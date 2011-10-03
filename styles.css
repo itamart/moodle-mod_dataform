@@ -1,0 +1,80 @@
+/**
+ * This file is part of the Dataform module for Moodle - http://moodle.org/.
+ *
+ * @package mod-dataform
+ * @copyright 2011 Itamar Tzadok
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * The Dataform has been developed as an enhanced counterpart
+ * of Moodle's Database activity module (1.9.11+ (20110323)).
+ * To the extent that Dataform code corresponds to Database code,
+ * certain copyrights on the Database module may obtain.
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#page-mod-dataform-view #sortsearch .c0 {
+  text-align: right;
+}
+
+#page-mod-dataform-view .approve img.icon {
+  width:34px;
+  height:34px;
+}
+
+#page-mod-dataform-preset .presetmapping {
+  text-align: center;
+}
+
+#page-mod-dataform-preset .presetmapping table {
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#page-mod-dataform-preset .overwritesettings {
+  margin-bottom: 1em;
+}
+
+.mod-dataform-field .c0 {
+  text-align: right;
+}
+
+.mod-dataform-field .fieldadd,
+.mod-dataform-field .sortdefault {
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
+.mod-dataform-field .fieldadd select,
+.mod-dataform-field .sortdefault select {
+  margin-left: 1em;
+}
+
+.mod-dataform-field .fieldname {
+  width:300px;
+}
+
+.mod-dataform-field .fielddescription {
+  width:300px;
+}
+
+.presetcontrols form {
+  display: inline;
+}
+
+.generaltable td.z_borderless,
+.generaltable th.z_borderless {
+    border: 0 none !important;
+}

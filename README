@@ -1,0 +1,59 @@
+Dataform
+========
+
+This module is an enhancement of the standard Database module activity.
+
+Installation:
+------------
+Default installation instructions for plugins in category Activities.
+
+Status:
+------
+Beta. Some features are incomplete and most features have not been tested yet.
+
+
+Requires:
+--------
+Moodle 2.1+
+
+
+Documentation:
+-------------
+Please feel free to contribute documentation in the relevant area of
+the MoodleDocs wiki.
+
+Support:
+--------
+
+
+Bug reports:
+------------
+
+
+Change log:
+-----------
+1.0.4
+Field
+Menu 	
+Added an option to add a new value in editing mode.
+Applies to single and multi menu fields.
+	Resolved
+Menu 	
+Added tag [[fieldname:cat]] for category effect. The tag displays the field value once for every sequence of entries with the same field value.
+Applies to single menu fields.
+	Resolved
+View
+Fancybox 	
+Added option to hide all or all but one items on page. This may be useful for dataform_view block designated fancybox view instances.
+	Resolved
+Management 	
+Added a 'save and continue' button to view form.
+	Resolved
+Settings
+Group entry 	
+A dataform setting which shifts entry editing from user level to group level.
+	Resolved
+* Open Issues
+	
+View-Interval: next does not advances when no interval is set.
+

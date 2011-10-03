@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/dataform/db" VERSION="20110707" COMMENT="XMLDB file for Moodle mod/dataform"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="dataform" COMMENT="the dataform activity settings" NEXT="dataform_fields">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="course"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="course" NEXT="intro"/>
+        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="name" NEXT="introformat"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" NEXT="timeavailable"/>
+        <FIELD NAME="timeavailable" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat" NEXT="timedue"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeavailable" NEXT="timeinterval"/>
+        <FIELD NAME="timeinterval" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timedue" NEXT="intervalcount"/>
+        <FIELD NAME="intervalcount" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="timeinterval" NEXT="allowlate"/>
+        <FIELD NAME="allowlate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intervalcount" NEXT="entriesrequired"/>
+        <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowlate" NEXT="entriestoview"/>
+        <FIELD NAME="entriestoview" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="entriesrequired" NEXT="maxentries"/>
+        <FIELD NAME="maxentries" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="entriestoview" NEXT="timelimit"/>
+        <FIELD NAME="timelimit" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="maxentries" NEXT="approval"/>
+        <FIELD NAME="approval" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timelimit" NEXT="grouped"/>
+        <FIELD NAME="grouped" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="approval" NEXT="rating"/>
+        <FIELD NAME="rating" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grouped" NEXT="comments"/>
+        <FIELD NAME="comments" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="rating" NEXT="locks"/>
+        <FIELD NAME="locks" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="comments" NEXT="singleedit"/>
+		<FIELD NAME="singleedit" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="locks" NEXT="singleview"/>
+        <FIELD NAME="singleview" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="singleedit" NEXT="rssarticles"/>
+        <FIELD NAME="rssarticles" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="singleview" NEXT="rss"/>
+        <FIELD NAME="rss" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="rssarticles" NEXT="css"/>
+        <FIELD NAME="css" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="rss" NEXT="js"/>
+        <FIELD NAME="js" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="css" NEXT="defaultview"/>
+        <FIELD NAME="defaultview" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="js" NEXT="defaultsort"/>
+        <FIELD NAME="defaultsort" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="defaultview" NEXT="grade"/>
+        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="defaultsort" NEXT="grademethod"/>
+        <FIELD NAME="grademethod" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grade" NEXT="notification"/>
+        <FIELD NAME="notification" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" COMMENT="Notify people when things change" PREVIOUS="grademethod"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="dataform_fields" COMMENT="the available activity fields" PREVIOUS="dataform" NEXT="dataform_views">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="dataid"/>
+        <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="type"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataid" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="type" NEXT="description"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="param1"/>
+        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="description" NEXT="param2"/>
+        <FIELD NAME="param2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param1" NEXT="param3"/>
+        <FIELD NAME="param3" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param2" NEXT="param4"/>
+        <FIELD NAME="param4" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param3" NEXT="param5"/>
+        <FIELD NAME="param5" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param4" NEXT="param6"/>
+        <FIELD NAME="param6" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param5" NEXT="param7"/>
+        <FIELD NAME="param7" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param6" NEXT="param8"/>
+        <FIELD NAME="param8" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param7" NEXT="param9"/>
+        <FIELD NAME="param9" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param8" NEXT="param10"/>
+        <FIELD NAME="param10" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param9"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dataid"/>
+        <KEY NAME="dataid" TYPE="foreign" FIELDS="dataid" REFTABLE="dataform" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="type-dataid" UNIQUE="false" FIELDS="type, dataid" COMMENT="used by dataform linking filter"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="dataform_views" COMMENT="the available activity views" PREVIOUS="dataform_fields" NEXT="dataform_filters">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="dataid"/>
+        <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="type"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataid" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="type" NEXT="description"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="visible"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="description" NEXT="perpage"/>
+        <FIELD NAME="perpage" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="visible" NEXT="groupby"/>
+        <FIELD NAME="groupby" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="perpage" NEXT="filter"/>
+        <FIELD NAME="filter" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupby" NEXT="patterns"/>
+        <FIELD NAME="patterns" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="filter" NEXT="section"/>
+        <FIELD NAME="section" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="patterns" NEXT="sectionpos"/>
+        <FIELD NAME="sectionpos" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="section" NEXT="param1"/>
+        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="sectionpos" NEXT="param2"/>
+        <FIELD NAME="param2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param1" NEXT="param3"/>
+        <FIELD NAME="param3" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param2" NEXT="param4"/>
+        <FIELD NAME="param4" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param3" NEXT="param5"/>
+        <FIELD NAME="param5" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param4" NEXT="param6"/>
+        <FIELD NAME="param6" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param5" NEXT="param7"/>
+        <FIELD NAME="param7" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param6" NEXT="param8"/>
+        <FIELD NAME="param8" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param7" NEXT="param9"/>
+        <FIELD NAME="param9" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param8" NEXT="param10"/>
+        <FIELD NAME="param10" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param9"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dataid"/>
+        <KEY NAME="dataid" TYPE="foreign" FIELDS="dataid" REFTABLE="dataform" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="type-dataid" UNIQUE="false" FIELDS="type, dataid" COMMENT="used by dataform linking filter"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="dataform_filters" COMMENT="the available activity filters" PREVIOUS="dataform_views" NEXT="dataform_entries">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="dataid"/>
+        <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataid" NEXT="description"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="visible"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="description" NEXT="perpage"/>
+        <FIELD NAME="perpage" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="10" SEQUENCE="false" PREVIOUS="visible" NEXT="groupby"/>
+        <FIELD NAME="groupby" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="perpage" NEXT="search"/>
+        <FIELD NAME="search" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="groupby" NEXT="customsort"/>
+        <FIELD NAME="customsort" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="search" NEXT="customsearch"/>
+        <FIELD NAME="customsearch" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="customsort"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dataid"/>
+        <KEY NAME="dataid" TYPE="foreign" FIELDS="dataid" REFTABLE="dataform" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="dataform_entries" COMMENT="the activity entries" PREVIOUS="dataform_filters" NEXT="dataform_contents">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="dataid"/>
+        <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="dataid" NEXT="groupid"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupid" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated" NEXT="approved"/>
+        <FIELD NAME="approved" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="grading"/>
+        <FIELD NAME="grading" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="approved"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dataid"/>
+        <KEY NAME="dataid" TYPE="foreign" FIELDS="dataid" REFTABLE="dataform" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="dataform_contents" COMMENT="the content of each entry" PREVIOUS="dataform_entries">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="fieldid"/>
+        <FIELD NAME="fieldid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="entryid"/>
+        <FIELD NAME="entryid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="fieldid" NEXT="content"/>
+        <FIELD NAME="content" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="entryid" NEXT="content1"/>
+        <FIELD NAME="content1" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="content" NEXT="content2"/>
+        <FIELD NAME="content2" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="content1" NEXT="content3"/>
+        <FIELD NAME="content3" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="content2" NEXT="content4"/>
+        <FIELD NAME="content4" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="content3"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="entryid"/>
+        <KEY NAME="entryid" TYPE="foreign" FIELDS="entryid" REFTABLE="dataform_entries" REFFIELDS="id" PREVIOUS="primary" NEXT="fieldid"/>
+        <KEY NAME="fieldid" TYPE="foreign" FIELDS="fieldid" REFTABLE="dataform_fields" REFFIELDS="id" PREVIOUS="entryid"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
