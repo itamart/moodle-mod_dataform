@@ -42,13 +42,14 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     protected function define_structure() {
 
         $paths = array();
-        $userinfo = $this->get_setting_value('userinfo');
+        $owner = $this->task->get_ownerid(''); // restore content associated to the restorer
+        $userinfo = $this->get_setting_value('userinfo'); // restore content and user info (requires the backup users)
 
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
         $paths[] = new restore_path_element('dataform_view', '/activity/dataform/views/view');
-        if ($userinfo) {
+        if ($owner or $userinfo) {
             $paths[] = new restore_path_element('dataform_entry', '/activity/dataform/entries/entry');
             $paths[] = new restore_path_element('dataform_content', '/activity/dataform/entries/entry/contents/content');
             $paths[] = new restore_path_element('dataform_rating', '/activity/dataform/entries/entry/ratings/rating');
@@ -100,18 +101,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         global $DB;
 
         if ($newitemid == $this->task->get_activityid()) {
-            // restoring into existing activity so delete the extra record in course_modules
-            //$imposedmoduleid = $this->task->get_moduleid();
-            //$DB->delete_records('course_modules', array('id' => $imposedmoduleid));
-
-            // reset task module id and mapping
-            //$actualmoduleid = $DB->get_field('course_modules', 'id', array('instance' => $newitemid));
-            //$this->task->set_moduleid($actualmoduleid);
+            // remap task module id
             $this->set_mapping('course_module', $this->task->get_old_moduleid(), $this->task->get_moduleid());
 
-            // reset task context id and mapping
-            //$ctxid = get_context_instance(CONTEXT_MODULE, $actualmoduleid)->id;
-            //$this->task->set_contextid($ctxid);
+            // remap task context id
             $this->set_mapping('context', $this->task->get_old_contextid(), $this->task->get_contextid());
 
         } else {
@@ -244,7 +237,11 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-        $data->userid = $this->get_mappingid('user', $data->userid);
+        if ($userid = $this->task->get_ownerid()) {
+            $data->userid = $userid;
+        } else {
+            $data->userid = $this->get_mappingid('user', $data->userid);
+        }
         $data->groupid = $this->get_mappingid('group', $data->groupid);
 
         // insert the dataform_entries record

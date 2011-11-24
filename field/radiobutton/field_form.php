@@ -27,9 +27,9 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
+require_once("$CFG->dirroot/mod/dataform/field/select/field_form.php");
 
-class mod_dataform_field_radiobutton_form extends mod_dataform_field_single_menu_form {
+class mod_dataform_field_radiobutton_form extends mod_dataform_field_select_form {
 
     /**
      *

@@ -32,8 +32,9 @@ require_once('mod_class.php');
 
 $urlparams = new object();
 
-$urlparams->d          = required_param('d', PARAM_INT);             // dataform id
-$urlparams->id        = optional_param('id', 0 , PARAM_INT);          // update field id
+$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // update field id
 
 // fields list actions
 $urlparams->new        = optional_param('new', 0, PARAM_ALPHA);     // type of the new field
@@ -43,11 +44,13 @@ $urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // id
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
-$df = new dataform($urlparams->d);
-
+$df = new dataform($urlparams->d, $urlparams->id);
 require_capability('mod/dataform:managetemplates', $df->context);
 
-$df->set_page('fields', array('urlparams' => $urlparams));
+$df->set_page('fields', array('modjs' => true, 'urlparams' => $urlparams));
+
+// activate navigation node
+navigation_node::override_active_url(new moodle_url('/mod/dataform/fields.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
 if ($forminput = data_submitted() and confirm_sesskey()) {
@@ -88,12 +91,9 @@ if ($forminput = data_submitted() and confirm_sesskey()) {
     // multi add or delete
     } else if (!empty($forminput->multiduplicate) or !empty($forminput->multidelete)) {
         $fids = array();
-        foreach ($forminput as $name => $checked) {
-            if (strpos($name, 'fieldselector_') !== false) {
-                if ($checked) {
-                    $namearr = explode('_', $name);  // Second one is the field id                   
-                    $fids[] = $namearr[1];
-                }
+        foreach ($forminput as $name => $value) {
+            if ($name == 'fieldselector') {
+                $fids[] = $value;
             }
         }
         
@@ -154,13 +154,8 @@ if ($fields) {
     $strdir = get_string('defaultsortdir', 'dataform');
     $stredit = get_string('edit');
     $strdelete = get_string('delete');
-    $selectallnone = '<input type="checkbox" '.
-                        'onclick="inps=document.getElementsByTagName(\'input\');'.
-                            'for (var i=0;i<inps.length;i++) {'.
-                                'if (inps[i].type==\'checkbox\' && inps[i].name.search(\'fieldselector_\')!=-1){'.
-                                    'inps[i].checked=this.checked;'.
-                                '}'.
-                            '}" />';
+
+    $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'field\'&#44;this.checked)'));
 
     $table = new html_table();
     $table->head = array($strname, $strtype, $strdescription, $strorder, $strdir, $stredit, $strdelete, $selectallnone);
@@ -193,12 +188,12 @@ if ($fields) {
         
         // set fields table display
         if ($fieldid > 0) {    // user fields
-            $fieldname = html_writer::link(new moodle_url($editbaseurl, $linkparams + array('id' => $fieldid)), $field->name());
-            $fieldedit = html_writer::link(new moodle_url($editbaseurl, $linkparams + array('id' => $fieldid)),
+            $fieldname = html_writer::link(new moodle_url($editbaseurl, $linkparams + array('fid' => $fieldid)), $field->name());
+            $fieldedit = html_writer::link(new moodle_url($editbaseurl, $linkparams + array('fid' => $fieldid)),
                             html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/edit'), 'class' => "iconsmall", 'alt' => get_string('edit'), 'title' => get_string('edit'))));
             $fielddelete = html_writer::link(new moodle_url($deletebaseurl, $linkparams + array('delete' => $fieldid)),
                             html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/delete'), 'class' => "iconsmall", 'alt' => get_string('delete'), 'title' => get_string('delete'))));
-            $fieldselector = html_writer::checkbox("fieldselector_$fieldid", $fieldid, false);
+            $fieldselector = html_writer::checkbox("fieldselector", $fieldid, false);
         } else {                // internal field
             $fieldname = $field->name();
             $fieldedit = '-';

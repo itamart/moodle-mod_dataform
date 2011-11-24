@@ -25,46 +25,31 @@
  */
 
 /**
- * 
- */
-function uploadNanogongRecording(recorderid, uploadpage, filename) {
-    var recorder = document.getElementById(recorderid);
-    if (recorder == null) {
-        alert('recorder not found');
-        return;
-    }
-    
-    var duration = parseInt(recorder.sendGongRequest('GetMediaDuration', 'audio')) || 0;
-    if (duration <= 0) {
-        alert('no recording found');
-        return;
-    }
-    
-    var ret = recorder.sendGongRequest('PostToForm',
-                                        uploadpage,
-                                        'repo_upload_file',
-                                        '',
-                                        filename);
-    if (ret == null || ret == '') {
-        alert('Failed to submit the voice recording');
-    } else {
-        alert(ret);
-    }
-} 
-
-/**
  * insert the field tags into the textarea.
  * Used when editing a dataform view
  */
 function insert_field_tags(selectlist, editorname) {
     var value = selectlist.options[selectlist.selectedIndex].value;
-	editorid = 'id_'+editorname;
-    if (typeof tinyMCE == 'undefined') {
-        // For inserting when in normal textareas
-		editor = document.getElementById(editorid);
-        insertAtCursor(editor, value);
+    editorid = 'id_'+editorname;
+
+    // textarea displayed and tinyMCE hidden
+    if (document.getElementById(editorid).style.display != 'none') {
+        editor = document.getElementById(editorid);
+        switch (value){
+            case '9':
+                insertAtCursor(editor, "\t");
+                break;
+
+            case '10':               
+                insertAtCursor(editor, "\n");
+                break;
+
+            default:
+                insertAtCursor(editor, value);
+        }
+
+    // tinyMCE displayed
     } else {
-        // TODO get editor name from editor or something
         tinyMCE.execInstanceCommand(editorid, 'mceInsertContent', false, value);
     }
 }
@@ -73,8 +58,8 @@ function insert_field_tags(selectlist, editorname) {
  * select antries for multiactions
  * Used when editing dataform entries
  */
-function entries_select_allnone(checked) {
-    var selectors = document.getElementsByName('entry_selector');
+function select_allnone(elem, checked) {
+    var selectors = document.getElementsByName(elem + 'selector');
     for (var i = 0; i < selectors.length; i++) {
         selectors[i].checked = checked;
     }
@@ -84,15 +69,22 @@ function entries_select_allnone(checked) {
  * construct url for multiactions
  * Used when editing dataform entries
  */
-function entries_bulk_action(url, action) {
+function bulk_action(elem, url, action, defaultval) {
     var selected = [];
-    var selectors = document.getElementsByName('entry_selector');
+    var selectors = document.getElementsByName(elem +'selector');
     for (var i = 0; i < selectors.length; i++) {
         if (selectors[i].checked == true) {
             selected.push(selectors[i].value);
         }
     }
-    location.href = url + '&' + action + '=' + selected.join(',');
+    // send selected entries to processing
+    if (selected.length) {
+        location.href = url + '&' + action + '=' + selected.join(',');
+
+    // if no entries selected but there is default, send it
+    } else if (defaultval) {
+        location.href = url + '&' + action + '=' + defaultval;
+    }
 }
 
 /**
@@ -119,6 +111,34 @@ function showHideAdvSearch(checked) {
         }
     }
 }
+
+/**
+ * 
+ */
+function uploadNanogongRecording(recorderid, uploadpage, filename) {
+    var recorder = document.getElementById(recorderid);
+    if (recorder == null) {
+        alert('recorder not found');
+        return;
+    }
+    
+    var duration = parseInt(recorder.sendGongRequest('GetMediaDuration', 'audio')) || 0;
+    if (duration <= 0) {
+        alert('no recording found');
+        return;
+    }
+    
+    var ret = recorder.sendGongRequest('PostToForm',
+                                        uploadpage,
+                                        'repo_upload_file',
+                                        '',
+                                        filename);
+    if (ret == null || ret == '') {
+        alert('Failed to submit the voice recording');
+    } else {
+        alert(ret);
+    }
+} 
 
 /**
  * wordcount bar

@@ -147,13 +147,12 @@ class dataform_entries {
 
         // direct url params; not from form
         $new = optional_param('new', 0, PARAM_INT);               // open new entry form
-        $import = optional_param('import', 0, PARAM_INT);               // import entries
         $editentries = optional_param('editentries', 0, PARAM_SEQUENCE);        // edit entries (all) or by record ids (comma delimited eids)
         $duplicate = optional_param('duplicate', '', PARAM_SEQUENCE);    // duplicate entries (all) or by record ids (comma delimited eids)
         $delete = optional_param('delete', '', PARAM_SEQUENCE);    // delete entries (all) or by record ids (comma delimited eids)
         $approve = optional_param('approve', '', PARAM_SEQUENCE);  // approve entries (all) or by record ids (comma delimited eids)
         $disapprove = optional_param('disapprove', '', PARAM_SEQUENCE);  // disapprove entries (all) or by record ids (comma delimited eids)
-        $export = optional_param('export', '', PARAM_SEQUENCE);  // export entries (all) or by record ids (comma delimited eids)
+        $append = optional_param('append', '', PARAM_SEQUENCE);  // append entries (all) or by record ids (comma delimited eids)
 
         $confirmed = optional_param('confirmed', 0, PARAM_BOOL);
 
@@ -162,11 +161,6 @@ class dataform_entries {
         // Prepare open a new entry form
         if ($new and confirm_sesskey()) {
             $this->_editentries = -$new;
-        // import any requested entries
-        } else if ($import and confirm_sesskey()) {
-            if ($data = $this->_view->get_import_data($import)) {
-                $this->process_entries('update',$data->eids, $data, true);
-            }
         // Duplicate any requested entries
         } else if ($duplicate and confirm_sesskey()) {
             $this->process_entries('duplicate', $duplicate, null, $confirmed);
@@ -179,11 +173,8 @@ class dataform_entries {
         // Disapprove any requested entries
         } else if ($disapprove and confirm_sesskey()) {
             $this->process_entries('disapprove', $disapprove, null, true);
-        // Export any requested entries
-        } else if ($export and confirm_sesskey()) {
-            $this->process_entries('export', $export, null, true);
         // Append any requested entries to the initiating entry
-        } else if ($export and confirm_sesskey()) {
+        } else if ($append and confirm_sesskey()) {
             $this->process_entries('append', $append, null, true);
         }
 
@@ -239,9 +230,15 @@ class dataform_entries {
     /**
      *
      */
-    public function display($return = false) {
+    public function display(array $params = null) {
         global $CFG, $OUTPUT;
         
+        // set display params
+        $displaycontrols = isset($params['controls']) ? $params['controls'] : true;
+        $notify = isset($params['notifications']) ? $params['notifications'] : true;
+        $tohtml = isset($params['tohtml']) ? $params['tohtml'] : false;
+        $pluginfileurl = isset($params['pluginfileurl']) ? $params['pluginfileurl'] : null;
+
         $html = '';
 
         if ($this->_returntoform) {
@@ -249,19 +246,29 @@ class dataform_entries {
             $html .= $this->_mform->html();
         } else {
             // first notifications
-            foreach ($this->_notifications['good'] as $notification) {
-                $html .= $OUTPUT->notification($notification, 'notifysuccess');    // good (usually green)
+            if ($notify) {
+                foreach ($this->_notifications['good'] as $notification) {
+                    $html .= $OUTPUT->notification($notification, 'notifysuccess');    // good (usually green)
+                }
+                foreach ($this->_notifications['bad'] as $notification) {
+                    $html .= $OUTPUT->notification($notification);    // bad (usually red)
+                }
             }
-            foreach ($this->_notifications['bad'] as $notification) {
-                $html .= $OUTPUT->notification($notification);    // bad (usually red)
-            }
-
+            
             // build definition
             $this->set__display_definition();
 
             if (!$editing = $this->user_is_editing()) {
-                // all _display_definition elements should be html so concat and echo
+                // all _display_definition elements should be html
                 $html .= $this->definition_to_html();
+                
+                // replace pluginfile urls if needed (e.g. in export)
+                if ($pluginfileurl) {
+                    $pluginfilepath = new moodle_url("/pluginfile.php/{$this->_df->context->id}/mod_dataform/content");
+                    $pattern = str_replace('/', '\/', $pluginfilepath);
+                    $pattern = "/$pattern\/\d+\//";
+                    $html = preg_replace($pattern, $pluginfileurl, $html);
+                }                    
 
             } else {
 
@@ -283,10 +290,10 @@ class dataform_entries {
             }
         }
         
-        if ($return) {
+        if ($tohtml) {
             return $html;
         } else {
-            echo  $html;
+            echo $html;
         }
     }
 
@@ -294,7 +301,6 @@ class dataform_entries {
      *
      */
     public function definition_to_html() {
-
         $elements = array();
         foreach ($this->_display_definition as $groupname => $entries_set) {
             $elements = array_merge($elements, $this->_view->group_entries_definition($entries_set, $groupname));
@@ -307,14 +313,13 @@ class dataform_entries {
             $html .= $content;
         }
 
-        return html_writer::tag('div', $html, array('class' => 'mdl-align'));
+        return $html;
     }
 
     /**
      *
      */
     public function definition_to_form(&$mform) {
-
         $elements = array();
         foreach ($this->_display_definition as $groupname => $entries_set) {
             $elements = array_merge($elements, $this->_view->group_entries_definition($entries_set, $groupname));
@@ -479,7 +484,7 @@ class dataform_entries {
                     }
                 }
             }
-            $whatcontent = ', '. implode(', ', $whatcontent);
+            $whatcontent = !empty($whatcontent) ? ', '. implode(', ', $whatcontent) : ' ';
             $contenttables = ' '. implode(' ', $contentfrom);
         }
 
@@ -516,7 +521,9 @@ class dataform_entries {
         // sql for fetching the entries
         $what = ' DISTINCT e.id, e.approved, e.timecreated, e.timemodified, e.userid, e.groupid, '.
                     user_picture::fields('u', array('idnumber', 'username'), 'uid '). ', '.
-                    'g.name AS groupname, g.description AS groupdesc, g.hidepicture AS grouphidepic, g.picture AS grouppic '.                    
+// TODO varchar g.description to make it pass the distinct clause in MSSQL
+///                    'g.name AS groupname, g.description AS groupdesc, g.hidepicture AS grouphidepic, g.picture AS grouppic '.                    
+                    'g.name AS groupname, g.hidepicture AS grouphidepic, g.picture AS grouppic '.                    
                     $whatcontent;
         $count = ' COUNT(e.id) ';
         $tables = ' {dataform_entries} e
@@ -610,6 +617,40 @@ class dataform_entries {
     }
 
     /**
+     * Retrieves stored files which are embedded in the current content
+     *  set_content must have been called
+     *
+     * @return array of stored files
+     */
+    public function get_embedded_files(array $fids) {
+        $files = array();
+
+        if (!empty($fids) and !empty($this->_entries)) {
+            $fs = get_file_storage();
+            foreach ($this->_entries as $entry) {
+                foreach ($fids as $fieldid) {
+                    // get the content id of the requested field
+                    $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
+                    // the field may not hold any content
+                    if ($contentid) {
+                        // retrieve the files (no dirs) from file area 
+                        // TODO for Picture fields this does not distinguish between the images and their thumbs
+                        //      but the view may not necessarily display both 
+                        $files = array_merge($files, $fs->get_area_files($this->_df->context->id,
+                                                                        'mod_dataform',
+                                                                        'content',
+                                                                        $contentid,
+                                                                        'sortorder, itemid, filepath, filename',
+                                                                        false));
+                    }
+                }
+            }
+        }
+        
+        return $files;
+    }
+
+    /**
      *
      */
     public function update_entry($entry, $params = null, $updatetime = true) {
@@ -619,7 +660,11 @@ class dataform_entries {
         
         if ($params and has_capability('mod/dataform:manageentries', $df->context)) {
             foreach ($params as $key => $value) {
-                $entry->{$key} = $value;
+                if ($key == 'name') {
+                    $entry->userid = $value;
+                } else {    
+                    $entry->{$key} = $value;
+                }
                 if ($key == 'timemodified') {
                     $updatetime = false;
                 }
@@ -664,32 +709,37 @@ class dataform_entries {
      *
      */
     public function process_entries($action, $eids, $data = null, $confirmed = false) {
-        global $DB, $USER, $OUTPUT, $PAGE;
+        global $CFG, $DB, $USER, $OUTPUT, $PAGE;
 
         $df = $this->_df;
 
         $entries = array();
+        // some entries may be specified for action
         if ($eids) {
-            // some entries are specified for action
+            // adding or updating entries
             if ($action == 'update') {
-                if (is_array($eids)) {
-                    continue;
-                } else if ($eids < 0) {
-                    $eids = array_reverse(range($eids, -1));
-                } else {
-                    $eids = explode(',', $eids);
+                if (!is_array($eids)) {
+                    // adding new entries
+                    if ($eids < 0) {
+                        $eids = array_reverse(range($eids, -1));
+                    // editing existing entries
+                    } else {
+                        $eids = explode(',', $eids);
+                    }
                 }
                 
                 foreach ($eids as $eid) {
                     $entry = new object();
-                    if ($eid > 0 and isset($this->_entries[$eid])) { // existing entry from view
+                    // existing entry from view
+                    if ($eid > 0 and isset($this->_entries[$eid])) {
                         $entries[$eid] = $this->_entries[$eid];
 
-                    } else if ($eid > 0) {   // existing entry not from view (import)
-                        // TODO
+                    // TODO existing entry *not* from view (import)
+                    } else if ($eid > 0) {
                         // need to collect these entries and get them from DB with their content
 
-                    } else if ($eid < 0) {   // new entry
+                    // new entries ($eid is the number of new entries
+                    } else if ($eid < 0) {
                         $entry->id = 0;
                         $entry->groupid = $df->currentgroup;
                         $entry->userid = $USER->id;
@@ -697,16 +747,19 @@ class dataform_entries {
                     }
                 }
 
+            // all other types of processing must refer to specific entry ids
             } else {
                 $entries = $DB->get_records_select('dataform_entries', "dataid = ? AND id IN ($eids)", array($df->id()));
             }
 
             if ($entries) {
                 foreach ($entries as $eid => $entry) {
+                    // filter approvable entries
                     if (($action == 'approve' or $action == 'disapprove') and !has_capability('mod/dataform:approve', $df->context)) {
                         unset($entries[$eid]);
-                    } else if (!$df->user_can_manage_entry($entry)
-                                and !has_capability('mod/dataform:manageentries', $df->context)) {
+
+                    // filter managable entries
+                    } else if (!$df->user_can_manage_entry($entry)) {
                         unset($entries[$eid]);
                     }
                 }
@@ -720,6 +773,7 @@ class dataform_entries {
             if (!$confirmed) {
 
                 // Print a confirmation page
+                echo $OUTPUT->header();
                 echo $OUTPUT->confirm(get_string("entriesconfirm$action", 'dataform', count($entries)),
                                     new moodle_url($PAGE->url, array($action => implode(',', array_keys($entries)),
                                                                     'sesskey' => sesskey(),
@@ -727,7 +781,7 @@ class dataform_entries {
                                     new moodle_url($PAGE->url));
 
                 echo $OUTPUT->footer();
-                exit;
+                exit(0);
 
             } else {
                 $processedeids = array();
@@ -749,8 +803,10 @@ class dataform_entries {
                                 dataform::_TIMEMODIFIED,
                                 dataform::_APPROVED,
                                 dataform::_USERID,
+                                dataform::_USERNAME,
                                 dataform::_GROUP
                             );
+
                             foreach ($data as $name => $value){
                                 if (strpos($name, 'field_') !== false) {   // assuming only field names contain field_
                                     list(, $fieldid, $entryid) = explode('_', $name);
@@ -762,7 +818,7 @@ class dataform_entries {
                                     
                                     if (in_array($fieldid, $entryinfo)) {
                                         // TODO
-                                        if ($fieldid == dataform::_USERID) {
+                                        if ($fieldid == dataform::_USERID or $fieldid == dataform::_USERNAME) {
                                             $entryvar = 'userid';
                                         } else {
                                             $entryvar = $field->get_internalname();
@@ -837,53 +893,32 @@ class dataform_entries {
                         break;
 
                     case 'approve':
-                        $newentrie = new object();
-                        $newentrie->approved = 1;
-                        foreach ($entries as $entrie) {
-                            if (!$entrie->approved and has_capability('mod/dataform:approve', $df->context)) {
-                                $newentrie->id = $entrie->id;
-                                $DB->update_record('dataform_entries', $newentrie);
-                                $processedeids[] = $entrie->id;
-                            }
-                        }
+                        // approvable entries should be filtered above
+                        $entryids = array_keys($entries);
+                        $ids = implode(',', $entryids);
+                        $DB->set_field_select('dataform_entries', 'approved', 1, " dataid = ? AND id IN ($ids) ", array($df->id()));        
+                        $processedeids = $entryids;
 
                         $strnotify = 'entriesapproved';
                         break;
 
                     case 'disapprove':
-                        $newentrie = new object();
-                        $newentrie->approved = 0;
-                        foreach ($entries as $entrie) {
-                            if ($entrie->approved and has_capability('mod/dataform:approve', $df->context)) {
-                                $newentrie->id = $entrie->id;
-                                $DB->update_record('dataform_entries', $newentrie);
-                                $processedeids[] = $entrie->id;
-                            }
-                        }
+                        // disapprovable entries should be filtered above
+                        $entryids = array_keys($entries);
+                        $ids = implode(',', $entryids);
+                        $DB->set_field_select('dataform_entries', 'approved', 0, " dataid = ? AND id IN ($ids) ", array($df->id()));        
+                        $processedeids = $entryids;
 
                         $strnotify = 'entriesdisapproved';
                         break;
 
                     case 'delete':
+                        // deletable entries should be filtered above
                         foreach ($entries as $entry) {
-                            if (!$df->user_can_manage_entry($entry)) {
-                                // TODO: notify something
-                                continue;
-                            }
-
                             $fields = $df->get_fields();
                             foreach ($fields as $field) {
                                 $field->delete_content($entry->id);
                             }
-
-                            //if ($contents =$DB->get_records('dataform_contents','entryid', $entrie->id)) {
-                            //    foreach ($contents as $content) {  // Delete files or whatever else this field allows
-                            //        if ($field = $df->get_field_from_id($content->fieldid)) { // Might not be there
-                            //            $field->delete_content($content->entryid);
-                            //        }
-                            //    }
-                            //}
-                            //$DB->delete_records('dataform_contents', array('entryid' => $entrie->id));
 
                             $DB->delete_records('dataform_entries', array('id' => $entry->id));
                             $processedeids[] = $entry->id;
@@ -891,7 +926,6 @@ class dataform_entries {
 
                         $strnotify = 'entriesdeleted';
                         break;
-
 
                     case 'append':
          
@@ -966,7 +1000,6 @@ class dataform_entries {
         if ($this->_editentries < 0) {
             // TODO check how many entries left to add
             if ($this->_df->user_can_manage_entry(0)) {
-                // TODO get category name from string and check for plural
                 $this->_display_definition['newentry'] = array();
                 for ($i = $this->_editentries; $i < 0; $i++) {
                     $this->_display_definition['newentry'][$i] = null;
@@ -1000,16 +1033,12 @@ class dataform_entries {
                 // The definition for a pattern is either html (when the field is to be browsed)
                 //  or a callback (when the field is to edited)
 
-// instead of getting field definitions here I'll just register the entry and editing params
-// and the rest will be done inside the view
-//                $fielddefinitions = $this->_view->get_field_definitions($entry, $editthisone, $editable);
-
                 // Are we grouping?
                 if ($this->_filter->groupby) {
                     $field = $fields[$this->_filter->groupby];
                     // if editing get the pattern for browsing b/c we need the content
                     if ($editthisone) {
-                        $fieldpatterns = $field->patterns($entry);
+                        $fieldpatterns = $field->patterns()->get_replacements($entry);
                     }
                     $fieldvalues = current($fieldpatterns);
                     $fieldvalue = count($fieldvalues) ? current($fieldvalues) : '';

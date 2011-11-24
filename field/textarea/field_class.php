@@ -53,33 +53,6 @@ class dataform_field_textarea extends dataform_field_base {
     }
 
     /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        $patterns = parent::patterns($tags, $entry, $edit, $editable);
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns['fields']['fields']["[[{$this->field->name}:wordcount]]"] = "[[{$this->field->name}:wordcount]]";
-
-        } else {
-
-            foreach ($tags as $tag) {
-                // need only to add word count
-                if ($tag == "[[{$this->field->name}:wordcount]]") {
-                    if ($edit) {
-                        $patterns["[[{$this->field->name}:wordcount]]"] = '';
-                    } else {
-                        $patterns["[[{$this->field->name}:wordcount]]"] = array('html', $this->word_count($entry));
-                    }
-                    break;
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
      * Sets up a field object
      */
     public function set_field($forminput = null) {
@@ -107,6 +80,13 @@ class dataform_field_textarea extends dataform_field_base {
      */
     public function is_editor() {
         return $this->field->param1;
+    }
+
+    /**
+     *
+     */
+    public function editor_options() {
+        return $this->editoroptions;
     }
 
     /**
@@ -177,125 +157,6 @@ class dataform_field_textarea extends dataform_field_base {
         $data->{"field_{$fieldid}_{$entryid}_editor"} = $content;
     
         return true;
-    }
-
-    /**
-     *
-     */
-    public function export_text_value($content) {
-        $exporttext = $content->content;
-        if ($content->content1 != FORMAT_HTML) {
-            $exporttext .= "##$content->content1";
-        }
-        return $exporttext;
-    }
-
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-        global $PAGE, $CFG;
-        
-        $fieldid = $this->field->id;
-        $entryid = $entry->id;
-        $fieldname = "field_{$fieldid}_{$entryid}";
-
-        // word count
-        if ($this->field->param9) {
-            $mform->addElement('html', '<link type="text/css" rel="stylesheet" href="'. "$CFG->libdir/yui/2.8.2/build/progressbar/assets/skins/sam/progressbar.css". '">');
-
-            $pbcontainer = '<div id="'. "id_{$fieldname}_wordcount_pb". '"></div>';
-            $minvaluecontainer = '<div id="'. "id_{$fieldname}_wordcount_minvalue". '" class="yui-pb-range" style="float:left;">0</div>';
-            $maxvaluecontainer = '<div id="'. "id_{$fieldname}_wordcount_maxvalue". '" class="yui-pb-range" style="float:right;">'.$this->field->param8.'</div>';
-            $valuecontainer = '<div class="yui-pb-caption"><span id="'. "id_{$fieldname}_wordcount_value". '"></span></div>';
-            $captionscontainer = '<div id="'. "id_{$fieldname}_wordcount_captions". '">'.
-                                    $minvaluecontainer. $maxvaluecontainer. $valuecontainer.
-                                    '</div>';
-            $mform->addElement('html', '<table style="margin-left:16%;"><tr><td>'.
-                                        $pbcontainer.
-                                        $captionscontainer.
-                                        '</td></tr></table>');
-
-            $options = new object;
-            $options->minValue = 0;
-            $options->maxValue = $this->field->param8;
-            $options->value = 0;
-            $options->minRequired = $this->field->param7;
-            $options->identifier = $fieldname;
-                     
-            $module = array(
-                'name' => 'M.dataform_wordcount_bar',
-                'fullpath' => '/mod/dataform/dataform.js',
-                'requires' => array('yui2-yahoo-dom-event', 'yui2-element', 'yui2-animation', 'yui2-progressbar'));
-
-            $PAGE->requires->js_init_call('M.dataform_wordcount_bar.init', array($options), true, $module);
-        }
-
-        // editor
-        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-
-        $data = new object;
-        $data->{$fieldname} = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : '';
-        $data->{"{$fieldname}format"} = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
-
-        if (!$this->is_editor() or !can_use_html_editor()) {
-            $data->{"{$fieldname}format"} = FORMAT_PLAIN;
-        }
-
-        $data = file_prepare_standard_editor($data, $fieldname, $this->editoroptions, $this->df->context, 'mod_dataform', 'content', $contentid);
-
-        $attr = array();
-        $attr['cols'] = !$this->field->param2 ? 40 : $this->field->param2;
-        $attr['rows'] = !$this->field->param3 ? 20 : $this->field->param3;
-
-        $mform->addElement('editor', "{$fieldname}_editor", null, $attr , $this->editoroptions);
-        $mform->setDefault("{$fieldname}_editor", $data->{"{$fieldname}_editor"});
-        $mform->setDefault("{$fieldname}[text]", $data->{$fieldname});
-        $mform->setDefault("{$fieldname}[format]", $data->{"{$fieldname}format"});
-
-    }
-
-    /**
-     * Print the content for browsing the entry
-     */
-    public function display_browse($entry) {
-
-        $fieldid = $this->field->id;
-
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $contentid = $entry->{"c{$fieldid}_id"};
-            $text = $entry->{"c$fieldid". '_content'};
-            $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
-
-            $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php', $this->df->context->id, 'mod_dataform', 'content', $contentid);
-
-            $options = new object();
-            $options->para = false;
-            $options->overflowdiv = true;
-            $str = format_text($text, $format, $options);
-            return $str;
-        } else {
-            return '';
-        }
-    }
-
-    /**
-     * 
-     */
-    public function word_count($entry) {
-
-        $fieldid = $this->field->id;
-
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $text = $entry->{"c$fieldid". '_content'};
-
-            return '';
-            //$options = new object();
-            //$options->para = false;
-            //$str = format_text($text, FORMAT_PLAIN, $options);
-        } else {
-            return '';
-        }
     }
 
 }

@@ -36,49 +36,6 @@ class dataform_field_picture extends dataform_field_file {
     /**
      *
      */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        $patterns = parent::patterns($tags, $entry, $edit, $editable);
-
-        $fieldname =  $this->field->name;
-        $extrapatterns = array("[[{$fieldname}:linked]]",
-                                "[[{$fieldname}:tn]]",
-                                "[[{$fieldname}:tn-url]]",
-                                "[[{$fieldname}:tn-linked]]");
-
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            foreach ($extrapatterns as $pattern) {
-                $patterns['fields']['fields'][$pattern] = $pattern;
-            }
-
-        } else {
-
-            foreach ($tags as $tag) {
-                if ($tag == "[[{$fieldname}:tn-url]]") {
-                    // no edit for the url so just output
-                    $patterns["[[{$fieldname}:tn-url]]"] = array('html', $this->display_browse($entry, array('tn' => 1, 'url' => 1)));
-                } else if ($edit) {
-                    if (in_array($tag, $extrapatterns)) {
-                        $patterns[$tag] = array('', array(array($this,'display_edit'), array($entry)));
-                    }
-                } else {
-                    if ($tag == "[[{$fieldname}:linked]]") {
-                        $patterns["[[{$fieldname}:linked]]"] = array('html', $this->display_browse($entry, array('linked' => 1)));
-                    } else if ($tag == "[[{$fieldname}:tn]]") {
-                        $patterns["[[{$fieldname}:tn]]"] = array('html', $this->display_browse($entry, array('tn' => 1)));
-                    } else if ($tag == "[[{$fieldname}:tn-linked]]") {
-                        $patterns["[[{$fieldname}:tn-linked]]"] = array('html', $this->display_browse($entry, array('tn' => 1, 'linked' => 1)));
-                    }
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
-     *
-     */
     public function update_field($fromform = null) {
         global $DB, $OUTPUT;
 
@@ -170,60 +127,6 @@ class dataform_field_picture extends dataform_field_file {
             }
         }
         return true;
-    }
-
-    /**
-     *
-     */
-    protected function display_file($file, $path, $altname, $params = null) {
-
-        if ($file->is_valid_image()) {
-            $filename = $file->get_filename();
-            $imgattr = array('style' => array());
-
-            if (!empty($params['tn'])) {
-                // decline if the file is not really a thumbnail
-                if (strpos($filename, 'thumb_') === false) {
-                    return '';
-                }
-            } else {
-                // decline if the file is a thumbnail
-                if (strpos($filename, 'thumb_') !== false) {
-                    return '';
-                }
-
-                // the picture's display dimension may be set in the field
-                if ($this->field->param4) {
-                    $imgattr['style'][] = 'width:'. s($this->field->param4). s($this->field->param6);
-                }
-                if ($this->field->param5) {
-                    $imgattr['style'][] = 'height:'. s($this->field->param5). s($this->field->param6);
-                }
-            }
-
-
-            $src = new moodle_url("$path/$filename");
-
-            if (!empty($params['url'])) {
-                return $src;
-            }
-
-            $imgattr['src'] = $src;
-            //$imgattr['alt'] = $altname;
-            //$imgattr['title'] = $altname;
-            $imgattr['style'][] = "border:0px";
-            $imgattr['style'] = implode(';', $imgattr['style']);
-
-            $str = html_writer::empty_tag('img', $imgattr);
-
-            if (!empty($params['linked'])) {
-                return html_writer::link($src, $str);
-            } else {
-                return $str;
-            }
-        } else {
-            return '';
-        }
     }
 
 }

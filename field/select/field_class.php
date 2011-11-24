@@ -30,15 +30,110 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_select extends dataform_field_single_menu {
+class dataform_field_select extends dataform_field_base {
 
     public $type = 'select';
 
     /**
      * 
      */
-    protected function render(&$mform, $fieldname, $options, $selected) {
-        $select = &$mform->addElement('select', $fieldname, null, array(0 => get_string('choosedots')) + $options);
-        $select->setSelected($selected);
+    public function update_content($entry, array $values = null) {
+        global $DB;
+
+        $fieldid = $this->field->id;
+        
+        $selected = $newvalue = null;
+        if (!empty($values)) {
+            foreach ($values as $name => $value) {
+                $names = explode('_', $name);
+                if (!empty($names[3]) and !empty($value)) {
+                    ${$names[3]} = $value;
+                }
+            }
+        }
+
+        if ($newvalue = s($newvalue)) {
+            $options = $this->options_menu();
+            if (!$selected = (int) array_search($newvalue, $options)) {
+                $selected = count($options) + 1;
+                $this->field->param1 = trim($this->field->param1). "\n$newvalue";
+                $this->update_field();
+            }
+        }
+
+        $oldcontent = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
+        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
+        
+        $rec = new object();
+        $rec->fieldid = $this->field->id;
+        $rec->entryid = $entry->id;
+        $rec->content = $selected;
+
+        if (!empty($oldcontent)) {
+            if ($selected != $oldcontent) {
+                if (empty($selected)) {
+                    $this->delete_content($entry->id);
+                } else {
+                    $rec->id = $contentid; // MUST_EXIST
+                    return $DB->update_record('dataform_contents', $rec);
+                 }
+            }
+        } else {
+            if (!empty($selected)) {
+                return $DB->insert_record('dataform_contents', $rec);
+            }
+        }
+        return true;
     }
+
+    /**
+     * 
+     */
+    function get_sql_compare_text() {
+        global $DB;
+        return $DB->sql_compare_text("c{$this->field->id}.content", 255);
+    }
+
+    /**
+     * 
+     */
+    public function options_menu() {
+        $rawoptions = explode("\n",$this->field->param1);
+        $options = array();
+        $key = 1;
+        foreach ($rawoptions as $option) {
+            $option = trim($option);
+            if ($option) {
+                $options[$key] = $option;
+                $key++;
+            }
+        }
+        return $options;
+    }
+
+    /**
+     * 
+     */
+    public function prepare_import_content(&$data, $importsettings, $csvrecord = null, $entryid = null) {
+        // import only from csv
+        if ($csvrecord) {
+            $fieldid = $this->field->id;
+            $fieldname = $this->name();
+            $csvname = $importsettings[$fieldname]['name'];
+            $allownew = $importsettings[$fieldname]['allownew'];
+            $label = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
+            
+            if ($label) {
+                $options = $this->options_menu();
+                if ($optionkey = array_search($label, $options)) {
+                    $data->{"field_{$fieldid}_{$entryid}_selected"} = $optionkey;
+                } else if ($allownew) {
+                    $data->{"field_{$fieldid}_{$entryid}_newvalue"} = $label;
+                }                    
+            }
+        }
+    
+        return true;
+    }
+
 }

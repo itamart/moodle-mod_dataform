@@ -27,5 +27,6 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
+$string['fromtimestamp'] = 'From timestamp: ';
 $string['pluginname'] = 'Time';
 

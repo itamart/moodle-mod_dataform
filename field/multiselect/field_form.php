@@ -29,5 +29,30 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_multiselect_form extends mod_dataform_field_multi_menu_form {
+class mod_dataform_field_multiselect_form extends mod_dataform_field_form {
+
+    /**
+     *
+     */
+    function field_definition() {
+
+        $field = $this->_customdata['field'];
+        $mform =& $this->_form;
+
+    //-------------------------------------------------------------------------------
+        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
+        
+        // options
+        $mform->addElement('textarea', 'param1', get_string('fieldoptions', 'dataform'), 'wrap="virtual" rows="10" cols="50"');
+
+        // default options
+        $mform->addElement('textarea', 'param2', get_string('fieldoptionsdefault', 'dataform'), 'wrap="virtual" rows="5" cols="50"');
+
+        // options separator
+        $mform->addElement('select', 'param3', get_string('fieldoptionsseparator', 'dataform'), array_map('current', $field->separators));
+
+        // allow add option
+        $mform->addElement('selectyesno', 'param4', get_string('allowaddoption', 'dataform'));
+
+    }
 }

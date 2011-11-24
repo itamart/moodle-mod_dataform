@@ -38,25 +38,18 @@ class mod_dataform_view_block_form extends mod_dataform_view_base_form {
     function view_definition_after_gps() {
 
         $view = $this->_customdata['view'];
-        $df = $this->_customdata['df'];
         $editoroptions = $view->editors();
 
         $mform =& $this->_form;
-
-        $generaltags = $view->general_tags();
-        $fieldtags = $view->field_tags();
 
         // repeated entry
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'listbodyhdr', get_string('viewlistbody', 'dataform'));
 
         $mform->addElement('editor', 'eparam2_editor', '', null, $editoroptions['param2']);
-        
-        $listbodyatags=array();
-        $listbodyatags[] = &$mform->createElement('html', '<div class="fitemtitle"><label>'. get_string('viewavailabletags','dataform'). '</label></div>');
-        $listbodyatags[] = &$mform->createElement('html', '<div class="felement fselect">'. html_writer::select($fieldtags, 'listbodytags', '', array('' => 'choosedots'), array('onchange' => 'insert_field_tags(this, \'eparam2_editor\');this.selectedIndex=0;')). '</div>');
-        $mform->addGroup($listbodyatags, 'listbodyatags', '', array(' '), false);
-
+        $mform->setDefault("eparam2_editor[format]", FORMAT_PLAIN);
+        $this->add_tags_selector('eparam2_editor', 'field');
+        $this->add_tags_selector('eparam2_editor', 'character');        
     }
     
 }

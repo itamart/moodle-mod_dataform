@@ -466,6 +466,21 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
+    if ($filearea === 'view' and $context->contextlevel == CONTEXT_MODULE) {
+        require_course_login($course, true, $cm);
+
+        $relativepath = implode('/', $args);
+        $fullpath = "/$context->id/mod_dataform/$filearea/$relativepath";
+
+        $fs = get_file_storage();
+        if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+            return false;
+        }
+
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+    }
+
     if (($filearea === 'course_packages' or $filearea === 'site_packages')) {
 //                and $context->contextlevel == CONTEXT_MODULE) {
         require_course_login($course, true, $cm);
@@ -521,15 +536,35 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
  * @param settings_navigation $settings The settings navigation object
  * @param navigation_node $datanode The node to add module settings to
  */
-function dataform_extend_settings_navigation(settings_navigation $settings, navigation_node $dataformnode) {
+function dataform_extend_settings_navigation(settings_navigation $settings, navigation_node $dfnode) {
     global $PAGE;
     
-    if (has_capability('mod/dataform:managetemplates', $PAGE->cm->context)) {
-        $dataformnode->add(get_string('delete'),
-                            new moodle_url('/course/mod.php', array('delete' => $PAGE->cm->id,
-                                                                   'sesskey' => sesskey())));
-    
+    $templatesmanager = has_capability('mod/dataform:managetemplates', $PAGE->cm->context);
+    $entriesmanager = has_capability('mod/dataform:manageentries', $PAGE->cm->context);
+
+    // delete
+    if ($templatesmanager) {
+        $dfnode->add(get_string('delete'), new moodle_url('/course/mod.php', array('delete' => $PAGE->cm->id, 'sesskey' => sesskey())));    
     }
+
+    // index
+    $dfnode->add(get_string('index', 'dataform'), new moodle_url('/mod/dataform/index.php', array('id' => $PAGE->course->id)));    
+
+    // manage
+    if ($templatesmanager or $entriesmanager) {
+        $manage = $dfnode->add(get_string('manage', 'dataform'));
+        if ($templatesmanager) {
+            $manage->add(get_string('packages', 'dataform'), new moodle_url('/mod/dataform/packages.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/fields.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/views.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filters.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('jsinclude', 'dataform'), new moodle_url('/mod/dataform/js.php', array('id' => $PAGE->cm->id, 'jsedit' => 1)));
+            $manage->add(get_string('cssinclude', 'dataform'), new moodle_url('/mod/dataform/css.php', array('id' => $PAGE->cm->id, 'cssedit' => 1)));
+        }
+        $manage->add(get_string('import', 'dataform'), new moodle_url('/mod/dataform/import.php', array('id' => $PAGE->cm->id)));
+
+    }
+
 }
 
 //------------------------------------------------------------

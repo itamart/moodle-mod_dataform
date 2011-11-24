@@ -1,0 +1,139 @@
+<?php
+
+/**
+ * This file is part of the Dataform module for Moodle - http://moodle.org/.
+ *
+ * @package mod-dataform
+ * @subpackage field-_approve
+ * @copyright 2011 Itamar Tzadok
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * The Dataform has been developed as an enhanced counterpart
+ * of Moodle's Database activity module (1.9.11+ (20110323)).
+ * To the extent that Dataform code corresponds to Database code,
+ * certain copyrights on the Database module may obtain.
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+defined('MOODLE_INTERNAL') or die();
+
+require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
+
+/**
+ *
+ */
+class mod_dataform_field__approve_patterns extends mod_dataform_field_patterns {
+
+    /**
+     * 
+     */
+    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
+        // no edit mode
+        $replacements = array();
+        // just one tag, empty until we check df settings
+        $replacements['##approve##'] = '';
+        
+        $df = $this->_field->df();
+        if ($df->data->approval) {
+            if ((!$entry or $edit) and has_capability('mod/dataform:approve', $df->context)) {
+                $replacements['##approve##'] = array('', array(array($this,'display_edit'), array($entry)));
+
+            // existing entry to browse 
+            } else {
+                $replacements['##approve##'] = array('html', $this->display_browse($entry));
+            }
+        }
+
+        return $replacements;
+    }
+
+    /**
+     * 
+     */
+    public function display_search($mform, $i = 0, $value = '') {
+        $field = $this->_field;
+        $fieldid = $field->id();
+
+        $options = array(0 => ucfirst(get_string('approvednot', 'dataform')), 1 => ucfirst(get_string('approved', 'dataform')));
+        $select = &$mform->addElement('select', "f_{$i}_$fieldid", null, $options);
+        $select->setSelected($value);
+        // disable the 'not' and 'operator' fields
+        $mform->disabledIf("searchnot$i", "f_{$i}_$fieldid", 'neq', 2);
+        $mform->disabledIf("searchoperator$i", "f_{$i}_$fieldid", 'neq', 2);
+    }
+
+    /**
+     *
+     */
+    public function display_edit(&$mform, $entry) {
+
+        $field = $this->_field;
+        $fieldid = $field->id();
+        $entryid = $entry->id;
+
+        if ($entryid > 0) {
+            $checked = $entry->approved;
+        } else {
+            $checked = 0;
+        }
+
+        $fieldname = "field_{$fieldid}_{$entryid}";
+        $mform->addElement('checkbox', $fieldname, null);
+        $mform->setDefault($fieldname, $checked);
+    }
+
+    /**
+     * 
+     */
+    protected function display_browse($entry) {
+        global $OUTPUT;
+        
+        $field = $this->_field;
+        if ($entry and $entry->approved) {
+            $approved = 'approved';
+            $approval = 'disapprove';
+            $approvedimagesrc = 'i/tick_green_big';
+        } else {
+            $approved = 'disapproved';
+            $approval = 'approve';
+            $approvedimagesrc = 'i/cross_red_big';
+        }
+        $strapproved = get_string($approved, 'dataform');
+        
+        $approvedimage = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url($approvedimagesrc),
+                                                            'class' => "iconsmall",
+                                                            'alt' => $strapproved,
+                                                            'title' => $strapproved));
+                                                            
+        if (has_capability('mod/dataform:approve', $field->df()->context)) {
+            return '<a href="'. $entry->baseurl. '&amp;'. $approval. '='. $entry->id. '&amp;sesskey='. sesskey(). '">'.
+                    $approvedimage. '</a>';
+        } else {
+            return $approvedimage;
+        }
+    }
+
+    /**
+     * Array of patterns this field supports 
+     */
+    protected function patterns() {
+        $cat = get_string('actions', 'dataform');
+
+        $patterns = array();
+        $patterns["##approve##"] = array(true, $cat);
+
+        return $patterns; 
+    }
+}

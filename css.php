@@ -30,7 +30,8 @@
 require_once('../../config.php');
 
 $urlparams = new object();
-$urlparams->d = required_param('d', PARAM_INT);   // dataform id
+$urlparams->d = optional_param('d', 0, PARAM_INT);   // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);   // course module id
 $urlparams->cssedit = optional_param('cssedit', 0, PARAM_BOOL);   // edit mode
 
 if ($urlparams->cssedit) {
@@ -43,14 +44,6 @@ if ($urlparams->cssedit) {
             global $CFG;
 
             $mform = &$this->_form;
-            $d = $this->_customdata['d'];
-
-            // hidden optional params
-            $mform->addElement('hidden', 'd', $d);
-            $mform->setType('d', PARAM_INT);
-
-            $mform->addElement('hidden', 'cssedit', 1);
-            $mform->setType('cssedit', PARAM_BOOL);
 
             // buttons
             //-------------------------------------------------------------------------------
@@ -71,13 +64,16 @@ if ($urlparams->cssedit) {
     }
 
     // Set a dataform object
-    $df = new dataform($urlparams->d);
-
+    $df = new dataform($urlparams->d, $urlparams->id);
     require_capability('mod/dataform:managetemplates', $df->context);
 
     $df->set_page('css', array('urlparams' => $urlparams));
 
-    $mform = new mod_dataform_css_form(null, array('d' => $df->id())); 
+    // activate navigation node
+    navigation_node::override_active_url(new moodle_url('/mod/dataform/css.php', array('id' => $df->cm->id, 'cssedit' => 1)));
+
+    $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id(), 'cssedit' => 1))); 
+
     if ($mform->is_cancelled()) {
     
     } else if ($data = $mform->get_data()){

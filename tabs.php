@@ -27,7 +27,11 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-if (isloggedin() and has_capability('mod/dataform:managetemplates', $this->context)) {
+$is_templatemanager = has_capability('mod/dataform:managetemplates', $this->context);
+$is_entriesmanager = has_capability('mod/dataform:manageentries', $this->context);
+
+// tabs are displayed only for managers
+if (isloggedin() and ($is_templatemanager or $is_entriesmanager)) {
     if (empty($currenttab) or empty($this->data) or empty($this->course)) {
         print_error('You cannot call this script in that way');
     }
@@ -48,16 +52,22 @@ if (isloggedin() and has_capability('mod/dataform:managetemplates', $this->conte
         $activated[] = 'manage';
 
         $row  = array();
-        $row[] = new tabobject('packages', new moodle_url('/mod/dataform/packages.php', array('d' => $this->id())), get_string('packages', 'dataform'));
-        $row[] = new tabobject('fields', new moodle_url('/mod/dataform/fields.php', array('d' => $this->id())), get_string('fields','dataform'));
-        $row[] = new tabobject('views', new moodle_url('/mod/dataform/views.php', array('d' => $this->id())), get_string('views','dataform'));
-        $row[] = new tabobject('filters', new moodle_url('/mod/dataform/filters.php', array('d' => $this->id())), get_string('filters','dataform'));
-        $row[] = new tabobject('settings', new moodle_url('/mod/dataform/mod_edit.php', array('d' => $this->id(), 'section' => 'entry')), get_string('settings','dataform'));
-        $row[] = new tabobject('js', new moodle_url('/mod/dataform/js.php', array('d' => $this->id(), 'jsedit' => 1)), get_string('jsinclude', 'dataform'));
-        $row[] = new tabobject('css', new moodle_url('/mod/dataform/css.php', array('d' => $this->id(), 'cssedit' => 1)), get_string('cssinclude', 'dataform'));
-        $row[] = new tabobject('import', new moodle_url('/mod/dataform/import.php', array('d' => $this->id())), get_string('import', 'dataform'));
-        $row[] = new tabobject('export', new moodle_url('/mod/dataform/export.php', array('d' => $this->id())), get_string('export', 'dataform'));
-
+        // template manager can do everything
+        if ($is_templatemanager)  {
+            $row[] = new tabobject('packages', new moodle_url('/mod/dataform/packages.php', array('d' => $this->id())), get_string('packages', 'dataform'));
+            $row[] = new tabobject('fields', new moodle_url('/mod/dataform/fields.php', array('d' => $this->id())), get_string('fields','dataform'));
+            $row[] = new tabobject('views', new moodle_url('/mod/dataform/views.php', array('d' => $this->id())), get_string('views','dataform'));
+            $row[] = new tabobject('filters', new moodle_url('/mod/dataform/filters.php', array('d' => $this->id())), get_string('filters','dataform'));
+            $row[] = new tabobject('settings', new moodle_url('/mod/dataform/mod_edit.php', array('d' => $this->id(), 'section' => 'entry')), get_string('settings','dataform'));
+            $row[] = new tabobject('js', new moodle_url('/mod/dataform/js.php', array('d' => $this->id(), 'jsedit' => 1)), get_string('jsinclude', 'dataform'));
+            $row[] = new tabobject('css', new moodle_url('/mod/dataform/css.php', array('d' => $this->id(), 'cssedit' => 1)), get_string('cssinclude', 'dataform'));
+            $row[] = new tabobject('import', new moodle_url('/mod/dataform/import.php', array('d' => $this->id())), get_string('import', 'dataform'));
+        
+        // entries manager can do import 
+        } else if ($is_entriesmanager)  {
+            $row[] = new tabobject('import', new moodle_url('/mod/dataform/import.php', array('d' => $this->id())), get_string('import', 'dataform'));
+        }
+                
         $tabs[] = $row;
     }
         

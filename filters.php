@@ -52,34 +52,14 @@ $urlparams->cancel     = optional_param('cancel', 0, PARAM_BOOL);
 
 // Set a dataform object
 $df = new dataform($urlparams->d, $urlparams->id);
-
 require_capability('mod/dataform:managetemplates', $df->context);
 
-$df->set_page('filters', array('urlparams' => $urlparams));
+$df->set_page('filters', array('modjs' => true, 'urlparams' => $urlparams));
+
+// activate navigation node
+navigation_node::override_active_url(new moodle_url('/mod/dataform/filters.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
-if ($forminput = data_submitted() and confirm_sesskey()) {
-    if (!empty($forminput->multiduplicate) or !empty($forminput->multidelete)) {
-        $fids = array();
-        foreach ($forminput as $name => $checked) {
-            if (strpos($name, 'filterselector_') !== false) {
-                if ($checked) {
-                    $namearr = explode('_', $name);  // Second one is the filter id                   
-                    $fids[] = $namearr[1];
-                }
-            }
-        }
-        
-        if ($fids) {
-            if (!empty($forminput->multiduplicate)) {
-                $duplicate = implode(',', $fids);
-            } else if (!empty($forminput->multidelete)) {
-                $delete = implode(',', $fids);        
-            }
-        }
-    }
-}
-
 if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested filters
     $df->process_filters('duplicate', $urlparams->duplicate, $urlparams->confirmed);
 
@@ -128,6 +108,9 @@ if ($urlparams->new and confirm_sesskey()) {
     // if there are filters print admin style list of them
     if ($filters) {
 
+        $filterbaseurl = '/mod/dataform/filters.php';
+        $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
+                        
         // table headings
         $strfilters = get_string('name');
         $strdescription = get_string('description');
@@ -139,40 +122,40 @@ if ($urlparams->new and confirm_sesskey()) {
         $strshow = get_string('show');
         $stredit = get_string('edit');
         $strdelete = get_string('delete');
-        $selectallnone = '<input type="checkbox" '.
-                            'onclick="inps=document.getElementsByTagName(\'input\');'.
-                                'for (var i=0;i<inps.length;i++) {'.
-                                    'if (inps[i].type==\'checkbox\' && inps[i].name.search(\'filterselector_\')!=-1){'.
-                                        'inps[i].checked=this.checked;'.
-                                    '}'.
-                                '}" />';
+        $strduplicate =  get_string('duplicate');
+
+        $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'filter\'&#44;this.checked)'));
+        $multidelete = html_writer::tag('button', 
+                                    $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), 
+                                    array('name' => 'multidelete',
+                                            'onclick' => 'bulk_action(\'filter\'&#44; \''. htmlspecialchars_decode(new moodle_url($filterbaseurl, $linkparams)). '\'&#44; \'delete\')'));
+    
 
         $table = new html_table();
         $table->head = array($strfilters, $strdescription, $strperpage, 
                             $strcustomsort, $strcustomsearch, $strvisible, 
-                            $stredit, $strdelete, $selectallnone);
-        $table->align = array('left', 'left', 'center', 'left', 'left', 'center', 'center', 'center', 'center');
-        $table->wrap = array(false, false, false, false, false, false, false, false, false);
+                            $stredit, $strduplicate, $multidelete, $selectallnone);
+        $table->align = array('left', 'left', 'center', 'left', 'left', 'center', 'center', 'center', 'center', 'center');
+        $table->wrap = array(false, false, false, false, false, false, false, false, false, false);
         $table->attributes['align'] = 'center';
         
-        $filterbaseurl = '/mod/dataform/filters.php';
-        $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
-                        
         foreach ($filters as $filterid => $filter) {
             $filtername = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('fedit' => $filterid, 'fid' => $filterid)), $filter->name);
             $filterdescription = shorten_text($filter->description, 30);
             $filteredit = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('fedit' => $filterid, 'fid' => $filterid)),
-                            html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/edit'), 'class' => "iconsmall", 'alt' => $stredit, 'title' => $stredit)));
+                            $OUTPUT->pix_icon('t/edit', $stredit));
+            $filterduplicate = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('duplicate' => $filterid)),
+                            $OUTPUT->pix_icon('t/copy', $strduplicate));
             $filterdelete = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('delete' => $filterid)),
-                            html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/delete'), 'class' => "iconsmall", 'alt' => $strdelete, 'title' => $strdelete)));
-            $filterselector = html_writer::checkbox("filterselector_$filterid", $filterid, false);
+                            $OUTPUT->pix_icon('t/delete', $strdelete));
+            $filterselector = html_writer::checkbox("filterselector", $filterid, false);
 
             // visible
             if ($filter->visible) {
-                $visibleicon = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/hide'), 'class' => "iconsmall", 'alt' => $strhide, 'title' => $strhide));
+                $visibleicon = $OUTPUT->pix_icon('t/hide', $strhide);
                 $visible = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('hide' => $filterid)), $visibleicon);
             } else {
-                $visibleicon = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/show'), 'class' => "iconsmall", 'alt' => $strshow, 'title' => $strshow));
+                $visibleicon = $OUTPUT->pix_icon('t/show', $strshow);
                 $visible = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('show' => $filterid)), $visibleicon);
             }
 
@@ -200,7 +183,7 @@ if ($urlparams->new and confirm_sesskey()) {
                     foreach ($sortfields as $sortieid => $sortdir) {
                         // check if field participates in default sort
                         $strsortdir = $sortdir ? 'Descending' : 'Ascending';
-                        $sortoptions = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/'. ($sortdir ? 'down' : 'up')), 'class' => "iconsmall", 'alt' => $strsortdir, 'title' => $strsortdir));
+                        $sortoptions = $OUTPUT->pix_icon('t/'. ($sortdir ? 'down' : 'up'), $strsortdir);
                         $sortoptions .= ' '. $fields[$sortieid]->field->name. '<br />';
                     }
                 }
@@ -247,28 +230,13 @@ if ($urlparams->new and confirm_sesskey()) {
                 $searchoptions,
                 $visible,
                 $filteredit,
+                $filterduplicate,
                 $filterdelete,
                 $filterselector
             );
         }
-         
-        echo '<form id="filterslist" action="', $CFG->wwwroot, '/mod/dataform/filters.php" method="post">',
-            '<input type="hidden" name="d" value="', $df->id(), '" />',
-            '<input type="hidden" name="sesskey" value="', sesskey(), '" />';
-
-        // multi action buttons
-        echo '<div class="mdl-align">',
-            'With selected: ',
-            '<input type="submit" name="multiduplicate" value="', get_string('multiduplicate', 'dataform'), '" />',
-            '&nbsp;&nbsp;',
-            '<input type="submit" name="multidelete" value="', get_string('multidelete', 'dataform'), '" />',        
-            '</div>',
-            '<br />';
-
-            echo html_writer::table($table);
-
-            echo '<br />',
-            '</div></form>';
+                 
+        echo html_writer::table($table);
     }
 }
 

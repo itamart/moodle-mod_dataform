@@ -27,8 +27,7 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
+require_once("$CFG->dirroot/mod/dataform/field/multiselect/field_form.php");
 
-class mod_dataform_field_checkbox_form extends mod_dataform_field_multi_menu_form {
-
+class mod_dataform_field_checkbox_form extends mod_dataform_field_multiselect_form {
 }

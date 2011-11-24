@@ -168,9 +168,9 @@ $urlparams->section   = optional_param('section', '' ,PARAM_NOTAGS);
 // Set a dataform object
 $df = new dataform($urlparams->d);
 
-require_capability('mod/dataform:managetemplates', $df->context);
-
 $df->set_page('mod_edit', array('urlparams' => $urlparams));
+
+require_capability('mod/dataform:managetemplates', $df->context);
 
 $mform = new mod_dataform_mod_section_form(null, array('df' => $df, 'section' => $urlparams->section));
 

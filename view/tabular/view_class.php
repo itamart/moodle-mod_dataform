@@ -158,14 +158,18 @@ class dataform_view_tabular extends dataform_view_base {
      */
     public function group_entries_definition($entriesset, $name = '') {
         global $CFG, $OUTPUT, $GLOBALS;
-        
+
+        $entries_set = $this->get_entries_definition($entriesset, $name);
+
         $tablehtml = trim($this->view->eparam2);
         $opengroupdiv = html_writer::start_tag('div', array('class' => 'entriesview'));
         $closegroupdiv = html_writer::end_tag('div');
+        if ($name) {
+            $name = ($name == 'newentry' ? get_string('entrynew', 'dataform') : $name); 
+        }
         $groupheading = $OUTPUT->heading($name, 3, 'main');
 
         $elements = array();
-        $entries_set = $this->get_entries_definition($entriesset, $name);
 
         // if there are no field definition just return everything as html
         if (empty($entries_set)) {
@@ -262,19 +266,17 @@ class dataform_view_tabular extends dataform_view_base {
 
         // get patterns definitions
         $fields = $this->get_fields();
-        $tags = array();
-        $patterndefinitions = array();
+        $fielddefinitions = array();
         $entry = new object;
         foreach ($this->_patterns['field'] as $fieldid => $patterns) {
             $field = $fields[$fieldid];
             $entry->id = $i;
-            if ($fieldpatterns = $field->patterns($patterns, $entry, true, true)) {
-                $patterndefinitions = array_merge($patterndefinitions, $fieldpatterns);
+            if ($definitions = $field->patterns()->get_replacements($patterns, $entry, true, true)) {
+                $fielddefinitions = array_merge($fielddefinitions, $definitions);
             }
-            $tags = array_merge($tags, $patterns);
         }            
             
-        $elements[] = $patterndefinitions; 
+        $elements[] = $fielddefinitions; 
 
         $i--;
         

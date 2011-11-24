@@ -70,6 +70,7 @@ class mod_dataform_field_file_form extends mod_dataform_field_form {
         $options = array();
         $options['*'] = get_string('filetypeany', 'dataform');
         $options['image'] = get_string('filetypeimage', 'dataform');
+        $options['*.html'] = get_string('filetypehtml', 'dataform');
 
         $mform->addElement('select', 'param3', get_string('filetypes', 'dataform'), $options);
         $mform->setDefault('param3', '*');

@@ -43,79 +43,10 @@ class dataform_field__time extends dataform_field_base {
     /**
      * 
      */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-
-        $fieldname = $this->field->internalname;
-        $entryinfo = array('' => "##{$fieldname}##",
-                            '%H' => "##{$fieldname}:hour##",
-                            '%a' => "##{$fieldname}:day##",
-                            '%V' => "##{$fieldname}:week##",
-                            '%b' => "##{$fieldname}:month##",
-                            '%G' => "##{$fieldname}:year##");
-
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array('entryinfo' => array('entryinfo' => array()));
-                               
-            // TODO use get strings
-            foreach ($entryinfo as $pattern) {
-                $patterns['entryinfo']['entryinfo'][$pattern] = $pattern;
-            }
-
-        } else {
-            $patterns = array();
-
-            // no edit mode for this field
-            foreach ($tags as $format => $tag) {
-                if ($entry->id < 0) {
-                    // display nothing on new entries 
-                    $patterns[$tag] = '';
-                } else {
-                    // convert commas before returning
-                    if ($format) {
-                        $patterns[$tag] = array('html', userdate($entry->{$fieldname}, $format));
-                    } else {
-                        $patterns[$tag] = array('html', userdate($entry->{$fieldname}));
-                    }
-                }
-            }
-        }
-        
-        return $patterns;
-    }
-
-    /**
-     * 
-     */
     public function update_content($entry, array $values = null) {
         return true;
     }
 
-    /**
-     * 
-     */
-    public function display_search($mform, $i = 0, $value = '') {
-        if (is_array($value)){
-            $from = $value[0];
-            $to = $value[1];
-        } else {
-            $from = 0;
-            $to = 0;
-        }
-    
-        $elements = array();
-        $elements[] = &$mform->createElement('date_time_selector', 'f_'. $i. '_'. $this->field->id. '_from', get_string('from'));
-        $elements[] = &$mform->createElement('date_time_selector', 'f_'. $i. '_'. $this->field->id. '_to', get_string('to'));
-        $mform->addGroup($elements, "searchelements$i", null, '<br />', false);
-        $mform->setDefault('f_'. $i. '_'. $this->field->id. '_from', $from);
-        $mform->setDefault('f_'. $i. '_'. $this->field->id. '_to', $to);
-        foreach (array('year','month','day','hour','minute') as $fieldidentifier) {
-            $mform->disabledIf('f_'. $i. '_'. $this->field->id. '_to['. $fieldidentifier. ']', "searchoperator$i", 'neq', 'BETWEEN');
-        }
-        $mform->disabledIf("searchelements$i", "searchoperator$i", 'eq', 'IN');
-        $mform->disabledIf("searchelements$i", "searchoperator$i", 'eq', 'LIKE');
-    }
-    
     /**
      * 
      */
@@ -232,12 +163,5 @@ class dataform_field__time extends dataform_field_base {
             return $not. ' '. $operator. ' '. $from. ' and '. $to;
         }
     }  
-
-    /**
-     *
-     */
-    public function export_text_value($entry) {
-        return $entry->{$this->field->internalname};
-    }
 
 }

@@ -61,7 +61,7 @@ class dataform_view_interval extends dataform_view_block {
         // set or clean up cache according to interval
         if (!$this->interval and !empty($this->view->param7)) {
             $this->view->param7 = null;
-            $this->update_view();
+            $this->update();
         }
     }
 
@@ -82,7 +82,7 @@ class dataform_view_interval extends dataform_view_block {
     public function update_cache_content($entriesset) {
         $this->cache->content = $entriesset;
         $this->view->param7 = serialize($this->cache);
-        $this->update_view();
+        $this->update();
     }
 
     /**

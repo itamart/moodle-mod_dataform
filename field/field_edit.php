@@ -33,17 +33,17 @@ $urlparams = new object();
 $urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
 
 $urlparams->type       = optional_param('type','' ,PARAM_ALPHA);   // type of a field to edit
-$urlparams->id        = optional_param('id',0 ,PARAM_INT);       // field id to edit
+$urlparams->fid        = optional_param('fid',0 ,PARAM_INT);       // field id to edit
 
 // Set a dataform object
 $df = new dataform($urlparams->d);
 
-require_capability('mod/dataform:managetemplates', $df->context);
-
 $df->set_page('field/field_edit', array('urlparams' => $urlparams));
 
-if ($urlparams->id) {
-    $field = $df->get_field_from_id($urlparams->id, true); // force get
+require_capability('mod/dataform:managetemplates', $df->context);
+
+if ($urlparams->fid) {
+    $field = $df->get_field_from_id($urlparams->fid, true); // force get
 } else if ($urlparams->type) {
     $field = $df->get_field($urlparams->type);
 }
@@ -68,7 +68,7 @@ if ($mform->is_cancelled()){
     } else {
         $data->id = $field->id();
         $field->update_field($data);
-        add_to_log($df->course->id, 'dataform', 'fields update', 'fields.php?d='. $df->id(). '&amp;id=', $urlparams->id, $df->cm->id);
+        add_to_log($df->course->id, 'dataform', 'fields update', 'fields.php?d='. $df->id(). '&amp;id=', $urlparams->fid, $df->cm->id);
     }
 
     if ($data->submitbutton == get_string('savecontinue', 'dataform')) {

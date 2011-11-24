@@ -49,7 +49,7 @@ class mod_dataform_view_base_form extends moodleform {
         $mform->addElement('hidden', 'type', $view->type());
         $mform->setType('type', PARAM_ALPHA);
 
-        $streditinga = $view->id() ? get_string('viewedit', 'dataform', $view->name()) : get_string('viewnew', 'dataform', $view->type());
+        $streditinga = $view->id() ? get_string('viewedit', 'dataform', $view->name()) : get_string('viewnew', 'dataform', $view->typename());
         $mform->addElement('html', '<h2 class="mdl-align">'.format_string($streditinga).'</h2>');
 
     // buttons
@@ -117,12 +117,7 @@ class mod_dataform_view_base_form extends moodleform {
         
         // section
         $mform->addElement('editor', 'esection_editor', '', null, $editoroptions['section']);
-
-        $generaltags = $view->general_tags();
-        $sectionatags=array();
-        $sectionatags[] = &$mform->createElement('html', '<div class="fitemtitle"><label>'. get_string('viewavailabletags','dataform'). '</label></div>');
-        $sectionatags[] = &$mform->createElement('html', '<div class="felement fselect">'. html_writer::select($generaltags, 'sectiontags', '', array('' => 'choosedots'), array('onchange' => 'insert_field_tags(this, \'esection_editor\');this.selectedIndex=0;')). '</div>');
-        $mform->addGroup($sectionatags, 'sectionatags', '', array(' '), false);
+        $this->add_tags_selector('esection_editor', 'general');
 
     // view specific definition
     //-------------------------------------------------------------------------------
@@ -166,6 +161,43 @@ class mod_dataform_view_base_form extends moodleform {
         $mform->closeHeaderBefore('buttonar');
     }
 
+    /**
+     *
+     */
+    function add_tags_selector($editorname, $tagstype){
+        $view = $this->_customdata['view'];
+        $mform = &$this->_form;
+
+        switch ($tagstype) {
+            case 'general':
+                $tags = $view->general_tags();
+                $label = get_string('viewgeneraltags','dataform');
+                break;
+                
+            case 'field':
+                $tags = $view->field_tags();
+                $label = get_string('viewfieldtags','dataform');
+                break;
+                
+            case 'character':
+                $tags = $view->character_tags();
+                $label = get_string('viewcharactertags','dataform');
+                break;
+                
+            default:
+                $tags = null;
+        }
+                
+        if (!empty($tags)) {
+            $grp = array();
+            $grp[] = &$mform->createElement('html', html_writer::start_tag('div', array('class' => 'fitem')));
+            $grp[] = &$mform->createElement('html', '<div class="fitemtitle"><label>'. $label. '</label></div>');
+            $grp[] = &$mform->createElement('html', '<div class="felement fselect">'. html_writer::select($tags, "{$editorname}{$tagstype}tags", '', array('' => 'choosedots'), array('onchange' => "insert_field_tags(this, '{$editorname}');this.selectedIndex=0;")). '</div>');
+            $grp[] = &$mform->createElement('html', html_writer::end_tag('div'));
+            $mform->addGroup($grp, "{$editorname}{$tagstype}tagsgrp", '', array(' '), false);
+        }
+    }
+    
     /**
      *
      */

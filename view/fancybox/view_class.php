@@ -55,9 +55,7 @@ class dataform_view_fancybox extends dataform_view_block {
             $PAGE->requires->js('/mod/dataform/view/fancybox/js/dataform_fancybox.js');
             $fancyboxcss = new moodle_url('/mod/dataform/view/fancybox/js/jquery.fancybox-1.3.4.css',
                                             array('media' => "screen"));
-            $PAGE->requires->css($fancyboxcss);
-                                    
-
+            $PAGE->requires->css($fancyboxcss);                                    
         }
     }
 
@@ -88,7 +86,7 @@ class dataform_view_fancybox extends dataform_view_block {
 
         // second row: add entries 
         $row2 = new html_table_row();
-        $addentries = new html_table_cell('##addnewentry##'.html_writer::empty_tag('br').'##addentriesfromimages##');
+        $addentries = new html_table_cell('##addnewentry##');
         $addentries->colspan = 5;
         $row2->cells = array($addentries);
         foreach ($row2->cells as $cell) {
@@ -155,7 +153,7 @@ class dataform_view_fancybox extends dataform_view_block {
         // split the entry template to tags and html
         $tags = array_keys($fielddefinitions);
         $parts = $this->split_tags($tags, $this->view->eparam2);
-                        
+
         foreach ($parts as $part) {
             if (in_array($part, $tags)) {
                 if ($part == '[[Image:url]]') {
@@ -181,159 +179,6 @@ class dataform_view_fancybox extends dataform_view_block {
         }
 
         return $elements;      
-    }
-
-    /**
-     *
-     */
-    protected function patterns($tags = null, $params = null) {
-        global $OUTPUT;
-
-        $patterns = parent::patterns($tags, $params);
-        
-        $generalactions = array('##addentriesfromimages##');
-        
-        // if no tags are requested, return select menu
-        if (is_null($tags)) {
-            $patterns['generalactions']['generalactions']['##addentriesfromimages##'] = '##addentriesfromimages##';
-
-        } else {      
-                
-            $baseurl = htmlspecialchars_decode($this->_baseurl. '&sesskey='. sesskey());
-            
-            foreach ($tags as $tag) {
-                if ($tag == '##addentriesfromimages##') {
-                    if (isset($params['hidenewentry']) or $this->_df->user_at_max_entries(true)) {            // TODO: move to a view attribute so as to call the function only once
-                        $patterns[$tag] = '';
-                    } else {
-                        if (!optional_param('importentries', 0, PARAM_BOOL)) {
-                            $patterns[$tag] = 
-                                html_writer::link($baseurl. '&importentries=1', get_string('entriesimport', 'dataform'));
-                        } else {
-                            $patterns[$tag] = $this->print_entries_import();
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
-     *
-     */
-    public function print_entries_import() {
-        global $PAGE, $OUTPUT;
-        
-        $itemid = file_get_unused_draft_itemid();
-
-        $options = new object;
-        $options->maxbytes  = $this->_df->course->maxbytes;
-        $options->maxfiles  = 1;
-        $options->maxbytes  = $this->_df->course->maxbytes;
-        $options->itemid    = $itemid;
-        $options->accepted_types = array('zip');
-        $options->context = $PAGE->context;
-
-        $fp = new file_picker($options);
-
-        $module = array('name'=>'dataform_filepicker', 'fullpath'=>'/mod/dataform/dataform.js', 'requires'=>array('core_filepicker'));
-        $PAGE->requires->js_init_call('M.dataform_filepicker.init', array($fp->options), true, $module);
-
-        $filepicker = $OUTPUT->render($fp);
-        $button = html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('entriesimport', 'dataform')));
-        $br = html_writer::empty_tag('br');
-        
-        $baseurl = '/mod/dataform/view.php';
-        $baseurlparams = array('d' => $this->_df->id(),
-                                'sesskey' => sesskey(),
-                                'view' => $this->id(),
-                                'filter' => $this->_filter->id,
-                                'import' => self::IMPORT_ENTRIES_FROM_IMAGES,
-                                'draftitemid' => $itemid);
-
-        $formparams = array();
-        foreach ($baseurlparams as $var => $val) {
-            $formparams[] = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => $var, 'value' => $val));
-        }
-
-        $attributes = array('method' => 'post', 'action' => new moodle_url($baseurl));
-
-        $fpform = html_writer::tag('form', implode('', $formparams). "$filepicker $br $button", $attributes);
-
-        // and finally one more wrapper with class
-        $str = html_writer::tag('div', $fpform, array('class' => 'singleselect', 'style' => 'max-width:350px;float:left;'));
-        $sider = html_writer::tag('div', '&nbsp;', array('style' => 'width:30%;float:left;'));
-
-        return $sider.$str.$sider;
-    }
-
-    /**
-     *
-     */
-    public function get_import_data($importtype) {
-        global $USER;
-    
-        // get the uploaded images file
-        $imagesfile = null;
-        $draftitemid = optional_param('draftitemid', 0, PARAM_INT);
-        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
-        $fs = get_file_storage();
-        $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid);
-        if (count($files) > 1) {
-            foreach ($files as $file) {
-                if (!$file->is_directory()) {
-                    $imagesfile = $file;
-                    break;
-                }
-            }
-        }
-                             
-        // extract images to the draft area
-        $zipper = get_file_packer('application/zip');
-        if ($imagesfile) {
-            $imagesfile->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftitemid, '/');
-            $imagesfile->delete();
-        }
-        
-        // get the view's Image field id
-        if (!$imagefield = $this->_df->get_field_by_name('Image')) {
-            return null;
-        }
-
-        $data = new object;
-        $data->eids = array();
-        
-        // move image to its own area and add info to data
-        $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid);
-        if (count($files) > 1) {
-            $rec = new object;
-            $rec->contextid = $usercontext->id;
-            $rec->component = 'user';
-            $rec->filearea = 'draft';
-
-            $i = 0;
-            foreach ($files as $file) {
-                if ($file->is_valid_image()) {
-                    // $get unused draft area
-                    $itemid = file_get_unused_draft_itemid();
-                    // move image to the new draft area 
-                    $rec->itemid = $itemid;
-                    $fs->create_file_from_storedfile($rec, $file);
-                    // add info to data
-                    $i--;
-                    $fieldname = "field_{$imagefield->id()}_$i";
-                    $data->{"{$fieldname}_filemanager"} = $itemid;
-                    $data->{"{$fieldname}_alttext"} = $file->get_filename();
-                    $data->eids[] = $i;
-                }
-            }
-            $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftitemid);
-        }
-        
-        return $data;        
     }
 
     /**

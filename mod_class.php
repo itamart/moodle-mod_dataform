@@ -191,17 +191,23 @@ class dataform {
         
         switch ($type) {
             case self::COUNT_ALL:
-                $count = $DB->count_records_sql('SELECT COUNT(e.id) FROM {dataform_entries} e WHERE e.dataid = ? AND e.grading <> 1', array($dataform->id));
+                $count = $DB->count_records_sql('SELECT COUNT(e.id) FROM {dataform_entries} e WHERE e.dataid = ? AND e.grading <> ?', array($this->id(), 1));
                 break;
         
             case self::COUNT_APPROVED:
-                break;
+                $count = '---';
+                 break;
         
             case self::COUNT_UNAPPROVED:
+                $count = '---';
                 break;
         
             case self::COUNT_LEFT:
+                $count = '---';
                 break;
+                
+            default: 
+                $count = '---';
         
         }
 
@@ -313,9 +319,8 @@ class dataform {
                 $USER->editing = $urlparams['edit'];
             }
 
-            //$buttons = '<table><tr><td><form method="get" action="'. "$page.php". '"><div>'.
             $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
-                '<input type="hidden" name="id" value="'.$this->cm->id.'" />'.
+                '<input type="hidden" name="d" value="'.$this->id().'" />'.
                 '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing()?0:1).'" />'.
                 '<input type="submit" value="'.get_string($PAGE->user_is_editing()?'blockseditoff':'blocksediton').'" /></div></form></td></tr></table>';
             $PAGE->set_button($buttons);
@@ -478,6 +483,16 @@ class dataform {
         }
     }
     
+    /**
+     * 
+     */
+    public function set_content() {
+        if (!empty($this->_currentview)) {
+            $this->_currentview->process_data();
+            $this->_currentview->set_content();
+        }
+    }
+
     /**
      * 
      */
@@ -768,8 +783,8 @@ class dataform {
      * given a view type returns the view object from $this->views
      * Initializes $this->views if necessary
      */
-    public function get_views_by_type($type, $menu = false) {
-        if (!$views = $this->get_views()) {;
+    public function get_views_by_type($type, $menu = false, $forceget = false) {
+        if (!$views = $this->get_views(null, false, $forceget)) {;
             return false;
         } else {
             $typeviews = array();
@@ -858,14 +873,17 @@ class dataform {
     public function process_views($action, $vids, $confirmed = false) {
         global $DB, $OUTPUT;
 
-        $views = array();
+        if (!has_capability('mod/dataform:managetemplates', $this->context)) {
+            // TODO throw exception
+            return false;
+        }
+        
         if ($vids) { // some views are specified for action
-            if ($candidates = $DB->get_records_select('dataform_views', "id IN ($vids)")) {
-                foreach ($candidates as $vid => $view) {
-                    // Must be from this dataform and owned by current user or user can manage entries
-                    if ($view->dataid == $this->id() and has_capability('mod/dataform:manageentries', $this->context)) {
-                        $views[$vid] = $view;
-                    }
+            $views = array();
+            $viewobjs = $this->get_views();
+            foreach (explode(',', $vids) as $vid) {
+                if (!empty($viewobjs[$vid])) {
+                    $views[$vid] = $viewobjs[$vid];
                 }
             }
         }
@@ -897,16 +915,16 @@ class dataform {
                 switch ($action) {
                     case 'visible':
                         $updateview = new object();
-                        foreach ($views as $view) {
-                            if ($view->id == $this->data->defaultview) {
+                        foreach ($views as $vid => $view) {
+                            if ($vid == $this->data->defaultview) {
                                 // TODO: notify something
                                 continue;
                             } else {
-                                $updateview->id = $view->id;
-                                $updateview->visible = (($view->visible + 1) % 3);  // hide = 0; (show) = 1; show = 2
+                                $updateview->id = $vid;
+                                $updateview->visible = (($view->view->visible + 1) % 3);  // hide = 0; (show) = 1; show = 2
                                 $DB->update_record('dataform_views', $updateview);
 
-                                $processedvids[] = $view->id;
+                                $processedvids[] = $vid;
                             }
                         }
 
@@ -916,14 +934,14 @@ class dataform {
                     case 'hide':
                         $updateview = new object();
                         $updateview->visible = 0;
-                        foreach ($views as $view) {
-                            if ($view->id == $this->data->defaultview) {
+                        foreach ($views as $vid => $view) {
+                            if ($vid == $this->data->defaultview) {
                                 // TODO: notify something
                                 continue;
                             } else {
-                                $updateview->id = $view->id;
+                                $updateview->id = $vid;
                                 $DB->update_record('dataform_views', $updateview);
-                                $processedvids[] = $view->id;
+                                $processedvids[] = $vid;
                             }
                         }
 
@@ -933,12 +951,12 @@ class dataform {
                     case 'filter':
                         $updateview = new object();
                         $filterid = optional_param('fid', 0, PARAM_INT);
-                        foreach ($views as $view) {
-                            if ($filterid != $view->filter) {
-                                $updateview->id = $view->id;
+                        foreach ($views as $vid => $view) {
+                            if ($filterid != $view->view->filter) {
+                                $updateview->id = $vid;
                                 $updateview->filter = $filterid;
                                 $DB->update_record('dataform_views', $updateview);
-                                $processedvids[] = $view->id;
+                                $processedvids[] = $vid;
                             }
                         }
 
@@ -946,31 +964,31 @@ class dataform {
                         break;
 
                     case 'reset':
-                        foreach ($views as $viewid => $viewrec) {
-                            // get view object
-                            $view = $this->get_view($viewrec);
-
+                        foreach ($views as $vid => $view) {
                             // generate default view and update
                             $view->generate_default_view();                            
 
                             // update view
-                            $view->update_view($view->view);
+                            $view->update($view->view);
                             
-                            $processedvids[] = $viewid;
+                            $processedvids[] = $vid;
                         }
 
                         $strnotify = 'viewsupdated';
                         break;
 
                     case 'duplicate':
-                        foreach ($views as $view) {
+                        foreach ($views as $vid => $view) {
                             // TODO: check for limit
 
                             // set name
-                            while ($this->name_exists('views', $view->name)) {
-                                $view->name = 'Copy of '. $view->name;
+                            while ($this->name_exists('views', $view->name())) {
+                                $view->view->name = 'Copy of '. $view->name();
                             }
-                            $viewid = $DB->insert_record('dataform_views',$view);
+                            // reset id
+                            $view->view->id = 0;
+                            
+                            $viewid = $view->add($view->view);
 
                             $processedvids[] = $viewid;
                         }
@@ -979,14 +997,12 @@ class dataform {
                         break;
 
                     case 'delete':
-                        foreach ($views as $view) {
-                            // TODO: delete filters
-                            //delete_records('dataform_filters', array('viewid', $view->id));
-                            $DB->delete_records('dataform_views', array('id' => $view->id));
-                            $processedvids[] = $view->id;
+                        foreach ($views as $vid => $view) {
+                            $view->delete();
+                            $processedvids[] = $vid;
 
                             // reset default view if needed
-                            if ($view->id == $this->data->defaultview) {
+                            if ($view->id() == $this->data->defaultview) {
                                 $this->set_default_view();
                             }
                         }
@@ -994,17 +1010,17 @@ class dataform {
                         break;
 
                     case 'default':
-                        foreach ($views as $view) { // there should be only one
-                            if ($view->visible != 2) {
+                        foreach ($views as $vid => $view) { // there should be only one
+                            if ($view->view->visible != 2) {
                                 $updateview = new object();
-                                $updateview->id = $view->id;
+                                $updateview->id = $vid;
                                 $updateview->visible = 2;
                                 $DB->update_record('dataform_views', $updateview);
                             }
 
-                            $this->set_default_view($view->id);
-                            // TODO: shouldn't produced this notification
-                            $processedvids[] = $view->id;
+                            $this->set_default_view($vid);
+                            // TODO: shouldn't produce this notification
+                            $processedvids[] = $vid;
                             break;
                         }
                         $strnotify = 'viewsupdated';
@@ -1398,7 +1414,7 @@ class dataform {
      *
      */
     public function get_gradebook_users() {
-        global $CFG;
+        global $DB, $CFG;
 
         // get the list of users by gradebook roles
         if (!empty($CFG->gradebookroles)) {
@@ -1408,15 +1424,28 @@ class dataform {
             $gradebookroles = '';
         }
 
-        $users = get_role_users($gradebookroles, $this->context, true, '', 'u.lastname ASC', true, $this->currentgroup);
-        if ($users) {
-            $users = array_keys($users);
-            if (!empty($CFG->enablegroupings) and $this->cm->groupmembersonly) {
-                $groupingusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id');
-                if ($groupingusers) {
-                    $users = array_intersect($users, array_keys($groupingusers));
-                }
-            }
+        if (!empty($CFG->enablegroupings) 
+                    and $this->cm->groupmembersonly
+                    and $groupingusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id')) {
+            $users = get_role_users($gradebookroles,
+                                    $this->context,
+                                    true,
+                                    'u.id, u.lastname, u.firstname',
+                                    'u.lastname ASC', 
+                                    true,
+                                    $this->currentgroup,
+                                    '',
+                                    '',
+                                    'u.id IN (:gusers)',
+                                    array('gusers' => implode(',', array_keys($groupingusers))));
+        } else {
+            $users = get_role_users($gradebookroles,
+                                    $this->context,
+                                    true,
+                                    'u.id, u.lastname, u.firstname',
+                                    'u.lastname ASC', 
+                                    true,
+                                    $this->currentgroup);
         }
         return $users;
     }
@@ -1470,6 +1499,35 @@ class dataform {
                 }
             }
         }
+    }
+
+    /**
+     *
+     */
+    public function user_can_export_entry($entry = null) {
+        global $CFG, $USER;
+
+        // we need portfolios for export
+        if (!empty($CFG->enableportfolios)) {
+
+            // can export all entries
+            if (has_capability('mod/dataform:exportallentries', $this->context)) {
+                return true;
+            }
+            
+            // for others, it depends on the entry
+            if (isset($entry->id) and $entry->id > 0) {
+                if (has_capability('mod/dataform:exportownentry', $this->context)) {
+                    if (!$this->data->grouped and $USER->id == $entry->userid) {
+                        return true;
+                    } else if ($this->data->grouped and groups_is_member($entry->groupid)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1619,8 +1677,8 @@ class dataform {
                 if ($packagefile != "." && $packagefile != "..") {
                     $package = new object;
                     $package->userid = 0;
-                    $package->name = str_replace('.mbz', '', $packagefile);
-                    $package->shortname = $package->name;
+                    $package->name = $packagefile;
+                    $package->shortname = pathinfo($package->name, PATHINFO_FILENAME);
                     $packages[] = $package;
                 }
             }
@@ -1638,10 +1696,11 @@ class dataform {
         global $USER;
 
         $packages = array();
+        $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
 
         $fs = get_file_storage();
         if ($packagearea == 'course_packages') {
-            $files = $fs->get_area_files($this->context->id, 'mod_dataform', $packagearea);
+            $files = $fs->get_area_files($course_context->id, 'mod_dataform', $packagearea);
         } else if ($packagearea == 'site_packages') {
             $files = $fs->get_area_files(dataform::PACKAGE_SITECONTEXT, 'mod_dataform', $packagearea);
         }
@@ -1655,7 +1714,7 @@ class dataform {
                 $package->contextid = $file->get_contextid();
                 $package->path = $file->get_filepath();
                 $package->name = $file->get_filename();
-                $package->shortname = basename($package->name);
+                $package->shortname = pathinfo($package->name, PATHINFO_FILENAME);
                 $package->userid = $file->get_userid();
                 $package->itemid = $file->get_itemid();
                 $package->id = $file->get_id();
@@ -1669,114 +1728,21 @@ class dataform {
     /**
      *
      */
-    public function apply_package($packageid, $fieldmapping = false) {
-        global $CFG;
-
-        require_once($CFG->libdir.'/uploadlib.php');
-        require_once($CFG->libdir.'/xmlize.php');
-        require_once('restorelib.php');
-
-        // make user draft area
-
-        // unzip the package to the draft area
-
-        // get content of package file and delete draft files area
-
-        // try to apply the package
-        if ($parsedxml = xmlize($packagexml)) {
-            // get current user fields
-            $currentfields = $this->get_fields();
-            // delete records of current fields views and filters
-            $DB->delete_records('dataform_fields', array('dataid' => $this->id()));
-            $DB->delete_records('dataform_views', array('dataid' => $this->id()));
-            $DB->delete_records('dataform_filters', array('dataid' => $this->id()));
-
-            // restore package from array
-            $params = new object();
-            $params->courseid = $this->course->id;
-            $params->destdataformid = $this->id();
-            restore_dataform_package($parsedxml, $params);
-
-            // at this stage new fields, views, filters should be created
-            // old fields if any and there content should still exit for mapping
-
-            if (!empty($currentfields)) {
-                // get new fields
-                $newfields = $this->get_fields(null, false, true);
-                // mapping preferences form
-                if ($fieldmapping and !empty($newfields)) {
-                    $strblank = get_string('blank', 'dataform');
-                    $strcontinue = get_string('continue');
-                    $strwarning = get_string('mappingwarning', 'dataform');
-                    $strfieldmappings = get_string('fieldmappings', 'dataform');
-                    $strnew = get_string('new');
-
-                    echo '<div style="text-align:center"><form action="packages.php?d='. $this->id(). '" method="post">';
-                    echo '<fieldset class="invisiblefieldset">';
-                    echo '<input type="hidden" name="map" value="1" />';
-                    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-
-                    echo "<h3>$strfieldmappings ";
-                    //echo helpbutton('fieldmappings', '', 'dataform');
-                    echo '</h3><table cellpadding="5">';
-
-                    foreach ($currentfields as $cid => $currentfield) {
-                        if ($cid > 0) {
-                            echo '<tr><td><label for="id_'.$currentfield->name().'">'.$currentfield->name().'</label></td>';
-                            echo '<td><select name="field_'.$cid.'_'.$currentfield->type().'" id="id_'.$currentfield->name().'">';
-
-                            $selected = false;
-                            foreach ($newfields as $nid => $newfield) {
-                                if ($nid > 0) {
-                                    if ($newfield->type() == $currentfield->type()) {
-                                        if ($newfield->name() == $currentfield->name()) {
-                                            echo '<option value="'.$nid.'" selected="selected">'.$newfield->name().'</option>';
-                                            $selected=true;
-                                        }
-                                        else {
-                                            echo '<option value="'.$nid.'">'.$newfield->name().'</option>';
-                                        }
-                                    }
-                                }
-                            }
-
-                            if ($selected)
-                                echo '<option value="-1">-</option>';
-                            else
-                                echo '<option value="-1" selected="selected">-</option>';
-                            echo '</select></td></tr>';
-                        }
-                    }
-                    echo '</table>';
-                    echo "<p>$strwarning</p>";
-
-                    echo '<input type="submit" value="'.$strcontinue.'" /></fieldset></form></div>';
-                } else {
-                    foreach ($currentfields as $field) {
-                        $field->delete_content();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     */
     public function create_package_from_backup() {
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->context->id, 'backup', 'activity');
         if (!empty($files)) {
+            $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
             foreach ($files as $file) {
                 if ($file->is_directory()) {
                     continue;
                 }
                 $package = new object;
-                $package->contextid = $this->context->id;
+                $package->contextid = $course_context->id;
                 $package->component = 'mod_dataform';
                 $package->filearea = dataform::PACKAGE_COURSEAREA;
                 $package->filepath = '/';
-                $package->filename = clean_filename(str_replace(' ', '_', $this->data->name). '-dataform-package-'. gmdate("Ymd_Hi"));
+                $package->filename = clean_filename(str_replace(' ', '_', $this->data->name). '-dataform-package-'. gmdate("Ymd_Hi"). '.mbz');
 
                 $fs->create_file_from_storedfile($package, $file);
                 return true;
@@ -1788,7 +1754,176 @@ class dataform {
     /**
      *
      */
-    public function share_packages($packageid) {
+    public function create_package_from_upload($draftid) {
+        global $USER;
+
+        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $fs = get_file_storage();
+        if ($file = reset($fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false))) {
+            $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+            $package = new object;
+            $package->contextid = $course_context->id;
+            $package->component = 'mod_dataform';
+            $package->filearea = dataform::PACKAGE_COURSEAREA;
+            $package->filepath = '/';
+            
+            $ext = pathinfo($file->get_filename(), PATHINFO_EXTENSION);            
+            if ($ext == 'mbz') {
+                $package->filename = $file->get_filename();
+                $fs->create_file_from_storedfile($package, $file);
+            } else if ($ext == 'zip') {
+                // extract files to the draft area
+                $zipper = get_file_packer('application/zip');
+                $file->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
+                $file->delete();
+
+                if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
+                    foreach ($files as $file) {
+                        $ext = pathinfo($file->get_filename(), PATHINFO_EXTENSION);
+                        if ($ext == 'mbz') {
+                            $package->filename = $file->get_filename();
+                            $fs->create_file_from_storedfile($package, $file);
+                        }
+                    }
+                }
+            }
+            $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftid);
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     *
+     */
+    public function apply_package($userpackage, $pluginpackage = null) {
+        global $DB, $CFG, $USER;
+        
+        // extract the backup file to the temp folder
+        $folder = $this->context->id. '-'. time();
+        $tempdir = "temp/backup/$folder";
+        $backuptempdir = make_upload_directory($tempdir);
+        $zipper = get_file_packer('application/zip');
+        if (!empty($pluginpackage)) { // plugin package
+            $packagepath = "$CFG->dirroot/mod/dataform/package/$pluginpackage";
+            $zipper->extract_to_pathname($packagepath, $backuptempdir);
+        } else {
+            $fs = get_file_storage();
+            $file = $fs->get_file_by_id($userpackage);
+            $file->extract_to_pathname($zipper, $backuptempdir);           
+        }
+        
+        require_once("$CFG->dirroot/backup/util/includes/restore_includes.php");
+        
+        $transaction = $DB->start_delegated_transaction();
+        $rs = new restore_controller($folder,
+                                    $this->course->id,
+                                    backup::INTERACTIVE_NO,
+                                    backup::MODE_GENERAL,
+                                    $USER->id,
+                                    backup::TARGET_CURRENT_ADDING);
+
+        // get the dataform restore activity task
+        $tasks = $rs->get_plan()->get_tasks();
+        $dataformtask = null;
+        foreach ($tasks as $key => $task) {
+            if ($task instanceof restore_dataform_activity_task) {
+                $dataformtask = $task;
+                break;
+            }
+        }
+
+        if ($dataformtask) {
+            $dataformtask->set_activityid($this->id());
+            $dataformtask->set_moduleid($this->cm->id);
+            $dataformtask->set_contextid($this->context->id);
+            $dataformtask->set_ownerid($USER->id);
+
+            $rs->execute_precheck();
+            $rs->execute_plan();
+            
+            $transaction->allow_commit();
+            redirect(new moodle_url('/mod/dataform/view.php', array('d' => $this->id())));        
+        }
+    }
+
+    /**
+     *
+     */
+    public function download_packages($packageids) {
+        global $CFG;
+        
+        if (headers_sent()) {
+            print_error('headerssent');
+        }
+
+        if (!$pids = explode(',', $packageids)) {
+            return false;
+        }
+
+        $packages = array();
+        $fs = get_file_storage();
+
+        // try first course area
+        $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+        $contextid = $course_context->id;
+
+        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PACKAGE_COURSEAREA)) {
+            foreach ($files as $file) {
+                if (empty($pids)) break;
+                
+                if (!$file->is_directory()) {
+                    $key = array_search($file->get_id(), $pids);
+                    if ($key !== false) {
+                        $packages[$file->get_filename()] = $file;
+                        unset($pids[$key]);
+                    }
+                }
+            }
+        }
+
+        // try site area
+        if (!empty($pids)) {
+            if ($files = $fs->get_area_files(dataform::PACKAGE_SITECONTEXT, 'mod_dataform', dataform::PACKAGE_SITEAREA)) {
+                foreach ($files as $file) {
+                    if (empty($pids)) break;
+                    
+                    if (!$file->is_directory()) {
+                        $key = array_search($file->get_id(), $pids);
+                        if ($key !== false) {
+                            $packages[$file->get_filename()] = $file;
+                            unset($pids[$key]);
+                        }
+                    }
+                }
+            }            
+        }
+
+        $tempdir = "temp/mod_dataform/download";
+        $downloaddir = make_upload_directory($tempdir);
+        $filename = 'packages.zip';
+        $downloadfile = "$CFG->dataroot/temp/mod_dataform/download/$filename";
+        
+        $zipper = get_file_packer('application/zip');
+        $zipper->archive_to_pathname($packages, $downloadfile);
+
+        header("Content-Type: application/download\n");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate,post-check=0,pre-check=0');
+        header('Pragma: public');
+        $downloadhandler = fopen($downloadfile, 'rb');
+        print fread($downloadhandler, filesize($downloadfile));
+        fclose($downloadhandler);
+        unlink($downloadfile);
+        exit(0);
+    }
+
+    /**
+     *
+     */
+    public function share_packages($packageids) {
         global $CFG, $USER;
 
         if (!has_capability('mod/dataform:packagesviewall', $this->context)) {
@@ -1796,14 +1931,15 @@ class dataform {
         }
                     
         $fs = get_file_storage();
-
         $filerecord = new object;
         $filerecord->contextid = dataform::PACKAGE_SITECONTEXT;
         $filerecord->component = 'mod_dataform';
         $filerecord->filearea = dataform::PACKAGE_SITEAREA;
         $filerecord->filepath = '/';
 
-        $fs->create_file_from_storedfile($filerecord, $packageid);
+        foreach (explode(',', $packageids) as $pid) {
+            $fs->create_file_from_storedfile($filerecord, $pid);
+        }
         return true;
     }
 
@@ -1831,29 +1967,50 @@ class dataform {
     /**
      *
      */
-    public function delete_packages($packagearea = dataform::PACKAGE_COURSEAREA, $packageid) {
+    public function delete_packages($packageids) {
+        if (!$pids = explode(',', $packageids)) {
+            return false;
+        }
+        
         if (!has_capability('mod/dataform:managepackages', $this->context)) {
             return false;
         }
                     
-        if ($packagearea == dataform::PACKAGE_COURSEAREA) {
-            $contextid = $this->context->id;
-        } else {
-            $contextid = dataform::PACKAGE_SITECONTEXT;
-        }
-        
         $fs = get_file_storage();
-        $files = $fs->get_area_files($contextid, 'mod_dataform', $packagearea);
-        if (!empty($files)) {
+
+        // try first course area
+        $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+        $contextid = $course_context->id;
+
+        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PACKAGE_COURSEAREA)) {
             foreach ($files as $file) {
-                if ($file->is_directory()) {
-                    continue;
-                }
-                if ($file->get_id() == $packageid) {
-                    $file->delete();
-                    break;
+                if (empty($pids)) break;
+                
+                if (!$file->is_directory()) {
+                    $key = array_search($file->get_id(), $pids);
+                    if ($key !== false) {
+                        $file->delete();
+                        unset($pids[$key]);
+                    }
                 }
             }
+        }
+
+        // try site area
+        if (!empty($pids)) {
+            if ($files = $fs->get_area_files(dataform::PACKAGE_SITECONTEXT, 'mod_dataform', dataform::PACKAGE_SITEAREA)) {
+                foreach ($files as $file) {
+                    if (empty($pids)) break;
+                    
+                    if (!$file->is_directory()) {
+                        $key = array_search($file->get_id(), $pids);
+                        if ($key !== false) {
+                            $file->delete();
+                            unset($pids[$key]);
+                        }
+                    }
+                }
+            }            
         }
         return true;        
     }

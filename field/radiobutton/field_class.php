@@ -28,9 +28,9 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
+require_once("$CFG->dirroot/mod/dataform/field/select/field_class.php");
 
-class dataform_field_radiobutton extends dataform_field_single_menu {
+class dataform_field_radiobutton extends dataform_field_select {
 
     public $type = 'radiobutton';
     public $separators = array(
@@ -40,17 +40,4 @@ class dataform_field_radiobutton extends dataform_field_single_menu {
             array('name' => ', (with space)', 'chr' => '&#44;&#32;')
     );
 
-    /**
-     * 
-     */
-    protected function render(&$mform, $fieldname, $options, $selected) {
-        $elemgrp = array();
-        foreach ($options as $key => $option) {
-            $elemgrp[] = &$mform->createElement('radio', $fieldname, null, $option, $key);
-        }
-        $mform->addGroup($elemgrp, "{$fieldname}_grp", null, $this->separators[(int) $this->field->param3]['chr'], false);
-        if (!empty($selected)) {
-            $mform->setDefault($fieldname, (int) $selected);
-        }
-    }
 }

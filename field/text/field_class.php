@@ -34,35 +34,5 @@ class dataform_field_text extends dataform_field_base {
 
     public $type = 'text';
 
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-
-        $entryid = $entry->id;
-        $fieldid = $this->field->id;
-        
-        if ($entryid > 0){
-            $content = $entry->{"c{$fieldid}_content"};
-        } else {
-            $content = '';
-        }
-
-        $fieldattr = array();
-
-        if (!empty($this->field->param2)) {
-            $fieldattr['style'] = 'width:'. s($this->field->param2). s($this->field->param3). ';';
-        }
-
-        if (!empty($this->field->param4)) {
-            $fieldattr['class'] = s($this->field->param4);
-        }
-
-        $fieldname = "field_{$fieldid}_{$entryid}";
-        $mform->addElement('text', $fieldname, null, $fieldattr);
-        $mform->setDefault($fieldname, s($content));
-        //$mform->addRule($fieldname, null, 'required', null, 'client');
-    }
-
 }
 

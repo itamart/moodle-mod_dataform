@@ -1,20 +1,17 @@
 <?php
 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/. 
+ * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
  * @package mod-dataform
- * @author Itamar Tzadok
- * @copyright 2011 Moodle contributors
+ * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
- * of Moodle's standard Database activity module. To the extent that the
- * Dataform code corresponds to the Database code (1.9.11+ (20110323)),
- * certain copyrights on certain files may obtain, including:
- * @copyright 1990 Moodle  Pty Ltd http://moodle.com
- * @copyright 1999 Moodle  Pty Ltd http://moodle.com
- * @copyright 2005 Martin Dougiamas http://dougiamas.com
+ * of Moodle's Database activity module (1.9.11+ (20110323)).
+ * To the extent that Dataform code corresponds to Database code,
+ * certain copyrights on the Database module may obtain, including:
+ * @copyright 1999 Martin Dougiamas {@link http://moodle.com}
  *
  * Moodle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +34,6 @@ $string['approved'] = 'approved';
 $string['approvednot'] = 'not approved';
 $string['ascending'] = 'Ascending';
 $string['authorinfo'] = 'Author info';
-$string['blank'] = 'Blank';
-$string['blankentries'] = 'Number of entries';
-$string['blanksettings'] = 'Blank entries settings';
 $string['browse'] = 'Browse';
 $string['columns'] = 'columns';
 $string['commentadd'] = 'Add comment';
@@ -99,6 +93,7 @@ $string['dftimedue'] = 'Due';
 $string['dftimeinterval'] = 'Interval duration';
 $string['dfupdatefailed'] = 'Failed to update dataform!';
 $string['disapproved'] = 'Not approved';
+$string['documenttype'] = 'Document type';
 $string['dots'] = '...';
 $string['download'] = 'Download';
 $string['editordisable'] = 'Disable editor';
@@ -143,9 +138,8 @@ $string['entrysaved'] = 'Your entry has been saved';
 $string['entrysettings'] = 'Entry settings';
 $string['entrysettingsupdated'] = 'Entry settings updated';
 $string['entrytimelimit'] = 'Editing time limit (minutes)';
+$string['exportcontent'] = 'Export content';
 $string['export'] = 'Export';
-$string['exportoutput'] = 'Export output';
-$string['exporttype'] = 'Export type';
 $string['fieldadd'] = 'Add a field';
 $string['fieldallowautolink'] = 'Allow autolink';
 $string['fieldattributes'] = 'Field attributes';
@@ -177,13 +171,13 @@ $string['filemaxsize'] = 'Total size of uploded files';
 $string['filesmax'] = 'Max number of uploaded files';
 $string['filetypeany'] = 'Any file type';
 $string['filetypegif'] = 'gif files';
+$string['filetypehtml'] = 'Html files';
 $string['filetypeimage'] = 'Image files';
 $string['filetypejpg'] = 'jpg files';
 $string['filetypepng'] = 'png files';
 $string['filetypes'] = 'Accepted file types';
 $string['filteradd'] = 'Add a filter';
 $string['filtercancel'] = 'Cancel filter';
-$string['filterconfirmduplicate'] = 'You are about to duplicate {$a} filter(s). Would you like to proceed?';
 $string['filtercreate'] = 'Create a new filter';
 $string['filtercurrent'] = 'Current filter';
 $string['filtercustomsearch'] = 'Search options';
@@ -198,6 +192,7 @@ $string['filterperpage'] = 'Per page';
 $string['filtersadded'] = '{$a} filter(s) added';
 $string['filtersave'] = 'Save filter';
 $string['filtersconfirmdelete'] = 'You are about to delete {$a} filter(s). Would you like to proceed?';
+$string['filtersconfirmduplicate'] = 'You are about to duplicate {$a} filter(s). Would you like to proceed?';
 $string['filtersdeleted'] = '{$a} filter(s) deleted';
 $string['filtersduplicated'] = '{$a} filter(s) duplicated';
 $string['filters'] = 'Filters';
@@ -209,8 +204,8 @@ $string['filtersupdated'] = '{$a} filter(s) updated';
 $string['filterupdate'] = 'Update an existing filter';
 $string['filteruserpref'] = '* My filter';
 $string['filteruserreset'] = '** Reset my filter';
-$string['first'] = 'First';
 $string['firstdayofweek'] = 'Monday';
+$string['first'] = 'First';
 $string['formemptyadd'] = 'You did not fill out any fields!';
 $string['fromfile'] = 'Import from zip file';
 $string['generalactions'] = 'General actions';
@@ -222,17 +217,15 @@ $string['gradeinputtype'] = 'Grade input type';
 $string['grading'] = 'Grading';
 $string['gradingmethod'] = 'Grading method';
 $string['groupentries'] = 'Group entries';
+$string['groupinfo'] = 'Group info';
 $string['headercss'] = 'Custom CSS styles for all views';
 $string['headerjs'] = 'Custom javascript for all views';
 $string['horizontal'] = 'Horizontal';
-$string['importeditimported'] = 'Edit imported entries';
+$string['importadd'] = 'Add a new Import view';
 $string['import'] = 'Import';
-$string['importinput'] = 'Import input';
-$string['importtype'] = 'Import type';
-$string['importupdateexisting'] = 'Update existing entries';
-$string['importuploadtext'] = 'Text (CSV only)';
+$string['importnoneindataform'] = 'There are no imports defined for this dataform.';
 $string['incorrect'] = 'Incorrect';
-$string['inpopup'] = 'Popup window';
+$string['index'] = 'Index';
 $string['insufficiententries'] = 'more entries needed to view this dataform';
 $string['internal'] = 'Internal';
 $string['intro'] = 'Introduction';
@@ -254,11 +247,15 @@ $string['moreurl'] = 'More URL';
 $string['movezipfailed'] = 'Can\'t move zip';
 $string['multiapprove'] = ' Approve ';
 $string['multidelete'] = ' Delete  ';
+$string['multidownload'] = 'Download';
 $string['multiduplicate'] = 'Duplicate';
 $string['multiedit'] = '  Edit   ';
 $string['multientry'] = 'Repeated entry';
+$string['multiexport'] = 'Export';
 $string['multipletags'] = 'Multiple tags found! View not saved';
 $string['multiselect'] = 'Multi-select';
+$string['multishare'] = 'Share';
+$string['newvalueallow'] = 'Allow new values';
 $string['newvalue'] = 'New value';
 $string['noaccess'] = 'You do not have access to this page';
 $string['nomatch'] = 'No matching entries found!';
@@ -267,19 +264,19 @@ $string['notapproved'] = 'Entry is not approved yet.';
 $string['notinjectivemap'] = 'Not an injective map';
 $string['notopenyet'] = 'Sorry, this activity is not available until {$a}';
 $string['numberrssarticles'] = 'RSS articles';
-$string['ods'] = '<acronym title=\"OpenDocument Spreadsheet\">ODS</acronym> (OpenOffice)';
 $string['optionaldescription'] = 'Short description (optional)';
 $string['optionalfilename'] = 'Filename (optional)';
 $string['other'] = 'Other';
 $string['overwrite'] = 'Overwrite';
 $string['overwritesettings'] = 'Overwrite current settings';
-$string['packageaddfromdataform'] = 'Package this dataform';
-$string['packageaddfromfile'] = 'Upload a package from file';
+$string['packageadd'] = 'Add packages';
 $string['packageapply'] = 'Apply';
 $string['packageavailableincourse'] = 'Course packages';
 $string['packageavailableinsite'] = 'Site packages';
 $string['packagechoose'] = 'choose a predfined package';
 $string['packagefaileddelete'] = 'Error deleting a package!';
+$string['packagefromdataform'] = 'Package this dataform';
+$string['packagefromfile'] = 'Upload package from file';
 $string['packageimportsuccess'] = 'The package has been successfully applied.';
 $string['packageinfo'] = 'Saving as a package will publish this view. Other users may be able to use it in their dataforms.';
 $string['packagemap'] = 'map fields';
@@ -288,9 +285,9 @@ $string['packagenodefinedviews'] = 'New package has no defined views!';
 $string['packagenoneavailable'] = 'No available packages to display';
 $string['packageplugin'] = 'Plug in';
 $string['packagerefreshlist'] = 'Refresh list';
-$string['packagesaveas'] = 'Save as package';
 $string['packageshare'] = 'Share';
 $string['packagesharesuccess'] = 'Saved successfully. Your package will now be available across the site.';
+$string['packagesource'] = 'Package source';
 $string['packages'] = 'Packages';
 $string['packageusestandard'] = 'Use a package';
 $string['page-mod-dataform-x'] = 'Any dataform activity module page';
@@ -304,10 +301,8 @@ $string['pluginadministration'] = 'Dataform activity administration';
 $string['pluginname'] = 'Dataform';
 $string['porttypeblank'] = 'Blank entries';
 $string['porttypecsv'] = 'CSV';
-$string['porttypeods'] = 'Calc (ods)';
-$string['porttypexls'] = 'Excel (xls)';
-$string['rate'] = 'Rate';
 $string['randomone'] = 'One random';
+$string['rate'] = 'Rate';
 $string['ratingmanual'] = 'Manual';
 $string['ratingmethod'] = 'Rating method';
 $string['ratingno'] = 'No ratings';
@@ -339,9 +334,11 @@ $string['rsstitletemplate'] = 'RSS title template';
 $string['savecontinue'] = 'Save and continue';
 $string['search'] = 'Search';
 $string['sendinratings'] = 'Send in my latest ratings';
+$string['separateentries'] = 'Each entry in a separate file';
 $string['separateparticipants'] = 'Separate participants';
 $string['settings'] = 'Settings';
 $string['showall'] = 'Show all entries';
+$string['spreadsheettype'] = 'Spreadsheet type';
 $string['submissionsinpopup'] = 'Submissions in popup';
 $string['submission'] = 'Submission';
 $string['submissionsview'] = 'Submissions view';
@@ -374,7 +371,7 @@ $string['usersubmissionsview'] = 'User submissions view';
 $string['userusername'] = 'User username';
 $string['vertical'] = 'Vertical';
 $string['viewadd'] = 'Add a view';
-$string['viewavailabletags'] = 'Available tags';
+$string['viewcharactertags'] = 'Character tags';
 $string['viewcreate'] = 'Create a new view';
 $string['viewcurrent'] = 'Current view';
 $string['viewcustomdays'] = 'Custom refresh interval: days';
@@ -382,10 +379,12 @@ $string['viewcustomhours'] = 'Custom refresh interval: hours';
 $string['viewcustomminutes'] = 'Custom refresh interval: minutes';
 $string['viewdescription'] = 'View description';
 $string['viewedit'] = 'Editing \'{$a}\'';
+$string['viewfieldtags'] = 'Field tags';
 $string['viewfilter'] = 'Filter';
 $string['viewforedit'] = 'View for \'edit\'';
 $string['viewformore'] = 'View for \'more\'';
 $string['viewfromdate'] = 'Viewable from';
+$string['viewgeneraltags'] = 'General tags';
 $string['viewgroupby'] = 'Group by';
 $string['viewintervalsettings'] = 'Interval settings';
 $string['viewinterval'] = 'When to refresh view content';

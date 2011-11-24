@@ -4,7 +4,7 @@
  * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
  * @package mod-dataform
- * @subpackage field-calculated
+ * @subpackage view-import
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -27,14 +27,10 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-$string['formula'] = 'Formula';
-$string['minvalue'] = 'Lowest value';
-$string['negation'] = 'Negation';
-$string['operand'] = 'Operand';
-$string['operator'] = 'Operator';
-$string['pluginname'] = 'Calculated';
-$string['random'] = 'Random value';
-$string['rangesteps'] = 'Range steps';
-$string['value'] = 'Value';
+$string['fieldsimportsettings'] = 'Fields import settings';
+$string['updateexisting'] = 'Update existing entries';
+$string['pluginname'] = 'Import';
+$string['uploadfile'] = 'CSV File';
+$string['uploadtext'] = 'CSV Text';
 
 

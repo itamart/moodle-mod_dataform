@@ -36,116 +36,6 @@ class dataform_field__group extends dataform_field_base {
     /**
      * 
      */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        
-        $groupinfo = array(
-            '##group:id##',
-            '##group:name##',
-            '##group:description##',
-            '##group:picture##',
-            '##group:picturelarge##',
-            '##group:edit##',
-        );
-        
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array('groupinfo' => array('groupinfo' => array()));
-                               
-            foreach ($groupinfo as $pattern) {
-                $patterns['groupinfo']['groupinfo'][$pattern] = $pattern;
-            }
-
-        } else {
-
-            $patterns = array();
-
-            // set the group object
-            $group = new object();
-            if ($entry->id < 0) { // new record (0)
-                $entry->groupid = $this->df->currentgroup;
-                $group->id = $entry->groupid;
-                $group->name = null;
-                $group->hidepicture = null;
-                $group->picture = null;
-
-            } else {
-                $group->id = $entry->groupid;
-                $group->name = $entry->groupname;
-                $group->hidepicture = $entry->grouphidepic;
-                $group->picture = $entry->grouppic;
-            }
-
-            foreach ($tags as $tag) {
-                  switch ($tag) {
-                    case '##group:id##':
-                        $patterns[$tag] = array('html', $gropu->id);
-                        break;
-
-                    case '##group:name##':
-                        $patterns[$tag] = array('html', $group->name);
-                        break;
-
-                    case '##group:description##':
-                        $patterns[$tag] = array('html', $group->description);
-                        break;
-
-                    case '##group:picture##':
-                        $patterns[$tag] = array('html',print_group_picture($group, $this->df->course->id, false, true));
-                        break;
-
-                    case '##group:picturelarge##':
-                        $patterns[$tag] = array('html',print_group_picture($group, $this->df->course->id, true, true));
-                        break;
-
-                    case '##group:edit##':
-                        if ($edit and has_capability('mod/dataform:approve', $this->df->context)) {
-                            $patterns[$tag] = array('', array(array($this,'display_edit'), array($entry)));
-                        } else {
-                            $patterns[$tag] = '';
-                        }
-                        break;
-                }
-            }
-        }
-        
-        return $patterns;
-    }
-    
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-
-        $entryid = $entry->id;
-        $fieldid = $this->field->id;
-        $fieldname = "field_{$fieldid}_{$entryid}";
-
-        $selected = $entry->groupid;
-
-        static $groupsmenu = null;
-        if (is_null($groupsmenu)) {
-            $groupsmenu = array(0 => get_string('choosedots'));        
-            if ($groups = groups_get_activity_allowed_groups($this->df->cm)) {
-                foreach ($groups as $groupid => $group) {
-                    $groupsmenu[$groupid] = $group->name;
-                }
-            }
-        }
-
-        $mform->addElement('select', $fieldname, null, $groupsmenu);
-        $mform->setDefault($fieldname, $selected);
-    }
-
-    /**
-     * 
-     */
-    public function display_search($mform, $i) {
-        return '';
-    }
-    
-    /**
-     * 
-     */
     public function update_content($entry, array $values = null) {
         return true;
     }
@@ -176,13 +66,6 @@ class dataform_field__group extends dataform_field_base {
      */
     public function get_distinct_content($sortdir = 0) {
         return false;
-    }
-
-    /**
-     *
-     */
-    public function export_text_value($entry) {
-        return $entry->groupid;
     }
 
     /**

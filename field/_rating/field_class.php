@@ -39,39 +39,6 @@ class dataform_field__rating extends dataform_field_base {
 
     public $type = '_rating';
 
-    protected $_patterns = array(
-                        '##ratings:count##',
-                        '##ratings:avg##',
-                        '##ratings:max##',
-                        '##ratings:min##',
-                        '##ratings:sum##',
-                        '##ratings:rate##',
-                        '##ratings:view##',
-                        '##ratings:viewurl##');
-
-
-    /**
-     * 
-     */
-    public function patterns_intersect($patterns) {
-        return array_intersect($this->_patterns, $patterns);
-    }
-
-    /**
-     * 
-     */
-    public function get_aggregations($patterns) {
-        if ($aggregations = array_intersect($patterns, array(
-                        self::AGGREGATE_AVG => '##ratings:avg##',
-                        self::AGGREGATE_MAX => '##ratings:max##',
-                        self::AGGREGATE_MIN => '##ratings:min##',
-                        self::AGGREGATE_SUM => '##ratings:sum##'))) {
-            return array_keys($aggregations);
-        } else {
-            return null;
-        }
-    }
-
     /**
      * 
      */
@@ -82,95 +49,6 @@ class dataform_field__rating extends dataform_field_base {
             return $this->df->data->grade;
         }
         return 0;
-    }
-
-    /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $enabled = false) {
-        global $USER, $OUTPUT;
-
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array('ratings' => array('ratings' => array()));
-                               
-            // TODO use get strings
-            foreach ($this->_patterns as $pattern) {
-                $patterns['ratings']['ratings'][$pattern] = $pattern;
-            }
-            
-        } else {
-        
-            $patterns = array();
-            $ratingenabled = $this->df->data->rating;
-            
-            if ($entry->id > 0 and $ratingenabled) {
-            
-                // no edit mode for this field so just return html
-                foreach ($tags as $tag) {
-                    switch($tag) {
-                        case '##ratings:count##':
-                            $patterns[$tag] = array('html', $entry->rating->count);
-                            break;
-                            
-                        case '##ratings:avg##':
-                            $patterns[$tag] = array('html', $entry->rating->aggregate[self::AGGREGATE_AVG]);
-                            break;
-                            
-                        case '##ratings:max##':
-                            $patterns[$tag] = array('html', $entry->rating->aggregate[self::AGGREGATE_MAX]);
-                            break;
-                            
-                        case '##ratings:min##':
-                            $patterns[$tag] = array('html', $entry->rating->aggregate[self::AGGREGATE_MIN]);
-                            break;
-                            
-                        case '##ratings:sum##':
-                            $patterns[$tag] = array('html', $entry->rating->aggregate[self::AGGREGATE_SUM]);
-                            break;
-                            
-                        case '##ratings:view##':
-                        case '##ratings:viewurl##':
-                            if (isset($entry->rating)) {
-                                $rating = $entry->rating;
-                                if ($rating->settings->permissions->viewall
-                                    and $rating->settings->pluginpermissions->viewall) {
-
-                                    $nonpopuplink = $rating->get_view_ratings_url();
-                                    $popuplink = $rating->get_view_ratings_url(true);
-                                    $popupaction = new popup_action('click', $popuplink, 'ratings', array('height' => 400, 'width' => 600));
-                                    
-                                    if ($tag == '##ratings:view##') {
-                                        $patterns[$tag] = array('html', $OUTPUT->action_link($nonpopuplink, 'view all', $popupaction));
-                                    } else {
-                                        $patterns[$tag] = array('html', $popuplink);
-                                    }
-                                } else {
-                                    $patterns[$tag] = '';
-                                }
-                            } else {
-                                $patterns[$tag] = '';
-                            }
-                            break;
-                            
-                        case '##ratings:rate##':
-                            if (isset($entry->rating)) {
-                                $patterns[$tag] = array('html', $this->render_rating($entry->rating));
-                            } else {
-                                $patterns[$tag] = '';
-                            }
-                            break;
-                    }
-                }
-                
-            } else {
-                foreach ($tags as $tag) {            
-                    $patterns[$tag] = '';                    
-                }                
-            }                    
-        }       
-            
-        return $patterns;
     }
 
     /**
@@ -193,82 +71,12 @@ class dataform_field__rating extends dataform_field_base {
      */
     public function update_content($entryid, array $values = null) {
         return true;
-/*        global $DB, $USER;
-
-        $updategrades = false;
-        $userid = 0;
-        
-        // update existing rating
-        if ($ratingid = optional_param('rating_'. $entryid, 0, PARAM_INT)) {
-            $rating = $DB->get_record('dataform_ratings','id', $ratingid);
-            if ($rating->grade != $value) {
-                if ($value !== '') {
-                        $rating->grade = $value;
-                        $updategrades = $DB->update_record('dataform_ratings', $rating);
-                } else {
-                    $updategrades = delete_records('dataform_ratings', 'id', $ratingid);
-                    // reset this user's grade
-                    $userid = $DB->get_field('dataform_entries', 'userid', array('id' => $entryid));
-                }
-            }
-    
-        // add new rating
-        } else {
-            if ($value !== '') {
-                $rating = new object();
-                $rating->userid   = $USER->id;
-                $rating->entryid = $entryid;
-                $rating->grade  = $value;
-                $updategrades = $DB->insert_record('dataform_ratings',$rating);
-            }
-        }
-        // update gradebook
-        if ($this->df->data->grade and $updategrades) {
-            $this->df->data->cmidnumber = $this->df->cm->id;
-            dataform_update_grades($this->df->data, $userid);
-        }
-        
-        return $updategrades;
-*/
-    }
-    
-    /**
-     * Delete all content associated with the field
-     */
-    public function delete_content($entryid = 0, $ratingid = 0) {
-/*    
-        if ($ratingid) {
-            delete_records('dataform_ratings', 'id', $ratingid);
-        } else if ($entryid) {
-
-            delete_records('dataform_ratings', 'entryid', $entryid);
-        }
-        // update gradebook
-        if ($this->df->data->grade) {
-            $this->df->data->cmidnumber = $this->df->cm->id;
-            dataform_update_grades($this->df->data);
-        }
-*/
     }
 
     /**
      * returns an array of distinct content of the field
      */
     public function get_distinct_content($sortdir = 0) {
-        return false;
-    }
-
-    /**
-     *
-     */
-    public function export_text_supported() {
-        return false;
-    }
-
-    /**
-     *
-     */
-    public function import_text_supported() {
         return false;
     }
 
@@ -379,88 +187,4 @@ class dataform_field__rating extends dataform_field_base {
         return true;
     }
 
-    /**
-     * 
-     */
-    function render_rating(rating $rating) {
-        global $CFG, $USER, $PAGE;
-/*
-        if ($rating->settings->aggregationmethod == RATING_AGGREGATE_NONE) {
-            return null;//ratings are turned off
-        }
-*/
-        $rm = new dataform_rating_manager();
-        // Initialise the JavaScript so ratings can be done by AJAX.
-        $rm->initialise_rating_javascript($PAGE);
-
-        $strrate = get_string("rate", "rating");
-        $ratinghtml = ''; //the string we'll return
-
-        // hack to work around the js updating imposed text
-        $ratinghtml .= html_writer::tag('span', '', array('id' => "ratingaggregate{$rating->itemid}",
-                                                            'style' => 'display:none;'));
-        $ratinghtml .= html_writer::tag('span', '', array('id' => "ratingcount{$rating->itemid}",
-                                                            'style' => 'display:none;'));
-        
-        $formstart = null;
-        // if the item doesn't belong to the current user, the user has permission to rate
-        // and we're within the assessable period
-        if ($rating->user_can_rate() or has_capability('mod/dataform:manageratings', $this->df->context)) {
-
-            $rateurl = $rating->get_rate_url();
-            $inputs = $rateurl->params();
-
-            //start the rating form
-            $formattrs = array(
-                'id'     => "postrating{$rating->itemid}",
-                'class'  => 'postratingform',
-                'method' => 'post',
-                'action' => $rateurl->out_omit_querystring()
-            );
-            $formstart  = html_writer::start_tag('form', $formattrs);
-            $formstart .= html_writer::start_tag('div', array('class' => 'ratingform'));
-
-            // add the hidden inputs
-            foreach ($inputs as $name => $value) {
-                $attributes = array('type' => 'hidden', 'class' => 'ratinginput', 'name' => $name, 'value' => $value);
-                $formstart .= html_writer::empty_tag('input', $attributes);
-            }
-
-
-            $ratinghtml = $formstart.$ratinghtml;
-
-            $scalearray = array(RATING_UNSET_RATING => $strrate.'...') + $rating->settings->scale->scaleitems;
-            $scaleattrs = array('class'=>'postratingmenu ratinginput','id'=>'menurating'.$rating->itemid);
-            $ratinghtml .= html_writer::select($scalearray, 'rating', $rating->rating, false, $scaleattrs);
-
-            //output submit button
-            $ratinghtml .= html_writer::start_tag('span', array('class'=>"ratingsubmit"));
-
-            $attributes = array('type' => 'submit', 'class' => 'postratingmenusubmit', 'id' => 'postratingsubmit'.$rating->itemid, 'value' => s(get_string('rate', 'rating')));
-            $ratinghtml .= html_writer::empty_tag('input', $attributes);
-
-            if (!$rating->settings->scale->isnumeric) {
-                $ratinghtml .= $this->help_icon_scale($rating->settings->scale->courseid, $rating->settings->scale);
-            }
-            $ratinghtml .= html_writer::end_tag('span');
-            $ratinghtml .= html_writer::end_tag('div');
-            $ratinghtml .= html_writer::end_tag('form');
-        }
-
-        return $ratinghtml;
-    }
-
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry = null) {
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-        return '';
-    }
-    
 }

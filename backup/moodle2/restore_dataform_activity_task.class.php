@@ -37,11 +37,27 @@ require_once("$CFG->dirroot/mod/dataform/backup/moodle2/restore_dataform_stepsli
  */
 class restore_dataform_activity_task extends restore_activity_task {
 
+    protected $ownerid = 0; // user id of designated owner of content
+
     /**
      * 
      */
     public function get_old_moduleid() {
         return $this->oldmoduleid;
+    }
+
+    /**
+     * 
+     */
+    public function set_ownerid($ownerid) {
+        $this->ownerid = $ownerid;
+    }
+
+    /**
+     * 
+     */
+    public function get_ownerid() {
+        return $this->ownerid;
     }
 
     /**

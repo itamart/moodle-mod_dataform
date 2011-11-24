@@ -27,7 +27,7 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once(dirname(__FILE__) . '/../../config.php');
+require_once('../../config.php');
 require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 
 $urlparams = new object();
@@ -42,8 +42,6 @@ $urlparams->refresh = optional_param('refresh', 0, PARAM_INT);
 // Set a dataform object with guest autologin
 $df = new dataform($urlparams->d, $urlparams->id, true);
 
-require_capability('mod/dataform:viewentry', $df->context);
-
 $pageparams = array(
         'js' => true,
         'css' => true,
@@ -51,16 +49,20 @@ $pageparams = array(
         'modjs' => true,
         'completion' => true,
         'comments' => true,
-        'urlparams' => $urlparams);
-        
+        'urlparams' => $urlparams);        
 $df->set_page('view', $pageparams);
+
+require_capability('mod/dataform:viewentry', $df->context);
+
+$df->set_content();
 
 $headerparams = array(
         'intro' => true,
         'tab' => 'browse',
         'groups' => true,
         'urlparams' => $urlparams);
-
 $df->print_header($headerparams);
+
 $df->display();
+
 $df->print_footer();

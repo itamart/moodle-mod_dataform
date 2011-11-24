@@ -28,9 +28,9 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
+require_once("$CFG->dirroot/mod/dataform/field/multiselect/field_class.php");
 
-class dataform_field_checkbox extends dataform_field_multi_menu {
+class dataform_field_checkbox extends dataform_field_multiselect {
 
     public $type = 'checkbox';
 
@@ -61,19 +61,8 @@ class dataform_field_checkbox extends dataform_field_multi_menu {
     /**
      *
      */
-    protected function render(&$mform, $fieldname, $options, $selected) {
-        $elemgrp = array();
-        foreach ($options as $i => $option) {
-            $cb = &$mform->createElement('advcheckbox', $fieldname. '_'. $i, null, $option, array('group' => 1), array(0, $i));
-            $elemgrp[] = $cb;
-            if (in_array($i, $selected)) {
-                $cb->setChecked(true);
-            }
-        }
-        $mform->addGroup($elemgrp, "{$fieldname}_grp",null, $this->separators[(int) $this->field->param2]['chr'], false);
-        // add checkbox controller
+    protected function get_content($content) {
+        return $content;
     }
-
-
 
 }

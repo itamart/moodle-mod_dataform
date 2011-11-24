@@ -37,13 +37,18 @@ require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 class dataform_field_base {
 
     public $type = 'unknown';  // Subclasses must override the type with their name
-    public $df = NULL;       // The dataform object that this field belongs to
-    public $field = NULL;      // The field object itself, if we know it
+    public $df = null;       // The dataform object that this field belongs to
+    public $field = null;      // The field object itself, if we know it
 
-    public $iconwidth = 16;    // Width of the icon for this fieldtype
-    public $iconheight = 16;   // Width of the icon for this fieldtype
+    protected $_patterns = null;      // The field object itself, if we know it
 
-    public function __construct($df = 0, $field = 0) {   // Field or dataform or both, field can be id or object, dataform id or df
+    /**
+     * Class constructor
+     *
+     * @param var $df       dataform id or class object
+     * @param var $field    field id or DB record
+     */
+    public function __construct($df = 0, $field = 0) {
 
         if (empty($df)) {
             print_error('Programmer error: You must specify dataform id or object when defining a field class. ');
@@ -144,9 +149,9 @@ class dataform_field_base {
         $rec->entryid = $entry->id;
         $rec->content = $content;
 
-        if (!empty($oldcontent)) {
-            if ($content != $oldcontent) {
-                if (empty($content)) {
+        if (!is_null($oldcontent)) {
+            if ($content !== $oldcontent) {
+                if (is_null($content) or $content === '') {
                     $this->delete_content($entry->id);
                 } else {
                     $rec->id = $contentid; // MUST_EXIST
@@ -154,7 +159,7 @@ class dataform_field_base {
                  }
             }
         } else {
-            if (!empty($content)) {
+            if (!is_null($content) and $content !== '') {
                 return $DB->insert_record('dataform_contents', $rec);
             }
         }
@@ -271,6 +276,18 @@ class dataform_field_base {
     }
 
     /**
+     * Getter
+     */
+    public function get($var) {
+        if (isset($this->field->$var)) {
+            return $this->field->$var;
+        } else {
+            // TODO throw an exception if $var is not a property of field
+            return false;
+        }
+    }
+
+    /**
      * Returns the field id
      */
     public function id() {
@@ -304,15 +321,20 @@ class dataform_field_base {
     public function image() {
         global $OUTPUT;
 
-        $src = $OUTPUT->pix_url('icon', "dataformfield_{$this->type}");
+        $image = $OUTPUT->pix_icon(
+                            'icon',
+                            $this->type,
+                            "dataformfield_{$this->type}");
  
-        return html_writer::empty_tag('img',
-                    array('src' => $src,
-                        'height' => $this->iconheight,
-                        'width' => $this->iconwidth,
-                        'alt' => $this->type,
-                        'title' => $this->type));
+        return $image;
 
+    }
+
+    /**
+     *
+     */
+    public function df() {
+        return $this->df;
     }
 
     /**
@@ -338,46 +360,17 @@ class dataform_field_base {
     }
 
     /**
-     *
-     */
-    public function patterns_exist($text) {
-        $usedpatterns = array();
-        // all this nasty nesting due to Moodle implementation of nested select
-        foreach ($this->patterns() as $patternset) {
-            foreach ($patternset as $patterns) {
-                foreach ($patterns as $pattern) {
-                    if (strpos($text, $pattern)) {
-                        $usedpatterns[] = $pattern;
-                    }
-                }
-            }
-        }
-
-        return $usedpatterns;
-    }
-
-    /**
      * 
      */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        $fieldname = $this->field->name;
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array('fields' => array('fields' => array()));
-            $patterns['fields']['fields']["[[$fieldname]]"] = "[[$fieldname]]";
-
-        } else {
-            // there is only one possible tag here so no check
-            $patterns = array();
-
-            if ($edit) {
-                $patterns["[[$fieldname]]"] = array('', array(array($this,'display_edit'), array($entry)));
-            } else {
-                $patterns["[[$fieldname]]"] = array('html', $this->display_browse($entry));
-            }
+    public function patterns() {
+        global $CFG;
+        
+        if (!$this->_patterns) {
+            $patternsclass = "mod_dataform_field_{$this->type}_patterns";
+            require_once("$CFG->dirroot/mod/dataform/field/{$this->type}/field_patterns.php");
+            $this->_patterns = new $patternsclass($this);
         }
-
-        return $patterns;
+        return $this->_patterns;
     }
 
     /**
@@ -447,32 +440,18 @@ class dataform_field_base {
     }
 
     /**
-     * Per default, it is assumed that the field supports text exporting. Override this (return false) on fields not supporting text exporting.
-     */
-    public function export_text_supported() {
-        return true;
-    }
-
-    /**
      * 
      */
-    public function prepare_import_content(&$data, $entryid, $value) {
+    public function prepare_import_content(&$data, $importsettings, $csvrecord = null, $entryid = null) {
         $fieldid = $this->field->id;
+        $fieldname = $this->name();
+        $csvname = $importsettings[$fieldname]['name'];
         
-        $data->{"field_{$fieldid}_{$entryid}"} = $value;
+        if (isset($csvrecord[$csvname]) and $csvrecord[$csvname] !== '') {
+            $data->{"field_{$fieldid}_{$entryid}"} = $csvrecord[$csvname];
+        }
     
         return true;
-    }
-
-    /**
-     * Per default, return the record's text value only from the "content" field.
-     * Override this in user fields class if necesarry.
-     * Override in internal fields class.
-     */
-    public function export_text_value($content) {
-        if ($this->export_text_supported()) {
-            return $content->content;
-        }
     }
 
     /**
@@ -491,66 +470,10 @@ class dataform_field_base {
     /**
      *
      */
-    public function display_edit(&$mform, $entry = null) {
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-
-        $fieldid = $this->field->id;
-
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $content = $entry->{"c$fieldid". '_content'};
-
-            $options = new object();
-            $options->para = false;
-
-            $format = FORMAT_PLAIN;
-            if ($this->field->param1 == '1') {  // We are autolinking this field, so disable linking within us
-                $content = '<span class="nolink">'. $content .'</span>';
-                $format = FORMAT_HTML;
-                $options->filter=false;
-            }
-
-            $str = format_text($content, $format, $options);
-        } else {
-            $str = '';
-        }
-        
-        return $str;
-    }
-
-    /**
-     * Just in case a field needs to print something before the whole form
-     */
-    public function print_before_form() {
-        return '';
-    }
-
-    /**
-     * Just in case a field needs to print something after the whole form
-     */
-    public function print_after_form() {
-        return '';
-    }
-
-    /**
-     *
-     */
-    public function display_search($mform, $i = 0, $value = '') {
-        $mform->addElement('text', 'f_'. $i. '_'. $this->field->id, null, array('size'=>'32'));
-        $mform->setType('f_'. $i. '_'. $this->field->id, PARAM_NOTAGS);
-        $mform->setDefault('f_'. $i. '_'. $this->field->id, $value);
-    }
-
-    /**
-     *
-     */
     public function parse_search($formdata, $i) {
-        if (!empty($formdata->{'f_'. $i. '_'. $this->field->id})) {
-            return $formdata->{'f_'. $i. '_'. $this->field->id};
+        $fieldid = $this->field->id;
+        if (!empty($formdata->{"f_{$i}_$fieldid"})) {
+            return $formdata->{"f_{$i}_$fieldid"};
         } else {
             return false;
         }
@@ -568,455 +491,7 @@ class dataform_field_base {
      * @param string $relativepath
      * @return bool false
      */
-    static public function file_ok($relativepath) {
+    public static function file_ok($relativepath) {
         return false;
     }
 }
-
-
-/**
- *
- */
-abstract class dataform_field_single_menu extends dataform_field_base {
-
-    public $type = '';
-    
-    protected $_cats = array();
-
-    /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        $patterns = parent::patterns($tags, $entry, $edit, $editable);
-
-        $fieldname = $this->field->name;
-        
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns['fields']['fields']["[[$fieldname:cat]]"] = "[[$fieldname:cat]]";
-
-        } else {
-            // no edit mode for these tags
-            foreach ($tags as $tag) {
-                switch ($tag) {
-                    case "[[$fieldname:cat]]":
-                        if ($edit) {
-                            $patterns[$tag] = array('', array(array($this,'display_edit'), array($entry)));
-                        } else {    
-                            $patterns[$tag] = array('html', $this->display_category($entry));
-                        }
-                        break;
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
-     * 
-     */
-    public function update_content($entry, array $values = null) {
-        global $DB;
-
-        $fieldid = $this->field->id;
-        
-        $selected = $newvalue = null;
-        if (!empty($values)) {
-            foreach ($values as $name => $value) {
-                $names = explode('_', $name);
-                if (!empty($names[3]) and !empty($value)) {
-                    ${$names[3]} = $value;
-                }
-            }
-        }
-
-        if ($newvalue = s($newvalue)) {
-            $options = $this->options_menu();
-            if (!$selected = (int) array_search($newvalue, $options)) {
-                $selected = count($options) + 1;
-                $this->field->param1 = trim($this->field->param1). "\n$newvalue";
-                $this->update_field();
-            }
-        }
-
-        $oldcontent = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
-        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-        
-        $rec = new object();
-        $rec->fieldid = $this->field->id;
-        $rec->entryid = $entry->id;
-        $rec->content = $selected;
-
-        if (!empty($oldcontent)) {
-            if ($selected != $oldcontent) {
-                if (empty($selected)) {
-                    $this->delete_content($entry->id);
-                } else {
-                    $rec->id = $contentid; // MUST_EXIST
-                    return $DB->update_record('dataform_contents', $rec);
-                 }
-            }
-        } else {
-            if (!empty($selected)) {
-                return $DB->insert_record('dataform_contents', $rec);
-            }
-        }
-        return true;
-    }
-
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-
-        $entryid = $entry->id;
-        $options = $this->options_menu();
-        $selected = 0;
-        
-        if ($entryid > 0){
-            $selected = (int) $entry->{'c'. $this->field->id. '_content'};
-        }
-        
-        // check for default value
-        if (!$selected and $this->field->param2) {
-            $selected = (int) array_search($this->field->param2, $options);
-        }
-
-        $fieldname = "field_{$this->field->id}_$entryid";
-        $this->render($mform, "{$fieldname}_selected", $options, $selected);
-
-        // add option
-        if ($this->field->param4 or has_capability('mod/dataform:managetemplates', $this->df->context)) {
-            $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
-            $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
-        }
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-
-        $fieldid = $this->field->id;
-        $str = '';
-
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $selected = (int) $entry->{"c$fieldid". '_content'};
-
-            $options = $this->options_menu();
-            if ($selected and $selected <= count($options)) {
-                $str = $options[$selected];
-            }
-        }
-        
-        return $str;
-    }
-
-    /**
-     *
-     */
-    public function display_category($entry, $params = null) {
-        $fieldid = $this->field->id;
-        if (!isset($this->_cats[$fieldid])) {
-            $this->_cats[$fieldid] = null;
-        }
-
-        $str = '';
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $selected = (int) $entry->{"c$fieldid". '_content'};
-            
-            $options = $this->options_menu();
-            if ($selected and $selected <= count($options) and $selected != $this->_cats[$fieldid]) {
-                $this->_cats[$fieldid] = $selected;
-                $str = $options[$selected];
-            }
-        }
-        
-        return $str;
-    }
-
-    /**
-     * 
-     */
-    public function display_search(&$mform, $i = 0, $value = '') {
-        $options = $this->options_menu();
-        $selected = (int) array_search($value, $options);
-        $fieldname = "f_{$i}_{$this->field->id}";
-        $this->render($mform, $fieldname, $options, $selected);
-    }
-
-    /**
-     * 
-     */
-    function get_sql_compare_text() {
-        global $DB;
-        return $DB->sql_compare_text("c{$this->field->id}.content", 255);
-    }
-
-    /**
-     * 
-     */
-    protected function options_menu() {
-        $rawoptions = explode("\n",$this->field->param1);
-        $options = array();
-        $key = 1;
-        foreach ($rawoptions as $option) {
-            $option = trim($option);
-            if ($option) {
-                $options[$key] = $option;
-                $key++;
-            }
-        }
-        return $options;
-    }
-
-
-    /**
-     * 
-     */
-    protected abstract function render(&$mform, $fieldname, $options, $selected);
-}
-
-/**
- *
- */
-abstract class dataform_field_multi_menu extends dataform_field_base {
-
-    public $type = '';
-    public $separators = array(
-            array('name' => 'New line', 'chr' => '<br />'),
-            array('name' => 'Space', 'chr' => '&#32;'),
-            array('name' => ',', 'chr' => '&#44;'),
-            array('name' => ', (with space)', 'chr' => '&#44;&#32;')
-    );
-
-    
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-
-        $entryid = $entry->id;
-        $options = $this->options_menu();
-        $selected = array();
-
-        if ($entryid > 0){
-            if ($content = s($entry->{"c{$this->field->id}_content"})) {
-                $selected = explode('#', $content);
-            }
-        }
-        
-        // check for default values
-        if (!$selected and $this->field->param2) {
-            $selected = $this->default_values();
-        }
-
-        $fieldname = "field_{$this->field->id}_$entryid";
-        $this->render($mform, "{$fieldname}_selected", $options, $selected);
-
-        // add option
-        if ($this->field->param4 or has_capability('mod/dataform:managetemplates', $this->df->context)) {
-            $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
-            $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
-        }
-
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-
-        $fieldid = $this->field->id;
-
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $content = $entry->{"c$fieldid". '_content'};
-
-            $options = $this->options_menu();
-            $optionscount = count($options);
-
-            $contents = explode('#', $content);
-
-            $str = array();           
-            foreach ($contents as $cont) {
-                if (!$cont = (int) $cont or $cont > $optionscount) {
-                    // hmm, looks like somebody edited the field definition
-                    continue;
-                }
-                $str[] = $options[$cont];
-            }
-
-            $str = implode($this->separators[(int) $this->field->param3]['chr'], $str);;
-        } else {
-            $str = '';
-        }
-        
-        return $str;
-    }
-    
-    /**
-     *
-     */
-    public function display_search(&$mform, $i = 0, $value = '') {
-        
-        if (is_array($value)){
-            $selected     = $value['selected'];
-            $allrequired = $value['allrequired'] ? 'checked = "checked"' : '';
-        } else {
-            $selected     = array();
-            $allrequired = '';
-        }
-
-        $options = $this->options_menu();
-
-        $fieldname = "f_{$i}_{$this->field->id}";
-        $this->render($mform, $fieldname, $options, $selected);
-        
-        $mform->addElement('checkbox', "{$fieldname}_allreq", null, ucfirst(get_string('requiredall', 'dataform')));
-        $mform->setDefault("{$fieldname}_allreq", $allrequired);
-    }
-
-    /**
-     *
-     */
-    public function format_search_value($searchparams) {
-        list($not, $operator, $value) = $searchparams;
-        if (is_array($value)){
-            $selected = implode(', ', $value['selected']);
-            $allrequired = '('. ($value['allrequired'] ? get_string('requiredall') : get_string('requirednotall')). ')';
-            return $not. ' '. $operator. ' '. $selected. ' '. $allrequired;
-        } else {
-            return false;
-        }
-    }  
-
-    /**
-     *
-     */
-    public function get_search_sql($search) {
-        global $DB;
-        
-        list($not, , $value) = $search;
-
-        static $i=0;
-        $i++;
-        $name = "df_{$this->field->id}_{$i}_";
-        $params = array();
-
-        $allrequired = $value['allrequired'];
-        $selected    = $value['selected'];
-        $content = "c{$this->field->id}.content";
-        $varcharcontent = $DB->sql_compare_text($content, 255);
-
-        if ($selected) {
-            $conditions = array();
-            foreach ($selected as $key => $sel) {
-                $xname = $name. $key;
-                $likesel = str_replace('%', '\%', $sel);
-                $likeselsel = str_replace('_', '\_', $likesel);
-
-                $conditions[] = "({$varcharcontent} = :{$xname}a".
-                                   ' OR '. $DB->sql_like($content, ":{$xname}b").
-                                   ' OR '. $DB->sql_like($content, ":{$xname}c").
-                                   ' OR '. $DB->sql_like($content, ":{$xname}d"). ")";
-                                   
-                $params[$xname.'a'] = $sel;
-                $params[$xname.'b'] = "$likesel#%";
-                $params[$xname.'c'] = "%#$likesel";
-                $params[$xname.'d'] = "%#$likesel#%";
-            }
-            if ($allrequired) {
-                return array(" $not (".implode(" AND ", $conditions).") ", $params);
-            } else {
-                return array(" $not (".implode(" OR ", $conditions).") ", $params);
-            }
-        } else {
-           return array(" ", $params);
-        }
-    }
-
-    /**
-     * 
-     */
-    protected function options_menu() {
-        $rawoptions = explode("\n",$this->field->param1);
-
-        $options = array();
-        $key = 1;
-        foreach ($rawoptions as $option) {
-            $option = trim($option);
-            if ($option) {
-                $options[$key] = $option;
-                $key++;
-            }
-        }
-        return $options;
-    }
-
-    /**
-     * 
-     */
-    protected function default_values() {
-        $rawdefaults = explode("\n",$this->field->param2);
-        $options = $this->options_menu();
-
-        $defaults = array();
-        foreach ($rawdefaults as $default) {
-            $default = trim($default);
-            if ($default and $key = array_search($default, $options)) {
-                $defaults[] = $key;
-            }
-        }
-        return $defaults;
-    }
-
-    /**
-     *
-     */
-    public function format_content($content) {
-        if (!empty($content)) {
-            // content from form
-            if (is_array($content)) {
-                $content = $this->get_content($content);
-                $optionscount = count(explode("\n", $this->field->param1));
-
-                $vals = array();
-                foreach ($content as $key => $val) {
-                    if ($key === 'xxx') {
-                        continue;
-                    }
-                    if ((int) $val > $optionscount) {
-                        continue;
-                    }
-                    $vals[] = $val;
-                }
-
-                if (empty($vals)) {
-                    return null;
-                } else {
-                    return implode('#', $vals);
-                }
-            
-            // content from import
-            } else {
-                return $content;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     *
-     */
-    protected function get_content($content) {
-        return $content;
-    }
-
-    /**
-     * 
-     */
-    protected abstract function render(&$mform, $fieldname, $options, $selected);
-}
-

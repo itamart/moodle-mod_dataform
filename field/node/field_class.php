@@ -44,149 +44,6 @@ class dataform_field_node extends dataform_field_base {
     }                    
 
     /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        global $OUTPUT;
-        
-        $patterns = parent::patterns($tags, $entry, $edit, $editable);
-        
-        $fieldname = $this->field->name;
-        $extrapatterns = array(
-            "[[{$fieldname}:reply]]",
-            "[[{$fieldname}:newchild]]",
-            "[[{$fieldname}:newsibling]]",
-            "[[{$fieldname}:appendchildren]]",
-            "[[{$fieldname}:appendsiblings]]",
-            "[[{$fieldname}:indent]]",
-            "[[{$fieldname}:ho]]",
-            "[[{$fieldname}:hc]]",
-            "[[{$fieldname}:1]]",
-            "[[{$fieldname}:A]]",
-        );        
-
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            foreach ($extrapatterns as $pattern) {
-                $patterns['fields']['fields'][$pattern] = $pattern;
-            }
-
-        } else {
-            
-            $entryid = $entry->id;
-            
-            // don't display extra tags in new entries 
-            if ($entry->id < 0) {
-                foreach ($tags as $tag) {
-                    if ($tag != "[[{$fieldname}]]") {
-                        $patterns[$tag] = '';
-                    }
-                }
-            } else {
-                
-                $fieldid = $this->field->id;
-                list(, $parentid, $siblingid, $depth, $numbering) = array_values((array) $this->get_entry_content($entry));
-                $baseurl = htmlspecialchars_decode($entry->baseurl. '&sesskey='. sesskey());
-                foreach ($tags as $tag) {
-                    // no edit mode for this field so just return html
-                    switch ($tag) {
-                        case "[[{$fieldname}:reply]]":
-                            $url = new moodle_url($entry->baseurl, array('new' => 1,
-                                                                        'parent' => $entryid,
-                                                                        'depth' => $depth + 1,
-                                                                        'sesskey'=> sesskey()));
-                            $iconsrc = $OUTPUT->pix_url('t/addfile');
-                            $iconalt = get_string('reply');
-                            $icon = html_writer::empty_tag('img', array('src' => $iconsrc,
-                                                                        'class' => "iconsmall",
-                                                                        'alt' => $iconalt,
-                                                                        'title' => $iconalt));
-                            $patterns[$tag] = array('html', html_writer::link($url,$icon));
-                            break;
-                            
-                        case "[[{$fieldname}:newchild]]":
-                            $url = new moodle_url($entry->baseurl, array('new' => 1,
-                                                                        'parent'=> $entryid,
-                                                                        'depth' => $depth + 1,
-                                                                        'sesskey'=>  sesskey()));
-                            $iconsrc = $OUTPUT->pix_url('t/addfile');
-                            $iconalt = get_string('newchild', 'dataformfield_node');
-                            $icon = html_writer::empty_tag('img', array('src' => $iconsrc,
-                                                                        'class' => "iconsmall",
-                                                                        'alt' => $iconalt,
-                                                                        'title' => $iconalt));
-                            $patterns[$tag] = array('html', html_writer::link($url,$icon));
-                            break;
-                            
-                        case "[[{$fieldname}:newsibling]]":
-                            $url = new moodle_url($entry->baseurl, array('new' =>  1,
-                                                                        'parent' => $parentid,
-                                                                        'sibling' => $entryid,
-                                                                        'depth' => $depth,
-                                                                        'sesskey'=>sesskey()));
-                            $iconsrc = $OUTPUT->pix_url('t/adddir');
-                            $iconalt = get_string('newsibling', 'dataformfield_node');
-                            $icon = html_writer::empty_tag('img', array('src' => $iconsrc,
-                                                                        'class' => "iconsmall",
-                                                                        'alt' => $iconalt,
-                                                                        'title' => $iconalt));
-                            $patterns[$tag] = array('html', html_writer::link($url,$icon));
-                            break;
-                            
-                        case "[[{$fieldname}:appendchildren]]":
-                            $baseurl = $baseurl. '&node='. $fieldid. '&parent='. $entryid. '&depth='. $depth + 1;
-                            $onclick = 'entries_bulk_action(\''. $baseurl. '\'&#44;\'append\')';
-                            $patterns[$tag] = array('html',
-                                ''
-//                                html_writer::empty_tag('input',
-//                                                        array('type' => 'button',
-//                                                                'name' => 'appendchildren',
-//                                                                'value' => get_string('appendchildren', 'dataformfield_node'),
-//                                                                'onclick' => $onclick))
-                            );
-                            break;
-                            
-                        case "[[{$fieldname}:appendsiblings]]":
-                            $baseurl = $baseurl. '&node='. $fieldid. '&parent='. $parentid. '&sibling='. $entryid. '&depth='. $depth;
-                            $onclick = 'entries_bulk_action(\''. $baseurl. '\'&#44;\'append\')';
-                            $patterns[$tag] = array('html',
-                                ''
-//                                html_writer::empty_tag('input',
-//                                                        array('type' => 'button',
-//                                                                'name' => 'appendsiblings',
-//                                                                'value' => get_string('appendsiblings', 'dataformfield_node'),
-//                                                                'onclick' => $onclick))
-                            );
-                            break;
-                            
-                        case "[[{$fieldname}:indent]]":
-                            $patterns[$tag] = array('html', ($depth * 50));
-                            break;
-                            
-                        case "[[{$fieldname}:ho]]":
-                            $level = $depth + 1;
-                            $patterns[$tag] = array('html', html_writer::start_tag("h{$level}"));
-                            break;
-                            
-                        case "[[{$fieldname}:hc]]":
-                            $level = $depth + 1;
-                            $patterns[$tag] = array('html', html_writer::end_tag("h{$level}"));
-                            break;
-                            
-                        case "[[{$fieldname}:1]]":
-                        case "[[{$fieldname}:A]]":                                                
-                            $patterns[$tag] = array('html', $numbering);
-                            break;
-                            
-                    }
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
      *
      */
     public function update_content($entry, array $values = null) {
@@ -234,41 +91,6 @@ class dataform_field_node extends dataform_field_base {
     }
 
     /**
-     * delete all content associated with the node
-     * and adjust content of adjacent nodes
-     */
-    public function delete_content1($entryid = 0) {
-        global $DB;
-
-        if ($entryid) {
-            $params = array('fieldid' => $this->field->id, 'entryid' => $entryid);
-            // adjust sibling
-            // get the content where $content->content1 (sibling) == thiscontent->entryid
-            // and $content->content1 = thiscontent->sibling; 
-            
-            // delete with children
-            
-            
-            // delete without children
-            
-            
-            $rs = $DB->get_recordset('dataform_contents', $params);
-            if ($rs->valid()) {
-                $fs = get_file_storage();
-                foreach ($rs as $content) {
-                    $fs->delete_area_files($this->df->context->id, 'mod_dataform', 'content', $content->id);
-                }
-            }
-            $rs->close();
-
-        } else {
-            $params = array('fieldid' => $this->field->id);
-        }
-
-        return $DB->delete_records('dataform_contents', $params);
-    }
-
-    /**
      *
      */
     public function format_content(array $values = null) {
@@ -305,37 +127,6 @@ class dataform_field_node extends dataform_field_base {
         global $DB;
 
         return $DB->sql_compare_text("c{$this->field->id}.content");
-    }
-
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-
-        $entryid = $entry->id;
-        $fieldid = $this->field->id;
-        $fieldname = "field_{$fieldid}_{$entryid}";
-
-        if ($entryid > 0){
-            $content = $entry->{"c{$fieldid}_content"};
-            $content1 = $entry->{"c{$fieldid}_content1"};
-            $content2 = $entry->{"c{$fieldid}_content2"};
-        } else {
-            $content = optional_param('parent', 0, PARAM_INT);
-            $content1 = optional_param('sibling', 0, PARAM_INT);
-            $content2 = optional_param('depth', 0, PARAM_INT);
-        }
-        $mform->addElement('hidden', "{$fieldname}_parent", $content);
-        $mform->addElement('hidden', "{$fieldname}_sibling", $content1);
-        $mform->addElement('hidden', "{$fieldname}_depth", $content2);
-
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-        return '';
     }
 
     /**
@@ -470,6 +261,22 @@ class dataform_field_node extends dataform_field_base {
     /**
      *
      */
+    public function get_entry_content($entry) {
+        $fieldid = $this->field->id;
+        
+        $node = new object;
+        $node->id = isset($entry->{"c$fieldid". '_id'}) ? $entry->{"c$fieldid". '_id'} : null;
+        $node->content = !empty($entry->{"c$fieldid". '_content'}) ? $entry->{"c$fieldid". '_content'} : 0;
+        $node->content1 = !empty($entry->{"c$fieldid". '_content1'}) ? $entry->{"c$fieldid". '_content1'} : 0;
+        $node->content2 = !empty($entry->{"c$fieldid". '_content2'}) ? $entry->{"c$fieldid". '_content2'} : 0;
+        $node->content3 = !empty($entry->{"c$fieldid". '_content3'}) ? $entry->{"c$fieldid". '_content3'} : '';
+
+        return $node; 
+    }                    
+
+    /**
+     *
+     */
     protected function build_sorted_list(&$set, $parent = 0) {
         $tree = array();
 
@@ -511,22 +318,6 @@ class dataform_field_node extends dataform_field_base {
         }
         
         return $tree;
-    }                    
-
-    /**
-     *
-     */
-    protected function get_entry_content($entry) {
-        $fieldid = $this->field->id;
-        
-        $node = new object;
-        $node->id = isset($entry->{"c$fieldid". '_id'}) ? $entry->{"c$fieldid". '_id'} : null;
-        $node->content = !empty($entry->{"c$fieldid". '_content'}) ? $entry->{"c$fieldid". '_content'} : 0;
-        $node->content1 = !empty($entry->{"c$fieldid". '_content1'}) ? $entry->{"c$fieldid". '_content1'} : 0;
-        $node->content2 = !empty($entry->{"c$fieldid". '_content2'}) ? $entry->{"c$fieldid". '_content2'} : 0;
-        $node->content3 = !empty($entry->{"c$fieldid". '_content3'}) ? $entry->{"c$fieldid". '_content3'} : '';
-
-        return $node; 
     }                    
 
 }

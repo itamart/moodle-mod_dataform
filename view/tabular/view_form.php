@@ -38,13 +38,9 @@ class mod_dataform_view_tabular_form extends mod_dataform_view_base_form {
     function view_definition_after_gps() {
 
         $view = $this->_customdata['view'];
-        $df = $this->_customdata['df'];
         $editoroptions = $view->editors();
 
         $mform =& $this->_form;
-
-        $generaltags = $view->general_tags();
-        $fieldtags = $view->field_tags();
 
         // content
         //-------------------------------------------------------------------------------
@@ -54,17 +50,9 @@ class mod_dataform_view_tabular_form extends mod_dataform_view_base_form {
         $mform->setDefault('param1', 1);
         
         $mform->addElement('editor', 'eparam2_editor', get_string('table', 'dataformview_tabular'), null, $editoroptions['param2']);
-        $mform->setType('param2_editor', PARAM_RAW);
-                
-        $listheaderatags=array();
-        $listheaderatags[] = &$mform->createElement('html', '<div class="fitemtitle"><label>'. get_string('viewavailabletags','dataform'). '</label></div>');
-        $listheaderatags[] = &$mform->createElement('html', '<div class="felement fselect">'. html_writer::select($generaltags, 'listheadertags', '', array('' => 'choosedots'), array('onchange' => 'insert_field_tags(this, \'eparam2_editor\');this.selectedIndex=0;')). '</div>');
-        $mform->addGroup($listheaderatags, 'listheaderatags', '', array(' '), false);
-
-        $listbodyatags=array();
-        $listbodyatags[] = &$mform->createElement('html', '<div class="fitemtitle"><label>'. get_string('viewavailabletags','dataform'). '</label></div>');
-        $listbodyatags[] = &$mform->createElement('html', '<div class="felement fselect">'. html_writer::select($fieldtags, 'listbodytags', '', array('' => 'choosedots'), array('onchange' => 'insert_field_tags(this, \'eparam2_editor\');this.selectedIndex=0;')). '</div>');
-        $mform->addGroup($listbodyatags, 'listbodyatags', '', array(' '), false);
+        $mform->setType('eparam2_editor', PARAM_RAW);
+        $this->add_tags_selector('eparam2_editor', 'general');
+        $this->add_tags_selector('eparam2_editor', 'field');        
 
     }
 

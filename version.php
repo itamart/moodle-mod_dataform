@@ -26,9 +26,9 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-$module->version  = 2011100300;
-$module->release = '1.0.4';
+$module->version  = 2011112200;
+$module->release = '1.0.5';
 $module->maturity = MATURITY_BETA;
-$module->requires = 2011070101;
+$module->requires = 2010112400;
 $module->cron     = 60;
 

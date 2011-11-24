@@ -34,32 +34,6 @@ class dataform_field_file extends dataform_field_base {
     public $type = 'file';
 
     /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        $patterns = parent::patterns($tags, $entry, $edit, $editable);
-        
-        $fieldname = $this->field->name;
-        
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns['fields']['fields']["[[{$fieldname}:url]]"] = "[[{$fieldname}:url]]";
-            $patterns['fields']['fields']["[[{$fieldname}:alt]]"] = "[[{$fieldname}:alt]]";
-
-        } else {
-            foreach ($tags as $tag) {
-                if ($tag == "[[{$fieldname}:url]]") {
-                    $patterns["[[{$fieldname}:url]]"] = array('html', $this->display_browse($entry, array('url' => 1)));
-                } else if ($tag == "[[{$fieldname}:alt]]") {
-                    $patterns["[[{$fieldname}:alt]]"] = array('html', $this->display_browse($entry, array('alt' => 1)));
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
      *
      */
     public function update_content($entry, array $values = null) {
@@ -68,7 +42,7 @@ class dataform_field_file extends dataform_field_base {
         $entryid = $entry->id;
         $fieldid = $this->field->id;
 
-        $filemanager = $alttext = $delete = null;
+        $filemanager = $alttext = $delete = $editor = null;
         if (!empty($values)) {
             foreach ($values as $name => $value) {
                 $names = explode('_', $name);
@@ -78,44 +52,51 @@ class dataform_field_file extends dataform_field_base {
             }
         }
 
+        // update file content
+        if ($editor) {
+            return $this->save_changes_to_file($entry, $values);
+        }
+            
+        // delete files
+        //if ($delete) {
+        //    return $this->delete_content($entryid);
+        //}
+        
+        // store uploaded files
         $contentid = isset($entry->{"c{$this->field->id}_id"}) ? $entry->{"c{$this->field->id}_id"} : null;
+        $draftarea = $filemanager;
+        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
 
-        if ($delete) {
-            return $this->delete_content($entryid);
-        } else {
-            // check if there are files to store
-            $fs = get_file_storage();
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftarea);
+        if (count($files)>1) {
+            // there are files to upload so add/update content record
+            $rec = new object;
+            $rec->fieldid = $fieldid;
+            $rec->entryid = $entryid;
+            $rec->content = 1;
+            $rec->content1 = $alttext;
 
-            $draftarea = $filemanager;
-            $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
-
-            $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftarea);
-            if (count($files)>1) {
-                // there are files to upload so add/update content record
-                $rec = new object;
-                $rec->fieldid = $fieldid;
-                $rec->entryid = $entryid;
-                $rec->content = 1;
-                $rec->content1 = $alttext;
-
-                if (!empty($contentid)) {
-                    $rec->id = $contentid;
-                    $DB->update_record('dataform_contents', $rec);
-                } else {
-                    $contentid = $DB->insert_record('dataform_contents', $rec);
-                }
-                
-                // now save files
-                $options = array('subdirs' => 0,
-                                    'maxbytes' => $this->field->param1,
-                                    'maxfiles' => $this->field->param2,
-                                    'accepted_types' => $this->field->param3);
-                $contextid = $this->df->context->id;
-                file_save_draft_area_files($filemanager, $contextid, 'mod_dataform', 'content', $contentid, $options);
-
-                $this->update_content_files($contentid);
+            if (!empty($contentid)) {
+                $rec->id = $contentid;
+                $DB->update_record('dataform_contents', $rec);
+            } else {
+                $contentid = $DB->insert_record('dataform_contents', $rec);
             }
-            $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftarea);
+            
+            // now save files
+            $options = array('subdirs' => 0,
+                                'maxbytes' => $this->field->param1,
+                                'maxfiles' => $this->field->param2,
+                                'accepted_types' => $this->field->param3);
+            $contextid = $this->df->context->id;
+            file_save_draft_area_files($filemanager, $contextid, 'mod_dataform', 'content', $contentid, $options);
+
+            $this->update_content_files($contentid);
+
+        // user cleared files from the field
+        } else if (!empty($contentid)) {
+            $this->delete_content($entryid);
         }
         return true;
     }
@@ -140,20 +121,6 @@ class dataform_field_file extends dataform_field_base {
     /**
      *
      */
-    public function export_text_supported() {
-        return false;
-    }
-
-    /**
-     *
-     */
-    public function import_text_supported() {
-        return false;
-    }
-
-    /**
-     *
-     */
     public static function file_ok($path) {
         return true;
     }
@@ -161,103 +128,55 @@ class dataform_field_file extends dataform_field_base {
     /**
      *
      */
-    public function display_edit(&$mform, $entry) {
-
-        $entryid = $entry->id;
-        $contentid = isset($entry->{"c{$this->field->id}_id"}) ? $entry->{"c{$this->field->id}_id"} : null;
-        $content = isset($entry->{"c{$this->field->id}_content"}) ? $entry->{"c{$this->field->id}_content"} : null;
-        $content1 = isset($entry->{"c{$this->field->id}_content1"}) ? $entry->{"c{$this->field->id}_content1"} : null;
-        
-        $fieldname = "field_{$this->field->id}_{$entryid}";
-        $fmoptions = array('subdirs' => 0,
-                            'maxbytes' => $this->field->param1,
-                            'maxfiles' => $this->field->param2,
-                            'accepted_types' => $this->field->param3);
-
-        $draftitemid = file_get_submitted_draft_itemid("{$fieldname}_filemanager");
-        file_prepare_draft_area($draftitemid, $this->df->context->id, 'mod_dataform', 'content', $contentid, $fmoptions);
-
-        // file manager
-        $mform->addElement('filemanager', "{$fieldname}_filemanager", null, null, $fmoptions);
-        $mform->setDefault("{$fieldname}_filemanager", $draftitemid);
-
-        // alt text
-        $options = array();
-        $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext','dataformfield_file'), $options);
-        $mform->setDefault("{$fieldname}_alttext", s($content1));
-
-        // delete (only for multiple files)
-        if ($this->field->param2 > 1) {
-            $mform->addElement('checkbox', "{$fieldname}_delete", get_string('clearcontent','dataformfield_file'));
-        }
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-
+    public function prepare_import_content(&$data, $patterns, $formdata) {
+        global $USER;
+    
         $fieldid = $this->field->id;
-        $entryid = $entry->id;
+        foreach ($patterns as $tag) {
+            $tagname = trim($tag, "[]#");
+            
+            if ($tagname == $this->name()) {
+                // get the uploaded images file
+                $draftid = $formdata->{"f_{$fieldid}_{$tagname}_filepicker"};
+                $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+                $fs = get_file_storage();
+                if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
+                    $zipfile = reset($files);
+                    // extract files to the draft area
+                    $zipper = get_file_packer('application/zip');
+                    $zipfile->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
+                    $zipfile->delete();
+                
+                    // move each file to its own area and add info to data
+                    if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
+                        $rec = new object;
+                        $rec->contextid = $usercontext->id;
+                        $rec->component = 'user';
+                        $rec->filearea = 'draft';
 
-        $content = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
-        $content1 = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
-        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-        
-        if (empty($content)) {
-            return '';
-        }
-
-        $fs = get_file_storage();
-        $files = $fs->get_area_files($this->df->context->id, 'mod_dataform', 'content', $contentid);
-        if (!$files or !(count($files) > 1)) {
-            return '';
-        }
-
-        $altname = empty($content1) ? '' : s($content1);
-
-        if (!empty($params['alt'])) {
-            return $altname;
-        }
-
-        $strfiles = array();
-        foreach ($files as $file) {
-            if (!$file->is_directory()) {
-                $filename = $file->get_filename();
-                $filenameinfo = pathinfo($filename);
-                $path = "/pluginfile.php/{$this->df->context->id}/mod_dataform/content/$contentid";
-
-                $strfiles[] = $this->display_file($file, $path, $altname, $params);
+                        $i = 0;
+                        foreach ($files as $file) {
+                            //if ($file->is_valid_image()) {
+                                // $get unused draft area
+                                $itemid = file_get_unused_draft_itemid();
+                                // move image to the new draft area 
+                                $rec->itemid = $itemid;
+                                $fs->create_file_from_storedfile($rec, $file);
+                                // add info to data
+                                $i--;
+                                $fieldname = "field_{$fieldid}_$i";
+                                $data->{"{$fieldname}_filemanager"} = $itemid;
+                                $data->{"{$fieldname}_alttext"} = $file->get_filename();
+                                $data->eids[$i] = $i;
+                            //}
+                        }
+                        $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftid);
+                    }
+                }
             }
         }
-        return implode('', $strfiles);
-    }
-                
-    /**
-     *
-     */
-    protected function display_file($file, $path, $altname, $params = null) {
-        global $OUTPUT;
-
-        $filename = $file->get_filename();
-        $displayname = $altname ? $altname : $filename;
         
-        if (!empty($params['url'])) {
-            return new moodle_url("$path/$filename");
-                    
-        } else if ($file->is_valid_image()) {
-            return html_writer::empty_tag('img', array('src' => new moodle_url("$path/$filename"),
-                                                        'alt' => $altname,
-                                                        'title' => $altname));
-                                                        //'height' => '100%',
-                                                        //'width' => '100%'));
-        } else {
-            $fileicon = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url(file_mimetype_icon($file->get_mimetype())),
-                                                        'alt' => $file->get_mimetype(),
-                                                        'height' => 16,
-                                                        'width' => 16));
-            return html_writer::link(new moodle_url("$path/$filename"), "$fileicon&nbsp;$displayname");
-        }
+        return $data;        
     }
 
     /**
@@ -267,4 +186,54 @@ class dataform_field_file extends dataform_field_base {
         return true;
     }
 
+            
+    /**
+     *
+     */
+    protected function save_changes_to_file($entry, array $values = null) {
+
+        $fieldid = $this->field->id;
+        $entryid = $entry->id;
+        $fieldname = "field_{$fieldid}_{$entry->id}";
+
+        $contentid = isset($entry->{"c{$this->field->id}_id"}) ? $entry->{"c{$this->field->id}_id"} : null;
+
+        $options = array('context' => $this->df->context);
+        $data = (object) $values;
+        $data = file_postupdate_standard_editor((object) $values, $fieldname, $options, $this->df->context, 'mod_dataform', 'content', $contentid);
+
+        // get the file content
+        $fs = get_file_storage();
+        $file = reset($fs->get_area_files($this->df->context->id, 'mod_dataform', 'content', $contentid, 'sortorder', false));
+        $filecontent = $file->get_content();
+        
+        // find content position (between body tags)
+        $tmpbodypos = stripos($filecontent, '<body');
+        $openbodypos = strpos($filecontent, '>', $tmpbodypos) + 1;
+        $sublength = strripos($filecontent, '</body>') - $openbodypos;
+        
+        // replace body content with new content
+        $filecontent = substr_replace($filecontent, $data->$fieldname, $openbodypos, $sublength);
+
+        // prepare new file record
+        $rec = new object;
+        $rec->contextid = $this->df->context->id;
+        $rec->component = 'mod_dataform';
+        $rec->filearea = 'content';
+        $rec->itemid = $contentid;
+        $rec->filename = $file->get_filename();
+        $rec->filepath = '/';
+        $rec->timecreated = $file->get_timecreated();
+        $rec->userid = $file->get_userid();
+        $rec->source = $file->get_source();
+        $rec->author = $file->get_author();
+        $rec->license = $file->get_license();
+        
+        // delete old file
+        $fs->delete_area_files($this->df->context->id, 'mod_dataform', 'content', $contentid);
+        
+        // create a new file from string
+        $fs->create_file_from_string($rec, $filecontent);
+        return true;           
+    }
 }

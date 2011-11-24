@@ -40,7 +40,6 @@ class mod_dataform_view_hierarchical_form extends mod_dataform_view_block_form {
         $df = $this->_customdata['df'];
         $view = $this->_customdata['view'];
         $editoroptions = $view->editors();
-        $fieldtags = $view->field_tags();
 
         $mform =& $this->_form;
 
@@ -66,10 +65,8 @@ class mod_dataform_view_hierarchical_form extends mod_dataform_view_block_form {
         
         // repeated entry
         $mform->addElement('editor', 'eparam2_editor', get_string('viewlistbody', 'dataform'), null, $editoroptions['param2']);       
-        $listbodyatags=array();
-        $listbodyatags[] = &$mform->createElement('html', '<div class="fitemtitle"><label>'. get_string('viewavailabletags','dataform'). '</label></div>');
-        $listbodyatags[] = &$mform->createElement('html', '<div class="felement fselect">'. html_writer::select($fieldtags, 'listbodytags', '', array('' => 'choosedots'), array('onchange' => 'insert_field_tags(this, \'eparam2_editor\');this.selectedIndex=0;')). '</div>');
-        $mform->addGroup($listbodyatags, 'listbodyatags', null, array(' '), false);
+        $this->add_tags_selector('eparam2_editor', 'field');
+        $this->add_tags_selector('eparam2_editor', 'character');        
 
     // toc settings
     //-------------------------------------------------------------------------------

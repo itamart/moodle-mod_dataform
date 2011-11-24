@@ -42,16 +42,5 @@ class dataform_field_number extends dataform_field_text {
         return $DB->sql_cast_char2real("c{$this->field->id}.content", true);
     }
 
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry) {
-        parent::display_edit($mform, $entry);
-        
-        $entryid = $entry->id;
-        $fieldname = 'field_'. $this->field->id. '_'. $entryid;
-        $mform->addRule($fieldname, null, 'numeric', null, 'client');
-    }
-
 }
 

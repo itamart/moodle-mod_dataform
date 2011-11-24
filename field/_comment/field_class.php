@@ -15,81 +15,6 @@ class dataform_field__comment extends dataform_field_base {
 
     public $type = '_comment';
 
-    protected $_patterns = array(
-        '##comments:count##',
-        '##comments:view##',
-        '##comments:viewurl##',
-        '##comments:add##',
-    );
-
-    /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $enabled = false) {
-        global $USER, $OUTPUT;
-
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array('comments' => array('comments' => array()));
-                               
-            // TODO use get strings
-            foreach ($this->_patterns as $pattern) {
-                $patterns['comments']['comments'][$pattern] = $pattern;
-            }
-            
-        } else {
-        
-            $patterns = array();
-            $commentsenabled = $this->df->data->comments;
-            
-            if ($entry->id > 0 and $commentsenabled) {            
-                // no edit mode for this field so just return html
-                foreach ($tags as $tag) {
-                    switch($tag) {
-                        case '##comments:count##':
-                            $patterns[$tag] = array('html', $entry->comment->count);
-                            break;
-                            
-                        case '##comments:view##':
-                        case '##comments:viewurl##':
-                            if (isset($entry->comment)) {
-                                $comment = $entry->comment;
-                                if ($comment->settings->permissions->viewall
-                                    and $comment->settings->pluginpermissions->viewall) {
-
-                                    $nonpopuplink = $rating->get_view_comments_url();
-                                    $popuplink = $rating->get_view_comments_url(true);
-                                    $popupaction = new popup_action('click', $popuplink, 'comments', array('height' => 400, 'width' => 600));
-                                    
-                                    if ($tag == '##comments:view##') {
-                                        $patterns[$tag] = array('html', $OUTPUT->action_link($nonpopuplink, 'view all', $popupaction));
-                                    } else {
-                                        $patterns[$tag] = array('html', $popuplink);
-                                    }
-                                } else {
-                                    $patterns[$tag] = '';
-                                }
-                            } else {
-                                $patterns[$tag] = '';
-                            }
-                            break;
-                            
-                        case '##comments:add##':
-                            $patterns[$tag] = array('html', $this->display_browse($entry));
-                            break;
-                    }
-                }
-                
-            } else {
-                foreach ($tags as $tag) {            
-                    $patterns[$tag] = '';                    
-                }                
-            }                    
-        }       
-            
-        return $patterns;
-    }
-
     /**
      * TODO
      */
@@ -110,36 +35,6 @@ class dataform_field__comment extends dataform_field_base {
      */
     public function update_content($entryid, array $values = null) {
         return true;
-/*
-        global $DB, $CFG, $USER;
-
-        if ($value) {
-            if ($commentid = optional_param('comment_'. $entryid, 0, PARAM_INT)) {
-                $comment = $DB->get_record('dataform_comments','id', $commentid);
-                if ($comment->content != $value) {
-                    $comment->content  = $value;
-                    // TODO
-                    //$comment->format   = $formadata->format;
-                    $comment->modified = time();
-                    return $DB->update_record('dataform_comments',$comment);
-                } else {
-                    return false;
-                }
-
-            // new comment
-            } else {
-                $comment = new object();
-                $comment->userid   = $USER->id;
-                $comment->created  = time();
-                $comment->modified = time();
-                $comment->content  = $value;
-                $comment->entryid = $entryid;
-                return $DB->insert_record('dataform_comments',$comment);
-            }
-        } else {
-            return false;
-        }
-*/
     }
 
     /**
@@ -159,36 +54,6 @@ class dataform_field__comment extends dataform_field_base {
      * returns an array of distinct content of the field
      */
     public function get_distinct_content($sortdir = 0) {
-        return false;
-    }
-
-    /**
-     * returns an array of distinct content of the field
-     */
-    public function print_after_form() {
-        $str = '';
-/*
-        if (can_use_richtext_editor()) {
-            ob_start();
-            use_html_editor('field_comment', '', 'edit-field_comment');
-            $str = ob_get_contents();
-            ob_end_clean();
-        }
-*/
-        return $str;
-    }
-
-    /**
-     *
-     */
-    public function export_text_supported() {
-        return false;
-    }
-
-    /**
-     *
-     */
-    public function import_text_supported() {
         return false;
     }
 
@@ -289,36 +154,4 @@ class dataform_field__comment extends dataform_field_base {
 
         return true;
     }
-
-
-    /**
-     *
-     */
-    public function display_edit(&$mform, $entry = null) {
-    }
-
-    /**
-     *
-     */
-    public function display_browse($entry, $params = null) {
-        global $CFG;
-
-        $str = '';
-        if (!empty($CFG->usecomments)) {
-            require_once("$CFG->dirroot/comment/lib.php");
-            $cmt = new object();
-            $cmt->context = $this->df->context;
-            $cmt->courseid  = $this->df->course->id;
-            $cmt->cm      = $this->df->cm;
-            $cmt->area    = 'dataform_entry';
-            $cmt->itemid  = $entry->id;
-            $cmt->showcount = true;
-            $cmt->component = 'mod_dataform';
-            $comment = new comment($cmt);
-            $str = $comment->output(true);
-        }
-
-        return $str;
-    }
-
 }

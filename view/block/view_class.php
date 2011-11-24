@@ -116,19 +116,20 @@ class dataform_view_block extends dataform_view_base {
         $entries_set = $this->get_entries_definition($entriesset, $name);
 
         // flatten the set to a list of elements
-        $listbody = array();
+        $elements = array();
         foreach ($entries_set as $entry_definitions) {
-            $listbody = array_merge($listbody, $entry_definitions);
+            $elements = array_merge($elements, $entry_definitions);
         }
 
-        $elements = array();
-        $elements[] = array('html', '<div class="entriesview">');
+        // if this group is named wrap it with entriesview class
+        // this is actually meant as a way to omit the wrapper in csv export
+        // but may not be the best way to achieve that so TODO
         if ($name) {
             $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
-            $elements[] = array('html', $OUTPUT->heading($name, 3, 'main'));
+            array_unshift($elements, array('html', $OUTPUT->heading($name, 3, 'main')));
+            array_unshift($elements, array('html', html_writer::start_tag('div', array('class' => 'entriesview'))));
+            array_push($elements, array('html', html_writer::start_tag('div')));
         }
-        $elements = array_merge($elements, $listbody);
-        $elements[] = array('html', '</div>');
         return $elements;
     }
 
@@ -171,7 +172,7 @@ class dataform_view_block extends dataform_view_base {
         foreach ($this->_patterns['field'] as $fieldid => $patterns) {
             $field = $fields[$fieldid];
             $entry->id = $i;
-            if ($fieldpatterns = $field->patterns($patterns, $entry, true, true)) {
+            if ($fieldpatterns = $field->patterns()->get_replacements($patterns, $entry, true, true)) {
                 $patterndefinitions = array_merge($patterndefinitions, $fieldpatterns);
             }
             $tags = array_merge($tags, $patterns);

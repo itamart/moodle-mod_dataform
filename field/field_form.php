@@ -35,10 +35,13 @@ class mod_dataform_field_form extends moodleform {
     function definition() {
 
         $field = $this->_customdata['field'];
-        $mform =& $this->_form;
+        $mform = &$this->_form;
 
         $mform->addElement('hidden', 'type', $field->type());
         $mform->setType('type', PARAM_ALPHA);
+
+        $mform->addElement('hidden', 'fid', $field->id());
+        $mform->setType('fid', PARAM_INT);
 
         $streditinga = $field->id() ? get_string('fieldedit', 'dataform', $field->name()) : get_string('fieldnew', 'dataform', $field->type());
         $mform->addElement('html', '<h2 class="mdl-align">'.format_string($streditinga).'</h2>');
@@ -108,64 +111,6 @@ class mod_dataform_field_form extends moodleform {
         }
 
         return $errors;
-    }
-
-}
-
-
-
-/**
- *
- */
-class mod_dataform_field_single_menu_form extends mod_dataform_field_form {
-
-    function field_definition() {
-
-        $mform =& $this->_form;
-
-    //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
-        // options
-        $mform->addElement('textarea', 'param1', get_string('fieldoptions', 'dataform'), 'wrap="virtual" rows="5" cols="30"');
-
-        // default value
-        $mform->addElement('text', 'param2', get_string('default'));
-
-        // reserve param3 for options separator (e.g. radiobutton, image button)
-
-        // allow add option
-        $mform->addElement('selectyesno', 'param4', get_string('allowaddoption', 'dataform'));
-        
-    }
-}
-
-
-/**
- *
- */
-class mod_dataform_field_multi_menu_form extends mod_dataform_field_form {
-
-    function field_definition() {
-
-        $field = $this->_customdata['field'];
-        $mform =& $this->_form;
-
-    //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
-        // options
-        $mform->addElement('textarea', 'param1', get_string('fieldoptions', 'dataform'), 'wrap="virtual" rows="10" cols="50"');
-
-        // default options
-        $mform->addElement('textarea', 'param2', get_string('fieldoptionsdefault', 'dataform'), 'wrap="virtual" rows="5" cols="50"');
-
-        // options separator
-        $mform->addElement('select', 'param3', get_string('fieldoptionsseparator', 'dataform'), array_map('current', $field->separators));
-
-        // allow add option
-        $mform->addElement('selectyesno', 'param4', get_string('allowaddoption', 'dataform'));
-
     }
 
 }

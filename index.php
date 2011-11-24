@@ -32,13 +32,13 @@ require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 require_once("$CFG->dirroot/mod/dataform/lib.php");
 
 $id             = required_param('id', PARAM_INT);   // course
-$add            = optional_param('add', '', PARAM_ALPHA);
-$update         = optional_param('update', 0, PARAM_INT);
-$duplicate      = optional_param('duplicate', 0, PARAM_INT);
-$hide           = optional_param('hide', 0, PARAM_INT);
-$show           = optional_param('show', 0, PARAM_INT);
-$movetosection  = optional_param('movetosection', 0, PARAM_INT);
-$delete         = optional_param('delete', 0, PARAM_INT);
+//$add            = optional_param('add', '', PARAM_ALPHA);
+//$update         = optional_param('update', 0, PARAM_INT);
+//$duplicate      = optional_param('duplicate', 0, PARAM_INT);
+//$hide           = optional_param('hide', 0, PARAM_INT);
+//$show           = optional_param('show', 0, PARAM_INT);
+//$movetosection  = optional_param('movetosection', 0, PARAM_INT);
+//$delete         = optional_param('delete', 0, PARAM_INT);
 
 if (!$course = $DB->get_record('course', array('id' => $id))) {
     print_error('invalidcourseid');
@@ -109,8 +109,8 @@ if ($rss) {
 if ($showeditbuttons = $PAGE->user_allowed_editing()) {
     $table->head[] = '';
     $table->align[] = 'center';
-    $editingurl = new moodle_url('/mod/dataform/index.php',
-                                array('id' => $course->id, 'sesskey' => sesskey()));
+    $editingurl = new moodle_url('/course/mod.php',
+                                array('sesskey' => sesskey()));
 }
 
 $options = new object;
@@ -166,10 +166,11 @@ foreach ($dataforms as $dataform) {
         $buttons = array();
         $editingurl->param('update', $dataform->coursemodule);
         $buttons['edit'] = html_writer::link($editingurl, $OUTPUT->pix_icon('t/edit', $stredit));
-
         $editingurl->remove_params('update');
+        
         $editingurl->param('delete', $dataform->coursemodule);
         $buttons['delete'] = html_writer::link($editingurl, $OUTPUT->pix_icon('t/delete', $strdelete));
+        $editingurl->remove_params('delete');
 
         $tablerow[] = implode('&nbsp;&nbsp;&nbsp;', $buttons);
     }

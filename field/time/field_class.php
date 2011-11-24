@@ -35,42 +35,6 @@ class dataform_field_time extends dataform_field_base {
     public $type = 'time';
 
     /**
-     * 
-     */
-    public function patterns($tags = null, $entry = null, $edit = false, $editable = false) {
-        $patterns = parent::patterns($tags, $entry, $edit, $editable);
-        
-        $fieldname = $this->field->name;
-        $extrapatterns = array('%H' => "[[{$fieldname}:hour]]",
-                                '%a' => "[[{$fieldname}:day]]",
-                                '%V' => "[[{$fieldname}:week]]",
-                                '%b' => "[[{$fieldname}:month]]",
-                                '%G' => "[[{$fieldname}:year]]");
-        
-        // if no tags requested, return select menu
-        if (is_null($tags)) {
-            foreach ($extrapatterns as $pattern) {
-                $patterns['fields']['fields'][$pattern] = $pattern;
-            }
-
-        } else {
-            foreach ($tags as $tag) {
-                if ($edit) {
-                    if (in_array($tag, $extrapatterns)) {
-                        $patterns[$tag] = array('', array(array($this,'display_edit'), array($entry)));
-                    }
-                } else {
-                    if ($format = array_search($tag, $extrapatterns)) {
-                        $patterns[$tag] = array('html', $this->display_browse($entry, array('format' => $format)));
-                    }
-                }
-            }
-        }
-
-        return $patterns;
-    }
-
-    /**
      *
      */
     public function format_content(array $values = null) {
@@ -96,31 +60,6 @@ class dataform_field_time extends dataform_field_base {
         }
     }
 
-    /**
-     * 
-     */
-    public function display_search($mform, $i = 0, $value = '') {
-        if (is_array($value)){
-            $from = $value[0];
-            $to = $value[1];
-        } else {
-            $from = 0;
-            $to = 0;
-        }
-    
-        $elements = array();
-        $elements[] = &$mform->createElement('date_time_selector', 'f_'. $i. '_'. $this->field->id. '_from', get_string('from'));
-        $elements[] = &$mform->createElement('date_time_selector', 'f_'. $i. '_'. $this->field->id. '_to', get_string('to'));
-        $mform->addGroup($elements, "searchelements$i", null, '<br />', false);
-        $mform->setDefault('f_'. $i. '_'. $this->field->id. '_from', $from);
-        $mform->setDefault('f_'. $i. '_'. $this->field->id. '_to', $to);
-        foreach (array('year','month','day','hour','minute') as $fieldidentifier) {
-            $mform->disabledIf('f_'. $i. '_'. $this->field->id. '_to['. $fieldidentifier. ']', "searchoperator$i", 'neq', 'BETWEEN');
-        }
-        $mform->disabledIf("searchelements$i", "searchoperator$i", 'eq', 'IN');
-        $mform->disabledIf("searchelements$i", "searchoperator$i", 'eq', 'LIKE');
-    }
-    
     /**
      * 
      */
@@ -179,48 +118,35 @@ class dataform_field_time extends dataform_field_base {
     /**
      * 
      */
+    public function prepare_import_content(&$data, $importsettings, $csvrecord = null, $entryid = null) {
+        // import only from csv
+        if ($csvrecord) {
+            $fieldid = $this->field->id;
+            $fieldname = $this->name();
+            $csvname = $importsettings[$fieldname]['name'];
+            $timestamp = $importsettings[$fieldname]['timestamp'];
+            $timestr = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
+            
+            if ($timestr) {
+                if (!$timestamp) {
+                    $timestr = strtotime($timestr);
+                }
+
+                // TODO check validity of timestamp
+                $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
+            }
+        }
+    
+        return true;
+    }
+
+    /**
+     * 
+     */
     public function get_sort_sql($fieldname) {
         global $DB;
         return $DB->sql_cast_char2int($fieldname, true);
     }
 
-    /**
-     * 
-     */
-    public function display_edit(&$mform, $entry = null) {
-        $entryid = $entry->id;
-        $fieldid = $this->field->id;
-        
-        if ($entryid > 0){
-            $content = $entry->{"c{$fieldid}_content"};
-        } else {
-            $content = 0;
-        }
-
-        $fieldname = "field_{$fieldid}_{$entryid}";
-        $mform->addElement('date_time_selector', $fieldname, null, array('optional' => true));
-        $mform->setDefault($fieldname, $content);
-    }
-    
-    /**
-     * 
-     */
-    public function display_browse($entry, $params = null) {
-
-        $fieldid = $this->field->id;
-
-        if (isset($entry->{"c$fieldid". '_content'})) {
-            $content = $entry->{"c$fieldid". '_content'};
-
-            if (!empty($params['format'])) {
-                $str = userdate($content, $params['format']);
-            } else {
-                $str = userdate($content);
-            }
-        } else {
-            $str = '';
-        }
-        return $str;
-    }    
 }
 

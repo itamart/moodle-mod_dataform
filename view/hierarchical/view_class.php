@@ -103,10 +103,10 @@ class dataform_view_hierarchical extends dataform_view_block {
             //if ($autoupdate) {
             //    $tocview->update_toc();
             //}
-            
+
             // add toc element
             $toc = html_writer::tag('div',
-                                    $tocview->display(true),
+                                    $tocview->display(array('tohtml' => true)),
                                     array('class' => 'mdl-left',
                                         'style' => 'float:left;width:20%;padding:5px;margin:5px;border:2px solid #dddddd;'));    
             $mainviewopen = html_writer::start_tag('div',
@@ -313,7 +313,7 @@ class dataform_view_hierarchical extends dataform_view_block {
             //$updateview = new object;
             //$updateview->id = $this->view->id;
             //$updateview->param4 = $this->view->param4;
-            //$this->update_view($updateview);
+            //$this->update($updateview);
         }
     }
 

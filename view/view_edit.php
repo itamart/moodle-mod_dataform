@@ -32,18 +32,19 @@ require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 $urlparams = new object();
 $urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
 
-$urlparams->type       = optional_param('type','' ,PARAM_ALPHA);   // type of a view to edit
-$urlparams->vid        = optional_param('vid',0 ,PARAM_INT);       // view id to edit
+$urlparams->type       = optional_param('type', '', PARAM_ALPHA);   // type of a view to edit
+$urlparams->vedit        = optional_param('vedit', 0, PARAM_INT);       // view id to edit
+$urlparams->returnurl  = optional_param('returnurl', '', PARAM_URL);
 
 // Set a dataform object
 $df = new dataform($urlparams->d);
 
-require_capability('mod/dataform:managetemplates', $df->context);
-
 $df->set_page('view/view_edit', array('modjs' => true, 'urlparams' => $urlparams));
 
-if ($urlparams->vid) {
-    $view = $df->get_view_from_id($urlparams->vid);
+require_capability('mod/dataform:managetemplates', $df->context);
+
+if ($urlparams->vedit) {
+    $view = $df->get_view_from_id($urlparams->vedit);
     if ($default = optional_param('resetdefault',0 ,PARAM_INT)) {
         $view->generate_default_view();
     }    
@@ -54,45 +55,54 @@ if ($urlparams->vid) {
 
 $mform = $view->get_form();
 
+// for cancelled
 if ($mform->is_cancelled()){
-    redirect(new moodle_url('/mod/dataform/views.php', array('d' => $urlparams->d)));
+        if ($urlparams->returnurl) {
+            redirect($urlparams->returnurl);
+        } else {
+            redirect(new moodle_url('/mod/dataform/views.php', array('d' => $urlparams->d)));
+        }
 
-// no submit buttons: reset to default, switch editor    
+// no submit buttons: reset to default 
 } else if ($mform->no_submit_button_pressed()) {
+    // reset view to default
+    // TODO is this the best way?
     $resettodefault = optional_param('resetdefaultbutton', '', PARAM_ALPHA);
-
-    if ($resettodefault) {   // reset view to default
-        // TODO is this the best way?
+    if ($resettodefault) {
         $urlparams->resetdefault = 1;
         redirect(new moodle_url('/mod/dataform/view/view_edit.php', (array) $urlparams));
         
     }
-    
-
 
 // process validated    
 } else if ($data = $mform->get_data()) { 
 
-    $data = $view->from_form($data);    
+    $data = $view->from_form($data);
 
-    if (!$view->id()) {    // add new view
-        $view->insert_view($data);
-        $df->notifications['good'][] = get_string('viewsadded','dataform');
-        add_to_log($df->course->id, 'dataform', 'views add',
-                   'view_edit.php?d='. $df->id(), '', $df->cm->id);
-        // TODO: default view       
-    } else {   // update view
+    // add new view
+    if (!$view->id()) {
+        $view->add($data);
+        $log = get_string('viewsadded','dataform');
 
-        $view->update_view($data);
-        $df->notifications['good'][] = get_string('viewsupdated','dataform');
-        add_to_log($df->course->id, 'dataform', 'views update',
-                   'views.php?d='. $df->id(). '&amp;vid=', $urlparams->vid, $df->cm->id);
+    // update view
+    } else {
+        $view->update($data);
+        $log = get_string('viewsupdated','dataform');
     }
     
-    if (isset($data->submitreturnbutton)) {
-        // go back to form
-    } else {
-        redirect(new moodle_url('/mod/dataform/views.php', array('d' => $urlparams->d)));
+    $df->notifications['good'][] = $log;
+
+    add_to_log($df->course->id, 'dataform', $log,
+               'views.php?d='. $df->id(). '&amp;vedit=', $view->id(), $df->cm->id);
+
+    // TODO: set default view       
+
+    if (!isset($data->submitreturnbutton)) {
+        if ($urlparams->returnurl) {
+            redirect($urlparams->returnurl);
+        } else {
+            redirect(new moodle_url('/mod/dataform/views.php', array('d' => $urlparams->d)));
+        }
     }
     
 }
