@@ -50,9 +50,9 @@ class dataform_field_userinfo extends dataform_field_base {
         parent::set_field($forminput);
         
         if ($this->field->param1 and ($this->field->param1 != $infoid or !$this->field->param2)) {
-            $infoitems = 'datatype,defaultdata,defaultdataform,param1,param2,param3,param4,param5';
+            $infoitems = 'datatype,defaultdata,defaultdataformat,param1,param2,param3,param4,param5';
             if ($info = $DB->get_record('user_info_field', array('id' => $this->field->param1), $infoitems)) {
-                $this->field->param2 = $info->type;
+                $this->field->param2 = $info->datatype;
                 $this->field->param3 = $info->defaultdata;
                 $this->field->param4 = $info->defaultdataformat;
 

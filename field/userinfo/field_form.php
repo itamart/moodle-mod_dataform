@@ -39,10 +39,6 @@ class mod_dataform_field_userinfo_form extends mod_dataform_field_form {
         $options = $DB->get_records_menu('user_info_field', array(), 'name', 'id,name');
         $options = array('' => get_string('choosedots')) + $options;
         $mform->addElement('select', "param1", get_string('infofield', 'dataformfield_userinfo'), $options);
-
-        $form->addElement('checkbox', 'param3', get_string('wanttime', 'profilefield_datetime'));
-        $form->setType('param3', PARAM_INT);
-
     }
 
 }
