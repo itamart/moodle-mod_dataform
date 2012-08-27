@@ -1,26 +1,31 @@
 <?php
-
-/**
- * This file is part of the Dataform module for Moodle
- *
- * @copyright 2011 Moodle contributors
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
+/** 
  * @package mod-dataform
- *
+ * @subpackage dataformfield-_comment
+ * @copyright 2012 Itamar Tzadok
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field__comment extends dataform_field_base {
+class dataform_field__comment extends dataform_field_no_content {
 
     public $type = '_comment';
-
-    /**
-     * TODO
-     */
-    public function get_search_sql($value = '') {
-        return array(" ", array());
-    }
 
     /**
      * TODO: use join?
@@ -33,39 +38,12 @@ class dataform_field__comment extends dataform_field_base {
     /**
      *
      */
-    public function update_content($entryid, array $values = null) {
-        return true;
-    }
-
-    /**
-     * Delete all content associated with the field
-     */
-    public function delete_content($entryid = 0, $commentid = 0) {
-/*
-        if ($commentid) {
-            delete_records('dataform_comments', 'id', $commentid);
-        } else if ($entryid) {
-            delete_records('dataform_comments', 'entryid', $entryid);
-        }
-*/
-    }
-
-    /**
-     * returns an array of distinct content of the field
-     */
-    public function get_distinct_content($sortdir = 0) {
-        return false;
-    }
-
-    /**
-     *
-     */
     public function permissions($params) {
         global $USER;
 
         if (has_capability('mod/dataform:managecomments', $this->df->context)
-//                    or ($params->commentarea == 'dataform_activity' and $params->itemid == $USER->id)
-                    or ($params->commentarea == 'dataform_entry' and $this->df->data->comments)) {
+                    or ($params->commentarea == 'activity' and $params->itemid == $USER->id)
+                    or ($params->commentarea == 'entry')) {
             return array('post'=>true, 'view'=>true);
         }
         return array('post'=>false, 'view'=>false);
@@ -74,19 +52,20 @@ class dataform_field__comment extends dataform_field_base {
     /**
      *
      */
-    public function validate($params) {
+    public function validation($params) {
         global $DB, $USER;
 
         // validate params
-        if ($params->context->id != $this->df->context->id
+        if (empty($params->context)
+                or $params->context->id != $this->df->context->id
                 or $params->courseid != $this->df->course->id
                 or $params->cm->id != $this->df->cm->id) {
             throw new comment_exception('invalidid', 'dataform');
         }
 
         // validate comment area
-        if ($params->commentarea != 'dataform_entry'
-                or $params->commentarea != 'dataform_activity') {
+        if ($params->commentarea != 'entry'
+                and $params->commentarea != 'activity') {
             throw new comment_exception('invalidcommentarea');
         }
 
@@ -97,18 +76,18 @@ class dataform_field__comment extends dataform_field_base {
             // but require df->data->comments for add/view on other entries (excluding grading entries)
 
             // comments in the activity level are associated (itemid) with participants
-            //if ($params->commentarea == 'dataform_activity') {
-            //    if ($params->itemid != $USER->id) {
-            //        throw new comment_exception('invalidcommentitemid');
-            //    }
-            //}
+            if ($params->commentarea == 'activity') {
+                if ($params->itemid != $USER->id) {
+                    throw new comment_exception('invalidcommentitemid');
+                }
+            }
 
-            if ($params->commentarea == 'dataform_entry') {
+            if ($params->commentarea == 'entry') {
 
                 // check if comments enabled
-                if (!$this->df->data->comments) {
-                    throw new comment_exception('commentsoff', 'dataform');
-                }
+                //if (!$this->df->data->comments) {
+                //    throw new comment_exception('commentsoff', 'dataform');
+                //}
 
                 // validate entry
                 if (!$entry = $DB->get_record('dataform_entries', array('id' => $params->itemid))) {
@@ -116,12 +95,12 @@ class dataform_field__comment extends dataform_field_base {
                 }
 
                 //check if approved
-                if ($this->df->data->approval
-                            and !$entry->approved
-                            and !($entry->userid === $USER->id)
-                            and !has_capability('mod/dataform:approve', $context)) {
-                    throw new comment_exception('notapproved', 'dataform');
-                }
+                //if ($this->df->data->approval
+                //            and !$entry->approved
+                //            and !($entry->userid === $USER->id)
+                //            and !has_capability('mod/dataform:approve', $context)) {
+                //    throw new comment_exception('notapproved', 'dataform');
+                //}
 
                 // group access
                 if ($entry->groupid) {
@@ -138,7 +117,7 @@ class dataform_field__comment extends dataform_field_base {
         // validation for comment deletion
         if (!empty($params->commentid)) {
             if ($comment = $DB->get_record('comments', array('id' => $params->commentid))) {
-                if ($comment->commentarea != 'dataform_entry') { // or $comment->commentarea != 'dataform_activity') {
+                if ($comment->commentarea != 'entry' and $comment->commentarea != 'activity') {
                     throw new comment_exception('invalidcommentarea');
                 }
                 if ($comment->contextid != $params->context->id) {

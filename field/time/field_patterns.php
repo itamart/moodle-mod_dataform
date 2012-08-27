@@ -1,32 +1,25 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @package field-time
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 defined('MOODLE_INTERNAL') or die();
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
@@ -39,25 +32,29 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name();
+        $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        // no edit mode
         $replacements = array();
-
-        foreach ($tags as $tag) {
+        // rules support
+        $tags = $this->add_clean_pattern_keys($tags);        
+        
+        foreach ($tags as $cleantag => $tag) {
             if ($edit) {
-                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry)));
+                $required = $this->is_required($tag);
+                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
 
             } else {
-                switch ($tag) {            
-                    case "[[{$fieldname}:hour]]": $format = '%H'; break; 
-                    case "[[{$fieldname}:day]]": $format = '%a'; break; 
-                    case "[[{$fieldname}:week]]": $format = '%V'; break; 
-                    case "[[{$fieldname}:month]]": $format = '%b'; break; 
-                    case "[[{$fieldname}:year]]": $format = '%G'; break;
-                    default: $format = null;
+                $format = (strpos($tag, "{$fieldname}:") !== false ? str_replace("{$fieldname}:", '', trim($tag, '[]')) : '');
+                switch ($format) {            
+                    case 'minute': $format = 'M'; break; 
+                    case 'hour': $format = 'H'; break; 
+                    case 'day': $format = 'a'; break; 
+                    case 'week': $format = 'V'; break; 
+                    case 'month': $format = 'b'; break; 
+                    case 'year': $format = 'G'; break;
                 }
                 $replacements[$tag] = array('html', $this->display_browse($entry, array('format' => $format)));
             }
@@ -69,7 +66,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function display_edit(&$mform, $entry = null) {
+    public function display_edit(&$mform, $entry, $required = false) {
         $fieldid = $this->_field->id();
         $entryid = $entry->id;
         
@@ -82,6 +79,9 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         $fieldname = "field_{$fieldid}_{$entryid}";
         $mform->addElement('date_time_selector', $fieldname, null, array('optional' => true));
         $mform->setDefault($fieldname, $content);
+        if ($required) {
+            $mform->addRule($fieldname, null, 'required', null, 'client');
+        }
     }
     
     /**
@@ -93,7 +93,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
 
         if (isset($entry->{"c{$fieldid}_content"})) {
             $content = $entry->{"c{$fieldid}_content"};
-            $format = !empty($params['format']) ? $params['format'] : '';
+            $format = !empty($params['format']) ? '%'. $params['format'] : '';
 
             $str = userdate($content, $format);
         } else {
@@ -106,7 +106,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function display_search($mform, $i = 0, $value = '') {
+    public function display_search(&$mform, $i = 0, $value = '') {
         $fieldid = $this->_field->id();
 
         if (is_array($value)){
@@ -133,7 +133,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_import($mform, $tags) {
+    public function display_import(&$mform, $tags) {
         $fieldid = $this->_field->id();
         $tagname = $this->_field->name();
         $name = "f_{$fieldid}_$tagname";
@@ -155,12 +155,33 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
+        // Minute (M)
+        $patterns["[[$fieldname:minute]]"] = array(false);
+        // Hour (H)
         $patterns["[[$fieldname:hour]]"] = array(false);
+        // %H:%M
+        $patterns["[[$fieldname:R]]"] = array(false);
+        // Day (a)
         $patterns["[[$fieldname:day]]"] = array(false);
+        $patterns["[[$fieldname:d]]"] = array(false);
+        // Week (V)
         $patterns["[[$fieldname:week]]"] = array(false);
+        // Month (b)
         $patterns["[[$fieldname:month]]"] = array(false);
+        $patterns["[[$fieldname:m]]"] = array(false);
+        // Year (G)
         $patterns["[[$fieldname:year]]"] = array(false);
+        $patterns["[[$fieldname:Y]]"] = array(false);
 
         return $patterns; 
+    }
+    
+    /**
+     * Array of patterns this field supports 
+     */
+    protected function supports_rules() {
+        return array(
+            self::RULE_REQUIRED
+        );
     }
 }

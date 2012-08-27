@@ -1,33 +1,26 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @package field-picture
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
-defined('MOODLE_INTERNAL') or die();
+defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->dirroot/mod/dataform/field/file/field_patterns.php");
 
@@ -39,40 +32,60 @@ class mod_dataform_field_picture_patterns extends mod_dataform_field_file_patter
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name();
+        $edit = !empty($options['edit']) ? $options['edit'] : false;
 
         // there is only one possible tag here so no check
-        $replacements = parent::get_replacements($tags, $entry, $edit, $editable);
+        $replacements = parent::get_replacements($tags, $entry, $options);
 
-        foreach ($tags as $tag) {
-            if ($tag == "[[$fieldname:tn-url]]") {
-                // no edit for the url so just output
-                $replacements["[[$fieldname:tn-url]]"] = array('html', $this->display_browse($entry, array('tn' => 1, 'url' => 1)));
-            } else if ($edit) {
-                if (in_array($tag, array_keys($this->patterns()))) {
-                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry)));
+        // rules support
+        $tags = $this->add_clean_pattern_keys($tags);
+        foreach ($tags as $cleantag => $tag) {
+            
+            if (is_array($replacements[$tag])) {
+                continue;
+            }
+            
+            if ($edit) {
+                if ($cleantag != "[[$fieldname:tn-url]]" and in_array($cleantag, array_keys($this->patterns()))) {
+                    $required = $this->is_required($tag);
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
                 }
             } else {
-                switch ($tag) {
+                $displaybrowse = '';
+                switch ($cleantag) {
+                    case "[[$fieldname:tn-url]]":
+                        $displaybrowse = $this->display_browse($entry, array('tn' => 1, 'url' => 1));
+                        break;
                     case "[[$fieldname:linked]]":
-                        $replacements[$tag] = array('html', $this->display_browse($entry, array('linked' => 1)));
+                        $displaybrowse = $this->display_browse($entry, array('linked' => 1));
                         break;
                     case "[[$fieldname:base64]]":
-                        $replacements[$tag] = array('html', $this->display_browse($entry, array('base64' => 1)));
+                        $displaybrowse = $this->display_browse($entry, array('base64' => 1));
                         break;
                     case "[[$fieldname:tn]]":
-                        $replacements["[[{$fieldname}:tn]]"] = array('html', $this->display_browse($entry, array('tn' => 1)));
+                        $displaybrowse = $this->display_browse($entry, array('tn' => 1));
                         break;
                     case "[[$fieldname:tn-linked]]":
-                        $replacements["[[$fieldname:tn-linked]]"] = array('html', $this->display_browse($entry, array('tn' => 1, 'linked' => 1)));
+                        $displaybrowse = $this->display_browse($entry, array('tn' => 1, 'linked' => 1));
                         break;
                     case "[[$fieldname:tn-base64]]":
-                        $replacements[$tag] = array('html', $this->display_browse($entry, array('tn' => 1, 'base64' => 1)));
+                        $displaybrowse = $this->display_browse($entry, array('tn' => 1, 'base64' => 1));
                         break;
                 }
+                
+                if (!empty($displaybrowse)) {
+                    if ($this->is_hidden($tag)) {
+                        $displaybrowse = html_writer::tag('span', $displaybrowse, array('class' => 'hide'));
+                    }
+                    $replacements[$tag] = array('html', $displaybrowse);
+                } else {
+                    $replacements[$tag] = '';
+                }            
             }
+
         }
 
         return $replacements;
@@ -84,10 +97,10 @@ class mod_dataform_field_picture_patterns extends mod_dataform_field_file_patter
     public function pluginfile_patterns() {
         $fieldname =  $this->_field->name();
         return array(
-                    "[[{$fieldname}]]",
-                    "[[{$fieldname}:linked]]",
-                    "[[{$fieldname}:tn-linked]]",
-                    );
+            "[[{$fieldname}]]",
+            "[[{$fieldname}:linked]]",
+            "[[{$fieldname}:tn-linked]]",
+        );
     }
 
     /**
@@ -121,10 +134,13 @@ class mod_dataform_field_picture_patterns extends mod_dataform_field_file_patter
             }
 
             // calculate src: either moodle url or base64
-            if (!empty($params['base64'])) {
+            if (!empty($params['download'])) {
+                return $this->display_link($file, $path, $altname, $params);
+            } else if (!empty($params['base64'])) {
                 $src = 'data:'. $file->get_mimetype(). ';base64,'. base64_encode($file->get_content());
             } else {
-                $src = new moodle_url("$path/$filename");
+                $pluginfileurl = new moodle_url('/pluginfile.php');
+                $src = moodle_url::make_file_url($pluginfileurl, "$path/$filename");
                 
                 // for url request return it here
                 if (!empty($params['url'])) {
@@ -133,9 +149,6 @@ class mod_dataform_field_picture_patterns extends mod_dataform_field_file_patter
             }
 
             $imgattr['src'] = $src;
-            //$imgattr['alt'] = $altname;
-            //$imgattr['title'] = $altname;
-            $imgattr['style'][] = "border:0px";
             $imgattr['style'] = implode(';', $imgattr['style']);
 
             $str = html_writer::empty_tag('img', $imgattr);

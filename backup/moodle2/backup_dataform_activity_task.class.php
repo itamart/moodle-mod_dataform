@@ -1,30 +1,23 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 2010 Eloy Lafuente (stronk7) {@link http://stronk7.com}
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once($CFG->dirroot . '/mod/dataform/backup/moodle2/backup_dataform_stepslib.php'); // Because it exists (must)
@@ -39,7 +32,31 @@ class backup_dataform_activity_task extends backup_activity_task {
      * Define (add) particular settings this activity can have
      */
     protected function define_my_settings() {
+        global $SESSION;
         // No particular settings for this activity
+        
+        // For packaging get root settings from SESSION and adjust root task
+        if (isset($SESSION->{"dataform_{$this->moduleid}_package"})) {
+            list($users, $anon) = explode(' ', $SESSION->{"dataform_{$this->moduleid}_package"});
+            list($roottask,,) = $this->plan->get_tasks();
+            // set users setting
+            $userssetting = &$roottask->get_setting('users');
+            $userssetting->set_value($users);
+            $this->plan->get_setting('users')->set_value($users);        
+            // disable dependencies if needed
+            if (!$users) {
+                $dependencies = &$userssetting->get_dependencies();
+                foreach ($dependencies as &$dependent) {
+                    $dependent_setting = &$dependent->get_dependent_setting();
+                    $dependent_setting->set_value(0);
+                }
+            }
+            // set anonymize
+            $anonsetting = &$roottask->get_setting('anonymize');
+            $anonsetting->set_value($anon);
+            $this->plan->get_setting('anonymize')->set_value($anon);        
+
+        }        
     }
 
     /**
@@ -64,24 +81,44 @@ class backup_dataform_activity_task extends backup_activity_task {
         $content= preg_replace($search, '$@DFINDEX*$2@$', $content);
 
         // Link to dataform by moduleid
-        $search="/(".$base."\/mod\/dataform\/view.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@DFBYID*$2@$', $content);
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?id\=)([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?id\=)([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWBYID*$2@$', '$@DFEMBEDBYID*$2@$');
+        $content= preg_replace($search, $replacement, $content);
 
         /// Link to dataform by dataform id
-        $search="/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)/";
-        $content= preg_replace($search,'$@DFBYD*$2@$', $content);
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWBYD*$2@$', '$@DFEMBEDBYD*$2@$');
+        $content= preg_replace($search, $replacement, $content);
 
         /// Link to one dataform view
-        $search="/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/";
-        $content= preg_replace($search,'$@DFVIEW*$2*$4@$', $content);
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWVIEW*$2*$4@$', '$@DFEMBEDVIEW*$2*$4@$');
+        $content= preg_replace($search, $replacement, $content);
 
         /// Link to one dataform view and filter
-        $search="/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/";
-        $content= preg_replace($search,'$@DFVIEWFILTER*$2*$4*$6@$', $content);
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWVIEWFILTER*$2*$4*$6@$', '$@DFEMBEDVIEWFILTER*$2*$4*$6@$');
+        $content= preg_replace($search, $replacement, $content);
 
         /// Link to one entry of the dataform
-        $search="/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/";
-        $content= preg_replace($search,'$@DFENTRY*$2*$4@$', $content);
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWENTRY*$2*$4@$', '$@DFEMBEDENTRY*$2*$4@$');
+        $content= preg_replace($search, $replacement, $content);
 
         return $content;
     }

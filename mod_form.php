@@ -1,32 +1,30 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
  * of Moodle's Database activity module (1.9.11+ (20110323)).
  * To the extent that Dataform code corresponds to Database code,
  * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
-defined('MOODLE_INTERNAL') or die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') or die;
 
 require_once ("$CFG->dirroot/course/moodleform_mod.php");
 
@@ -44,12 +42,12 @@ class mod_dataform_mod_form extends moodleform_mod {
         
         $mform = &$this->_form;
 
-    // buttons
-    //-------------------------------------------------------------------------------
+        // buttons
+        //-------------------------------------------------------------------------------
     	$this->add_action_buttons();
 
-    // name and intro
-    //-------------------------------------------------------------------------------
+        // name and intro
+        //-------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // name
@@ -65,8 +63,8 @@ class mod_dataform_mod_form extends moodleform_mod {
         // intro
         $this->add_intro_editor(false, get_string('intro', 'dataform'));
 
-    // timing
-    //-------------------------------------------------------------------------------
+        // timing
+        //-------------------------------------------------------------------------------
         $mform->addElement('header', 'timinghdr', get_string('timing', 'form'));
 
         // time available
@@ -90,17 +88,21 @@ class mod_dataform_mod_form extends moodleform_mod {
         // allow late
         $mform->addElement('checkbox', 'allowlate', get_string('dflateallow', 'dataform') , get_string('dflateuse', 'dataform'));
 
-    // rss
-    //-------------------------------------------------------------------------------
+        // rss
+        //-------------------------------------------------------------------------------
         if($CFG->enablerssfeeds && $CFG->dataform_enablerssfeeds){
             $mform->addElement('header', 'rssshdr', get_string('rss'));
 
             $mform->addElement('select', 'rssarticles', get_string('numberrssarticles', 'dataform') , $countoptions);
         }
 
-    // grading
-    //-------------------------------------------------------------------------------
-        $this->standard_grading_coursemodule_elements();
+        // grading
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', 'gradinghdr', get_string('rating', 'rating'));
+
+        // entry rating
+        $mform->addElement('modgrade', 'grade', get_string('grade'));
+        $mform->setDefault('grade', 0);
 
         // rating method
         $grademethods = array(
@@ -115,8 +117,12 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->setDefault('grademethod', 0);
         $mform->disabledIf('grademethod', 'grade', 'eq', 0);
         
-    // entry settings
-    //-------------------------------------------------------------------------------
+        // entry rating
+        $mform->addElement('modgrade', 'rating', get_string('rating', 'dataform'));
+        $mform->setDefault('rating', 0);
+
+        // entry settings
+        //-------------------------------------------------------------------------------
         $mform->addElement('header', 'entrysettingshdr', get_string('entrysettings', 'dataform'));
 
         // if there is an admin limit select from dropdown
@@ -157,51 +163,25 @@ class mod_dataform_mod_form extends moodleform_mod {
             $mform->disabledIf('maxentries', 'admindeniesentries', 'eq', 1);
         }
 
+        // anonymous entries
+        if ($CFG->dataform_anonymous) { 
+            $mform->addElement('selectyesno', 'anonymous', get_string('entriesanonymous', 'dataform'));
+            $mform->setDefault('anonymous', 0);
+        }
+        
+        // group entries
+        $mform->addElement('selectyesno', 'grouped', get_string('groupentries', 'dataform'));
+        $mform->disabledIf('grouped', 'groupmode', 'eq', 0);
+        $mform->disabledIf('grouped', 'groupmode', 'eq', -1);
+        
         // time limit to manage an entry
         $mform->addElement('text', 'timelimit', get_string('entrytimelimit', 'dataform'));
         $mform->setType('timelimit', PARAM_INT);
         $mform->setDefault('timelimit', '');
         $mform->addRule('timelimit', null, 'numeric', null, 'client');
 
-        // approval
-        $mform->addElement('selectyesno', 'approval', get_string('requireapproval', 'dataform'));
-
-        // group entries
-        $mform->addElement('selectyesno', 'grouped', get_string('groupentries', 'dataform'));
-        $mform->disabledIf('grouped', 'groupmode', 'eq', 0);
-        $mform->disabledIf('grouped', 'groupmode', 'eq', -1);
-        
-        // comments
-        $mform->addElement('selectyesno', 'comments', get_string('comments', 'dataform'));
-
-        // entry rating
-        $mform->addElement('modgrade', 'rating', get_string('rating', 'dataform'));
-        $mform->setDefault('rating', 0);
-
-        // entry locks
-        $locksarray = array();
-        $locksarray[] = &$mform->createElement('advcheckbox', 'lockonapproval', null, get_string('entrylockonapproval', 'dataform'), null, array(0,1));
-        $locksarray[] = &$mform->createElement('advcheckbox', 'lockoncomments', null, get_string('entrylockoncomments', 'dataform'), null, array(0,2));
-        $locksarray[] = &$mform->createElement('advcheckbox', 'lockonratings', null, get_string('entrylockonratings', 'dataform'), null, array(0,4));
-        $mform->addGroup($locksarray, 'locksarr', get_string('entrylocks', 'dataform'), '<br />', false);
-        //$mform->addHelpButton('locksarr', array('locksarr', get_string('entrylocks', 'dataform'), 'dataform'));
-
-        if ($this->_df !== null and $viewmenu = $this->_df->get_views(null, true)) {
-            $singleoptions = array(0 => get_string('choose')) + $viewmenu;
-        } else {
-            $singleoptions = array(0 => get_string('choose'));
-        }                
-
-        // edit view
-        $mform->addElement('select', 'singleedit', get_string('viewforedit', 'dataform'), $singleoptions);
-        //$mform->addHelpButton('singleedit', array('viewforedit', get_string('viewforedit', 'dataform'), 'dataform'));
-
-        // single view
-        $mform->addElement('select', 'singleview', get_string('viewformore', 'dataform'), $singleoptions);
-        //$mform->addHelpButton('singleview', array('viewformore', get_string('viewformore', 'dataform'), 'dataform'));
-
-    // common course elements
-    //-------------------------------------------------------------------------------
+        // common course elements
+        //-------------------------------------------------------------------------------
         $this->standard_coursemodule_elements();
 
         // add separate participants group option
@@ -209,32 +189,9 @@ class mod_dataform_mod_form extends moodleform_mod {
         $groups = &$mform->getElement('groupmode');
         $groups->addOption(get_string('separateparticipants', 'dataform'), -1);
 
-    // buttons
-    //-------------------------------------------------------------------------------
+        // buttons
+        //-------------------------------------------------------------------------------
     	$this->add_action_buttons();
-    }
-
-    /**
-     *
-     */
-    function data_preprocessing(&$default_values){
-        if (!empty($default_values->timeinterval)) {
-            $default_values->timedue = $default_values->timeinterval * $default_values->intervalcount;
-        }
-
-        if (!empty($default_values->locks)) {
-            $default_values->lockonapproval = $default_values->locks & 1;
-            $default_values->lockoncomments = $default_values->locks & 2;
-            $default_values->lockonratings = $default_values->locks & 4;
-        }
-    }
-
-    /**
-     *
-     */
-    function set_data($default_values) {
-        $this->data_preprocessing($default_values);
-        parent::set_data($default_values);
     }
 
     /**
@@ -242,16 +199,9 @@ class mod_dataform_mod_form extends moodleform_mod {
      */
     function get_data($slashed = true) {
         if ($data = parent::get_data($slashed)) {
-            // reset grading
-            if ($data->grade = 0) {
-                $data->grademethod = 0;
+            if (!empty($data->timeinterval)) {
+                $data->timedue = $data->timeavailable + ($data->timeinterval * $data->intervalcount);
             }
-            // set locks
-            $lockonapproval = !empty($data->lockonapproval) ? $data->lockonapproval : 0;
-            $lockoncomments = !empty($data->lockoncomments) ? $data->lockoncomments : 0;
-            $lockonratings = !empty($data->lockonratings) ? $data->lockonratings : 0;
-
-            $data->locks = $lockonapproval | $lockoncomments | $lockonratings;
         }
         return $data;
     }

@@ -1,31 +1,24 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-select
+ * @subpackage dataformfield-select
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 1999 Moodle Pty Ltd http://moodle.com
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
@@ -35,23 +28,90 @@ class dataform_field_select extends dataform_field_base {
     public $type = 'select';
 
     /**
-     * 
+     * Update a field in the database
      */
-    public function update_content($entry, array $values = null) {
+    public function update_field($fromform = null) {
         global $DB;
-
-        $fieldid = $this->field->id;
         
-        $selected = $newvalue = null;
-        if (!empty($values)) {
-            foreach ($values as $name => $value) {
-                $names = explode('_', $name);
-                if (!empty($names[3]) and !empty($value)) {
-                    ${$names[3]} = $value;
+        // before we update get the current options
+        $oldoptions = $this->options_menu();
+        // update
+        parent::update_field($fromform);       
+
+        // adjust content if necessary
+        $adjustments = array();
+        $newoptions = $this->options_menu();
+        foreach ($newoptions as $newkey => $value) {
+            if (!isset($oldoptions[$newkey]) or $value != $oldoptions[$newkey]) {
+                if ($key = array_search($value, $oldoptions) or $key !== false) {
+                    $adjustments[$key] = $newkey;
                 }
             }
         }
 
+        if (!empty($adjustments)) {
+            // fetch all contents of the field whose content in keys
+            list($incontent, $params) = $DB->get_in_or_equal(array_keys($adjustments));
+            array_unshift($params, $this->field->id);
+            $contents = $DB->get_records_select_menu('dataform_contents',
+                                        " fieldid = ? AND content $incontent ",
+                                        $params,
+                                        '',
+                                        'id,content'); 
+            if ($contents) {
+                if (count($contents) == 1) {
+                    list($id, $content) = each($contents);
+                    $DB->set_field('dataform_contents', 'content', $adjustments[$content], array('id' => $id));
+                } else { 
+                    $params = array();
+                    $sql = "UPDATE {dataform_contents} SET content = CASE id ";
+                    foreach ($contents as $id => $content) {
+                        $newcontent = $adjustments[$content];
+                        $sql .= " WHEN ? THEN ? ";
+                        $params[] = $id;
+                        $params[] = $newcontent;
+                    }
+                    list($inids, $paramids) = $DB->get_in_or_equal(array_keys($contents));
+                    $sql .= " END WHERE id $inids ";
+                    $params = array_merge($params, $paramids);
+                    $DB->execute($sql, $params);
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
+     */
+    protected function content_names() {
+        return array('selected', 'newvalue');
+    }
+    
+
+    /**
+     *
+     */
+    protected function format_content($entry, array $values = null) {
+        $fieldid = $this->field->id;
+        // old contents
+        $oldcontents = array();
+        if (isset($entry->{"c{$fieldid}_content"})) {
+            $oldcontents[] = $entry->{"c{$fieldid}_content"};
+        }
+        // new contents
+        $contents = array();
+
+        $selected = $newvalue = null;
+        if (!empty($values)) {
+            foreach ($values as $name => $value) {
+                $value = (string) $value;
+                if (!empty($name) and !empty($value)) {
+                    ${$name} = $value;
+                }
+            }
+        }        
+        // update new value in the field type
         if ($newvalue = s($newvalue)) {
             $options = $this->options_menu();
             if (!$selected = (int) array_search($newvalue, $options)) {
@@ -60,30 +120,12 @@ class dataform_field_select extends dataform_field_base {
                 $this->update_field();
             }
         }
-
-        $oldcontent = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
-        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-        
-        $rec = new object();
-        $rec->fieldid = $this->field->id;
-        $rec->entryid = $entry->id;
-        $rec->content = $selected;
-
-        if (!empty($oldcontent)) {
-            if ($selected != $oldcontent) {
-                if (empty($selected)) {
-                    $this->delete_content($entry->id);
-                } else {
-                    $rec->id = $contentid; // MUST_EXIST
-                    return $DB->update_record('dataform_contents', $rec);
-                 }
-            }
-        } else {
-            if (!empty($selected)) {
-                return $DB->insert_record('dataform_contents', $rec);
-            }
+        // add the content
+        if (!is_null($selected)) {
+            $contents[] = $selected;
         }
-        return true;
+
+        return array($contents, $oldcontents);
     }
 
     /**
@@ -103,7 +145,7 @@ class dataform_field_select extends dataform_field_base {
         $key = 1;
         foreach ($rawoptions as $option) {
             $option = trim($option);
-            if ($option) {
+            if ($option != '') {
                 $options[$key] = $option;
                 $key++;
             }

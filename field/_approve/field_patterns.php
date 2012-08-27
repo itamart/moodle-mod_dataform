@@ -1,32 +1,25 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-_approve
+ * @subpackage dataformfield-_approve
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 defined('MOODLE_INTERNAL') or die();
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
@@ -39,15 +32,17 @@ class mod_dataform_field__approve_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
-        // no edit mode
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
+        $df = $this->_field->df();
+
+        $canapprove = has_capability('mod/dataform:approve', $df->context);
+        $edit = !empty($options['edit']) ? $options['edit'] and $canapprove : false;
         $replacements = array();
         // just one tag, empty until we check df settings
         $replacements['##approve##'] = '';
         
-        $df = $this->_field->df();
         if ($df->data->approval) {
-            if ((!$entry or $edit) and has_capability('mod/dataform:approve', $df->context)) {
+            if (!$entry or $edit) {
                 $replacements['##approve##'] = array('', array(array($this,'display_edit'), array($entry)));
 
             // existing entry to browse 
@@ -62,7 +57,7 @@ class mod_dataform_field__approve_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function display_search($mform, $i = 0, $value = '') {
+    public function display_search(&$mform, $i = 0, $value = '') {
         $field = $this->_field;
         $fieldid = $field->id();
 
@@ -118,8 +113,10 @@ class mod_dataform_field__approve_patterns extends mod_dataform_field_patterns {
                                                             'title' => $strapproved));
                                                             
         if (has_capability('mod/dataform:approve', $field->df()->context)) {
-            return '<a href="'. $entry->baseurl. '&amp;'. $approval. '='. $entry->id. '&amp;sesskey='. sesskey(). '">'.
-                    $approvedimage. '</a>';
+            return html_writer::link(
+                new moodle_url($entry->baseurl, array($approval => $entry->id, 'sesskey' => sesskey())),
+                $approvedimage
+            );
         } else {
             return $approvedimage;
         }

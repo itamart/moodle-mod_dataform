@@ -1,31 +1,24 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 require_once('../../config.php');
 require_once('mod_class.php');
 
@@ -37,12 +30,12 @@ $urlparams->vedit = optional_param('vedit', 0, PARAM_INT);     // view id to edi
 
 // views list actions
 $urlparams->default    = optional_param('default', 0, PARAM_INT);  // id of view to default
-$urlparams->visible    = optional_param('visible', 0, PARAM_SEQUENCE);     // ids (comma delimited) of views to hide/(show)/show
-$urlparams->hide       = optional_param('hide', 0, PARAM_SEQUENCE);     // ids (comma delimited) of views to hide
+$urlparams->singleedit = optional_param('singleedit', 0, PARAM_INT);  // id of view to single edit
+$urlparams->singlemore = optional_param('singlemore', 0, PARAM_INT);  // id of view to single more
+$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // id of view to hide/(show)/show
 $urlparams->reset     = optional_param('reset', 0, PARAM_SEQUENCE);   // ids (comma delimited) of views to delete
 $urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // ids (comma delimited) of views to delete
 $urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // ids (comma delimited) of views to duplicate
-// TODO
 $urlparams->setfilter     = optional_param('setfilter', 0, PARAM_INT);  // id of view to filter
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
@@ -69,13 +62,24 @@ if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested v
 } else if ($urlparams->visible and confirm_sesskey()) {    // set view's visibility
     $df->process_views('visible', $urlparams->visible, true);    // confirmed by default
 
-} else if ($urlparams->hide and confirm_sesskey()) {  // hide any requested views
-    $df->process_views('hide', $urlparams->hide, true);
-
 } else if ($urlparams->default and confirm_sesskey()) {  // set view to default
     $df->process_views('default', $urlparams->default, true);    // confirmed by default
 
-} else if ($urlparams->setfilter and confirm_sesskey()) {  // set view to default
+} else if ($urlparams->singleedit and confirm_sesskey()) {  // set view to single edit
+    if ($urlparams->singleedit == -1) {
+        $df->set_single_edit_view();    // reset
+    } else {
+        $df->set_single_edit_view($urlparams->singleedit); 
+    }
+
+} else if ($urlparams->singlemore and confirm_sesskey()) {  // set view to single more
+    if ($urlparams->singlemore == -1) {
+        $df->set_single_more_view();    // reset
+    } else {
+        $df->set_single_more_view($urlparams->singlemore); 
+    }
+
+} else if ($urlparams->setfilter and confirm_sesskey()) {  // re/set view filter
     $df->process_views('filter', $urlparams->setfilter, true);    // confirmed by default
 
 }
@@ -121,28 +125,32 @@ if ($views) {
     $strtype = get_string('type', 'dataform');
     $strdescription = get_string('description');
     $strvisible = get_string('visible');
-    $strdefault = get_string('default');
+    $strdefault = get_string('defaultview', 'dataform');
+    $strsingleedit = get_string('singleedit', 'dataform');
+    $strsinglemore = get_string('singlemore', 'dataform');
     $strfilter = get_string('filter', 'dataform');
     $stredit = get_string('edit');
     $strdelete = get_string('delete');
     $strduplicate =  get_string('duplicate');
+    $strchoose = get_string('choose');
 
     $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'view\'&#44;this.checked)'));
-    $multidelete = html_writer::tag('button', 
-                                $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), 
-                                array('name' => 'multidelete',
-                                        'onclick' => 'bulk_action(\'view\'&#44; \''. htmlspecialchars_decode(new moodle_url($actionbaseurl, $linkparams)). '\'&#44; \'delete\')'));
+    $multideleteurl = new moodle_url($actionbaseurl, $linkparams);
+    $multidelete = html_writer::tag(
+        'button', 
+        $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), 
+        array('name' => 'multidelete', 'onclick' => 'bulk_action(\'view\'&#44; \''. $multideleteurl->out(false). '\'&#44; \'delete\')'));
 
     $strhide = get_string('hide');
     $strshow = get_string('show');
     $strreset =  get_string('reset');
     
-    $filtersmenu = $df->get_filters(null, true);
+    $filtersmenu = $df->get_filter_manager()->get_filters(null, true);
         
     $table = new html_table();
-    $table->head = array($strviews, $strtype, $strdescription, $strvisible, $strdefault, $strfilter, $stredit, $strduplicate, $strreset, $multidelete, $selectallnone);
-    $table->align = array('left', 'left', 'left', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center');
-    $table->wrap = array(false, false, false, false, false, false, false, false, false, false, false);
+    $table->head = array($strviews, $strtype, $strdescription, $strvisible, $strdefault, $strsingleedit, $strsinglemore, $strfilter, $stredit, $strduplicate, $strreset, $multidelete, $selectallnone);
+    $table->align = array('left', 'left', 'left', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center');
+    $table->wrap = array(false, false, false, false, false, false, false, false, false, false, false, false, false);
     $table->attributes['align'] = 'center';
     
     foreach ($views as $viewid => $view) {
@@ -161,44 +169,67 @@ if ($views) {
         $viewselector = html_writer::checkbox("viewselector", $viewid, false);
 
         // visible
-        if ($visibile = $view->view->visible) {
+        if ($visible = $view->view->visible) {
             $visibleicon = $OUTPUT->pix_icon('t/hide', $strhide);
-            $visibleicon = $visibile == 1 ? "($visibleicon)" : $visibleicon;
+            $visibleicon = $visible == 1 ? "($visibleicon)" : $visibleicon;
         } else {
            $visibleicon = $OUTPUT->pix_icon('t/show', $strshow);
         }
-        $visible = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('visible' => $viewid)), $visibleicon);
+        $viewvisible = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('visible' => $viewid)), $visibleicon);
 
         // default view
         if ($viewid == $df->data->defaultview) {
-            $defaultview = $OUTPUT->pix_icon('t/clear', $strdefault);
+            $defaultview = $OUTPUT->pix_icon('t/clear', '');
         } else {
-            $defaultview = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('default' => $viewid)), get_string('choose'));
+            $defaultview = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('default' => $viewid)), $OUTPUT->pix_icon('t/switch_whole', $strchoose));
         }
         
-        // view filter
-        // TODO
-        if ($view->filter() !== false) {
-            if (!empty($filtersmenu)) {
-                if ($view->filter() and !in_array($view->filter(), array_keys($filtersmenu))) {
-                    $viewfilter = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array(setfilter => $viewid, 'fid' => 0)),
-                                $OUTPUT->pix_icon('i/risk_xss', $strreset));
-                } else {
-                    $viewfilter = html_writer::select($filtersmenu, '', $view->filter(), array('' => 'choosedots'), array('onchange' => 'location.href=\'views.php?d='. $df->id(). '&amp;setfilter='. $viewid. '&amp;fid=\'+this.selectedIndex+\'&amp;sesskey='.sesskey().'\''));
-                }
+        // single edit view
+        if ($viewid == $df->data->singleedit) {
+            $singleedit = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('singleedit' => -1)), $OUTPUT->pix_icon('t/clear', ''));
+        } else {
+            $singleedit = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('singleedit' => $viewid)), $OUTPUT->pix_icon('t/switch_whole', $strchoose));
+        }
+        
+        // single more view
+        if ($viewid == $df->data->singleview) {
+            $singlemore = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('singlemore' => -1)), $OUTPUT->pix_icon('t/clear', ''));
+        } else {
+            $singlemore = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('singlemore' => $viewid)), $OUTPUT->pix_icon('t/switch_whole', $strchoose));
+        }
+        
+        // TODO view filter
+        if (!empty($filtersmenu)) {
+            $viewfilterid = $view->view->filter;
+            if ($viewfilterid and !in_array($viewfilterid, array_keys($filtersmenu))) {
+                $viewfilter = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('setfilter' => $viewid, 'fid' => -1)), $OUTPUT->pix_icon('i/risk_xss', $strreset));
+            
             } else {
-                $viewfilter = get_string('filtersnonedefined', 'dataform');
+                if ($viewfilterid) {
+                    $selected = $viewfilterid;
+                    $options = array(-1 => '* '. get_string('reset')) + $filtersmenu;
+                } else {
+                    $selected = '';
+                    $options = $filtersmenu;
+                }
+                
+                $selecturl = new moodle_url($actionbaseurl, $linkparams + array('setfilter' => $viewid));
+                $viewselect = new single_select($selecturl, 'fid', $options, $selected, array('' => 'choosedots'));
+
+                $viewfilter = $OUTPUT->render($viewselect);
             }
         } else {
-            $viewfilter = '-';
+            $viewfilter = get_string('filtersnonedefined', 'dataform');
         }
         
         $table->data[] = array(
             $viewname,
             $viewtype,
             $viewdescription,
-            $visible,
+            $viewvisible,
             $defaultview,
+            $singleedit,
+            $singlemore,
             $viewfilter,
             $viewedit,
             $viewduplicate,

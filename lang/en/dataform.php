@@ -1,8 +1,20 @@
 <?php
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -10,21 +22,7 @@
  * The Dataform has been developed as an enhanced counterpart
  * of Moodle's Database activity module (1.9.11+ (20110323)).
  * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 1999 Martin Dougiamas {@link http://moodle.com}
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ * certain copyrights on the Database module may obtain.
  */
 
 $string['actions'] = 'Entry actions';
@@ -49,20 +47,25 @@ $string['commentsaved'] = 'Comment saved';
 $string['comments'] = 'Comments';
 $string['commentsn'] = '{$a} comments';
 $string['commentsnone'] = 'No comments';
+$string['configanonymousentries'] = 'This switch will enable the possibility of guest/anonymous entries for all dataforms. You will still need to turn anonymous on manually in the settings for each dataform.';
 $string['configenablerssfeeds'] = 'This switch will enable the possibility of RSS feeds for all dataforms. You will still need to turn feeds on manually in the settings for each dataform.';
 $string['configmaxentries'] = 'This value determines the maximum number of entries that may be added to a dataform activity.';
 $string['configmaxfields'] = 'This value determines the maximum number of fields that may be added to a dataform activity.';
 $string['configmaxfilters'] = 'This value determines the maximum number of filters that may be added to a dataform activity.';
 $string['configmaxviews'] = 'This value determines the maximum number of views that may be added to a dataform activity.';
 $string['correct'] = 'Correct';
+$string['csscode'] = 'CSS code';
 $string['cssinclude'] = 'CSS';
+$string['cssincludes'] = 'Include external CSS';
 $string['csssaved'] = 'CSS saved';
+$string['cssupload'] = 'Upload CSS files';
 $string['csvdelimiter'] = 'delimiter';
 $string['csvenclosure'] = 'enclosure';
 $string['csvfailed'] = 'Unable to read the raw data from the CSV file';
 $string['csvoutput'] = 'CSV output';
 $string['csvsettings'] = 'CSV settings';
 $string['csvwithselecteddelimiter'] = '<acronym title=\"Comma Separated Values\">CSV</acronym> text with selected delimiter:';
+$string['dataform:addinstance'] = 'Add a new dataform';
 $string['dataform:approve'] = 'Approve unapproved entries';
 $string['dataform:comment'] = 'Write comments';
 $string['dataform:exportallentries'] = 'Export all entries';
@@ -78,10 +81,11 @@ $string['dataform:rate'] = 'Rate entries';
 $string['dataform:ratingsviewall'] = 'View all ratings';
 $string['dataform:ratingsviewany'] = 'View any ratings';
 $string['dataform:ratingsview'] = 'View ratings';
+$string['dataform:viewanonymousentry'] = 'View anonymous entries';
 $string['dataform:viewentry'] = 'View entries';
+$string['dataform:viewindex'] = 'View index';
 $string['dataform:writeentry'] = 'Write entries';
-$string['defaultsortdir'] = 'Sort direction';
-$string['defaultsortorder'] = 'Sort order';
+$string['defaultview'] = 'D';
 $string['deletenotenrolled'] = 'Delete entries by users not enrolled';
 $string['descending'] = 'Descending';
 $string['dfintervalcount'] = 'Number of intervals';
@@ -98,7 +102,9 @@ $string['dots'] = '...';
 $string['download'] = 'Download';
 $string['editordisable'] = 'Disable editor';
 $string['editorenable'] = 'Enable editor';
+$string['embed'] = 'Embed';
 $string['entriesadded'] = '{$a} entry(s) added';
+$string['entriesanonymous'] = 'Allow anonymous entries';
 $string['entriesappended'] = '{$a} entry(s) appended';
 $string['entriesapproved'] = '{$a} entry(s) approved';
 $string['entriesconfirmadd'] = 'You are about to duplicate {$a} entry(s). Would you like to proceed?';
@@ -145,7 +151,9 @@ $string['fieldallowautolink'] = 'Allow autolink';
 $string['fieldattributes'] = 'Field attributes';
 $string['fieldcreate'] = 'Create a new field';
 $string['fielddescription'] = 'Field description';
+$string['fieldeditable'] = 'Editable';
 $string['fieldedit'] = 'Editing \'{$a}\'';
+$string['fieldedits'] = 'Number of edits';
 $string['field'] = 'field';
 $string['fieldids'] = 'Field ids';
 $string['fieldmappings'] = 'Field Mappings';
@@ -153,11 +161,12 @@ $string['fieldname'] = 'Field name';
 $string['fieldnew'] = 'New {$a} field';
 $string['fieldnoneforaction'] = 'No fields were found for the requested action';
 $string['fieldnoneindataform'] = 'There are no fields defined for this dataform.';
-$string['fieldnonematching'] = 'No matching fields foundli';
+$string['fieldnonematching'] = 'No matching fields found';
 $string['fieldnotmatched'] = 'The following fields in your file are not known in this dataform: {$a}';
 $string['fieldoptionsdefault'] = 'Default values (one per line)';
 $string['fieldoptions'] = 'Options (one per line)';
 $string['fieldoptionsseparator'] = 'Options separator';
+$string['fieldrules'] = 'Field edit rules';
 $string['fieldsadded'] = 'Fields added';
 $string['fieldsconfirmdelete'] = 'You are about to delete {$a} field(s). Would you like to proceed?';
 $string['fieldsconfirmduplicate'] = 'You are about to duplicate {$a} field(s). Would you like to proceed?';
@@ -166,6 +175,10 @@ $string['fields'] = 'Fields';
 $string['fieldsmax'] = 'Maximum fields';
 $string['fieldsnonedefined'] = 'No fields defined';
 $string['fieldsupdated'] = 'Fields updated';
+$string['fieldvisibility'] = 'Visibile to';
+$string['fieldvisibleall'] = 'Everyone';
+$string['fieldvisiblenone'] = 'Managers only';
+$string['fieldvisibleowner'] = 'Owner and managers';
 $string['fieldwidth'] = 'Width';
 $string['filemaxsize'] = 'Total size of uploded files';
 $string['filesmax'] = 'Max number of uploaded files';
@@ -177,16 +190,19 @@ $string['filetypejpg'] = 'jpg files';
 $string['filetypepng'] = 'png files';
 $string['filetypes'] = 'Accepted file types';
 $string['filteradd'] = 'Add a filter';
+$string['filterbypage'] = 'By page';
 $string['filtercancel'] = 'Cancel filter';
 $string['filtercreate'] = 'Create a new filter';
 $string['filtercurrent'] = 'Current filter';
 $string['filtercustomsearch'] = 'Search options';
 $string['filtercustomsort'] = 'Sort options';
 $string['filterdescription'] = 'Filter description';
+$string['filteredit'] = 'Editing \'{$a}\'';
 $string['filter'] = 'filter';
 $string['filtergroupby'] = 'Group by';
-$string['filtername'] = 'Filter name';
-$string['filternew'] = 'Create a new filter';
+$string['filterincomplete'] = 'Search condition must be completed.';
+$string['filtername'] = 'Dataform auto-linking';
+$string['filternew'] = 'New filter';
 $string['filternoneforaction'] = 'No filters were found for the requested action';
 $string['filterperpage'] = 'Per page';
 $string['filtersadded'] = '{$a} filter(s) added';
@@ -195,6 +211,7 @@ $string['filtersconfirmdelete'] = 'You are about to delete {$a} filter(s). Would
 $string['filtersconfirmduplicate'] = 'You are about to duplicate {$a} filter(s). Would you like to proceed?';
 $string['filtersdeleted'] = '{$a} filter(s) deleted';
 $string['filtersduplicated'] = '{$a} filter(s) duplicated';
+$string['filterselection'] = 'Selection';
 $string['filters'] = 'Filters';
 $string['filtersimplesearch'] = 'Simple search';
 $string['filtersmax'] = 'Maximum filters';
@@ -210,12 +227,14 @@ $string['formemptyadd'] = 'You did not fill out any fields!';
 $string['fromfile'] = 'Import from zip file';
 $string['generalactions'] = 'General actions';
 $string['getstartedfields'] = 'You can add fields in the {$a} section.';
-$string['getstartedpackages'] = 'You can check out available dataform packages and apply a package in the {$a} section.'; 
+$string['getstartedpackages'] = 'You can check out available dataform packages and apply a package in the {$a} section.';
 $string['getstarted'] = 'This dataform appears to be new or with incomplete setup.<br /> You can get the dataform started by applying a package<br />or adding fields and views.';
 $string['getstartedviews'] = 'You can add views in the {$a} section.';
+$string['grade'] = 'Grade';
 $string['gradeinputtype'] = 'Grade input type';
 $string['grading'] = 'Grading';
 $string['gradingmethod'] = 'Grading method';
+$string['gradingsettings'] = 'Activity grading settings';
 $string['groupentries'] = 'Group entries';
 $string['groupinfo'] = 'Group info';
 $string['headercss'] = 'Custom CSS styles for all views';
@@ -232,13 +251,22 @@ $string['intro'] = 'Introduction';
 $string['invalidname'] = 'Please choose another name for this {$a}';
 $string['invalidrate'] = 'Invalid dataform rate ({$a})';
 $string['invalidurl'] = 'The URL you just entered is not valid';
+$string['jscode'] = 'Javascript code';
 $string['jsinclude'] = 'Javascript';
+$string['jsincludes'] = 'Include external javascript';
 $string['jssaved'] = 'Javascript saved';
+$string['jsupload'] = 'Upload javascript files';
+$string['lock'] = 'Lock';
 $string['manage'] = 'Manage';
 $string['mappingwarning'] = 'All old fields not mapped to a new field will be lost and all data in that field will be removed.';
+$string['max'] = 'Maximum';
 $string['maxsize'] = 'Maximum size';
 $string['mediafile'] = 'Media file';
 $string['menus'] = 'Menus';
+$string['messageprovider:message'] = 'Dataform reminder';
+$string['messageprovider:paypal'] = 'Paypal IPN';
+$string['messageprovider:submission'] = 'Dataform notifications';
+$string['min'] = 'Minimum';
 $string['modulename'] = 'Dataform';
 $string['modulename_help'] = 'The dataform module may be used for creating a wide range of activities/resources by allowing the instructor/manager to design and create a custom content form from various input elements (e.g.  texts, numbers, images, files, urls, etc.), and participants to submit content and view submitted content.';
 $string['modulenameplural'] = 'Dataforms';
@@ -264,6 +292,7 @@ $string['notapproved'] = 'Entry is not approved yet.';
 $string['notinjectivemap'] = 'Not an injective map';
 $string['notopenyet'] = 'Sorry, this activity is not available until {$a}';
 $string['numberrssarticles'] = 'RSS articles';
+$string['numcharsallowed'] = 'Number of characters';
 $string['optionaldescription'] = 'Short description (optional)';
 $string['optionalfilename'] = 'Filename (optional)';
 $string['other'] = 'Other';
@@ -274,12 +303,15 @@ $string['packageapply'] = 'Apply';
 $string['packageavailableincourse'] = 'Course packages';
 $string['packageavailableinsite'] = 'Site packages';
 $string['packagechoose'] = 'choose a predfined package';
+$string['packagedataanon'] = 'with user data anonymized';
+$string['packagedata'] = 'with user data';
 $string['packagefaileddelete'] = 'Error deleting a package!';
 $string['packagefromdataform'] = 'Package this dataform';
 $string['packagefromfile'] = 'Upload package from file';
 $string['packageimportsuccess'] = 'The package has been successfully applied.';
 $string['packageinfo'] = 'Saving as a package will publish this view. Other users may be able to use it in their dataforms.';
 $string['packagemap'] = 'map fields';
+$string['packagenodata'] = 'without user data';
 $string['packagenodefinedfields'] = 'New package has no defined fields!';
 $string['packagenodefinedviews'] = 'New package has no defined views!';
 $string['packagenoneavailable'] = 'No available packages to display';
@@ -302,6 +334,8 @@ $string['pluginname'] = 'Dataform';
 $string['porttypeblank'] = 'Blank entries';
 $string['porttypecsv'] = 'CSV';
 $string['randomone'] = 'One random';
+$string['random'] = 'Random';
+$string['range'] = 'Range';
 $string['rate'] = 'Rate';
 $string['ratingmanual'] = 'Manual';
 $string['ratingmethod'] = 'Rating method';
@@ -322,6 +356,7 @@ $string['ratingsviewrate'] = 'View and rate';
 $string['ratingsview'] = 'View ratings';
 $string['ratingvalue'] = 'Rating value';
 $string['reference'] = 'Reference';
+$string['renew'] = 'Renew';
 $string['requireapproval'] = 'Require approval?';
 $string['requiredall'] = 'all required';
 $string['requirednotall'] = 'not all required';
@@ -331,6 +366,36 @@ $string['rssglobaldisabled'] = 'Disabled. See site configuration variables.';
 $string['rsshowmany'] = '(number of latest entries to show, 0 to disable RSS)';
 $string['rsstemplate'] = 'RSS template';
 $string['rsstitletemplate'] = 'RSS title template';
+$string['ruleaction'] = 'Rule action';
+$string['ruleadd'] = 'Add a rule';
+$string['rulebypage'] = 'By page';
+$string['rulecancel'] = 'Cancel rule';
+$string['rulecondition'] = 'Condition';
+$string['rulecreate'] = 'Create a new rule';
+$string['rulecustomsearch'] = 'Search options';
+$string['ruledenydelete'] = 'Prevent entry deletion';
+$string['ruledenyedit'] = 'Prevent entry editing';
+$string['ruledenyviewbyother'] = 'Hide entry from everyone but owner';
+$string['ruledenyview'] = 'Hide entry from everyone';
+$string['ruledescription'] = 'Rule description';
+$string['ruleedit'] = 'Editing \'{$a}\'';
+$string['rulename'] = 'Dataform auto-linking';
+$string['rulenew'] = 'New rule';
+$string['rulenoneforaction'] = 'No rules were found for the requested action';
+$string['rule'] = 'rule';
+$string['rulesadded'] = '{$a} rule(s) added';
+$string['rulesave'] = 'Save rule';
+$string['rulesconfirmdelete'] = 'You are about to delete {$a} rule(s). Would you like to proceed?';
+$string['rulesconfirmduplicate'] = 'You are about to duplicate {$a} rule(s). Would you like to proceed?';
+$string['rulesdeleted'] = '{$a} rule(s) deleted';
+$string['rulesduplicated'] = '{$a} rule(s) duplicated';
+$string['rules'] = 'Entry rules';
+$string['rulesmax'] = 'Maximum rules';
+$string['rulesnonedefined'] = 'No rules defined';
+$string['rulesnoneindataform'] = 'There are no rules defined for this dataform.';
+$string['rules'] = 'Rules';
+$string['rulesupdated'] = '{$a} rule(s) updated';
+$string['ruleupdate'] = 'Update an existing rule';
 $string['savecontinue'] = 'Save and continue';
 $string['search'] = 'Search';
 $string['sendinratings'] = 'Send in my latest ratings';
@@ -338,6 +403,8 @@ $string['separateentries'] = 'Each entry in a separate file';
 $string['separateparticipants'] = 'Separate participants';
 $string['settings'] = 'Settings';
 $string['showall'] = 'Show all entries';
+$string['singleedit'] = 'E';
+$string['singlemore'] = 'M';
 $string['spreadsheettype'] = 'Spreadsheet type';
 $string['submissionsinpopup'] = 'Submissions in popup';
 $string['submission'] = 'Submission';
@@ -349,12 +416,14 @@ $string['subplugintype_dataformpackage_plural'] = 'Dataform package types';
 $string['subplugintype_dataformview'] = 'Dataform view type';
 $string['subplugintype_dataformview_plural'] = 'Dataform view types';
 $string['teachersandstudents'] = '{$a->teachers} and {$a->students}';
+$string['textbox'] = 'Text box';
 $string['timecreated'] = 'Time created';
 $string['timemodified'] = 'Time modified';
 $string['todataform'] = 'to this dataform.';
+$string['tools'] = 'Tools';
 $string['trusttext'] = 'Trust text';
 $string['type'] = 'Type';
-$string['updatedefaultsort'] = 'Update sort settings';
+$string['unlock'] = 'Unlock';
 $string['updatefield'] = 'Update an existing field';
 $string['updateview'] = 'Update an existing view';
 $string['userfirstname'] = 'User first name';
@@ -396,6 +465,8 @@ $string['viewnew'] = 'New {$a} view';
 $string['viewnodefault'] = 'Default view is not set. Choose one of the views in the {$a} list as the default view.';
 $string['viewnoneforaction'] = 'No views were found for the requested action';
 $string['viewnoneindataform'] = 'There are no views defined for this dataform.';
+$string['toolnoneindataform'] = 'There are no tools defined for this dataform.';
+$string['toolrun'] = 'Run';
 $string['viewoptions'] = 'View options';
 $string['viewpagingfield'] = 'Paging field';
 $string['viewperpage'] = 'Per page';
@@ -415,4 +486,5 @@ $string['viewtodate'] = 'Viewable to';
 $string['view'] = 'view';
 $string['viewvisibility'] = 'Visibility';
 $string['wrongdataid'] = 'Wrong dataform id provided';
+
 

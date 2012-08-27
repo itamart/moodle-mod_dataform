@@ -1,31 +1,31 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
  * of Moodle's Database activity module (1.9.11+ (20110323)).
  * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 2005 Moodle Pty Ltd http://moodle.com
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ * certain copyrights on the Database module may obtain.
  */
+
+require_once('filter/filter_class.php');
 
 /**
  * Dataform class
@@ -46,6 +46,11 @@ class dataform {
     const _USERPICTURE = -12;
     const _COMMENT = -13;
     const _RATING = -14;
+    const _RATINGAVG = -141;
+    const _RATINGCOUNT = -142;
+    const _RATINGMAX = -143;
+    const _RATINGMIN = -144;
+    const _RATINGSUM = -145;
 
     const PACKAGE_COURSEAREA = 'course_packages';
     const PACKAGE_SITEAREA = 'site_packages';
@@ -70,9 +75,11 @@ class dataform {
 
     public $notifications = array('bad' => array(), 'good' => array());
 
+    protected $pagefile = 'view';
     protected $fields = array();
     protected $views = array();
-    protected $filters = array();
+    protected $filtermanager = null;
+    protected $rules = array();
     protected $_currentview = null;
 
     // internal fields
@@ -81,12 +88,6 @@ class dataform {
     // internal group modes
     protected $internalgroupmodes = array(
             'separateparticipants' => -1
-    );
-
-    protected $locks = array(
-            'approval'   => 1,
-            'comments'   => 2,
-            'ratings'   => 4
     );
 
     /**
@@ -100,47 +101,29 @@ class dataform {
             if (is_object($d)) { // try object first
                 $this->data = $d;
             } else if (!$this->data = $DB->get_record('dataform', array('id' => $d))) {
-                print_error("Invalid Dataform ID: $d");
+                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: $d");
             }
             if (!$this->course = $DB->get_record('course', array('id' => $this->data->course))) {
-                print_error('Course is misconfigured');
+                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Course id: {$this->data->course}");
             }
             if (!$this->cm = get_coursemodule_from_instance('dataform', $this->id(), $this->course->id)) {
-                print_error('Course Module ID was incorrect');
+                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Cm id: {$this->id()}");
             }
         // initialize from course module id
         } else if ($id) {
             if (!$this->cm = get_coursemodule_from_id('dataform', $id)) {
-                print_error('Course Module ID was incorrect');
+                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Cm id: $id");
             }
             if (!$this->course = $DB->get_record('course', array('id' => $this->cm->course))) {
-                print_error('Course is misconfigured');
+                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Course id: {$this->cm->course}");
             }
             if (!$this->data = $DB->get_record('dataform', array('id' => $this->cm->instance))) {
-                print_error('Course module is incorrect');
+                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: {$this->cm->instance}");
             }
         }
 
-        // initialize the internal fields
-        $dataid = $this->data->id;
-        $this->internalfields[dataform::_ENTRY] = (object) array('id' => dataform::_ENTRY, 'dataid' => $dataid, 'type' => '_entry', 'name' => get_string('entry', 'dataform'), 'description' => '' , 'internalname' => '');
-        $this->internalfields[dataform::_TIMECREATED] =(object) array('id' => dataform::_TIMECREATED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timecreated', 'dataform'), 'description' => '' , 'internalname' => 'timecreated');
-        $this->internalfields[dataform::_TIMEMODIFIED] =(object) array('id' => dataform::_TIMEMODIFIED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timemodified', 'dataform'), 'description' => '' , 'internalname' => 'timemodified');
-        $this->internalfields[dataform::_APPROVED] =(object) array('id' => dataform::_APPROVED, 'dataid' => $dataid, 'type' => '_approve', 'name' => get_string('approved', 'dataform'), 'description' => '' , 'internalname' => 'approved');
-        $this->internalfields[dataform::_GROUP] =(object) array('id' => dataform::_GROUP, 'dataid' => $dataid, 'type' => '_group', 'name' => get_string('group', 'dataformfield__group'), 'description' => '' , 'internalname' => 'groupid');
-        $this->internalfields[dataform::_USERID] =(object) array('id' => dataform::_USERID, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userid', 'dataform'), 'description' => '' , 'internalname' => 'id');
-        $this->internalfields[dataform::_USERNAME] =(object) array('id' => dataform::_USERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('username', 'dataform'), 'description' => '' , 'internalname' => 'name');
-        $this->internalfields[dataform::_USERFIRSTNAME] =(object) array('id' => dataform::_USERFIRSTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userfirstname', 'dataform'), 'description' => '' , 'internalname' => 'firstname');
-        $this->internalfields[dataform::_USERLASTNAME] =(object) array('id' => dataform::_USERLASTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userlastname', 'dataform'), 'description' => '' , 'internalname' => 'lastname');
-        $this->internalfields[dataform::_USERUSERNAME] =(object) array('id' => dataform::_USERUSERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userusername', 'dataform'), 'description' => '' , 'internalname' => 'username');
-        $this->internalfields[dataform::_USERIDNUMBER] =(object) array('id' => dataform::_USERIDNUMBER, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('useridnumber', 'dataform'), 'description' => '' , 'internalname' => 'idnumber');
-        $this->internalfields[dataform::_USERPICTURE] =(object) array('id' => dataform::_USERPICTURE, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userpicture', 'dataform'), 'description' => '' , 'internalname' => 'picture');
-        $this->internalfields[dataform::_COMMENT] =(object) array('id' => dataform::_COMMENT, 'dataid' => $dataid, 'type' => '_comment', 'name' => get_string('comments', 'dataform'), 'description' => '' , 'internalname' => 'comments');
-        $this->internalfields[dataform::_RATING] = (object) array('id' => dataform::_RATING, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratings', 'dataform'), 'description' => '' , 'internalname' => 'ratings');
-        //$this->internalfields[dataform::_GRADE] = (object) array('id' => dataform::_GRADE, 'dataid' => $dataid, 'type' => '_grade', 'name' => get_string('grade', 'grades'), 'description' => '' , 'internalname' => 'grading');
-
         // get context
-        $this->context = get_context_instance(CONTEXT_MODULE, $this->cm->id);
+        $this->context = context_module::instance($this->cm->id);
 
         // set groups
         if ($this->cm->groupmode and in_array($this->cm->groupmode, $this->internalgroupmodes)) {
@@ -149,6 +132,13 @@ class dataform {
             $this->groupmode = groups_get_activity_groupmode($this->cm);
             $this->currentgroup = groups_get_activity_group($this->cm, true);
         }
+        
+        // set fields manager
+        
+        // set views manager
+        
+        // set filters manager
+        $this->_filtermanager = new dataform_filter_manager($this);
     }
 
     /**
@@ -168,6 +158,13 @@ class dataform {
     /**
      *
      */
+    public function pagefile() {
+        return $this->pagefile;
+    }
+
+    /**
+     *
+     */
     public function internal_group_modes() {
         return $this->internalgroupmodes;
     }
@@ -175,12 +172,8 @@ class dataform {
     /**
      *
      */
-    public function locks($type) {
-        if (array_key_exists($type, $this->locks)) {
-            return $this->locks[$type];
-        } else {
-            return false;
-        }
+    public function get_filter_manager() {
+        return $this->_filtermanager;
     }
 
     /**
@@ -191,7 +184,7 @@ class dataform {
         
         switch ($type) {
             case self::COUNT_ALL:
-                $count = $DB->count_records_sql('SELECT COUNT(e.id) FROM {dataform_entries} e WHERE e.dataid = ? AND e.grading <> ?', array($this->id(), 1));
+                $count = $DB->count_records_sql('SELECT COUNT(e.id) FROM {dataform_entries} e WHERE e.dataid = ?', array($this->id()));
                 break;
         
             case self::COUNT_APPROVED:
@@ -251,6 +244,50 @@ class dataform {
     }
 
     /**
+     * TODO complete cleanup
+     */
+    protected function renew() {
+        global $DB;
+
+        // files
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->context->id, 'mod_dataform');
+
+        // delete fields and their content
+        if ($fields = $this->get_fields()) {
+            foreach ($fields as $field) {
+                $field->delete_field();
+            }
+            // reset this fields
+            $this->get_fields(null, false, true);
+        }
+            
+        // delete views
+        if ($views = $this->get_views()) {
+            foreach ($views as $view) {
+                $view->delete();
+            }
+            $this->get_views(null, false, true);
+        }
+
+        // delete filters
+        $DB->delete_records('dataform_filters', array('dataid'=>$this->data->id));
+        
+        // delete entries
+        $DB->delete_records('dataform_entries', array('dataid'=>$this->data->id));
+
+        // delete ratings
+        
+        // delete comments
+
+        // cleanup gradebook
+        dataform_grade_item_delete($this->data);
+
+
+        return true;
+    }
+
+    /**
      * sets the dataform page
      *
      * @param string $page current page
@@ -259,8 +296,14 @@ class dataform {
     public function set_page($page = 'view', $params = null) {
         global $CFG, $PAGE, $USER;
 
-        // auto gues login
-        $autologinguest = $page == 'view' ? true : false;
+        $this->pagefile = $page;
+        $thisid = $this->id();
+        
+        // guest auto login
+        $autologinguest = false;
+        if ($page == 'view' or $page == 'embed') {
+            $autologinguest = true;
+        }
         
         // require login
         require_login($this->course->id, $autologinguest, $this->cm);
@@ -276,51 +319,109 @@ class dataform {
         }
 
         // make sure there is at least dataform id param
-        $urlparams['d'] = $this->id();
+        $urlparams['d'] = $thisid;
 
         $manager = has_capability('mod/dataform:managetemplates', $this->context);
+
+        // renew if requested
+        if ($manager and !empty($urlparams['renew']) and confirm_sesskey()) {
+            $this->renew();
+        }
 
         // if dataform activity closed don't let students in
         if (!$manager) {
             $timenow = time();
             if (!empty($this->data->timeavailable) and $this->data->timeavailable > $timenow) {
-                print_error('notopenyet', 'dataform', null, userdate($this->data->timeavailable));
+                throw new moodle_exception('notopenyet', 'dataform', '', userdate($this->data->timeavailable));
             }
         }
 
         // Is user editing
         $urlparams['edit'] = optional_param('edit', 0, PARAM_BOOL);
-
         $PAGE->set_url("/mod/dataform/$page.php", $urlparams);
 
-        // RSS and CSS and JS
-        if (!empty($params->rss) and !empty($CFG->enablerssfeeds) && !empty($CFG->dataform_enablerssfeeds) && $df->data->rssarticles > 0) {
-            require_once($CFG->libdir . '/rsslib.php');
+        // RSS
+        if (!empty($params->rss) and
+                !empty($CFG->enablerssfeeds) and
+                !empty($CFG->dataform_enablerssfeeds) and
+                $this->data->rssarticles > 0) {
+            require_once("$CFG->libdir/rsslib.php");
             $rsstitle = format_string($this->course->shortname) . ': %fullname%';
             rss_add_http_header($this->context, 'mod_dataform', $this->data, $rsstitle);
         }
-        if (!empty($params->css) and $this->data->css) {
-            $PAGE->requires->css('/mod/dataform/css.php?d='.$this->id());
+        
+        $fs = get_file_storage();
+        
+        // CSS
+        if (!empty($params->css)) {
+            // js includes from the js template
+            if ($this->data->cssincludes) {
+                foreach (explode("\n", $this->data->cssincludes) as $cssinclude) {
+                    $cssinclude = trim($cssinclude);
+                    if ($cssinclude) {
+                        $PAGE->requires->css(new moodle_url($cssinclude));
+                    }
+                }
+            }
+            // Uploaded css files
+            if ($files = $fs->get_area_files($this->context->id, 'mod_dataform', 'css', 0, 'sortorder', false)) {
+                $path = "/pluginfile.php/{$this->context->id}/mod_dataform/css/0";
+                foreach ($files as $file) {
+                    $filename = $file->get_filename();
+                    $PAGE->requires->css("$path/$filename");
+                }
+            }                
+            // css code from the css template
+            if ($this->data->css) {
+                $PAGE->requires->css("/mod/dataform/css.php?d=$thisid");
+            }
         }
-        if (!empty($params->js) and $this->data->js) {
-            $PAGE->requires->js('/mod/dataform/js.php?d='.$this->id(), true);
+        
+        // JS
+        if (!empty($params->js)) {
+            // js includes from the js template
+            if ($this->data->jsincludes) {
+                foreach (explode("\n", $this->data->jsincludes) as $jsinclude) {
+                    $jsinclude = trim($jsinclude);
+                    if ($jsinclude) {
+                        $PAGE->requires->js(new moodle_url($jsinclude));
+                    }
+                }
+            }
+            // Uploaded js files
+            if ($files = $fs->get_area_files($this->context->id, 'mod_dataform', 'js', 0, 'sortorder', false)) {
+                $path = "/pluginfile.php/{$this->context->id}/mod_dataform/js/0";
+                foreach ($files as $file) {
+                    $filename = $file->get_filename();
+                    $PAGE->requires->js("$path/$filename");
+                }
+            }                
+            // js code from the js template
+            if ($this->data->js) {
+                $PAGE->requires->js("/mod/dataform/js.php?d=$thisid");
+            }
         }
+        
+        // MOD JS
         if (!empty($params->modjs)) {
-            $PAGE->requires->js('/mod/dataform/dataform.js', true);
+            $PAGE->requires->js('/mod/dataform/dataform.js');
         }
+        
+        // COMMENTS
         if (!empty($params->comments)) {
             require_once("$CFG->dirroot/comment/lib.php");
             comment::init();
         }
 
-        // editing button
-        if ($PAGE->user_allowed_editing()) {
-            if ($urlparams['edit'] != -1) { // teacher editing mode
+        // editing button (omit in embedded dataforms)
+        if ($page != 'embed' and $PAGE->user_allowed_editing()) {
+             // teacher editing mode
+            if ($urlparams['edit'] != -1) {
                 $USER->editing = $urlparams['edit'];
             }
 
             $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
-                '<input type="hidden" name="d" value="'.$this->id().'" />'.
+                '<input type="hidden" name="d" value="'.$thisid.'" />'.
                 '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing()?0:1).'" />'.
                 '<input type="submit" value="'.get_string($PAGE->user_is_editing()?'blockseditoff':'blocksediton').'" /></div></form></td></tr></table>';
             $PAGE->set_button($buttons);
@@ -344,8 +445,8 @@ class dataform {
         }
 
         // page layout
-        if (!empty($urlparams['pagelayout'])) {
-            $PAGE->set_pagelayout($urlparams['pagelayout']);
+        if (!empty($params->pagelayout)) {
+            $PAGE->set_pagelayout($params->pagelayout);
         }
         
         $PAGE->set_title($this->name());
@@ -359,24 +460,17 @@ class dataform {
         
         // if a new dataform or incomplete design, direct manager to manage area
         if ($manager) {
-            $fields = $this->get_fields();;
             $views = $this->get_views();
-            if (!$fields or !$views) {
+            if (!$views) {
                 $this->notifications['bad']['getstarted'] = get_string('getstarted','dataform');
-            }
-            if (!$fields and !$views) {
-                $linktopackages = html_writer::link(new moodle_url('packages.php', array('d' => $this->id())), get_string('packages', 'dataform'));
+                $linktopackages = html_writer::link(new moodle_url('packages.php', array('d' => $thisid)), get_string('packages', 'dataform'));
                 $this->notifications['bad']['getstartedpackages'] = get_string('getstartedpackages','dataform', $linktopackages);
-            }
-            if (!$fields)  {
-                $linktofields = html_writer::link(new moodle_url('fields.php', array('d' => $this->id())), get_string('fields', 'dataform'));
+                $linktofields = html_writer::link(new moodle_url('fields.php', array('d' => $thisid)), get_string('fields', 'dataform'));
                 $this->notifications['bad']['getstartedfields'] = get_string('getstartedfields','dataform', $linktofields);
-            }
-            if (!$views)  {
-                $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $this->id())), get_string('views', 'dataform'));
+                $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $thisid)), get_string('views', 'dataform'));
                 $this->notifications['bad']['getstartedviews'] = get_string('getstartedviews','dataform', $linktoviews);
             } else if (!$this->data->defaultview) {
-                $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $this->id())), get_string('views', 'dataform'));
+                $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $thisid)), get_string('views', 'dataform'));
                 $this->notifications['bad']['defaultview'] = get_string('viewnodefault','dataform', $linktoviews);
             }
         }
@@ -395,7 +489,11 @@ class dataform {
         $params = (object) $params;
 
         echo $OUTPUT->header();        
-        echo $OUTPUT->heading(format_string($this->name()));
+
+        // print intro
+        if (!empty($params->heading)) {
+            echo $OUTPUT->heading(format_string($this->name()));
+        }
 
         // print intro
         if (!empty($params->intro) and $params->intro) {
@@ -448,7 +546,7 @@ class dataform {
      */
     public function print_groups_menu($view, $filter) {
         if ($this->groupmode and !in_array($this->groupmode, $this->internalgroupmodes)) {
-            $returnurl = new moodle_url('/mod/dataform/view.php', 
+            $returnurl = new moodle_url("/mod/dataform/{$this->pagefile}.php", 
                                         array('d' => $this->id(),
                                                 'view' => $view,
                                                 'filter' => $filter));
@@ -498,9 +596,8 @@ class dataform {
      */
     public function display() {
         if (!empty($this->_currentview)) {
+            add_to_log($this->course->id, 'dataform', 'view', $this->pagefile. '.php?id='. $this->cm->id, $this->id(), $this->cm->id);
             $this->_currentview->display();
-
-            add_to_log($this->course->id, 'dataform', 'view', 'view.php?id='. $this->cm->id, $this->id(), $this->cm->id);
         }
     }
 
@@ -509,11 +606,88 @@ class dataform {
  *********************************************************************************/
 
     /**
-     * given a field id return the field object from $this->fields
-     * Initializes $this->fields if necessary
+     * initialize the internal fields
+     */
+    protected function get_internal_fields() {
+        if (!$this->internalfields) {
+            $dataid = $this->data->id;
+            
+            $field = (object) array('id' => self::_ENTRY, 'dataid' => $dataid, 'type' => '_entry', 'name' => get_string('entry', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => '');
+            $this->internalfields[self::_ENTRY] = $this->get_field($field);
+            
+            $field = (object) array('id' => self::_TIMECREATED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timecreated', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'timecreated');
+            $this->internalfields[self::_TIMECREATED] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_TIMEMODIFIED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timemodified', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'timemodified');
+            $this->internalfields[self::_TIMEMODIFIED] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_APPROVED, 'dataid' => $dataid, 'type' => '_approve', 'name' => get_string('approved', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'approved');
+            $this->internalfields[self::_APPROVED] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_GROUP, 'dataid' => $dataid, 'type' => '_group', 'name' => get_string('group', 'dataformfield__group'), 'description' => '', 'visible' => 2, 'internalname' => 'groupid');
+            $this->internalfields[self::_GROUP] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERID, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userid', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'id');
+            $this->internalfields[self::_USERID] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('username', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'name');
+            $this->internalfields[self::_USERNAME] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERFIRSTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userfirstname', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'firstname');
+            $this->internalfields[self::_USERFIRSTNAME] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERLASTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userlastname', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'lastname');
+            $this->internalfields[self::_USERLASTNAME] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERUSERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userusername', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'username');
+            $this->internalfields[self::_USERUSERNAME] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERIDNUMBER, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('useridnumber', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'idnumber');
+            $this->internalfields[self::_USERIDNUMBER] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_USERPICTURE, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userpicture', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'picture');
+            $this->internalfields[self::_USERPICTURE] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_COMMENT, 'dataid' => $dataid, 'type' => '_comment', 'name' => get_string('comments', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'comments');
+            $this->internalfields[self::_COMMENT] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_RATING, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratings', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'ratings');
+            $this->internalfields[self::_RATING] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_RATINGAVG, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingsavg', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'avgratings');
+            $this->internalfields[self::_RATINGAVG] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_RATINGCOUNT, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingscount', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'countratings');
+            $this->internalfields[self::_RATINGCOUNT] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_RATINGMAX, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingsmax', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'maxratings');
+            $this->internalfields[self::_RATINGMAX] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_RATINGMIN, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingsmin', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'minratings');
+            $this->internalfields[self::_RATINGMIN] = $this->get_field($field);
+
+            $field = (object) array('id' => self::_RATINGSUM, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingssum', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'sumratings');
+            $this->internalfields[self::_RATINGSUM] = $this->get_field($field);
+        }
+        return $this->internalfields;
+    }
+
+    /**
+     *
+     */
+    public function get_user_defined_fields($forceget = false) {
+        $this->get_fields(null, false, $forceget);
+        return $this->fields;
+    }
+
+    /**
+     * given a field id return the field object from get_fields
+     * Initializes get_fields if necessary
      */
     public function get_field_from_id($fieldid, $forceget = false) {
-        if (!$fields = $this->get_fields(null, false, $forceget) or empty($fields[$fieldid])) {;
+        $fields = $this->get_fields(null, false, $forceget);
+        
+        if (empty($fields[$fieldid])) {;
             return false;
         } else {
             return $fields[$fieldid];
@@ -521,37 +695,30 @@ class dataform {
     }
 
     /**
-     * given a field type returns the field object from $this->fields
-     * Initializes $this->fields if necessary
+     * given a field type returns the field object from get_fields
+     * Initializes get_fields if necessary
      */
     public function get_fields_by_type($type, $menu = false) {
-        if (!$fields = $this->get_fields()) {;
-            return false;
-        } else {
-            $typefields = array();
-            foreach  ($fields as $fieldid => $field) {
-                if ($field->type() === $type) {
-                    if ($menu) {
-                        $typefields[$fieldid] = $field->name();
-                    } else {
-                        $typefields[$fieldid] = $field;
-                    }
+        $typefields = array();
+        foreach  ($this->get_fields() as $fieldid => $field) {
+            if ($field->type() === $type) {
+                if ($menu) {
+                    $typefields[$fieldid] = $field->name();
+                } else {
+                    $typefields[$fieldid] = $field;
                 }
             }
-            return $typefields;
         }
+        return $typefields;
     }
 
     /**
-     * given a field name returns the field object from $this->fields
-     * Initializes $this->fields if necessary
+     * given a field name returns the field object from get_fields
      */
     public function get_field_by_name($name) {
-        if ($fields = $this->get_fields()) {;
-            foreach ($fields as $field) {
-                if ($field->name() === $name) {
-                    return $field;
-                }
+        foreach ($this->get_fields() as $field) {
+            if ($field->name() === $name) {
+                return $field;
             }
         }
         return false;
@@ -589,38 +756,32 @@ class dataform {
 
         if (!$this->fields or $forceget) {
             $this->fields = array();
+            // collate user fields
             if ($fields = $DB->get_records('dataform_fields', array('dataid' => $this->id()))) {
-                // collate user fields
                 foreach ($fields as $fieldid => $field) {
-                    $this->fields[$fieldid] = $this->get_field($field);
-                }
-
-                // collate internalfields only if there are user fields
-                foreach ($this->internalfields as $fieldid => $field) {
                     $this->fields[$fieldid] = $this->get_field($field);
                 }
             }
         }
 
-        if ($this->fields) {
-            if (empty($exclude) and !$menu) {
-                return $this->fields;
-            } else {
-                $fields = array();
-                foreach ($this->fields as $fieldid => $field) {
-                    if (!empty($exclude) and in_array($fieldid, $exclude)) {
-                        continue;
-                    }
-                    if ($menu) {
-                        $fields[$fieldid]= $field->name();
-                    } else {
-                        $fields[$fieldid]= $field;
-                    }
-                }
-                return $fields;
-            }
+        // collate all fields
+        $fields = $this->fields + $this->get_internal_fields();
+
+        if (empty($exclude) and !$menu) {
+            return $fields;
         } else {
-            return false;
+            $retfields = array();
+            foreach ($fields as $fieldid => $field) {
+                if (!empty($exclude) and in_array($fieldid, $exclude)) {
+                    continue;
+                }
+                if ($menu) {
+                    $retfields[$fieldid]= $field->name();
+                } else {
+                    $retfields[$fieldid]= $field;
+                }
+            }
+            return $retfields;
         }
     }
 
@@ -630,15 +791,18 @@ class dataform {
     public function process_fields($action, $fids, $confirmed = false) {
         global $OUTPUT, $DB;
 
+        if (!has_capability('mod/dataform:managetemplates', $this->context)) {
+            // TODO throw exception
+            return false;
+        }
+
         $dffields = $this->get_fields();
         $fields = array();
-        if ($fieldids = explode(',', $fids)) { // some fields are specified for action
+        // collate the fields for processing
+        if ($fieldids = explode(',', $fids)) {
             foreach ($fieldids as $fieldid) {
                 if ($fieldid > 0 and isset($dffields[$fieldid])) {
-                    // Must be from this dataform and user can manage entries
-                    if ($dffields[$fieldid]->field->dataid == $this->id() and has_capability('mod/dataform:managetemplates', $this->context)) {
-                        $fields[$fieldid] = $dffields[$fieldid];
-                    }
+                    $fields[$fieldid] = $dffields[$fieldid];
                 }
             }
         }
@@ -696,6 +860,30 @@ class dataform {
                             }
                         }
                         $strnotify = 'fieldsupdated';
+                        break;
+
+                    case 'visible':
+                        foreach ($fields as $fid => $field) {
+                            // hide = 0; (show to owner) = 1; show to everyone = 2
+                            $visible = (($field->field->visible + 1) % 3);
+                            $DB->set_field('dataform_fields', 'visible', $visible, array('id' => $fid));
+
+                            $processedfids[] = $fid;
+                        }
+
+                        $strnotify = '';
+                        break;
+
+                    case 'editable':
+                        foreach ($fields as $fid => $field) {
+                            // lock = 0; unlock = -1;
+                            $editable = $field->field->edits ? 0 : -1;
+                            $DB->set_field('dataform_fields', 'edits', $editable, array('id' => $fid));
+
+                            $processedfids[] = $fid;
+                        }
+
+                        $strnotify = '';
                         break;
 
                     case 'duplicate':
@@ -849,9 +1037,54 @@ class dataform {
         $rec->id = $this->id();
         $rec->defaultview = $viewid;
         if (!$DB->update_record('dataform', $rec)) {
-            print_error('There was an error updating the database');
+            throw new moodle_exception('Failed to update the database');
         }
         $this->data->defaultview = $viewid;
+    }
+
+    /**
+     *
+     */
+    public function set_default_filter($filterid = 0) {
+        global $DB;
+
+        $rec = new object();
+        $rec->id = $this->id();
+        $rec->defaultfilter = $filterid;
+        if (!$DB->update_record('dataform', $rec)) {
+            throw new moodle_exception('Failed to update the database');
+        }
+        $this->data->defaultfilter = $filterid;
+    }
+
+    /**
+     *
+     */
+    public function set_single_edit_view($viewid = 0) {
+        global $DB;
+
+        $rec = new object();
+        $rec->id = $this->id();
+        $rec->singleedit = $viewid;
+        if (!$DB->update_record('dataform', $rec)) {
+            throw new moodle_exception('Failed to update the database');
+        }
+        $this->data->singleedit = $viewid;
+    }
+
+    /**
+     *
+     */
+    public function set_single_more_view($viewid = 0) {
+        global $DB;
+
+        $rec = new object();
+        $rec->id = $this->id();
+        $rec->singleview = $viewid;
+        if (!$DB->update_record('dataform', $rec)) {
+            throw new moodle_exception('Failed to update the database');
+        }
+        $this->data->singleview = $viewid;
     }
 
     /**
@@ -928,24 +1161,7 @@ class dataform {
                             }
                         }
 
-                        $strnotify = 'viewsupdated';
-                        break;
-
-                    case 'hide':
-                        $updateview = new object();
-                        $updateview->visible = 0;
-                        foreach ($views as $vid => $view) {
-                            if ($vid == $this->data->defaultview) {
-                                // TODO: notify something
-                                continue;
-                            } else {
-                                $updateview->id = $vid;
-                                $DB->update_record('dataform_views', $updateview);
-                                $processedvids[] = $vid;
-                            }
-                        }
-
-                        $strnotify = 'viewsupdated';
+                        $strnotify = '';
                         break;
 
                     case 'filter':
@@ -954,7 +1170,11 @@ class dataform {
                         foreach ($views as $vid => $view) {
                             if ($filterid != $view->view->filter) {
                                 $updateview->id = $vid;
-                                $updateview->filter = $filterid;
+                                if ($filterid == -1) {
+                                    $updateview->filter = 0;
+                                } else {
+                                    $updateview->filter = $filterid;
+                                }
                                 $DB->update_record('dataform_views', $updateview);
                                 $processedvids[] = $vid;
                             }
@@ -1019,11 +1239,10 @@ class dataform {
                             }
 
                             $this->set_default_view($vid);
-                            // TODO: shouldn't produce this notification
                             $processedvids[] = $vid;
                             break;
                         }
-                        $strnotify = 'viewsupdated';
+                        $strnotify = '';
                         break;
 
                     default:
@@ -1041,370 +1260,9 @@ class dataform {
     }
 
 /**********************************************************************************
- * FILTERS
+ * RULES
  *********************************************************************************/
 
-    /**
-     *
-     */
-    public function get_filter_from_id($filterid = 0) {
-        global $DB;
-
-        if ($filterid == dataform::USER_FILTER_SET) {  // set user preferences
-            set_user_preference('dataform_'. $this->id(). '_perpage', optional_param('userperpage', get_user_preferences('dataform_'. $this->id(). '_perpage', 0), PARAM_INT));
-            set_user_preference('dataform_'. $this->id(). '_groupby', optional_param('usergroupby', get_user_preferences('dataform_'. $this->id(). '_groupby', 0), PARAM_INT));
-            set_user_preference('dataform_'. $this->id(). '_search', optional_param('usersearch', get_user_preferences('dataform_'. $this->id(). '_search', ''), PARAM_NOTAGS));
-            set_user_preference('dataform_'. $this->id(). '_customsort', optional_param('usercustomsort', get_user_preferences('dataform_'. $this->id(). '_customsort', $this->data->defaultsort), PARAM_RAW));
-            set_user_preference('dataform_'. $this->id(). '_customsearch', optional_param('usercustomsearch', get_user_preferences('dataform_'. $this->id(). '_customsearch', ''), PARAM_RAW));
-            $filterid = dataform::USER_FILTER;
-        
-        } else if ($filterid == dataform::USER_FILTER_RESET) {  // reset user preferences
-            unset_user_preference('dataform_'. $this->id(). '_perpage');
-            unset_user_preference('dataform_'. $this->id(). '_groupby');
-            unset_user_preference('dataform_'. $this->id(). '_search');
-            unset_user_preference('dataform_'. $this->id(). '_customsort');
-            unset_user_preference('dataform_'. $this->id(). '_customsearch');
-            $filterid = 0;
-        }
-        
-        if ($filterid == 0) {  // df default sort
-            $filter = new object();
-            $filter->id = 0;
-            $filter->dataid = $this->id();
-            $filter->perpage = 0;
-            $filter->groupby = 0;
-            $filter->customsort = $this->data->defaultsort;
-            $filter->customsearch = '';
-            $filter->search = '';
-
-        } else if ($filterid == dataform::USER_FILTER) {  // user preferences
-            $filter = new object();
-            $filter->id = $filterid;
-            $filter->dataid = $this->id();
-            $filter->perpage = get_user_preferences('dataform_'. $this->id(). '_perpage', 0);
-            $filter->groupby = get_user_preferences('dataform_'. $this->id(). '_groupby', 0);
-            $filter->search = trim(get_user_preferences('dataform_'. $this->id(). '_search', ''));
-            $filter->customsort = trim(get_user_preferences('dataform_'. $this->id(). '_customsort', $this->data->defaultsort));
-            $filter->customsearch = trim(get_user_preferences('dataform_'. $this->id(). '_customsearch', ''));
-
-        } else {
-            // TODO check that from this dataform
-            $filter = $DB->get_record('dataform_filters', array('id' => $filterid));
-        }
-
-        return $filter;
-    }
-
-    /**
-     *
-     */
-    public function get_filter_from_form($formdata) {
-        $filter = new object();
-        $filter->id = $formdata->fid;
-        $filter->dataid = $this->id();
-        $filter->name = $formdata->name;
-        $filter->description = $formdata->description;
-        $filter->perpage = $formdata->perpage;
-        $filter->groupby = $formdata->groupby;
-        $filter->search = isset($formdata->search) ? $formdata->search : '';
-        $filter->customsort = $this->get_sort_options_from_form($formdata);
-        $filter->returntoform = false;
-        $filter->customsearch = $this->get_search_options_from_form($formdata, $filter->returntoform);
-
-        if ($filter->customsearch) {
-            $filter->search = '';
-        }
-
-        return $filter;
-    }
-
-    /**
-     *
-     */
-    public function process_filters($action, $fids, $confirmed = false) {
-        global $CFG, $DB, $OUTPUT;
-
-        $filters = array();
-        // TODO may need new roles
-        if (has_capability('mod/dataform:managetemplates', $this->context)) {
-            // don't need record from database for filter form submission
-            if ($fids) { // some filters are specified for action
-                $filters = $DB->get_records_select('dataform_filters', "id IN ($fids)");
-            } else if ($action == 'update') {
-                $filters[] = $this->get_filter_from_id();
-            }
-        }
-
-        $processedfids = array();
-        $strnotify = '';
-
-        // TODO update should be roled
-        if (empty($filters)) {
-            $this->notifications['bad'][] = get_string("filternoneforaction", 'dataform');
-            return false;
-        } else {
-            if (!$confirmed) {
-                // print header
-                $this->print_header('filters');
-
-                // Print a confirmation page
-                echo $OUTPUT->confirm(get_string("filtersconfirm$action", 'dataform', count($filters)),
-                        new moodle_url('/mod/dataform/filters.php', array('d' => $this->id(),
-                                                                        $action => implode(',', array_keys($filters)),
-                                                                        'sesskey' => sesskey(),
-                                                                        'confirmed' => 1)),
-                        new moodle_url('/mod/dataform/filters.php', array('d' => $this->id())));
-
-                echo $OUTPUT->footer();
-                exit;
-
-            } else {
-                // go ahead and perform the requested action
-                switch ($action) {
-                    case 'update':     // add new or update existing
-                        $filter = reset($filters);
-                        require_once($CFG->dirroot. '/mod/dataform/filter_form.php');
-                        $mform = new mod_dataform_filter_form(null, array('df' => $this, 'filter' => $filter));
-
-                        if ($mform->is_cancelled()){
-                            // clean up  customsearch if needed
-                            if ($filter->id and $filter->customsearch) {
-                                $needupdate = false;
-                                $searchfields = unserialize($filter->customsearch);
-                                foreach ($searchfields as $fieldid => $searchfield) {
-                                    if ($searchfield) { // there are some andor options
-                                        foreach ($searchfield as $andorskey => $andors) {
-                                            foreach ($andors as $optionkey => $option) {
-                                                list(, , $value) = $option;
-                                                if (!$value) {
-                                                    $needupdate = true;
-                                                    unset($andors[$optionkey]);
-                                                }
-                                            }
-                                            // if all options removed, remove this andors
-                                            if (!$andors) {
-                                                unset($searchfield[$andorskey]);
-                                            }
-                                        }
-                                        // if all andors removed, remove this searchfield
-                                        if (!$searchfield) {
-                                            unset($searchfields[$fieldid]);
-                                        }
-                                    } else {
-                                        unset($searchfields[$fieldid]);
-                                    }
-                                }
-                                if ($needupdate) {
-                                    $updatefilter = new object();
-                                    $updatefilter->id = $filter->id;
-                                    if ($searchfields) {
-                                        $updatefilter->customsearch = serialize($searchfields);
-                                    } else {
-                                        $updatefilter->customsearch = '';
-                                    }
-                                    $DB->update_record('dataform_filters', $updatefilter);
-                                }
-                            }
-
-                        // process validated
-                        } else if ($formdata = $mform->get_data()) {
-                            $filter = $this->get_filter_from_form($formdata);
-                            if ($filter->id) {
-                                $DB->update_record('dataform_filters', $filter);
-                                $processedfids[] = $filter->id;
-                                $strnotify = 'filtersupdated';
-                            } else {
-                                $filter->id = $DB->insert_record('dataform_filters', $filter, true);
-                                $processedfids[] = $filter->id;
-                                $strnotify = 'filtersadded';
-                            }
-                            // return to form if need to add search criteria
-                            if ($filter->returntoform) {
-                                $this->display_filter_form($filter);
-                            }
-                        }
-
-                        break;
-
-                    case 'duplicate':
-                        if (!empty($filters)) {
-                            foreach ($filters as $filter) {
-                                // TODO: check for limit
-                                // set new name
-                                while ($this->name_exists('filters', $filter->name)) {
-                                    $filter->name = 'Copy of '. $filter->name;
-                                }
-                                $filterid = $DB->insert_record('dataform_filters', $filter);
-
-                                $processedfids[] = $filterid;
-                            }
-                        }
-                        $strnotify = 'filtersadded';
-                        break;
-
-                    case 'show':
-                        $updatefilter = new object();
-                        $updatefilter->visible = 1;
-                        foreach ($filters as $filter) {
-                            $updatefilter->id = $filter->id;
-                            $DB->update_record('dataform_filters', $updatefilter);
-
-                            $processedfids[] = $filter->id;
-                        }
-
-                        $strnotify = 'filtersupdated';
-                        break;
-
-                    case 'hide':
-                        $updatefilter = new object();
-                        $updatefilter->visible = 0;
-                        foreach ($filters as $filter) {
-                            $updatefilter->id = $filter->id;
-                            $DB->update_record('dataform_filters', $updatefilter);
-
-                            $processedfids[] = $filter->id;
-                        }
-
-                        $strnotify = 'filtersupdated';
-                        break;
-
-                    case 'delete':
-                        foreach ($filters as $filter) {
-                            $DB->delete_records('dataform_filters', array('id' => $filter->id));
-                            $processedfids[] = $filter->id;
-                        }
-                        $strnotify = 'filtersdeleted';
-                        break;
-
-                    default:
-                        break;
-                }
-
-                add_to_log($this->course->id, 'dataform', 'filter '. $action, 'filters.php?id='. $this->cm->id, $this->id(), $this->cm->id);
-                if (!empty($strnotify)) {
-                    $filtersprocessed = $processedfids ? count($processedfids) : 'No';
-                    $this->notifications['good'][] = get_string($strnotify, 'dataform', $filtersprocessed);
-                }
-                return $processedfids;
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public function get_filters($exclude = null, $menu = false, $forceget = false) {
-        global $DB;
-
-        if (!$this->filters or $forceget) {
-            if (!$this->filters = $DB->get_records('dataform_filters', array('dataid' => $this->id()))) {
-                $this->filters = array();
-             }
-        }
-
-        if ($this->filters) {
-            if (empty($exclude) and !$menu) {
-                return $this->filters;
-            } else {
-                $filters = array();
-                foreach ($this->filters as $filterid => $filter) {
-                    if (!empty($exclude) and in_array($filterid, $exclude)) {
-                        continue;
-                    }
-                    if ($menu) {
-                        if ($filter->visible or has_capability('mod/dataform:managetemplates', $this->context)) {
-                            $filters[$filterid] = $filter->name;
-                        }
-                    } else {
-                        $filters[$filterid]= $filter;
-                    }
-                }
-                return $filters;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     *
-     */
-    public function display_filter_form($filter) {
-        global $CFG, $OUTPUT;
-
-        require_once($CFG->dirroot. '/mod/dataform/filter_form.php');
-
-        $mform = new mod_dataform_filter_form(null, array('df' => $this, 'filter' => $filter));
-
-        //$mform->data_preprocessing($filter);
-        $mform->set_data($filter);
-
-        $this->print_header('filters', array('tab' => 'filters'));
-        $mform->display();
-        echo $OUTPUT->footer();
-
-        exit;
-    }
-
-    /**
-     *
-     */
-    function get_sort_options_from_form($formdata) {
-        $sortfields = array();
-        $i = 0;
-        while (isset($formdata->{"sortfield$i"})) {
-            if ($sortfieldid = $formdata->{"sortfield$i"}) {
-                $sortfields[$sortfieldid] = $formdata->{"sortdir$i"};
-            }
-            $i++;
-        }
-        // TODO should we add the groupby field to the customsort now?
-        if ($sortfields) {
-            return serialize($sortfields);
-        } else {
-            return '';
-        }
-    }
-
-    /**
-     *
-     */
-    function get_search_options_from_form($formdata, &$returntoform) {
-        if ($fields = $this->get_fields()) {
-            $searchfields = array();
-            $i = 0;
-            while (isset($formdata->{"searchandor$i"})) {
-                // check if trying to define a search criterion
-                if ($searchandor = $formdata->{"searchandor$i"}) {
-                    if ($searchfieldid = $formdata->{"searchfield$i"}) {
-                        if (!isset($searchfields[$searchfieldid])) {
-                            $searchfields[$searchfieldid] = array();
-                        }
-                        if (!isset($searchfields[$searchfieldid][$searchandor])) {
-                            $searchfields[$searchfieldid][$searchandor] = array();
-                        }
-                        $parsedvalue = $fields[$searchfieldid]->parse_search($formdata, $i);
-                        if ($parsedvalue === false) {
-                            $returntoform = true; // the search criteria fields need to be added
-                        }
-
-                        $not = isset($formdata->{"searchnot$i"}) ? 'NOT' : '';
-                        $operator = isset($formdata->{"searchoperator$i"}) ? $formdata->{"searchoperator$i"} : '';
-                        $searchvalue = array($not, $operator, $parsedvalue);
-
-                        $searchfields[$searchfieldid][$searchandor][] = $searchvalue;
-                    }
-                }
-                $i++;
-            }
-        }
-
-        if ($searchfields) {
-            return serialize($searchfields);
-        } else {
-            return '';
-        }
-    }
 
 /**********************************************************************************
  * USER
@@ -1413,7 +1271,7 @@ class dataform {
     /**
      *
      */
-    public function get_gradebook_users() {
+    public function get_gradebook_users(array $userids = null) {
         global $DB, $CFG;
 
         // get the list of users by gradebook roles
@@ -1424,30 +1282,49 @@ class dataform {
             $gradebookroles = '';
         }
 
-        if (!empty($CFG->enablegroupings) 
-                    and $this->cm->groupmembersonly
-                    and $groupingusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id')) {
-            $users = get_role_users($gradebookroles,
-                                    $this->context,
-                                    true,
-                                    'u.id, u.lastname, u.firstname',
-                                    'u.lastname ASC', 
-                                    true,
-                                    $this->currentgroup,
-                                    '',
-                                    '',
-                                    'u.id IN (:gusers)',
-                                    array('gusers' => implode(',', array_keys($groupingusers))));
-        } else {
-            $users = get_role_users($gradebookroles,
-                                    $this->context,
-                                    true,
-                                    'u.id, u.lastname, u.firstname',
-                                    'u.lastname ASC', 
-                                    true,
-                                    $this->currentgroup);
+        if (!empty($CFG->enablegroupings) and $this->cm->groupmembersonly) {
+            $groupingsusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id');
+            $gusers = $groupingsusers ? array_keys($groupingsusers) : null;
         }
-        return $users;
+        
+        if (!empty($userids)) {
+            if (!empty($gusers)) {
+                $gusers = array_intersect($userids, $gusers);
+            } else {
+                $gusers = $userids;
+            }
+        }           
+                    
+        if (isset($gusers)) {
+            if (!empty($gusers)) {
+                list($inuids, $params) = $DB->get_in_or_equal($gusers);
+                return get_role_users(
+                    $gradebookroles,
+                    $this->context,
+                    true,
+                    user_picture::fields('u'),
+                    'u.lastname ASC', 
+                    true,
+                    $this->currentgroup,
+                    '',
+                    '',
+                    "u.id $inuids",
+                    $params
+                );
+            } else {
+                return null;
+            }
+        } else {
+            return get_role_users(
+                $gradebookroles,
+                $this->context,
+                true,
+                'u.id, u.lastname, u.firstname',
+                'u.lastname ASC', 
+                true,
+                $this->currentgroup
+            );
+        }
     }
 
     /**
@@ -1458,7 +1335,7 @@ class dataform {
     public function user_at_max_entries($perinterval = false) {
         if ($this->data->maxentries < 0 or has_capability('mod/dataform:manageentries', $this->context)) {
             return false;
-        } else if (!$this->data->maxentries) {
+        } else if ($this->data->maxentries == 0) {
             return true;
         } else {
             return ($this->user_num_entries($perinterval) >= $this->data->maxentries);
@@ -1506,7 +1383,6 @@ class dataform {
      */
     public function user_can_export_entry($entry = null) {
         global $CFG, $USER;
-
         // we need portfolios for export
         if (!empty($CFG->enableportfolios)) {
 
@@ -1533,14 +1409,24 @@ class dataform {
     /**
      *
      */
-    public function user_can_manage_entry($entry = 0) {
-        global $USER;
+    public function user_can_manage_entry($entry = null) {
+        global $USER, $CFG;
 
         // teachers can always manage entries
         if (has_capability('mod/dataform:manageentries',$this->context)) {
             return true;
+        }
+
+        // anonymous/guest can only add entries if enabled
+        if ((!isloggedin() or isguestuser())
+                    and empty($entry->id)
+                    and $CFG->dataform_anonymous
+                    and $this->data->anonymous) {
+            return true;
+        }
+        
         // for others, it depends ...
-        } else if (has_capability('mod/dataform:writeentry', $this->context)) {
+        if (has_capability('mod/dataform:writeentry', $this->context)) {
             $timeavailable = $this->data->timeavailable;
             $timedue = $this->data->timedue;
             $allowlate = $this->data->allowlate;
@@ -1548,7 +1434,7 @@ class dataform {
 
             // activity time frame
             if ($timeavailable and !($now >= $timeavailable)
-                    or ($timedue and (!($now < $timedue) or !$allowlate))) {
+                    or ($timedue and !($now < $timedue) and !$allowlate)) {
                 return false;
             }
 
@@ -1562,7 +1448,7 @@ class dataform {
             }
 
             // managing a certain entry
-            if ($entry) {
+            if (!empty($entry->id)) {
                 // entry owner
                 // TODO groups_is_member queries DB for each entry!
                 if (empty($USER->id)
@@ -1572,7 +1458,8 @@ class dataform {
                 }
 
                 // ok owner, what's the time (limit)?
-                if ($timelimitsec = ($this->data->timelimit * 60)) {
+                if ($this->data->timelimit != -1) {
+                    $timelimitsec = ($this->data->timelimit * 60);
                     $elapsed = $now - $entry->timecreated;
                     if ($elapsed > $timelimitsec) {
                         return false;    // too late ...
@@ -1585,19 +1472,6 @@ class dataform {
                     $currentintervalstarted = (floor($elapsed / $timeinterval) * $timeinterval) + $timeavailable;
                     if ($entry->timecreated < $currentintervalstarted) {
                         return false;  // nop ...
-                    }
-                }
-
-                // same interval but the entrie may be locked ...
-                if ($locks = $this->data->locks) {
-                    if (($locks & $this->locks['approval']) and $entry->approved) {
-                        return false;
-                    }
-                    if (($locks & $this->locks['comments']) and $DB->count_records('dataform_comments', 'entryid', $entry->id)) {
-                        return false;
-                    }
-                    if (($locks & $this->locks['ratings']) and $DB->count_records('dataform_ratings', 'entryid', $entry->id)) {
-                        return false;
                     }
                 }
 
@@ -1619,12 +1493,22 @@ class dataform {
      * @param boolean $perinterval
      * output int
      */
-    protected function user_num_entries($perinterval = false) {
+    public function user_num_entries($perinterval = false) {
         global $USER, $CFG, $DB;
+
+        static $numentries = null;
+        static $numentries_intervaled = null;
+
+        if (!$perinterval and !is_null($numentries)) {
+            return $numentries;
+        }
+        
+        if ($perinterval and !is_null($numentries_intervaled)) {
+            return $numentries_intervaled;
+        }        
 
         $params = array();
         $params['dataid'] = $this->id();
-        $params['grading'] = 0;
 
         $and_whereuserorgroup = '';
         $and_whereinterval = '';
@@ -1649,44 +1533,29 @@ class dataform {
             $intervalendtime = $intervalstarttime + $timeinterval;
             $and_whereinterval = " AND timecreated >= :starttime AND timecreated < :endtime ";
             $params['starttime'] = $intervalstarttime;
-            $params['endtime'] = $intervalstarttime;
+            $params['endtime'] = $intervalendtime;
 
         }
 
         $sql = "SELECT COUNT(*)
                 FROM {dataform_entries}
-                WHERE dataid = :dataid AND grading = :grading $and_whereuserorgroup $and_whereinterval";
-        return $DB->count_records_sql($sql, $params);
+                WHERE dataid = :dataid $and_whereuserorgroup $and_whereinterval";
+        $entriescount = $DB->count_records_sql($sql, $params);
+        
+        if (!$perinterval) {
+            $numentries = $entriescount;
+        } else {
+            $numentries_intervaled = $entriescount;
+        }        
+
+        return $entriescount;
+        
     }
 
 
 /**********************************************************************************
  * PACKAGES
  *********************************************************************************/
-
-    /**
-     * Returns an array of the course local packages from the course files
-     */
-    public function get_plugin_packages() {
-        global $CFG;
-        $packages = array();
-
-        $packagespath = 'mod/dataform/package/';
-        if ($handle = opendir("$CFG->dirroot/$packagespath")) {
-            while (false !== ($packagefile = readdir($handle))) {
-                if ($packagefile != "." && $packagefile != "..") {
-                    $package = new object;
-                    $package->userid = 0;
-                    $package->name = $packagefile;
-                    $package->shortname = pathinfo($package->name, PATHINFO_FILENAME);
-                    $packages[] = $package;
-                }
-            }
-            closedir($handle);
-        }
-
-        return $packages;
-    }
 
     /**
      * Returns an array of the shared packages (in moodledata) the user is allowed to access
@@ -1696,7 +1565,7 @@ class dataform {
         global $USER;
 
         $packages = array();
-        $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+        $course_context = context_course::instance($this->course->id);
 
         $fs = get_file_storage();
         if ($packagearea == 'course_packages') {
@@ -1728,13 +1597,230 @@ class dataform {
     /**
      *
      */
-    public function create_package_from_backup() {
+    public function print_packages_list($targetpage, $localpackages, $sharedpackages) {
+        global $CFG, $OUTPUT;
+        
+        if ($localpackages or $sharedpackages) {
+
+            $linkparams = array('d' => $this->id(), 'sesskey' => sesskey());
+            $actionurl = htmlspecialchars_decode(new moodle_url($targetpage, $linkparams));
+            
+            // prepare to make file links
+            require_once("$CFG->libdir/filelib.php");
+
+            /// table headings
+            $strname = get_string('name');
+            $strdescription = get_string('description');
+            $strscreenshot = get_string('screenshot');
+            $strapply = get_string('packageapply', 'dataform');
+            $strmap = get_string('packagemap', 'dataform');
+            $strdownload = get_string('download', 'dataform');
+            $strdelete = get_string('delete');
+            $strshare = get_string('packageshare', 'dataform');
+
+            $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'package\'&#44;this.checked)'));
+            
+            $multidownload = html_writer::tag('button', $OUTPUT->pix_icon('t/download', get_string('multidownload', 'dataform')), array('name' => 'multidownload', 'onclick' => 'bulk_action(\'package\'&#44; \''. $actionurl. '\'&#44; \'download\')'));
+            
+            $multidelete = html_writer::tag('button', $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), array('name' => 'multidelete', 'onclick' => 'bulk_action(\'package\'&#44; \''. $actionurl. '\'&#44; \'delete\')'));
+            
+            $multishare = html_writer::tag('button', $OUTPUT->pix_icon('i/group', get_string('multishare', 'dataform')), array('name' => 'multishare', 'onclick' => 'bulk_action(\'package\'&#44; \''. $actionurl. '\'&#44; \'share\')'));
+
+            $table = new html_table();
+            $table->head = array($strname, $strdescription, $strscreenshot, $strapply, $multidownload, $multishare, $multidelete, $selectallnone);
+            $table->align = array('left', 'left', 'center', 'center', 'center', 'center', 'center', 'center');
+            $table->wrap = array(false, false, false, false, false, false, false, false);
+            $table->attributes['align'] = 'center';
+
+            // print local packages
+            if ($localpackages) {
+                // headingg
+                $lpheadingcell = new html_table_cell();
+                $lpheadingcell->text = html_writer::tag('h4', get_string('packageavailableincourse', 'dataform'));
+                $lpheadingcell->colspan = 9;
+                
+                $lpheadingrow = new html_table_row();
+                $lpheadingrow->cells[] = $lpheadingcell;
+
+                $table->data[] = $lpheadingrow;
+
+                foreach ($localpackages as $package) {
+
+                    $packagename = $package->shortname;
+                    $packagedescription = '';
+                    $packagescreenshot = '';
+                    //if ($package->screenshot) {
+                    //    $packagescreenshot = '<img width="150" class="packagescreenshot" src="'. $package->screenshot. '" alt="'. get_string('screenshot'). '" />';
+                    //}
+                    $packageapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $package->id)),
+                                    $OUTPUT->pix_icon('t/switch_whole', $strapply));
+                    //$packageapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $package->id)),
+                    //                $OUTPUT->pix_icon('t/switch_plus', $strapply));
+                    $packagedownload = html_writer::link(
+                        moodle_url::make_file_url("/pluginfile.php", "/$package->contextid/mod_dataform/course_packages/$package->itemid/$package->name"),
+                        $OUTPUT->pix_icon('t/download', $strdownload)
+                    );
+                    $packageshare = '';
+                    if (has_capability('mod/dataform:packagesviewall', $this->context)) {
+                        $packageshare = html_writer::link(new moodle_url($targetpage, $linkparams + array('share' => $package->id)),
+                                    $OUTPUT->pix_icon('i/group', $strshare));
+                    }
+                    $packagedelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $package->id)),
+                                    $OUTPUT->pix_icon('t/delete', $strdelete));
+                    $packageselector = html_writer::checkbox("packageselector", $package->id, false);
+
+                    $table->data[] = array(
+                        $packagename,
+                        $packagedescription,
+                        $packagescreenshot,
+                        $packageapply,
+                        $packagedownload,
+                        $packageshare,
+                        $packagedelete,
+                        $packageselector
+                   );
+                }
+                
+            }
+
+            // print shared packages
+            if ($sharedpackages) {
+                // heading
+                $lpheadingcell = new html_table_cell();
+                $lpheadingcell->text = html_writer::tag('h4', get_string('packageavailableinsite', 'dataform'));
+                $lpheadingcell->colspan = 9;
+                
+                $lpheadingrow = new html_table_row();
+                $lpheadingrow->cells[] = $lpheadingcell;
+
+                $table->data[] = $lpheadingrow;
+                
+                $linkparams['area'] = dataform::PACKAGE_SITEAREA;
+
+                foreach ($sharedpackages as $package) {
+
+                    $packagename = $package->shortname;
+                    $packagedescription = '';
+                    $packagescreenshot = '';
+                    $packageapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $package->id)),
+                                    $OUTPUT->pix_icon('t/switch_whole', $strapply));
+                    //$packageapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $package->id)),
+                    //                $OUTPUT->pix_icon('t/switch_plus', $strapply));
+                    $packagedownload = html_writer::link(
+                        moodle_url::make_file_url("/pluginfile.php", "/$package->contextid/mod_dataform/site_packages/$package->itemid/$package->name"),
+                        $OUTPUT->pix_icon('t/download', $strdownload)
+                    );
+                    $packageshare = '';
+                    $packagedelete = '';
+                    if (has_capability('mod/dataform:managepackages', $this->context)) {            
+                        $packagedelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $package->id)),
+                                        $OUTPUT->pix_icon('t/delete', $strdelete));
+                    }                
+                    $packageselector = html_writer::checkbox("packageselector", $package->id, false);
+
+                    $table->data[] = array(
+                        $packagename,
+                        $packagedescription,
+                        $packagescreenshot,
+                        $packageapply,
+                        $packagedownload,
+                        $packageshare,
+                        $packagedelete,
+                        $packageselector
+                   );
+                }
+            }
+            
+            echo html_writer::table($table);
+            echo html_writer::empty_tag('br');           
+        }
+    }
+
+    /**
+     *
+     */
+    public function process_packages($targetpage, $params) {
+        global $CFG;
+        
+        require_once('packages_form.php');
+
+        $mform = new mod_dataform_packages_form(new moodle_url($targetpage, array('d' => $this->id(), 'sesskey' => sesskey(), 'add' => 1)));
+        // add packages
+        if ($data = $mform->get_data()) { 
+            // package this dataform
+            if ($data->package_source == 'current') {
+                $this->create_package_from_backup($data->package_data);
+
+            // upload packages
+            } else if ($data->package_source == 'file') {
+                $this->create_package_from_upload($data->uploadfile);
+            }
+        // apply a package
+        } else if ($params->apply and confirm_sesskey()) {    // apply package
+            $this->apply_package($params->apply);
+            // rebuild course cache to show new dataform name on the course page
+            rebuild_course_cache($this->course->id);
+            
+        // download (bulk in zip)
+        } else if ($params->download and confirm_sesskey()) {
+            $this->download_packages($params->download);
+
+        // share packages
+        } else if ($params->share and confirm_sesskey()) {  // share selected packages
+            $this->share_packages($params->share);
+
+        // delete packages
+        } else if ($params->delete and confirm_sesskey()) { // delete selected packages
+            $this->delete_packages($params->delete);
+        }
+    }
+
+    /**
+     *
+     */
+    public function create_package_from_backup($userdata) {
+        global $CFG, $USER, $SESSION;
+        
+        require_once("$CFG->dirroot/backup/util/includes/backup_includes.php");
+        
+        $users = 0;
+        $anon = 0;
+        switch ($userdata) {
+            case 'dataanon':
+                $anon = 1;
+            case 'data':
+                $users = 1;
+        }
+        
+        // store package settings in $SESSION
+        $SESSION->{"dataform_{$this->cm->id}_package"} = "$users $anon";
+
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $this->cm->id, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
+
+        // clear package settings from $SESSION
+        unset($SESSION->{"dataform_{$this->cm->id}_package"});
+
+        // set users and anon in plan
+        $bc->get_plan()->get_setting('users')->set_value($users);        
+        $bc->get_plan()->get_setting('anonymize')->set_value($anon);
+        $bc->set_status(backup::STATUS_AWAITING);
+
+        $bc->execute_plan();
+        $bc->destroy();
+        
         $fs = get_file_storage();
-        $files = $fs->get_area_files($this->context->id, 'backup', 'activity');
+        if ($users and !$anon) {
+            $contextid = $this->context->id;
+            $files = $fs->get_area_files($contextid, 'backup', 'activity', 0, 'timemodified', false);
+        } else {
+            $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+            $contextid = $usercontext->id;
+            $files = $fs->get_area_files($contextid, 'user', 'backup', 0, 'timemodified', false);
+        }
         if (!empty($files)) {
-            $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+            $course_context = context_course::instance($this->course->id);
             foreach ($files as $file) {
-                if ($file->is_directory()) {
+                if ($file->get_contextid() != $contextid) {
                     continue;
                 }
                 $package = new object;
@@ -1742,9 +1828,13 @@ class dataform {
                 $package->component = 'mod_dataform';
                 $package->filearea = dataform::PACKAGE_COURSEAREA;
                 $package->filepath = '/';
-                $package->filename = clean_filename(str_replace(' ', '_', $this->data->name). '-dataform-package-'. gmdate("Ymd_Hi"). '.mbz');
+                $package->filename = clean_filename(str_replace(' ', '_', $this->data->name).
+                                    '-dataform-package-'.
+                                    gmdate("Ymd_Hi"). '-'.
+                                    str_replace(' ', '-', get_string("package$userdata", 'dataform')). '.mbz');
 
                 $fs->create_file_from_storedfile($package, $file);
+                $file->delete();
                 return true;
             }
         }
@@ -1760,7 +1850,7 @@ class dataform {
         $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
         $fs = get_file_storage();
         if ($file = reset($fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false))) {
-            $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+            $course_context = context_course::instance($this->course->id);
             $package = new object;
             $package->contextid = $course_context->id;
             $package->component = 'mod_dataform';
@@ -1797,39 +1887,38 @@ class dataform {
     /**
      *
      */
-    public function apply_package($userpackage, $pluginpackage = null) {
+    public function apply_package($userpackage) {
         global $DB, $CFG, $USER;
         
         // extract the backup file to the temp folder
         $folder = $this->context->id. '-'. time();
-        $tempdir = "temp/backup/$folder";
-        $backuptempdir = make_upload_directory($tempdir);
+        $backuptempdir = make_temp_directory("backup/$folder");
         $zipper = get_file_packer('application/zip');
-        if (!empty($pluginpackage)) { // plugin package
-            $packagepath = "$CFG->dirroot/mod/dataform/package/$pluginpackage";
-            $zipper->extract_to_pathname($packagepath, $backuptempdir);
-        } else {
-            $fs = get_file_storage();
-            $file = $fs->get_file_by_id($userpackage);
-            $file->extract_to_pathname($zipper, $backuptempdir);           
-        }
+        $fs = get_file_storage();
+        $file = $fs->get_file_by_id($userpackage);
+        $file->extract_to_pathname($zipper, $backuptempdir);           
         
         require_once("$CFG->dirroot/backup/util/includes/restore_includes.php");
+
+        // anonymous users cleanup
+        $DB->delete_records_select('user', $DB->sql_like('firstname', '?'), array('%anonfirstname%'));
         
         $transaction = $DB->start_delegated_transaction();
-        $rs = new restore_controller($folder,
+        $rc = new restore_controller($folder,
                                     $this->course->id,
                                     backup::INTERACTIVE_NO,
                                     backup::MODE_GENERAL,
                                     $USER->id,
                                     backup::TARGET_CURRENT_ADDING);
 
+        $rc->execute_precheck();
+
         // get the dataform restore activity task
-        $tasks = $rs->get_plan()->get_tasks();
+        $tasks = $rc->get_plan()->get_tasks();
         $dataformtask = null;
-        foreach ($tasks as $key => $task) {
+        foreach ($tasks as &$task) {
             if ($task instanceof restore_dataform_activity_task) {
-                $dataformtask = $task;
+                $dataformtask = &$task;
                 break;
             }
         }
@@ -1840,12 +1929,19 @@ class dataform {
             $dataformtask->set_contextid($this->context->id);
             $dataformtask->set_ownerid($USER->id);
 
-            $rs->execute_precheck();
-            $rs->execute_plan();
+            //$rc->set_status(backup::STATUS_AWAITING);
+            $rc->execute_plan();
             
             $transaction->allow_commit();
+            // rc cleanup
+            $rc->destroy();
+            // anonymous users cleanup
+            $DB->delete_records_select('user', $DB->sql_like('firstname', '?'), array('%anonfirstname%'));
+            
             redirect(new moodle_url('/mod/dataform/view.php', array('d' => $this->id())));        
-        }
+        } else {
+            $rc->destroy();
+        }        
     }
 
     /**
@@ -1855,7 +1951,7 @@ class dataform {
         global $CFG;
         
         if (headers_sent()) {
-            print_error('headerssent');
+            throw new moodle_exception('headerssent');
         }
 
         if (!$pids = explode(',', $packageids)) {
@@ -1866,7 +1962,7 @@ class dataform {
         $fs = get_file_storage();
 
         // try first course area
-        $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+        $course_context = context_course::instance($this->course->id);
         $contextid = $course_context->id;
 
         if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PACKAGE_COURSEAREA)) {
@@ -1900,10 +1996,9 @@ class dataform {
             }            
         }
 
-        $tempdir = "temp/mod_dataform/download";
-        $downloaddir = make_upload_directory($tempdir);
+        $downloaddir = make_temp_directory('download');
         $filename = 'packages.zip';
-        $downloadfile = "$CFG->dataroot/temp/mod_dataform/download/$filename";
+        $downloadfile = "$downloaddir/$filename";
         
         $zipper = get_file_packer('application/zip');
         $zipper->archive_to_pathname($packages, $downloadfile);
@@ -1979,7 +2074,7 @@ class dataform {
         $fs = get_file_storage();
 
         // try first course area
-        $course_context = get_context_instance(CONTEXT_COURSE, $this->course->id);
+        $course_context = context_course::instance($this->course->id);
         $contextid = $course_context->id;
 
         if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PACKAGE_COURSEAREA)) {
@@ -2025,12 +2120,13 @@ class dataform {
     public function name_exists($table, $name, $id=0) {
         global $DB;
 
-        $params = array();
-        $params['name'] = $name;
-        $params['dataid'] = $this->id();
-        $params['id'] = $id;
+        $params = array(
+            $this->id(),
+            $name,
+            $id
+        );
         
-        $where = " dataid = :dataid AND name = :name AND id <> :id ";
+        $where = " dataid = ? AND name = ? AND id <> ? ";
         return $DB->record_exists_select("dataform_{$table}", $where, $params);
     }
 
@@ -2060,7 +2156,7 @@ class dataform {
      * 
      */
     public function add_to_log($action) {
-        add_to_log($this->course->id, 'dataform', 'entry '. $action, 'view.php?id='. $this->cm->id, $this->id(), $this->cm->id);
+        add_to_log($this->course->id, 'dataform', 'entry '. $action, $this->pagefile. '.php?id='. $this->cm->id, $this->id(), $this->cm->id);
     }
     
     

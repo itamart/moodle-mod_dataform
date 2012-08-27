@@ -1,32 +1,25 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-multiselect
+ * @subpackage dataformfield-multiselect
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 defined('MOODLE_INTERNAL') or die();
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
@@ -39,17 +32,20 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name();
+        $edit = !empty($options['edit']) ? $options['edit'] : false;
 
         // there is only one possible tag here so no check
         $replacements = array();
+        $tag = reset($tags);        
 
         if ($edit) {
-            $replacements["[[$fieldname]]"] = array('', array(array($this ,'display_edit'), array($entry)));
+            $required = $this->is_required($tag);
+            $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry, $required)));
         } else {
-            $replacements["[[$fieldname]]"] = array('html', $this->display_browse($entry));
+            $replacements[$tag] = array('html', $this->display_browse($entry));
         }
 
         return $replacements;
@@ -58,7 +54,7 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
     /**
      *
      */
-    public function display_edit(&$mform, $entry) {
+    public function display_edit(&$mform, $entry, $required = false) {
         $field = $this->_field;
         $fieldid = $field->id();
 
@@ -78,7 +74,7 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
         }
 
         $fieldname = "field_{$fieldid}_$entryid";
-        $this->render($mform, "{$fieldname}_selected", $options, $selected);
+        $this->render($mform, "{$fieldname}_selected", $options, $selected, $required);
 
         // add option
         if ($field->get('param4') or has_capability('mod/dataform:managetemplates', $field->df()->context)) {
@@ -123,7 +119,7 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
     /**
      *
      */
-    public function display_import($mform, $tags) {
+    public function display_import(&$mform, $tags) {
         $fieldid = $this->_field->id();
         $tagname = $this->_field->name();
         $name = "f_{$fieldid}_$tagname";
@@ -164,10 +160,13 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
     /**
      *
      */
-    protected function render(&$mform, $fieldname, $options, $selected) {
+    protected function render(&$mform, $fieldname, $options, $selected, $required = false) {
         $select = &$mform->addElement('select', $fieldname, null, $options);
         $select->setMultiple(true);
         $select->setSelected($selected);
+        if ($required) {
+            $mform->addRule($fieldname, null, 'required', null, 'client');
+        }      
     }
 
     /**
@@ -181,5 +180,15 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
 
         return $patterns; 
     }
+    
+    /**
+     * Array of patterns this field supports 
+     */
+    protected function supports_rules() {
+        return array(
+            self::RULE_REQUIRED
+        );
+    }
+    
 }
 

@@ -1,55 +1,60 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @package field-text
- * @copyright 2011 Itamar Tzadok
+ * @package field-url
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
-defined('MOODLE_INTERNAL') or die();
+defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
 
 /**
  *
  */
-class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
+class mod_dataform_field_url_patterns extends mod_dataform_field_patterns {
 
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name();
+        $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        // there is only one possible tag here so no check
         $replacements = array();
 
-        if ($edit) {
-            $replacements["[[$fieldname]]"] = array('', array(array($this,'display_edit'), array($entry)));
-        } else {
-            $replacements["[[$fieldname]]"] = array('html', $this->display_browse($entry));
+        foreach ($tags as $tag) {
+            if ($edit) {
+                if ($tag == "[[$fieldname]]") {                
+                    $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry)));
+                } else {
+                    $replacements[$tag] = '';
+                }
+            } else {
+                $parts = explode(':', trim($tag, '[]'));
+                if (!empty($parts[1])) {
+                    $type = $parts[1];
+                } else {
+                    $type = '';
+                }
+                $replacements[$tag] = array('html', $this->display_browse($entry, $type));
+            }
         }
 
         return $replacements;
@@ -59,58 +64,85 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
      *
      */
     public function display_edit(&$mform, $entry) {
+        global $CFG, $PAGE;
+
         $field = $this->_field;
         $fieldid = $field->id();
         $entryid = $entry->id;
-        
-        if ($entryid > 0){
-            $content = $entry->{"c{$fieldid}_content"};
-        } else {
-            $content = '';
-        }
-
-        $fieldattr = array();
-
-        if (!empty($field->get('param2'))) {
-            $fieldattr['style'] = 'width:'. s($field->get('param2')). s($field->get('param3')). ';';
-        }
-
-        if (!empty($field->get('param4'))) {
-            $fieldattr['class'] = s($field->get('param4'));
-        }
-
         $fieldname = "field_{$fieldid}_{$entryid}";
-        $mform->addElement('text', $fieldname, null, $fieldattr);
-        $mform->setDefault($fieldname, s($content));
-        //$mform->addRule($fieldname, null, 'required', null, 'client');
+
+        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
+        $url = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
+        $alt = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
+        
+        $url = empty($url) ? 'http://' : $url;
+        $usepicker = $field->field->param1;
+        $options = array(
+            'title' => s($field->field->description),
+            'size' => 40
+        );        
+        
+        $mform->addElement('url', "{$fieldname}_url", null, $options, array('usefilepicker' => $usepicker));
+        $mform->setDefault("{$fieldname}_url", s($url));
+
+        // add alt name if not forcing name
+        if (empty($field->field->param2)) {
+            $mform->addElement('text', "{$fieldname}_alt", get_string('alttext','dataformfield_url'));
+            $mform->setDefault("{$fieldname}_alt", s($alt));
+        }
     }
 
     /**
      *
      */
-    protected function display_browse($entry, $params = null) {
+    protected function display_browse($entry, $type = '') {
+        global $CFG;
+
         $field = $this->_field;
         $fieldid = $field->id();
 
         if (isset($entry->{"c{$fieldid}_content"})) {
-            $content = $entry->{"c{$fieldid}_content"};
-
-            $options = new object();
-            $options->para = false;
-
-            $format = FORMAT_PLAIN;
-            if ($field->get('param1') == '1') {  // We are autolinking this field, so disable linking within us
-                $content = '<span class="nolink">'. $content .'</span>';
-                $format = FORMAT_HTML;
-                $options->filter=false;
+            $url = $entry->{"c{$fieldid}_content"};
+            if (empty($url) or ($url == 'http://')) {
+                return '';
+            }
+            
+            // simple url text
+            if (empty($type)) {
+                return $url;
+            }
+            
+            // param2 forces the text to something
+            if ($field->field->param2) {
+                $alttext = s($field->field->param2);
+            } else {
+                $alttext = empty($entry->{"c{$fieldid}_content1"}) ? $url : $entry->{"c{$fieldid}_content1"};
             }
 
-            $str = format_text($content, $format, $options);
-        } else {
-            $str = '';
+            // linking
+            if ($type == 'link') {
+                return html_writer::link($url, $alttext);
+            }
+            
+            // image
+            if ($type == 'image') {
+                return html_writer::empty_tag('img', array('src' => $url));
+            }
+
+            // image flexible
+            if ($type == 'imageflex') {
+                return html_writer::empty_tag('img', array('src' => $url, 'style' => 'width:100%'));
+            }
+
+            // media
+            if ($type == 'media') {
+                require_once("$CFG->dirroot/filter/mediaplugin/filter.php");
+                $mpfilter = new filter_mediaplugin($field->df()->context, array());
+                return $mpfilter->filter(html_writer::link($url, ''));
+            }
         }
         
-        return $str;
+        return '';
     }
 
     /**
@@ -121,6 +153,10 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
+        $patterns["[[$fieldname:link]]"] = array(false);
+        $patterns["[[$fieldname:image]]"] = array(false);
+        $patterns["[[$fieldname:imageflex]]"] = array(false);
+        $patterns["[[$fieldname:media]]"] = array(false);
 
         return $patterns; 
     }

@@ -1,37 +1,30 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/
- *
  * @package mod-dataform
- * @subpackage view-interval
- * @author Itamar Tzadok
- * @copyright 2011 Moodle contributors
+ * @subpackage dataformview-interval
+ * @copyright 2012 Itamar Tzadok 
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's standard Database activity module. To the extent that the
- * Dataform code corresponds to the Database code (1.9.11+ (20110323)),
- * certain copyrights on certain files may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once("$CFG->dirroot/mod/dataform/view/block/view_class.php");
+require_once("$CFG->dirroot/mod/dataform/view/matrix/view_class.php");
 require_once("$CFG->dirroot/mod/dataform/entries_class.php");
 
-class dataform_view_interval extends dataform_view_block {
+class dataform_view_interval extends dataform_view_matrix {
 
     protected $type = 'interval';
     
@@ -43,14 +36,21 @@ class dataform_view_interval extends dataform_view_block {
     protected $cache = null;
     
     /**
+     *
+     */
+    public function supports_activity_grading() {
+        return false;
+    }
+
+    /**
      * Constructor
      */
     public function __construct($df = 0, $view = 0) {
         parent::__construct($df, $view);
         
-        $this->selection = $this->_filter->select = dataform_entries::SELECT_FIRST;
+        $this->selection = $this->_filter->onpage = dataform_entries::SELECT_FIRST_PAGE;
         if (!empty($this->view->param4)) {
-             $this->selection = $this->_filter->select = $this->view->param4;
+             $this->selection = $this->_filter->onpage = $this->view->param4;
         }
         $this->interval = !empty($this->view->param5) ? $this->view->param5 : 0; 
         $this->custom = !empty($this->view->param6) ? $this->view->param6 : 0;
@@ -119,6 +119,9 @@ class dataform_view_interval extends dataform_view_block {
         $now = time();
         if (!empty($this->view->param7)) {
             $this->cache = unserialize($this->view->param7);
+            if (!empty($this->cache->next)) {
+                $this->page = $this->cache->next;
+            }
         } else {
             // first time
             $this->cache = new object();
@@ -153,10 +156,9 @@ class dataform_view_interval extends dataform_view_block {
         }
         
         if ($checktime > $this->cache->time) {
-
             $this->cache->time = $checktime;
             
-            if ($this->selection == dataform_entries::SELECT_NEXT) {
+            if ($this->selection == dataform_entries::SELECT_NEXT_PAGE) {
                 $this->cache->next++;
                 if ($this->cache->next > $this->resetnext) {
                     $this->cache->next = 0;

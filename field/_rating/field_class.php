@@ -1,35 +1,29 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-_rating
- * @copyright 2011 Itamar Tzadok
+ * @subpackage dataformfield-_rating
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field__rating extends dataform_field_base {
+class dataform_field__rating extends dataform_field_no_content {
 
     const AGGREGATE_AVG = 1;
     const AGGREGATE_COUNT = 2;
@@ -38,6 +32,76 @@ class dataform_field__rating extends dataform_field_base {
     const AGGREGATE_SUM = 5;
 
     public $type = '_rating';
+
+    /**
+     *
+     */
+    public function get_select_sql() {
+        return ' er.itemid, er.component, er.ratingarea, er.contextid,
+                er.numratings, er.avgratings, er.sumratings, er.maxratings, er.minratings, 
+                er.ratingid, er.ratinguserid, er.scaleid, er.usersrating ';
+    }
+
+    /**
+     *
+     */
+    protected function get_sql_compare_text() {
+        return $this->get_sort_sql();
+    }
+
+    /**
+     *
+     */
+    public function get_sort_sql() {
+        $internalname = $this->field->internalname;
+        if ($internalname == 'ratings') {
+            return "er.usersrating";
+        } else if ($internalname == 'countratings') {
+            return "er.numratings";
+        } else {
+            return "er.$internalname";
+        }
+    }
+
+    /**
+     *
+     */
+    public function get_join_sql() {
+        global $USER;
+
+        $params = array();
+        $params['rcontextid'] = $this->df()->context->id;
+        $params['ruserid']    = $USER->id;
+        $params['rcomponent'] = 'mod_dataform';
+        $params['ratingarea'] = 'entry';
+    
+        $sql = "LEFT JOIN 
+                (SELECT r.itemid, r.component, r.ratingarea, r.contextid,
+                           COUNT(r.rating) AS numratings,
+                           AVG(r.rating) AS avgratings,
+                           SUM(r.rating) AS sumratings,
+                           MAX(r.rating) AS maxratings,
+                           MIN(r.rating) AS minratings,
+                           ur.id as ratingid, ur.userid as ratinguserid, ur.scaleid, ur.rating AS usersrating
+                    FROM {rating} r
+                            LEFT JOIN {rating} ur ON ur.contextid = r.contextid
+                                                    AND ur.itemid = r.itemid
+                                                    AND ur.component = r.component
+                                                    AND ur.ratingarea = r.ratingarea
+                                                    AND ur.userid = :ruserid
+                    WHERE r.contextid = :rcontextid 
+                            AND r.component = :rcomponent
+                            AND r.ratingarea = :ratingarea
+                    GROUP BY r.itemid, r.component, r.ratingarea, r.contextid, ratingid, ur.userid, ur.scaleid
+                    ORDER BY r.itemid) AS er ON er.itemid = e.id ";
+        return array($sql, $params);
+    }
+
+    /**
+     *
+    public function permissions($params) {
+    }
+     */
 
     /**
      * 
@@ -52,56 +116,24 @@ class dataform_field__rating extends dataform_field_base {
     }
 
     /**
-     * TODO
-     */
-    public function get_search_sql($value = '') {
-        return array(" ", array());
-    }
-
-    /**
-     * TODO: use join?
-     */
-    public function get_sort_sql() {
-        return '';
-        //return "(Select count(entryid) From mdl_dataform_ratings as cr Where cr.entryid = r.id)";
-    }
-
-    /**
-     * 
-     */
-    public function update_content($entryid, array $values = null) {
-        return true;
-    }
-
-    /**
-     * returns an array of distinct content of the field
-     */
-    public function get_distinct_content($sortdir = 0) {
-        return false;
-    }
-
-    /**
-     *
-    public function permissions($params) {
-    }
-     */
-
-    /**
      *
      */
-    public function validate($params) {
+    public function validation($params) {
         global $DB, $USER;
         
-        $data = $this->df->data;
-        
+        // Check the component is mod_dataform
+        if ($params['component'] != 'mod_dataform') {
+            throw new rating_exception('invalidcomponent');
+        }
+
+        // you can't rate your own entries unless you can manage ratings
+        if (!has_capability('mod/dataform:manageratings', $params['context']) and $params['rateduserid'] == $USER->id) {
+            throw new rating_exception('nopermissiontorate');
+        }
+
         // if the supplied context doesnt match the item's context
         if ($params['context']->id != $this->df->context->id) {
             throw new rating_exception('invalidcontext');
-        }
-
-        if ($data->approval and !$data->approved) {
-            //database requires approval but this item isnt approved
-            throw new rating_exception('nopermissiontorate');
         }
 
         // Check the ratingarea is entry or activity
@@ -109,6 +141,8 @@ class dataform_field__rating extends dataform_field_base {
             throw new rating_exception('invalidratingarea');
         }
 
+        $data = $this->df->data;
+        
         // vaildate activity scale and rating range
         if ($params['ratingarea'] == 'activity') {
             if ($params['scaleid'] != $data->grade) {
@@ -173,8 +207,10 @@ class dataform_field__rating extends dataform_field_base {
 
         // Make sure groups allow this user to see the item they're rating
         $groupid = $this->df->currentgroup;
-        if ($groupid > 0 and $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course)) {   // Groups are being used
-            if (!groups_group_exists($groupid)) { // Can't find group
+        if ($groupid > 0 and $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course)) {  
+            // Groups are being used
+            if (!groups_group_exists($groupid)) {
+                // Can't find group
                 throw new rating_exception('cannotfindgroup');//something is wrong
             }
 

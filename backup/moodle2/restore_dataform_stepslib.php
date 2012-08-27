@@ -1,30 +1,23 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 2010 Eloy Lafuente (stronk7) {@link http://stronk7.com}
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -49,7 +42,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
         $paths[] = new restore_path_element('dataform_view', '/activity/dataform/views/view');
-        if ($owner or $userinfo) {
+
+        if ($userinfo) {
             $paths[] = new restore_path_element('dataform_entry', '/activity/dataform/entries/entry');
             $paths[] = new restore_path_element('dataform_content', '/activity/dataform/entries/entry/contents/content');
             $paths[] = new restore_path_element('dataform_rating', '/activity/dataform/entries/entry/ratings/rating');
@@ -69,6 +63,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $oldid = $data->id;
         $data->course = $this->get_courseid();
 
+        $data->timemodified = $this->apply_date_offset($data->timemodified);
         $data->timeavailable = $this->apply_date_offset($data->timeavailable);
         $data->timedue = $this->apply_date_offset($data->timedue);
 
@@ -105,8 +100,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             $this->set_mapping('course_module', $this->task->get_old_moduleid(), $this->task->get_moduleid());
 
             // remap task context id
-            $this->set_mapping('context', $this->task->get_old_contextid(), $this->task->get_contextid());
 
+            $this->set_mapping('context', $this->task->get_old_contextid(), $this->task->get_contextid());
         } else {
             // Save activity id in task
             $this->task->set_activityid($newitemid); 
@@ -319,22 +314,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
         }
 
-        // default sort
-        $updatedf = false;
-        if ($defaultsort = $DB->get_field('dataform', 'defaultsort', array('id' => $dataformnewid))) {
-            $defaultsort = unserialize($defaultsort);
-            $sortfields = array();
-            foreach ($defaultsort as $sortfield => $sortdir) {
-                if ($sortfield > 0) {
-                    $sortfields[$this->get_mappingid('dataform_field', $sortfield)] = $sortdir;
-                    $updatedf = true;
-                } else {
-                    $sortfields[$sortfield] = $sortdir;
-                }
-            }
-            if ($updatedf) {
-                $defaultsort = serialize($sortfields);
-                $DB->set_field('dataform', 'defaultsort', $defaultsort, array('id' => $dataformnewid));
+        // default filter
+        if ($defaultfilter = $DB->get_field('dataform', 'defaultfilter', array('id' => $dataformnewid))) {
+            if ($defaultfilter = $this->get_mappingid('dataform_filter', $defaultfilter)) {
+                $DB->set_field('dataform', 'defaultfilter', $defaultfilter, array('id' => $dataformnewid));
             }
         }
 

@@ -1,10 +1,6 @@
 /**
  * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
- * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
  * The Dataform has been developed as an enhanced counterpart
  * of Moodle's Database activity module (1.9.11+ (20110323)).
  * To the extent that Dataform code corresponds to Database code,
@@ -24,6 +20,12 @@
  * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @package mod-dataform
+ * @copyright 2011 Itamar Tzadok
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+ 
 #page-mod-dataform-view #sortsearch .c0 {
   text-align: right;
 }
@@ -33,18 +35,52 @@
   height:34px;
 }
 
-#page-mod-dataform-preset .presetmapping {
-  text-align: center;
+#page-mod-dataform-view .approve img.icon {
+  width:34px;
+  height:34px;
 }
 
-#page-mod-dataform-preset .presetmapping table {
-  text-align: left;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#page-mod-dataform-preset .overwritesettings {
+#page-mod-dataform-view .tabtree {
   margin-bottom: 1em;
+}
+
+#page-mod-dataform-view .singleselect {
+  margin: 0.5em 0;
+}
+
+#page-mod-dataform-embed .entriesview,
+#page-mod-dataform-view .entriesview {
+  overflow: auto;
+}
+
+#page-mod-dataform-embed .mform fieldset.hidden,
+#page-mod-dataform-view .mform fieldset.hidden {
+  display: table-column;
+}
+
+#page-mod-dataform-embed .mform .entriesview fieldset.hidden,
+#page-mod-dataform-embed .mform .entriesview fieldset.hidden div,
+#page-mod-dataform-view .mform .entriesview fieldset.hidden,
+#page-mod-dataform-view .mform .entriesview fieldset.hidden div{
+  margin: 0;
+  padding: 0;
+}
+
+#page-mod-dataform-embed .mform .fitem .fitemtitle,
+#page-mod-dataform-embed .mform .entriesview .fitem .fitemtitle,
+#page-mod-dataform-view .mform .fitem .fitemtitle,
+#page-mod-dataform-view .mform .entriesview .fitem .fitemtitle {
+  float: none;
+  text-align: left;
+  width: 100%;
+}
+
+#page-mod-dataform-embed .mform .fitem .felement,
+#page-mod-dataform-embed .mform .entriesview .fitem .felement,
+#page-mod-dataform-view .mform .fitem .felement,
+#page-mod-dataform-view .mform .entriesview .fitem .felement {
+  margin-left: 0;
+  width: 100%;
 }
 
 .mod-dataform-field .c0 {
@@ -62,19 +98,25 @@
   margin-left: 1em;
 }
 
-.mod-dataform-field .fieldname {
-  width:300px;
-}
-
-.mod-dataform-field .fielddescription {
-  width:300px;
-}
-
-.presetcontrols form {
-  display: inline;
-}
-
 .generaltable td.z_borderless,
 .generaltable th.z_borderless {
     border: 0 none !important;
+}
+
+#page-mod-dataform-embed {
+    margin: 0;
+    width: 100%;
+}
+
+#page-mod-dataform-embed.pagelayout-embedded #content {
+    padding: 0;
+}
+
+/* Captcha image overlap fix for Safari */
+#recaptcha_image {
+    margin-bottom: 25px;
+}
+
+.mform div.fdescription.required {
+    display: none;
 }

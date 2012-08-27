@@ -1,31 +1,24 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-time
+ * @subpackage dataformfield-time
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on Database module may obtain, including:
- * @copyright 1999 Moodle Pty Ltd http://moodle.com
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
@@ -37,7 +30,22 @@ class dataform_field_time extends dataform_field_base {
     /**
      *
      */
-    public function format_content(array $values = null) {
+    protected function content_names() {
+        return array('', 'year', 'month', 'day', 'hour', 'minute');
+    }
+    
+    /**
+     *
+     */
+    protected function format_content($entry, array $values = null) {
+        $fieldid = $this->field->id;
+        $oldcontents = array();
+        $contents = array();
+        // old contents
+        if (isset($entry->{"c{$fieldid}_content"})) {
+            $oldcontents[] = $entry->{"c{$fieldid}_content"};
+        }
+        // new contents
         if (!empty($values)) {
             $timestamp = 0;
             if (count($values) === 1) {
@@ -47,17 +55,15 @@ class dataform_field_time extends dataform_field_base {
                 // assuming any of year, month, day, hour, minute is passed
                 $year = $month = $day = $hour = $minute = 0;
                 foreach ($values as $name => $value) {
-                    $names = explode('_', $name);
-                    if (!empty($names[3])) {          // the time unit
-                        ${$names[3]} = $value;
+                    if (!empty($name)) {          // the time unit
+                        ${$name} = $value;
                     }
                 }
                 $timestamp = make_timestamp($year, $month, $day, $hour, $minute, 0, 0, false);
             }
-            return $timestamp;
-        } else {
-            return null;
+            $contents[] = $timestamp;
         }
+        return array($contents, $oldcontents);        
     }
 
     /**
@@ -143,9 +149,9 @@ class dataform_field_time extends dataform_field_base {
     /**
      * 
      */
-    public function get_sort_sql($fieldname) {
+    public function get_sort_sql() {
         global $DB;
-        return $DB->sql_cast_char2int($fieldname, true);
+        return $DB->sql_cast_char2int("c{$this->field->id}.content", true);
     }
 
 }

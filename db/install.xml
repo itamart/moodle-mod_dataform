@@ -10,32 +10,35 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="course" NEXT="intro"/>
         <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="name" NEXT="introformat"/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" NEXT="timeavailable"/>
-        <FIELD NAME="timeavailable" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat" NEXT="timedue"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" NEXT="timemodified"/>       
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat" NEXT="timeavailable"/>
+        <FIELD NAME="timeavailable" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="timedue"/>
         <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeavailable" NEXT="timeinterval"/>
         <FIELD NAME="timeinterval" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timedue" NEXT="intervalcount"/>
         <FIELD NAME="intervalcount" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="timeinterval" NEXT="allowlate"/>
-        <FIELD NAME="allowlate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intervalcount" NEXT="entriesrequired"/>
-        <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowlate" NEXT="entriestoview"/>
+        <FIELD NAME="allowlate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intervalcount" NEXT="grade"/>
+        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowlate" NEXT="grademethod"/>
+        <FIELD NAME="grademethod" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grade" NEXT="anonymous"/>        
+        <FIELD NAME="anonymous" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="grademethod" NEXT="notification"/>
+        <FIELD NAME="notification" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" COMMENT="" PREVIOUS="anonymous" NEXT="entriesrequired"/>
+        <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="notification" NEXT="entriestoview"/>
         <FIELD NAME="entriestoview" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="entriesrequired" NEXT="maxentries"/>
         <FIELD NAME="maxentries" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="entriestoview" NEXT="timelimit"/>
-        <FIELD NAME="timelimit" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="maxentries" NEXT="approval"/>
+        <FIELD NAME="timelimit" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="-1" SEQUENCE="false" PREVIOUS="maxentries" NEXT="approval"/>
         <FIELD NAME="approval" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timelimit" NEXT="grouped"/>
         <FIELD NAME="grouped" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="approval" NEXT="rating"/>
-        <FIELD NAME="rating" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grouped" NEXT="comments"/>
-        <FIELD NAME="comments" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="rating" NEXT="locks"/>
-        <FIELD NAME="locks" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="comments" NEXT="singleedit"/>
-		<FIELD NAME="singleedit" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="locks" NEXT="singleview"/>
+        <FIELD NAME="rating" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grouped" NEXT="rules"/>
+        <FIELD NAME="rules" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="rating" NEXT="singleedit"/>
+		<FIELD NAME="singleedit" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="rules" NEXT="singleview"/>
         <FIELD NAME="singleview" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="singleedit" NEXT="rssarticles"/>
         <FIELD NAME="rssarticles" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="singleview" NEXT="rss"/>
         <FIELD NAME="rss" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="rssarticles" NEXT="css"/>
-        <FIELD NAME="css" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="rss" NEXT="js"/>
-        <FIELD NAME="js" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="css" NEXT="defaultview"/>
-        <FIELD NAME="defaultview" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="js" NEXT="defaultsort"/>
-        <FIELD NAME="defaultsort" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="defaultview" NEXT="grade"/>
-        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="defaultsort" NEXT="grademethod"/>
-        <FIELD NAME="grademethod" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grade" NEXT="notification"/>
-        <FIELD NAME="notification" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" COMMENT="Notify people when things change" PREVIOUS="grademethod"/>
+        <FIELD NAME="css" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="rss" NEXT="cssincludes"/>
+        <FIELD NAME="cssincludes" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="css" NEXT="js"/>
+        <FIELD NAME="js" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="cssincludes" NEXT="jsincludes"/>
+        <FIELD NAME="jsincludes" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="js" NEXT="defaultview"/>
+        <FIELD NAME="defaultview" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="jsincludes" NEXT="defaultfilter"/>
+        <FIELD NAME="defaultfilter" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="defaultview"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -50,8 +53,10 @@
         <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="type"/>
         <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataid" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="type" NEXT="description"/>
-        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="param1"/>
-        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="description" NEXT="param2"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="visible"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="2" SEQUENCE="false" PREVIOUS="description" NEXT="edits"/>
+        <FIELD NAME="edits" TYPE="int" LENGTH="6" NOTNULL="true" UNSIGNED="false" DEFAULT="-1" SEQUENCE="false" PREVIOUS="visible" NEXT="param1"/>
+        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="edits" NEXT="param2"/>
         <FIELD NAME="param2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param1" NEXT="param3"/>
         <FIELD NAME="param3" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param2" NEXT="param4"/>
         <FIELD NAME="param4" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param3" NEXT="param5"/>
@@ -110,8 +115,9 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataid" NEXT="description"/>
         <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="visible"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="description" NEXT="perpage"/>
-        <FIELD NAME="perpage" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="10" SEQUENCE="false" PREVIOUS="visible" NEXT="groupby"/>
-        <FIELD NAME="groupby" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="perpage" NEXT="search"/>
+        <FIELD NAME="perpage" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="10" SEQUENCE="false" PREVIOUS="visible" NEXT="selection"/>
+        <FIELD NAME="selection" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="perpage" NEXT="groupby"/>
+        <FIELD NAME="groupby" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="selection" NEXT="search"/>
         <FIELD NAME="search" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="groupby" NEXT="customsort"/>
         <FIELD NAME="customsort" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="search" NEXT="customsearch"/>
         <FIELD NAME="customsearch" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="customsort"/>
@@ -129,8 +135,7 @@
         <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="timecreated"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupid" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated" NEXT="approved"/>
-        <FIELD NAME="approved" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="grading"/>
-        <FIELD NAME="grading" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="approved"/>
+        <FIELD NAME="approved" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="dataid"/>

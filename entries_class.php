@@ -1,504 +1,126 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 
 /**
  *
  */
 class dataform_entries {
 
-    const ADD_NEW_ENTRY = -1;
-    const ADD_BULK_ENTRIES = -2;
-    
-    const SELECT_FIRST = 0;
-    const SELECT_LAST = -1;
-    const SELECT_NEXT = -2;
-    const SELECT_RANDOM = -3;
+    const SELECT_FIRST_PAGE = 0;
+    const SELECT_LAST_PAGE = -1;
+    const SELECT_NEXT_PAGE = -2;
+    const SELECT_RANDOM_PAGE = -3;
     
     protected $_df = null;      // dataform object
-    protected $_view = null;    // view object
-    protected $_filter = null;  // filter object
+    protected $_view = null;      // view object
 
     protected $_entries = null;
     protected $_entriestotalcount = 0;
     protected $_entriesfiltercount = 0;
-    protected $_editentries = 0;
-    protected $_notifications = array('good' => array(), 'bad' => array());
-
-    protected $_mform = null;
-    protected $_display_definition = array();
-    protected $_returntoform = false;
 
     /**
      * Constructor
      * View or dataform or both, each can be id or object
      */
-    public function __construct($df, $view, $filter) {
-        global $DB, $CFG, $SESSION;
+    public function __construct($df, $view = null) {
 
-        if (empty($df)) {
-            print_error('Programmer error: You must specify dataform id or object when defining a field class. ');
-        } else if (is_object($df)) {
+        if (empty($df) and empty($view)) {
+            throw new coding_exception('Dataform id or object must be passed to entries constructor.');
+        }
+        
+        if (is_object($df)) {
             $this->_df = $df;
-        } else {    // dataform id
+        } else {
             $this->_df = new dataform($df);
         }
 
-        if (!empty($view) and is_object($view)) {
+        if (is_object($view)) {
             $this->_view = $view;
-        } else { // get from id or default
+        } else {
             $this->_view = $this->_df->get_view_from_id($view);
         }
-
-        $this->_filter = $filter;
     }
 
     /**
      *
      */
-    public function count() {
-        return (!empty($this->_entries) ? count($this->_entries) : 0);
-    }
-
-    /**
-     *
-     */
-    public function filter_count() {
-        return $this->_entriesfiltercount;
-    }
-
-    /**
-     *
-     */
-    public function process_data() {
+    public function set_content(array $options = null) {
         global $CFG;
-
-        // check first if returning from form
-        $update = optional_param('update', '', PARAM_RAW);
-        $cancel = optional_param('cancel', 0, PARAM_RAW);
-        if (!$cancel and $update and confirm_sesskey()) {
-
-            // get entries only if updating existing entries
-            if ($update != self::ADD_NEW_ENTRY) {
-                // TODO optimize to fetch only the edited entries
-                $this->set_content();
-            }
-
-            // set the display definition for the form
-            $this->_editentries = $update;
-            $this->set__display_definition();
-
-            // prepare params for form
-            $custom_data = array();
-            $custom_data['df'] = $this->_df;
-            $custom_data['entries'] = $this;
-            $custom_data['view'] = $this->_view;
-            $custom_data['filter'] = $this->_filter;
-            $custom_data['update'] = $update;
-            $custom_data['page'] = $this->_filter->page;
-
-            // get form
-            require_once("$CFG->dirroot/mod/dataform/entries_form.php");
-            $this->_mform = new mod_dataform_entries_form(null, $custom_data);
-
-            // we already know that it isn't cancelled
-
-            if ($data = $this->_mform->get_data()) {
-                // validated successfully so process request
-                $processedentries = $this->process_entries('update', $update, $data, true);
-
-                // reset editing flag
-                $this->_editentries = '';
-
-                $this->_returntoform = false;
-                return true;
-            } else {
-                // form validation failed so return to form
-                $this->_returntoform = true;
-                return false;
-            }
-        }
-
-
-        // direct url params; not from form
-        $new = optional_param('new', 0, PARAM_INT);               // open new entry form
-        $editentries = optional_param('editentries', 0, PARAM_SEQUENCE);        // edit entries (all) or by record ids (comma delimited eids)
-        $duplicate = optional_param('duplicate', '', PARAM_SEQUENCE);    // duplicate entries (all) or by record ids (comma delimited eids)
-        $delete = optional_param('delete', '', PARAM_SEQUENCE);    // delete entries (all) or by record ids (comma delimited eids)
-        $approve = optional_param('approve', '', PARAM_SEQUENCE);  // approve entries (all) or by record ids (comma delimited eids)
-        $disapprove = optional_param('disapprove', '', PARAM_SEQUENCE);  // disapprove entries (all) or by record ids (comma delimited eids)
-        $append = optional_param('append', '', PARAM_SEQUENCE);  // append entries (all) or by record ids (comma delimited eids)
-
-        $confirmed = optional_param('confirmed', 0, PARAM_BOOL);
-
-        $this->_editentries = $editentries;
-
-        // Prepare open a new entry form
-        if ($new and confirm_sesskey()) {
-            $this->_editentries = -$new;
-        // Duplicate any requested entries
-        } else if ($duplicate and confirm_sesskey()) {
-            $this->process_entries('duplicate', $duplicate, null, $confirmed);
-        // Delete any requested entries
-        } else if ($delete and confirm_sesskey()) {
-            $this->process_entries('delete', $delete, null, $confirmed);
-        // Approve any requested entries
-        } else if ($approve and confirm_sesskey()) {
-            $this->process_entries('approve', $approve, null, true);
-        // Disapprove any requested entries
-        } else if ($disapprove and confirm_sesskey()) {
-            $this->process_entries('disapprove', $disapprove, null, true);
-        // Append any requested entries to the initiating entry
-        } else if ($append and confirm_sesskey()) {
-            $this->process_entries('append', $append, null, true);
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     */
-    public function set_content($options = null) {
-        global $CFG;
-
-        if (!isset($options->entriesset)) {
-
-            // check if view is caching
-            if ($this->_view->is_caching()) {
-                if (!$entriesset = $this->_view->get_cache_content()) {
-                    $filteroptions = $this->_view->get_cache_filter_options();
-                    foreach ($filteroptions as $option => $value) {
-                        $this->_filter->{$option} = $value;
-                    }
-                    $entriesset = $this->get_entries();
-                    $this->_view->update_cache_content($entriesset);
-                }
-            } else {
-                $entriesset = $this->get_entries();
-            }
-        }
+        
+        if (isset($options['entriesset'])) {
+            $entriesset = $options['entriesset'];
+        } else if (!empty($options['user'])) {
+            $entriesset = $this->get_entries(array('userid' => $options['user']));
+        } else {
+            $entriesset = $this->get_entries();
+        }            
 
         $this->_entries = !empty($entriesset->entries) ? $entriesset->entries : array();
         $this->_entriestotalcount = !empty($entriesset->max) ? $entriesset->max : count($this->_entries);
         $this->_entriesfiltercount = !empty($entriesset->found) ? $entriesset->found : count($this->_entries);
-
-        // add ratings if applicable
-        if (!empty($options->ratings)) {
-            require_once("$CFG->dirroot/mod/dataform/field/_rating/lib.php");
-            $rm = new dataform_rating_manager();
-            $options->ratings->items = $this->_entries;
-            $this->_entries = $rm->get_ratings($options->ratings);
-        }
-
-        if (!$this->_entriestotalcount) {
-            $this->_notifications['bad'][] = get_string('entriesfound', 'dataform', get_string('no'));
-        } else {
-            // notify subset if filtered
-            if (($this->_entriesfiltercount != $this->_entriestotalcount) and $this->_filter->id) {
-                $strentriesfound = $this->_entriesfiltercount. '/'. $this->_entriestotalcount;
-                $this->_notifications['good'][] = get_string('entriesfound', 'dataform', $strentriesfound);
-            }
-        }
     }
 
     /**
      *
      */
-    public function display(array $params = null) {
-        global $CFG, $OUTPUT;
-        
-        // set display params
-        $displaycontrols = isset($params['controls']) ? $params['controls'] : true;
-        $notify = isset($params['notifications']) ? $params['notifications'] : true;
-        $tohtml = isset($params['tohtml']) ? $params['tohtml'] : false;
-        $pluginfileurl = isset($params['pluginfileurl']) ? $params['pluginfileurl'] : null;
-
-        $html = '';
-
-        if ($this->_returntoform) {
-            $this->_mform->set_data(null);
-            $html .= $this->_mform->html();
-        } else {
-            // first notifications
-            if ($notify) {
-                foreach ($this->_notifications['good'] as $notification) {
-                    $html .= $OUTPUT->notification($notification, 'notifysuccess');    // good (usually green)
-                }
-                foreach ($this->_notifications['bad'] as $notification) {
-                    $html .= $OUTPUT->notification($notification);    // bad (usually red)
-                }
-            }
-            
-            // build definition
-            $this->set__display_definition();
-
-            if (!$editing = $this->user_is_editing()) {
-                // all _display_definition elements should be html
-                $html .= $this->definition_to_html();
-                
-                // replace pluginfile urls if needed (e.g. in export)
-                if ($pluginfileurl) {
-                    $pluginfilepath = new moodle_url("/pluginfile.php/{$this->_df->context->id}/mod_dataform/content");
-                    $pattern = str_replace('/', '\/', $pluginfilepath);
-                    $pattern = "/$pattern\/\d+\//";
-                    $html = preg_replace($pattern, $pluginfileurl, $html);
-                }                    
-
-            } else {
-
-                // prepare params for form
-                $setdata = array();
-                $custom_data['df'] = $this->_df;
-                $custom_data['entries'] = $this;
-                $custom_data['view'] = $this->_view;
-                $custom_data['filter'] = $this->_filter;
-                $custom_data['update'] = $this->_editentries;
-                $custom_data['page'] = $this->_filter->page;
-
-                // get form
-                require_once("$CFG->dirroot/mod/dataform/entries_form.php");
-                $this->_mform = new mod_dataform_entries_form(null, $custom_data);
-
-                $this->_mform->set_data(null);
-                $html .= $this->_mform->html();
-            }
-        }
-        
-        if ($tohtml) {
-            return $html;
-        } else {
-            echo $html;
-        }
-    }
-
-    /**
-     *
-     */
-    public function definition_to_html() {
-        $elements = array();
-        foreach ($this->_display_definition as $groupname => $entries_set) {
-            $elements = array_merge($elements, $this->_view->group_entries_definition($entries_set, $groupname));
-        }
-
-        $html = '';
-        // if $mform is null, simply echo/return html string
-        foreach ($elements as $element) {
-            list(, $content) = $element;
-            $html .= $content;
-        }
-
-        return $html;
-    }
-
-    /**
-     *
-     */
-    public function definition_to_form(&$mform) {
-        $elements = array();
-        foreach ($this->_display_definition as $groupname => $entries_set) {
-            $elements = array_merge($elements, $this->_view->group_entries_definition($entries_set, $groupname));
-        }
-
-        foreach ($elements as $element) {
-            if (!empty($element)) {
-                list($type, $content) = $element;
-                if ($type === 'html') {
-                    $mform->addElement('html', $content);
-                } else {
-                    list($func, $params) = $content;
-                    call_user_func_array($func, array_merge(array($mform),$params));
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public function get_entries() {
+    public function get_entries($options = null) {
         global $CFG, $DB, $USER;
         
         $df = &$this->_df;
-        $filter = &$this->_filter;
-        
+        $filter = $this->_view->get_filter();      
         $fields = $df->get_fields();
 
-        // content fields if any
-        $contentfields = (isset($filter->contentfields) ? $filter->contentfields : '');
-
-        // sort and search settings
-        $perpage = isset($filter->perpage) ? $filter->perpage : 0;
-        $groupby = isset($filter->groupby) ? $filter->groupby : 0;
-        $customsort = isset($filter->customsort) ? trim($filter->customsort) : '';
-        $customsearch = isset($filter->customsearch) ? trim($filter->customsearch) : '';
-        $simplesearch = isset($filter->search) ? trim($filter->search) : '';
+        // Filter sql
+        list($filtertables,
+            $wheresearch,
+            $sortorder,
+            $whatcontent,
+            $filterparams) = $filter->get_sql($fields);
 
         // named params array for the sql
         $params = array();        
 
-        // we need to collate content tables for select search and sort
-        // the three sets may overlap, but search tables should be joined
-        // whereas the others only left joined
-        // so start with search, then select and sort
-
-        // SEARCH settings
-        $searchfrom = array();
-        $searchwhere = array();
-        $searchparams = array(); // named params array
-
-        if ($customsearch) {
-            $searchfields = unserialize($customsearch);
-
-            $whereand = array();
-            $whereor = array();
-            foreach($searchfields as $fieldid => $searchfield) {
-                // if we got this far there must be some actual search values
-                if ($fieldid > 0) { // only for user fields
-                    $searchfrom[] = $fieldid;
-                }
-
-                $field = $fields[$fieldid];
-
-                // add AND search clauses
-                if (!empty($searchfield['AND'])) {
-                    foreach ($searchfield['AND'] as $option) {
-                        list($fieldsql, $fieldparams) = $field->get_search_sql($option);
-                        $whereand[] = $fieldsql;
-                        $searchparams = array_merge($searchparams, $fieldparams);
-                    }
-                }
-
-                // add OR search clause
-                if (!empty($searchfield['OR'])) {
-                    foreach ($searchfield['OR'] as $option) {
-                        list($fieldsql, $fieldparams) = $field->get_search_sql($option);
-                        $whereor[] = $fieldsql;
-                        $searchparams = array_merge($searchparams, $fieldparams);
-                    }
-                }
-            }
-
-            if ($searchfrom) {
-                $searchwhere[] = implode(' AND ', array_map(function($fieldid) {return " c$fieldid.fieldid = $fieldid ";}, $searchfrom));
-            }
-            if ($whereand) {
-                $searchwhere[] = implode(' AND ', $whereand);
-            }
-            if ($whereor) {
-                $searchwhere[] = '('. implode(' OR ', $whereor). ')';
-            }
-        } else if ($simplesearch) {
-            $searchfrom[] = 's';
-            $searchwhere[] = ' ('. $DB->sql_like('cs.content', ':search1', false).
-                                ' OR '. $DB->sql_like('u.firstname', ':search2', false).
-                                ' OR '. $DB->sql_like('u.lastname', ':search3', false).') ';
-            $searchparams['search1'] = "%$simplesearch%";
-            $searchparams['search2'] = "%$simplesearch%";
-            $searchparams['search3'] = "%$simplesearch%";
-        }
-
-        // compile sql for search settings
-        $searchtables = '';
-        if ($searchfrom) {
-            foreach ($searchfrom as $fieldid) {
-                $searchtables .= " JOIN {dataform_contents} c$fieldid ON c$fieldid.entryid = e.id ";
-            }
-        }
-        $wheresearch = $searchwhere ? ' AND '. implode(' AND ', $searchwhere) : '';
-
-        // SORT settings
-        $sorties = array();
-        $orderby = array("e.timecreated ASC");
-        //$sortcount = '';
-
-        $sortfields = array();
-        if ($customsort) {
-            $sortfields = unserialize($customsort);
-
-            $orderby = array();
-            foreach ($sortfields as $fieldid => $sortdir) {
-                $field = $fields[$fieldid];
-                $sortname = $field->get_sort_sql();
-                if ($fieldid > 0) {
-                    // only user fields are added to sorties
-                    $sorties[$fieldid] = $sortname;
-                    //$sortcount .= ($sortcount ? ', ' : ''). 'c'. $fieldid. '.entryid';
-                }
-                $orderby[] = "$sortname ". ($sortdir ? 'DESC' : 'ASC');
-            }
-        }
-
-        // compile sql for sort settings
-        $sorttables = '';
-        $sortorder = ' ORDER BY '. implode(', ', $orderby). ' ';
-        if ($sorties) {
-            $sortfrom = array_keys($sorties);
-            foreach ($sortfrom as $fieldid) {
-                // add only tables which are not already added for searching
-                if (empty($searchfrom) or !in_array($fieldid, $searchfrom)) {
-                    $sorttables .= " LEFT JOIN {dataform_contents} c$fieldid ON (c$fieldid.entryid = e.id AND c$fieldid.fieldid = $fieldid) ";
-                }
-            }
-        }
-
-        // CONTENT fields if any
-        $whatcontent = ' ';
-        $contenttables = ' ';
-        if ($contentfields) {
-            $whatcontent = array();
-            $contentfrom = array();
-            foreach ($contentfields as $fieldid) {
-                // only user fields
-                if ($fieldid > 0) {
-                    $whatcontent[] = $fields[$fieldid]->get_select_sql();
-                    // add content table only if not already used for search or sort
-                    if ((!isset($sortfrom) or !in_array($fieldid, $sortfrom))
-                            and (empty($searchfrom) or !in_array($fieldid, $searchfrom))) {
-                        $contentfrom[$fieldid] = "LEFT JOIN {dataform_contents} c$fieldid ON (c$fieldid.entryid = e.id AND c$fieldid.fieldid = $fieldid) ";
-                    }
-                }
-            }
-            $whatcontent = !empty($whatcontent) ? ', '. implode(', ', $whatcontent) : ' ';
-            $contenttables = ' '. implode(' ', $contentfrom);
-        }
-
         // USER filtering
         $whereuser = '';
-        if (!$df->user_can_view_all_entries(array('notify' => true))) {
+        if (!$df->user_can_view_all_entries()) {
+            // include only the  user's entries
             $whereuser = " AND e.userid = :{$this->sqlparams($params, 'userid', $USER->id)} ";
+        } else {
+            // specific users requested
+            if (!empty($filter->users)) {
+                list($inusers, $userparams) = $DB->get_in_or_equal($filter->users, SQL_PARAMS_NAMED, 'users');
+                $whereuser .= " AND e.userid $inusers ";
+                $params = array_merge($params, array('users' => $userparams));
+            }
+                
+            // exclude guest/anonymous
+            if (!has_capability('mod/dataform:viewanonymousentry', $df->context)) {
+                $whereuser .= " AND e.userid <> :{$this->sqlparams($params, 'guestid', 1)} ";
+            }
         }
 
         // GROUP filtering
         $wheregroup = '';
         if ($df->currentgroup) {
-//            $wheregroup = " AND (e.groupid = :{$this->sqlparams($params, 'groupid', $df->currentgroup)}
-//                                OR e.groupid = :{$this->sqlparams($params, 'groupid', 0)}) ";
             $wheregroup = " AND e.groupid = :{$this->sqlparams($params, 'groupid', $df->currentgroup)} ";
         }
 
@@ -513,30 +135,34 @@ class dataform_entries {
             }
         }
 
-        // RATING (activity) filtering
-        // unconditioned just in case activity rating is used and then abandoned
-        $whererating = " AND e.grading = :{$this->sqlparams($params, 'grading', 0)} ";
-
-
         // sql for fetching the entries
-        $what = ' DISTINCT e.id, e.approved, e.timecreated, e.timemodified, e.userid, e.groupid, '.
-                    user_picture::fields('u', array('idnumber', 'username'), 'uid '). ', '.
-// TODO varchar g.description to make it pass the distinct clause in MSSQL
-///                    'g.name AS groupname, g.description AS groupdesc, g.hidepicture AS grouphidepic, g.picture AS grouppic '.                    
-                    'g.name AS groupname, g.hidepicture AS grouphidepic, g.picture AS grouppic '.                    
-                    $whatcontent;
+        $what = ' DISTINCT '.
+                // entry
+                ' e.id, e.approved, e.timecreated, e.timemodified, e.userid, e.groupid, '.
+                // user
+                user_picture::fields('u', array('idnumber', 'username'), 'uid '). ', '.
+                // group (TODO g.description AS groupdesc need to be varchar for MSSQL)
+                'g.name AS groupname, g.hidepicture AS grouphidepic, g.picture AS grouppic '. 
+                // content (including ratings and comments if required)
+                $whatcontent;
         $count = ' COUNT(e.id) ';
         $tables = ' {dataform_entries} e
                     JOIN {user} u ON u.id = e.userid 
                     LEFT JOIN {groups} g ON g.id = e.groupid ';
-        $wheredfid =  " e.dataid = :{$this->sqlparams($params, 'dataid', $df->id())}  ";
+        $wheredfid =  " e.dataid = :{$this->sqlparams($params, 'dataid', $df->id())} ";
+        $whereoptions = '';
+        if (!empty($options)) {
+            foreach ($options as $key => $val) {
+                $whereoptions .=  " e.$key = :{$this->sqlparams($params, $key, $val)} ";
+            }
+        }
 
-        $fromsql  = " $tables $contenttables $sorttables $searchtables ";
-        $wheresql = " $wheredfid $whereuser $wheregroup $whereapprove $whererating $wheresearch";
+        $fromsql  = " $tables $filtertables ";
+        $wheresql = " $wheredfid $whereoptions $whereuser $wheregroup $whereapprove $wheresearch";
         $sqlselect  = "SELECT $what FROM $fromsql WHERE $wheresql $sortorder";
 
         // total number of entries the user is authorized to view (without additional filtering)
-        $sqlmax     = "SELECT $count FROM $tables WHERE $wheredfid $whereuser $wheregroup $whereapprove $whererating";
+        $sqlmax = "SELECT $count FROM $tables WHERE $wheredfid $whereoptions $whereuser $wheregroup $whereapprove";
         // number of entries in this particular view call (with filtering)
         $sqlcount   = "SELECT $count FROM $fromsql WHERE $wheresql";
 
@@ -545,7 +171,7 @@ class dataform_entries {
         foreach ($params as $paramset) {
             $baseparams = array_merge($paramset, $baseparams);
         }
-        $allparams = array_merge($baseparams, $searchparams);
+        $allparams = array_merge($baseparams, $filterparams);
 
         // count prospective entries
         if (empty($wheresearch)) {
@@ -565,55 +191,103 @@ class dataform_entries {
         $entries->entries = null;
 
         if ($searchcount) {
-            // if a specific entry requested (eid)
-            if (isset($filter->eid) and $filter->eid) {
-                $andwhereeid = " AND e.id = :{$this->sqlparams($params, 'eid', $filter->eid)} ";
+            // if specific entries requested (eids)
+            if (!empty($filter->eids)) {
+                list($ineids, $eidparams) = $DB->get_in_or_equal($filter->eids, SQL_PARAMS_NAMED, 'eid');
+                $andwhereeid = " AND e.id $ineids ";
                 
-                $sqlselect = "$sqlcount AND e.id <= :{$this->sqlparams($params, 'eid', $filter->eid)} $sortorder";
-                $eidposition = $DB->get_records_sql($sqlselect, $allparams + $params['eid']);
-
                 $sqlselect = "SELECT $what $whatcontent                                  
                               FROM $fromsql 
                               WHERE $wheresql $andwhereeid $sortorder";
  
-                if ($entries->entries = $DB->get_records_sql($sqlselect, $allparams + $params['eid'])) {
-                    // there should be only one
-                    $filter->page = key($eidposition) - 1;
-                }
-
-            // get perpage subset 
-            } else if ($perpage) {
-                $page = isset($filter->page) ? $filter->page : 0;
-                $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
-                
-                if (isset($filter->select)) {
-                    // first page
-                    if ($filter->select == self::SELECT_FIRST) {
-                        $page = 0;
-
-                    // last page
-                    } else if ($filter->select == self::SELECT_LAST) {
-                        $page = $numpages - 1;
-                    
-                    // next page
-                    } else if ($filter->select == self::SELECT_NEXT) {
-                        $page = $filter->page = ($page % $numpages);
-                    
-                    // random page
-                    } else if ($filter->select == self::SELECT_RANDOM) {
-                        $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
+                if ($entries->entries = $DB->get_records_sql($sqlselect, $allparams + $eidparams)) {
+                    // if one entry was requested get its position
+                    if (!is_array($filter->eids) or count($filer->eids) == 1) {
+                        $sqlselect = "$sqlcount AND e.id $ineids $sortorder";
+                        $eidposition = $DB->get_records_sql($sqlselect, $allparams + $eidparams);
+                        
+                        $filter->page = key($eidposition) - 1;
                     }
                 }
 
-                $entries->entries = $DB->get_records_sql($sqlselect, $allparams, $page * $perpage, $perpage);
+            // get perpage subset 
+            } else if (!$filter->groupby and $perpage = $filter->perpage) {
+                
+                // a random set (filter->selection == 1) 
+                if (!empty($filter->selection)) {
+                    // get ids of found entries
+                    $sqlselect = "SELECT DISTINCT e.id FROM $fromsql WHERE $wheresql";
+                    $entryids = $DB->get_records_sql($sqlselect, $allparams);                    
+                    // get a random subset of ids
+                    $randids = array_rand($entryids, min($perpage, count($entryids)));                    
+                    // get the entries
+                    list($insql, $paramids) = $DB->get_in_or_equal($randids, SQL_PARAMS_NAMED, 'rand');
+                    $andwhereids = " AND e.id $insql ";
+                    $sqlselect = "SELECT $what FROM $fromsql WHERE $wheresql $andwhereids";
+                    $entries->entries = $DB->get_records_sql($sqlselect, $allparams + $paramids);
+                
+                // by page
+                } else {
+                    $page = isset($filter->page) ? $filter->page : 0;
+                    $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
+                         
+                    if (isset($filter->onpage)) {
+                        // first page
+                        if ($filter->onpage == self::SELECT_FIRST_PAGE) {
+                            $page = 0;
 
+                        // last page
+                        } else if ($filter->onpage == self::SELECT_LAST_PAGE) {
+                            $page = $numpages - 1;
+                        
+                        // next page
+                        } else if ($filter->onpage == self::SELECT_NEXT_PAGE) {
+                            $page = $filter->page = ($page % $numpages);
+                        
+                        // random page
+                        } else if ($filter->onpage == self::SELECT_RANDOM_PAGE) {
+                            $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
+                        }
+                    }
+                    $entries->entries = $DB->get_records_sql($sqlselect, $allparams, $page * $perpage, $perpage);
+                }
             // get everything
             } else {
                 $entries->entries = $DB->get_records_sql($sqlselect, $allparams);
             }
-
         }
+
         return $entries;
+    }
+
+    /**
+     *
+     */
+    public function get_user_entries($userid = null) {
+        global $USER;
+        
+        if (empty($userid)) {
+            $userid = $USER->id;
+        }
+        return $this->get_entries(array('userid' => $userid));
+    }
+
+    /**
+     *
+     */
+    public function get_count($filtered = false) {
+        if ($filtered) {
+            return $this->_entriesfiltercount;
+        } else {
+            return (!empty($this->_entries) ? count($this->_entries) : 0);
+        }
+    }
+
+    /**
+     *
+     */
+    public function entries() {
+        return $this->_entries;
     }
 
     /**
@@ -650,67 +324,13 @@ class dataform_entries {
         return $files;
     }
 
-    /**
-     *
-     */
-    public function update_entry($entry, $params = null, $updatetime = true) {
-        global $DB, $USER;
-
-        $df = $this->_df;
-        
-        if ($params and has_capability('mod/dataform:manageentries', $df->context)) {
-            foreach ($params as $key => $value) {
-                if ($key == 'name') {
-                    $entry->userid = $value;
-                } else {    
-                    $entry->{$key} = $value;
-                }
-                if ($key == 'timemodified') {
-                    $updatetime = false;
-                }
-            }
-        } 
-        
-        // update existing entry
-        if ($entry->id > 0) {
-            if ($df->user_can_manage_entry($entry)) { // just in case the user opens two forms at the same time
-                if (!has_capability('mod/dataform:approve', $df->context)) {
-                    $entry->approved = 0;
-                }
-
-                if ($updatetime) {
-                    $entry->timemodified = time();
-                }
-
-                if ($DB->update_record('dataform_entries',$entry)) {
-                    return $entry->id;
-                } else {
-                    return false;
-                }
-            }
-
-        // add new entry
-        } else {
-            if ($df->user_can_manage_entry()) { // just in case the user opens two forms at the same time
-                $entry->dataid = $df->id();
-                if (!isset($entry->userid)) $entry->userid = $USER->id;
-                if (!isset($entry->groupid)) $entry->groupid = $df->currentgroup;
-                if (!isset($entry->timecreated)) $entry->timecreated = time();
-                if (!isset($entry->timemodified)) $entry->timemodified = time();
-                $entryid = $DB->insert_record('dataform_entries', $entry);
-                return $entryid;
-            }
-        }
-
-        return false;
-    }
+    
 
     /**
-     *
+     * @return array notification string, list of processed ids 
      */
     public function process_entries($action, $eids, $data = null, $confirmed = false) {
         global $CFG, $DB, $USER, $OUTPUT, $PAGE;
-
         $df = $this->_df;
 
         $entries = array();
@@ -728,6 +348,17 @@ class dataform_entries {
                     }
                 }
                 
+                // TODO Prepare counters for adding new entries
+                $addcount = 0;
+                $addmax = $df->data->maxentries;
+                $perinterval = ($df->data->intervalcount > 1);
+                if ($addmax != -1 and has_capability('mod/dataform:manageentries', $df->context)) {
+                    $addmax = -1;
+                } else {
+                    $addmax = max(0, $addmax - $df->user_num_entries($perinterval));
+                }   
+                
+                // Prepare the entries to process
                 foreach ($eids as $eid) {
                     $entry = new object();
                     // existing entry from view
@@ -740,10 +371,13 @@ class dataform_entries {
 
                     // new entries ($eid is the number of new entries
                     } else if ($eid < 0) {
-                        $entry->id = 0;
-                        $entry->groupid = $df->currentgroup;
-                        $entry->userid = $USER->id;
-                        $entries[$eid] = $entry;
+                        $addcount++;
+                        if ($addmax <= $addcount) {
+                            $entry->id = 0;
+                            $entry->groupid = $df->currentgroup;
+                            $entry->userid = $USER->id;
+                            $entries[$eid] = $entry;
+                        }
                     }
                 }
 
@@ -757,7 +391,7 @@ class dataform_entries {
                     // filter approvable entries
                     if (($action == 'approve' or $action == 'disapprove') and !has_capability('mod/dataform:approve', $df->context)) {
                         unset($entries[$eid]);
-
+                    
                     // filter managable entries
                     } else if (!$df->user_can_manage_entry($entry)) {
                         unset($entries[$eid]);
@@ -767,8 +401,7 @@ class dataform_entries {
         }
 
         if (empty($entries)) {
-            $this->_notifications['bad'][] = get_string("entrynoneforaction",'dataform');
-            return false;
+            return array(get_string("entrynoneforaction",'dataform'), '');
         } else {
             if (!$confirmed) {
 
@@ -795,7 +428,7 @@ class dataform_entries {
                             $fields = $df->get_fields();
 
                             // first parse the data to collate content in an array for each recognized field
-                            $entrycontents = array_fill_keys(array_keys($entries), array('info' => array(), 'fields' => array()));
+                            $contents = array_fill_keys(array_keys($entries), array('info' => array(), 'fields' => array()));
                             $calculations = array();
                             $entryinfo = array(
                                 dataform::_ENTRY,
@@ -807,8 +440,10 @@ class dataform_entries {
                                 dataform::_GROUP
                             );
 
+                            // Iterate the data and extract entry and fields content
                             foreach ($data as $name => $value){
-                                if (strpos($name, 'field_') !== false) {   // assuming only field names contain field_
+                               // assuming only field names contain field_
+                                if (strpos($name, 'field_') !== false) {
                                     list(, $fieldid, $entryid) = explode('_', $name);
                                     if (array_key_exists($fieldid, $fields)) {
                                         $field = $fields[$fieldid];
@@ -823,33 +458,22 @@ class dataform_entries {
                                         } else {
                                             $entryvar = $field->get_internalname();
                                         }
-                                        $entrycontents[$entryid]['info'][$entryvar] = $value;
+                                        $contents[$entryid]['info'][$entryvar] = $value;
                                     
-                                    } else if ($field->type() == 'calculated') {
-                                        // do calculated field after updating the rest
-                                        $calculations[$fieldid] = $field;
- 
-                                    } else {
-                                        if (!array_key_exists($fieldid, $entrycontents[$entryid]['fields'])) {
-                                            $entrycontents[$entryid]['fields'][$fieldid] = array();
-                                        }
-                                        $entrycontents[$entryid]['fields'][$fieldid][$name] = $value;
+                                    } else if (!array_key_exists($fieldid, $contents[$entryid]['fields'])) {
+                                        $contents[$entryid]['fields'][$fieldid] = $field->get_content_from_data($entryid, $data);
                                     }
                                 }
                             }
 
-                            // now update contents
+                            // now update entry and contents
                             foreach ($entries as $eid => $entry) {
-                                if ($entry->id = $this->update_entry($entry, $entrycontents[$eid]['info'])) {
+                                if ($entry->id = $this->update_entry($entry, $contents[$eid]['info'])) {
+
                                     $processedeids[] = $entry->id;
                                     // $eid should be different from $entryid only in new entries
-                                    foreach ($entrycontents[$eid]['fields'] as $fieldid => $content) {
+                                    foreach ($contents[$eid]['fields'] as $fieldid => $content) {
                                         $fields[$fieldid]->update_content($entry, $content);
-                                    }
-
-                                    // TODO currently does not support calculations on calculated fields
-                                    foreach ($calculations as $calculated) {
-                                        $calculated->update_content($entry, $entrycontents[$eid]['fields']);
                                     }
                                 }
                             }                            
@@ -883,7 +507,7 @@ class dataform_entries {
                                 $newcontent = $content;
                                 $newcontent->entryid = $entrieid;
                                 if (!$DB->insert_record('dataform_contents', $newcontent)) {
-                                    print_error('cannotinsertrecord', '', '', $entrieid);
+                                    throw new moodle_exception('cannotinsertrecord', null, null, $entrieid);
                                 }
                             }
                             $processedeids[] = $entrieid;
@@ -956,14 +580,14 @@ class dataform_entries {
                 }
 
                 $df->add_to_log($action);
-                if ($strnotify) {
-                    if ($entriesprocessed = ($processedeids ? count($processedeids) : 0)) {
-                       $this->_notifications['good'][] = get_string($strnotify, 'dataform', $entriesprocessed);
-                    } else {
-                       $this->_notifications['bad'][] = get_string($strnotify, 'dataform', get_string('no'));
-                    }
+
+                if ($processedeids) {
+                    $strnotify = get_string($strnotify, 'dataform', count($processedeids));
+                } else {
+                    $strnotify = get_string($strnotify, 'dataform', get_string('no'));
                 }
-                return $processedeids;
+
+                return array($strnotify, $processedeids);
             }
         }
     }
@@ -971,144 +595,57 @@ class dataform_entries {
     /**
      *
      */
-    public function user_is_editing() {
-        $editing = $this->_editentries;
-        //$multiactions = $this->_view->uses_multiactions();
+    public function update_entry($entry, $params = null, $updatetime = true) {
+        global $CFG, $DB, $USER;
 
-        //if (!$editing and (!$multiactions or ($multiedit and !$this->entriesfiltercount))) {
-        //    return false;
-
-        //} else if ($editing) {
-        //    return $editing;
-
-        //} else {
-        //    return true;
-        //}
-        return $editing;
-    }
-
-    /**
-     *
-     */
-    protected function set__display_definition() {
-
-        $this->_display_definition = array();
-
-        $editentries = null;
-
-        // Display a new entry to add in its own group
-        if ($this->_editentries < 0) {
-            // TODO check how many entries left to add
-            if ($this->_df->user_can_manage_entry(0)) {
-                $this->_display_definition['newentry'] = array();
-                for ($i = $this->_editentries; $i < 0; $i++) {
-                    $this->_display_definition['newentry'][$i] = null;
+        $df = $this->_df;
+        
+        if ($params and has_capability('mod/dataform:manageentries', $df->context)) {
+            foreach ($params as $key => $value) {
+                if ($key == 'name') {
+                    $entry->userid = $value;
+                } else {    
+                    $entry->{$key} = $value;
+                }
+                if ($key == 'timemodified') {
+                    $updatetime = false;
                 }
             }
-        } else if ($this->_editentries) {
-            $editentries = explode(',', $this->_editentries);
-        }
-
-        $fields = $this->_df->get_fields();
-
-        // compile entries if any
-        if ($this->_entries) {
-            // prepare for groupby
-            $groupbyvalue = '';
-            $groupdefinition = array();
-
-            foreach ($this->_entries as $entryid => $entry) {   // Might be just one
-                $newgroup = '';
-
-                // May we edit this entry? (!$editable hides the entry action tags in _entry field )
-                $editthisone = false;
-                if ($editable = $this->_df->user_can_manage_entry($entry)) {
-                    if ($editentries) {
-                        $editthisone = in_array($entryid, $editentries);
-                    }
+        } 
+        
+        // update existing entry (only authenticated users)
+        if ($entry->id > 0) {
+            if ($df->user_can_manage_entry($entry)) { // just in case the user opens two forms at the same time
+                if (!has_capability('mod/dataform:approve', $df->context)) {
+                    $entry->approved = 0;
                 }
 
-                // the view knows which tags are used in the entry
-                // so we can collect their definitions (replacements).
-                // The definition for a pattern is either html (when the field is to be browsed)
-                //  or a callback (when the field is to edited)
-
-                // Are we grouping?
-                if ($this->_filter->groupby) {
-                    $field = $fields[$this->_filter->groupby];
-                    // if editing get the pattern for browsing b/c we need the content
-                    if ($editthisone) {
-                        $fieldpatterns = $field->patterns()->get_replacements($entry);
-                    }
-                    $fieldvalues = current($fieldpatterns);
-                    $fieldvalue = count($fieldvalues) ? current($fieldvalues) : '';
-                    if ($fieldvalue != $groupbyvalue) {
-                        $newgroup = $groupbyvalue;
-                        // TODO assuming here that the groupbyed field returns only one pattern
-                        $groupbyvalue = $fieldvalue;
-                    }
+                if ($updatetime) {
+                    $entry->timemodified = time();
                 }
 
-                // check if we need to start a new group of entries
-                if ($newgroup) {
-                    $this->_display_definition[$newgroup] = $groupdefinitions;
-                    $groupdefinitions = array();
+                if ($DB->update_record('dataform_entries',$entry)) {
+                    return $entry->id;
+                } else {
+                    return false;
                 }
-
-                // we have the patterns and their definitions for this entry
-                // so complie the entry definition and add to the current entries group
-
-// see above
-//                $groupdefinition[$entryid] = $this->_view->entry_definition($fielddefinitions);
-                $groupdefinition[$entryid] = array($entry, $editthisone, $editable);
-
             }
-            // collect remaining listbody text (all of it if no groupby)
-            $this->_display_definition[$groupbyvalue] = $groupdefinition;
-        }
-    }
 
-    /**
-     *
-     */
-    protected function get_ratings($entries) {
-        global $CFG, $USER;
-
-        $data = $this->df->data;
-
-        if (empty($entries)) {
-            return $entries;
+        // add new entry (authenticated or anonymous (if enabled))
+        } else if ($df->user_can_manage_entry(null)) {
+            // identify non-logged-in users (in anonymous entries) as guests
+            $userid = empty($USER->id) ? $CFG->siteguest : $USER->id; 
+               
+            $entry->dataid = $df->id();
+            $entry->userid = !empty($entry->userid) ? $entry->userid : $userid;
+            if (!isset($entry->groupid)) $entry->groupid = $df->currentgroup;
+            if (!isset($entry->timecreated)) $entry->timecreated = time();
+            if (!isset($entry->timemodified)) $entry->timemodified = time();
+            $entryid = $DB->insert_record('dataform_entries', $entry);
+            return $entryid;
         }
 
-        if (!$data->grade and !($data->rating  and $data->grademethod)) {
-            return $entries;
-        }
-
-        if (!$this->uses_ratings('##ratings##')) {
-            return $entries;
-        }
-
-        require_once($CFG->dirroot.'/rating/lib.php');
-        $options = new object();
-        $options->context = $this->df->context;
-        $options->component = 'mod_dataform';
-        if ($data->grademethod) {
-            $options->ratingarea = 'entry';
-            $options->aggregate = $data->grademethod;
-            $options->scaleid = $data->rating;
-        } else {
-            $options->ratingarea = 'activity';
-            $options->aggregate = RATING_AGGREGATE_MAXIMUM;
-            $options->scaleid = $data->grade;
-        }
-        $options->items = $entries;
-        $options->userid = $USER->id;
-        $options->returnurl = $CFG->wwwroot.'/mod/dataform/view.php?d='.$this->df->id();
-        //$options->assesstimestart = $data->assesstimestart;
-        //$options->assesstimefinish = $data->assesstimefinish;
-
-        $rm = new rating_manager();
-        return $rm->get_ratings($options);
+        return false;
     }
 
     /**

@@ -1,38 +1,45 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-file
- * @copyright 2011 Itamar Tzadok
+ * @subpackage dataformfield-file
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 1999 Moodle Pty Ltd http://moodle.com
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
+/**
+ * 
+ */
 class dataform_field_file extends dataform_field_base {
     public $type = 'file';
+    
+    // content - file manager
+    // content1 - alt name
+    // content2 - download counter
 
+    /**
+     *
+     */
+    protected function content_names() {
+        return array('filemanager', 'alttext', 'delete', 'editor');
+    }
+    
     /**
      *
      */
@@ -45,9 +52,8 @@ class dataform_field_file extends dataform_field_base {
         $filemanager = $alttext = $delete = $editor = null;
         if (!empty($values)) {
             foreach ($values as $name => $value) {
-                $names = explode('_', $name);
-                if (!empty($names[3]) and !empty($value)) {
-                    ${$names[3]} = $value;
+                if (!empty($name) and !empty($value)) {
+                    ${$name} = $value;
                 }
             }
         }
@@ -104,7 +110,7 @@ class dataform_field_file extends dataform_field_base {
     /**
      *
      */
-    public function format_content(array $values = null) {
+    public function format_content($entry, array $values = null) {
         return array(null, null, null);
     }
 
@@ -115,67 +121,55 @@ class dataform_field_file extends dataform_field_base {
         $id = " c{$this->field->id}.id AS c{$this->field->id}_id ";
         $content = $this->get_sql_compare_text(). " AS c{$this->field->id}_content";
         $content1 = " c{$this->field->id}.content1 AS c{$this->field->id}_content1";
-        return " $id , $content , $content1 ";
+        $content2 = " c{$this->field->id}.content2 AS c{$this->field->id}_content2";
+        return " $id , $content , $content1 , $content2 ";
     }
 
     /**
      *
      */
-    public static function file_ok($path) {
-        return true;
-    }
-
-    /**
-     *
-     */
-    public function prepare_import_content(&$data, $patterns, $formdata) {
+    public function prepare_import_content(&$data, $importsettings, $csvrecord = null, $entryid = null) {
         global $USER;
     
         $fieldid = $this->field->id;
-        foreach ($patterns as $tag) {
-            $tagname = trim($tag, "[]#");
-            
-            if ($tagname == $this->name()) {
-                // get the uploaded images file
-                $draftid = $formdata->{"f_{$fieldid}_{$tagname}_filepicker"};
-                $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
-                $fs = get_file_storage();
-                if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
-                    $zipfile = reset($files);
-                    // extract files to the draft area
-                    $zipper = get_file_packer('application/zip');
-                    $zipfile->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
-                    $zipfile->delete();
-                
-                    // move each file to its own area and add info to data
-                    if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
-                        $rec = new object;
-                        $rec->contextid = $usercontext->id;
-                        $rec->component = 'user';
-                        $rec->filearea = 'draft';
+        $fieldname = $this->field->name;
+        
+        $draftid = $importsettings[$fieldname]['filepicker'];
+        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $fs = get_file_storage();
+        if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
+            $zipfile = reset($files);
+            // extract files to the draft area
+            $zipper = get_file_packer('application/zip');
+            $zipfile->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
+            $zipfile->delete();
+        
+            // move each file to its own area and add info to data
+            if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
+                $rec = new object;
+                $rec->contextid = $usercontext->id;
+                $rec->component = 'user';
+                $rec->filearea = 'draft';
 
-                        $i = 0;
-                        foreach ($files as $file) {
-                            //if ($file->is_valid_image()) {
-                                // $get unused draft area
-                                $itemid = file_get_unused_draft_itemid();
-                                // move image to the new draft area 
-                                $rec->itemid = $itemid;
-                                $fs->create_file_from_storedfile($rec, $file);
-                                // add info to data
-                                $i--;
-                                $fieldname = "field_{$fieldid}_$i";
-                                $data->{"{$fieldname}_filemanager"} = $itemid;
-                                $data->{"{$fieldname}_alttext"} = $file->get_filename();
-                                $data->eids[$i] = $i;
-                            //}
-                        }
-                        $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftid);
-                    }
+                $i = 0;
+                foreach ($files as $file) {
+                    //if ($file->is_valid_image()) {
+                        // $get unused draft area
+                        $itemid = file_get_unused_draft_itemid();
+                        // move image to the new draft area 
+                        $rec->itemid = $itemid;
+                        $fs->create_file_from_storedfile($rec, $file);
+                        // add info to data
+                        $i--;
+                        $fieldname = "field_{$fieldid}_$i";
+                        $data->{"{$fieldname}_filemanager"} = $itemid;
+                        $data->{"{$fieldname}_alttext"} = $file->get_filename();
+                        $data->eids[$i] = $i;
+                    //}
                 }
+                $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftid);
             }
         }
-        
         return $data;        
     }
 

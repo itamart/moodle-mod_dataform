@@ -1,31 +1,26 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
  * This file is part of the Dataform module for Moodle - http://moodle.org/. 
  *
  * @package mod-dataform
- * @subpackage view-tabular
- * @author Itamar Tzadok
- * @copyright 2011 Moodle contributors
+ * @subpackage dataformview-tabular
+ * @copyright 2012 Itamar Tzadok 
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's standard Database activity module. To the extent that the
- * Dataform code corresponds to the Database code (1.9.11+ (20110323)),
- * certain copyrights on certain files may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php"); 
@@ -33,9 +28,9 @@ require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 /**
  * A template for displaying dataform entries in a tabular list
  * Parameters used:
- * param1 - list header section
+ * param1 - activity grading
  * param2 - repeated entry section
- * param3 - table cell alignment 
+ * param3 - table header
  */
 
 class dataform_view_tabular extends dataform_view_base {
@@ -47,8 +42,8 @@ class dataform_view_tabular extends dataform_view_base {
      * 
      */
     public function generate_default_view() {
-        // get all the fields for that database
-        if (!$fields = $this->get_fields()) {
+        // get all the fields
+        if (!$fields = $this->_df->get_fields()) {
             return; // you shouldn't get that far if there are no user fields
         }
         
@@ -148,18 +143,11 @@ class dataform_view_tabular extends dataform_view_base {
         $this->view->eparam2 = str_replace($tags, $replacements, $this->view->eparam2);
     }
 
-
-
-
-
-
     /**
      *
      */
-    public function group_entries_definition($entriesset, $name = '') {
+    protected function group_entries_definition($entriesset, $name = '') {
         global $CFG, $OUTPUT, $GLOBALS;
-
-        $entries_set = $this->get_entries_definition($entriesset, $name);
 
         $tablehtml = trim($this->view->eparam2);
         $opengroupdiv = html_writer::start_tag('div', array('class' => 'entriesview'));
@@ -172,7 +160,7 @@ class dataform_view_tabular extends dataform_view_base {
         $elements = array();
 
         // if there are no field definition just return everything as html
-        if (empty($entries_set)) {
+        if (empty($entriesset)) {
             $elements[] = array('html', $opengroupdiv. $groupheading. $tablehtml. $closegroupdiv);
         
         } else {
@@ -189,7 +177,7 @@ class dataform_view_tabular extends dataform_view_base {
 
             // get the header row if required
             $headerrow = '';
-            if ($require_headerrow = $this->view->param1) {
+            if ($require_headerrow = $this->view->param3) {
                 if (strpos($tablehtml, '<thead>') === 0) {
                     // get the header row and remove from subject
                     $theadpattern = '/^<thead>[\s\S]*<\/thead>/i';
@@ -220,9 +208,11 @@ class dataform_view_tabular extends dataform_view_base {
             
             // do the entries
             // get tags from the first item in the entry set
-            $tags = array_keys(reset(reset($entries_set))); 
+            $tagsitem = reset($entriesset);
+            $tagsitem = reset($tagsitem);
+            $tags = array_keys($tagsitem); 
 
-            foreach ($entries_set as $fielddefinitions) {
+            foreach ($entriesset as $fielddefinitions) {
                 $definitions = reset($fielddefinitions);
                 $parts = $this->split_tags($tags, $entrytemplate);
                 
@@ -248,7 +238,7 @@ class dataform_view_tabular extends dataform_view_base {
     /**
      * 
      */
-    public function entry_definition($fielddefinitions) {
+    protected function entry_definition($fielddefinitions) {
         $elements = array();
         // just store the fefinitions
         //   and group_entries_definition will process them
@@ -259,27 +249,23 @@ class dataform_view_tabular extends dataform_view_base {
     /**
      * 
      */
-    public function new_entry_definition() {
+    protected function new_entry_definition($entryid = -1) {
         $elements = array();
         
-        static $i = -1;
-
         // get patterns definitions
-        $fields = $this->get_fields();
+        $fields = $this->_df->get_fields();
         $fielddefinitions = array();
         $entry = new object;
         foreach ($this->_patterns['field'] as $fieldid => $patterns) {
             $field = $fields[$fieldid];
-            $entry->id = $i;
-            if ($definitions = $field->patterns()->get_replacements($patterns, $entry, true, true)) {
+            $entry->id = $entryid;
+            $options = array('edit' => true, 'manage' => true);
+            if ($definitions = $field->get_definitions($patterns, $entry, $options)) {
                 $fielddefinitions = array_merge($fielddefinitions, $definitions);
             }
         }            
             
         $elements[] = $fielddefinitions; 
-
-        $i--;
-        
         return $elements;
     }
 }

@@ -1,32 +1,25 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @package field-file
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 defined('MOODLE_INTERNAL') or die();
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
@@ -39,35 +32,61 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $editable = false) {
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name();
+        $edit = !empty($options['edit']) ? $options['edit'] : false;
+
         $replacements = array();
 
-        foreach ($tags as $tag) {
-            if ($tag == "[[$fieldname]]") {
-                if ($edit) {
-                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry)));
+        // rules support
+        $tags = $this->add_clean_pattern_keys($tags);
+
+        foreach ($tags as $cleantag => $tag) {
+            if ($edit) {
+                if ($cleantag == "[[$fieldname]]") {
+                    $required = $this->is_required($tag);
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
                 } else {
-                    $replacements[$tag] = array('html', $this->display_browse($entry));
+                    $replacements[$tag] = '';
                 }
-            // url    
-            } else if ($tag == "[[{$fieldname}:url]]") {
-                $replacements[$tag] = array('html', $this->display_browse($entry, array('url' => 1)));
-            // alt
-            } else if ($tag == "[[{$fieldname}:alt]]") {
-                $replacements[$tag] = array('html', $this->display_browse($entry, array('alt' => 1)));
-            // size
-            } else if ($tag == "[[{$fieldname}:size]]") {
-                $replacements[$tag] = array('html', $this->display_browse($entry, array('size' => 1)));
-            // content (for html files)
-            } else if ($tag == "[[{$fieldname}:content]]") {
-                if ($edit) {
-                    $replacements[$tag] = array('', array(array($this,'display_edit_content'), array($entry)));
+            } else {
+                $displaybrowse = '';
+                if ($cleantag == "[[$fieldname]]") {
+                    $displaybrowse = $this->display_browse($entry);
+                // url    
+                } else if ($cleantag == "[[{$fieldname}:url]]") {
+                    $displaybrowse = $this->display_browse($entry, array('url' => 1));
+                // alt
+                } else if ($cleantag == "[[{$fieldname}:alt]]") {
+                    $displaybrowse = $this->display_browse($entry, array('alt' => 1));
+                // size
+                } else if ($cleantag == "[[{$fieldname}:size]]") {
+                    $displaybrowse = $this->display_browse($entry, array('size' => 1));
+                // content (for html files)
+                } else if ($cleantag == "[[{$fieldname}:content]]") {
+                    if ($edit) {
+                        $replacements[$tag] = array('', array(array($this,'display_edit_content'), array($entry)));
+                    } else {
+                        $displaybrowse = $this->display_browse($entry, array('content' => 1));
+                    }
+                // download
+                } else if ($cleantag == "[[{$fieldname}:download]]") {
+                    $displaybrowse = $this->display_browse($entry, array('download' => 1));
+                // download count
+                } else if ($cleantag == "[[{$fieldname}:downloadcount]]") {
+                    $displaybrowse = $this->display_browse($entry, array('downloadcount' => 1));
+                }
+                
+                if (!empty($displaybrowse)) {
+                    if ($this->is_hidden($tag)) {
+                        $displaybrowse = html_writer::tag('span', $displaybrowse, array('class' => 'hide'));
+                    }
+                    $replacements[$tag] = array('html', $displaybrowse);
                 } else {
-                    $replacements[$tag] = array('html', $this->display_browse($entry, array('content' => 1)));
+                    $replacements[$tag] = '';
                 }
-            }
+            }           
         }
 
         return $replacements;
@@ -76,7 +95,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_edit(&$mform, $entry) {
+    public function display_edit(&$mform, $entry, $required = false) {
         $field = $this->_field;
         $fieldid = $field->id();
 
@@ -89,7 +108,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         $fmoptions = array('subdirs' => 0,
                             'maxbytes' => $field->get('param1'),
                             'maxfiles' => $field->get('param2'),
-                            'accepted_types' => array($field->get('param3')));
+                            'accepted_types' => explode(',', $field->get('param3')));
 
         $draftitemid = file_get_submitted_draft_itemid("{$fieldname}_filemanager");
         file_prepare_draft_area($draftitemid, $field->df()->context->id, 'mod_dataform', 'content', $contentid, $fmoptions);
@@ -97,6 +116,9 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         // file manager
         $mform->addElement('filemanager', "{$fieldname}_filemanager", null, null, $fmoptions);
         $mform->setDefault("{$fieldname}_filemanager", $draftitemid);
+        if ($required) {
+            $mform->addRule("{$fieldname}_filemanager", null, 'required', null, 'client');
+        }
 
         // alt text
         $options = array();
@@ -170,7 +192,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_browse($entry, $params = null) {
+    public function display_browse($entry, $params = null, $hidden = false) {
 
         $field = $this->_field;
         $fieldid = $field->id();
@@ -178,10 +200,15 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
 
         $content = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
         $content1 = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
+        $content2 = isset($entry->{"c{$fieldid}_content2"}) ? $entry->{"c{$fieldid}_content2"} : null;
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
         
         if (empty($content)) {
             return '';
+        }
+
+        if (!empty($params['downloadcount'])) {
+            return $content2;
         }
 
         $fs = get_file_storage();
@@ -202,7 +229,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
 
                 $filename = $file->get_filename();
                 $filenameinfo = pathinfo($filename);
-                $path = "/pluginfile.php/{$field->df()->context->id}/mod_dataform/content/$contentid";
+                $path = "/{$field->df()->context->id}/mod_dataform/content/$contentid";
 
                 $strfiles[] = $this->display_file($file, $path, $altname, $params);
             }
@@ -214,13 +241,13 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
      *
      */
     protected function display_file($file, $path, $altname, $params = null) {
-        global $OUTPUT;
+        global $CFG, $OUTPUT;
 
         $filename = $file->get_filename();
-        $displayname = $altname ? $altname : $filename;
+        $pluginfileurl = '/pluginfile.php';
         
         if (!empty($params['url'])) {
-            return new moodle_url("$path/$filename");
+            return moodle_url::make_file_url($pluginfileurl, "$path/$filename");
         
         } else if (!empty($params['size'])) {
             $bsize = $file->get_filesize();
@@ -235,18 +262,37 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
             return $file->get_content();
         
         } else if ($file->is_valid_image()) {
-            return html_writer::empty_tag('img', array('src' => new moodle_url("$path/$filename"),
+            return html_writer::empty_tag('img', array('src' => moodle_url::make_file_url($pluginfileurl, "$path/$filename"),
                                                         'alt' => $altname,
                                                         'title' => $altname));
-                                                        //'height' => '100%',
-                                                        //'width' => '100%'));
         } else {
-            $fileicon = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url(file_mimetype_icon($file->get_mimetype())),
-                                                        'alt' => $file->get_mimetype(),
-                                                        'height' => 16,
-                                                        'width' => 16));
-            return html_writer::link(new moodle_url("$path/$filename"), "$fileicon&nbsp;$displayname");
+            return $this->display_link($file, $path, $altname, $params);
         }
+    }
+
+    /**
+     *
+     */
+    protected function display_link($file, $path, $altname, $params = null) {
+        global $OUTPUT;
+        
+        $filename = $file->get_filename();
+        $displayname = $altname ? $altname : $filename;
+
+        $fileicon = html_writer::empty_tag('img', array(
+            'src' => $OUTPUT->pix_url(file_mimetype_icon($file->get_mimetype())),
+            'alt' => $file->get_mimetype(),
+            'height' => 16,
+            'width' => 16)
+        );
+        if (!empty($params['download'])) {
+            list(,$context,,,$contentid) = explode('/', $path);
+            $url = new moodle_url("/mod/dataform/field/file/download.php", array('cid' => $contentid, 'context' => $context, 'file' => $filename));
+        } else {
+            $url = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
+        }                
+        
+        return html_writer::link($url, "$fileicon&nbsp;$displayname");
     }
 
     /**
@@ -291,7 +337,6 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
                     $mform->setDefault("f_{$fieldid}_$tagname", $tagname);
                     break;                
             }
-
         }
     }
 
@@ -307,7 +352,18 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         $patterns["[[$fieldname:alt]]"] = array(true);
         $patterns["[[$fieldname:size]]"] = array(false);
         $patterns["[[$fieldname:content]]"] = array(false);
+        $patterns["[[$fieldname:download]]"] = array(false);
+        $patterns["[[$fieldname:downloadcount]]"] = array(false);
 
         return $patterns; 
+    }
+    
+    /**
+     * Array of patterns this field supports
+     */
+    protected function supports_rules() {
+        return array(
+            self::RULE_REQUIRED
+        );
     }
 }

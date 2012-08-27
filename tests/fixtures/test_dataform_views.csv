@@ -1,0 +1,2 @@
+id,dataid,type,name,description,visible,perpage,groupby,filter,patterns,section,sectionpos,param1,param2,param3,param4,param5
+1,1,import,Import,,2,0,0,0,a:2:{s:4:"view";a:0:{}s:5:"field";a:2:{i:1;a:1:{i:0;s:8:"[[Text]]";}i:-6;a:1:{i:0;s:13:"##author:id##";}}},NULL,0,[[Text]],1,NULL,NULL,NULL

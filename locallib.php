@@ -1,30 +1,33 @@
 <?php
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
- *
- *
  * @package mod-dataform
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
+ * The Dataform has been developed as an enhanced counterpart
+ * of Moodle's Database activity module (1.9.11+ (20110323)).
+ * To the extent that Dataform code corresponds to Database code,
+ * certain copyrights on the Database module may obtain.
  */
 
 require_once("$CFG->libdir/portfolio/caller.php");
 require_once("$CFG->dirroot/mod/dataform/mod_class.php");
+require_once($CFG->libdir . '/filelib.php');
 
 /**
  * The class to handle entry exports of a dataform module
@@ -233,4 +236,120 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         return $returnurl;                                                        
     }
     
+}
+
+
+/**
+ * Class representing the virtual node with all itemids in the file browser
+ *
+ * @category  files
+ * @copyright 2012 Itamar Tzadok
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class dataform_file_info_container extends file_info {
+    /** @var file_browser */
+    protected $browser;
+    /** @var stdClass */
+    protected $course;
+    /** @var stdClass */
+    protected $cm;
+    /** @var string */
+    protected $component;
+    /** @var stdClass */
+    protected $context;
+    /** @var array */
+    protected $areas;
+    /** @var string */
+    protected $filearea;
+
+    /**
+     * Constructor (in case you did not realize it ;-)
+     *
+     * @param file_browser $browser
+     * @param stdClass $course
+     * @param stdClass $cm
+     * @param stdClass $context
+     * @param array $areas
+     * @param string $filearea
+     */
+    public function __construct($browser, $course, $cm, $context, $areas, $filearea) {
+        parent::__construct($browser, $context);
+        $this->browser = $browser;
+        $this->course = $course;
+        $this->cm = $cm;
+        $this->component = 'mod_dataform';
+        $this->context = $context;
+        $this->areas = $areas;
+        $this->filearea = $filearea;
+    }
+
+    /**
+     * @return array with keys contextid, filearea, itemid, filepath and filename
+     */
+    public function get_params() {
+        return array(
+            'contextid' => $this->context->id,
+            'component' => $this->component,
+            'filearea' => $this->filearea,
+            'itemid' => null,
+            'filepath' => null,
+            'filename' => null,
+        );
+    }
+
+    /**
+     * Can new files or directories be added via the file browser
+     *
+     * @return bool
+     */
+    public function is_writable() {
+        return false;
+    }
+
+    /**
+     * Should this node be considered as a folder in the file browser
+     *
+     * @return bool
+     */
+    public function is_directory() {
+        return true;
+    }
+
+    /**
+     * Returns localised visible name of this node
+     *
+     * @return string
+     */
+    public function get_visible_name() {
+        return $this->areas[$this->filearea];
+    }
+
+    /**
+     * Returns list of children nodes
+     *
+     * @return array of file_info instances
+     */
+    public function get_children() {
+        global $DB;
+
+        $children = array();
+        $itemids = $DB->get_records('files', array('contextid' => $this->context->id, 'component' => $this->component,
+            'filearea' => $this->filearea), 'itemid DESC', "DISTINCT itemid");
+        foreach ($itemids as $itemid => $unused) {
+            if ($child = $this->browser->get_file_info($this->context, 'mod_dataform', $this->filearea, $itemid)) {
+                $children[] = $child;
+            }
+        }
+
+        return $children;
+    }
+
+    /**
+     * Returns parent file_info instance
+     *
+     * @return file_info or null for root
+     */
+    public function get_parent() {
+        return $this->browser->get_file_info($this->context);
+    }
 }

@@ -1,31 +1,24 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-multiselect
+ * @subpackage dataformfield-multiselect
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain, including:
- * @copyright 1999 Moodle Pty Ltd http://moodle.com
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
@@ -41,65 +34,6 @@ class dataform_field_multiselect extends dataform_field_base {
     );
 
     
-    /**
-     * 
-     */
-    public function update_content($entry, array $values = null) {
-        global $DB;
-
-        $fieldid = $this->field->id;
-        
-        $selected = $newvalue = null;
-        if (!empty($values)) {
-            foreach ($values as $name => $value) {
-                $names = explode('_', $name);
-                if (!empty($names[3]) and !empty($value)) {
-                    ${$names[3]} = $value;
-                }
-            }
-        }
-
-        if ($newvalues = explode('#', s($newvalue))) {
-            $options = $this->options_menu();
-            $count = count($options);
-            foreach ($newvalues as $newvalue) {
-                if (!$optionkey = (int) array_search($newvalue, $options)) {
-                    $this->field->param1 = trim($this->field->param1). "\n$newvalue";
-                    $count++;
-                    $selected[] = $count;
-                }
-            }
-            if ($count > count($options)) {
-                $this->update_field();
-            }
-        }
-
-        $selected = implode('#', $selected);
-        $oldcontent = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
-        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-        
-        $rec = new object();
-        $rec->fieldid = $this->field->id;
-        $rec->entryid = $entry->id;
-        $rec->content = $selected;
-
-        if (!empty($oldcontent)) {
-            if ($selected != $oldcontent) {
-                if (empty($selected)) {
-                    $this->delete_content($entry->id);
-                } else {
-                    $rec->id = $contentid; // MUST_EXIST
-                    return $DB->update_record('dataform_contents', $rec);
-                 }
-            }
-        } else {
-            if (!empty($selected)) {
-                return $DB->insert_record('dataform_contents', $rec);
-            }
-        }
-        return true;
-    }
-
     /**
      *
      */
@@ -176,31 +110,56 @@ class dataform_field_multiselect extends dataform_field_base {
     /**
      *
      */
-    public function format_content($content) {
-        if (!empty($content)) {
-            $content = $this->get_content($content); // expected an array
-            $optionscount = count(explode("\n", $this->field->param1));
+    protected function content_names() {
+        return array('selected', 'newvalue');
+    }
+    
+    /**
+     *
+     */
+    protected function format_content($entry, array $values = null) {
+        $fieldid = $this->field->id;
+        $oldcontents = array();
+        $contents = array();
 
-            $vals = array();
-            foreach ($content as $key => $val) {
-                if ($key === 'xxx') {
-                    continue;
-                }
-                if ((int) $val > $optionscount) {
-                    continue;
-                }
-                $vals[] = $val;
-            }
-
-            if (empty($vals)) {
-                return null;
-            } else {
-                return implode('#', $vals);
-            }
-            
-        } else {
-            return null;
+        // old contents
+        if (isset($entry->{"c{$fieldid}_content"})) {
+            $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
+
+        // parse values
+        $selected = array();
+        $newvalue = null;
+        if (!empty($values)) {
+            foreach ($values as $name => $value) {
+                if (!empty($name) and $value !== '') {
+                    ${$name} = $value;
+                }
+            }
+        }
+
+        // update new values in field type
+        if (s($newvalue) and $newvalues = explode('#', s($newvalue))) {
+            $options = $this->options_menu();
+            $count = count($options);
+            foreach ($newvalues as $newvalue) {
+                if (!$optionkey = (int) array_search($newvalue, $options)) {
+                    $this->field->param1 = trim($this->field->param1). "\n$newvalue";
+                    $count++;
+                    $selected[] = $count;
+                }
+            }
+            if ($count > count($options)) {
+                $this->update_field();
+            }
+        }
+
+        // new contents
+        if (!empty($selected)) {
+            $contents[] = implode('#', $selected);
+        }
+        
+        return array($contents, $oldcontents);
     }
 
     /**
@@ -257,16 +216,9 @@ class dataform_field_multiselect extends dataform_field_base {
     }
 
     /**
-     *
-     */
-    protected function get_content($content) {
-        return reset($content);
-    }
-
-    /**
      * 
      */
-    protected function default_values() {
+    public function default_values() {
         $rawdefaults = explode("\n",$this->field->param2);
         $options = $this->options_menu();
 

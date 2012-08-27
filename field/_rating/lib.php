@@ -1,30 +1,24 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-_rating
+ * @subpackage dataformfield-_rating
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -47,8 +41,10 @@ class dataform_rating extends rating {
 
         if ($aggregate and $aggregation != RATING_AGGREGATE_COUNT) {
             if ($aggregation != RATING_AGGREGATE_SUM and !$this->settings->scale->isnumeric) {
-                $aggregate = $this->settings->scale->scaleitems[round($aggregate)]; //round aggregate as we're using it as an index
-            } else { // aggregation is SUM or the scale is numeric
+                //round aggregate as we're using it as an index
+                $aggregate = $this->settings->scale->scaleitems[round($aggregate)];
+            } else {
+                // aggregation is SUM or the scale is numeric
                 $aggregate = round($aggregate, 1);
             }
         }
@@ -64,7 +60,7 @@ class dataform_rating extends rating {
 class dataform_rating_manager extends rating_manager {
 
     /**
-     * Adds rating objects to an array of items (forum posts, glossary entries etc)
+     * Adds rating objects to an array of entries
      * Rating objects are available at $item->rating
      * @param stdClass $options {
      *            context          => context the context in which the ratings exists [required]
@@ -104,6 +100,45 @@ class dataform_rating_manager extends rating_manager {
             return array();
         }
 
+        list($sql, $params) = $this->get_sql_aggregate($options);        
+        if ($ratingrecords = $DB->get_records_sql($sql, $params)) {
+            foreach ($options->items as &$item) {
+                if (array_key_exists($item->id, $ratingrecords)) {
+                    $rec = $ratingrecords[$item->id];
+                    $rec->context = $options->context;
+                    $rec->component = $options->component;
+                    $rec->ratingarea = $options->ratingarea;
+                    $rec->scaleid = $options->scaleid;
+                    $rec->settings = $this->generate_rating_settings_object($options);
+                    $rec->aggregate = $options->aggregate;
+                    $item->rating = $this->get_rating_object($item, $rec);
+                }
+            }
+        }
+        return $options->items;
+    }
+
+    /**
+     * @return array the array of items with their ratings attached at $items[0]->rating
+     */
+    public function get_sql_aggregate($options) {
+        global $DB, $USER;
+
+        // User id; default to current user
+        if (empty($options->userid)) {
+            $userid = $USER->id;
+        } else {
+            $userid = $options->userid;
+        }
+
+        // Params
+        $params = array();
+        $params['contextid'] = $options->context->id;
+        $params['userid']    = $userid;
+        $params['component']    = $options->component;
+        $params['ratingarea'] = $options->ratingarea;
+
+        // Aggregation sql
         $optionsaggregate = null;
         if (empty($options->aggregate)) {
             // ugly hack to work around the exception in generate_settings
@@ -112,32 +147,27 @@ class dataform_rating_manager extends rating_manager {
             $optionsaggregate = $options->aggregate;        
             $aggregatessql = array();
             foreach ($options->aggregate as $aggregation) {
+                if (empty($aggregation)) {
+                    continue;
+                }
                 $aggrmethod = $this->get_aggregation_method($aggregation);
                 $aggrmethodpref = strtolower($aggrmethod);
-                $aggregatessql[$aggrmethodpref] = "$aggrmethod(r.rating) AS {$aggrmethodpref}rating";
+                $aggregatessql[$aggrmethodpref] = "$aggrmethod(r.rating) AS {$aggrmethodpref}ratings";
             }
             // ugly hack to work around the exception in generate_settings
             $options->aggregate = RATING_AGGREGATE_COUNT;     
         }
+        $aggregationsql = !empty($aggregatessql) ? implode(', ', $aggregatessql). ', ' : '';
 
-        // Default the userid to the current user if it is not set
-        if (empty($options->userid)) {
-            $userid = $USER->id;
-        } else {
-            $userid = $options->userid;
+        // sql for entry ids
+        $andwhereitems = '';
+        if (!empty($options->items)) {
+            $itemids = array_keys($options->items);
+            list($itemidtest, $paramitems) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+            $andwhereitems = " AND r.itemid $itemidtest ";
+            $params = array_merge($params, $paramitems);
         }
 
-        // set sql for entry ids
-        $itemids = array_keys($options->items);
-        list($itemidtest, $params) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
-
-        // get the items from the database
-        $params['contextid'] = $options->context->id;
-        $params['userid']    = $userid;
-        $params['component']    = $options->component;
-        $params['ratingarea'] = $options->ratingarea;
-
-        $aggregationsql = !empty($aggregatessql) ? implode(', ', $aggregatessql). ', ' : '';
         $sql = "SELECT r.itemid, r.component, r.ratingarea, r.contextid,
                        COUNT(r.rating) AS numratings, $aggregationsql 
                        ur.id, ur.userid, ur.scaleid, ur.rating AS usersrating
@@ -148,55 +178,116 @@ class dataform_rating_manager extends rating_manager {
                                                 AND ur.ratingarea = r.ratingarea
                                                 AND ur.userid = :userid
                 WHERE r.contextid = :contextid 
-                        AND r.itemid {$itemidtest}
                         AND r.component = :component
                         AND r.ratingarea = :ratingarea
+                        $andwhereitems
                 GROUP BY r.itemid, r.component, r.ratingarea, r.contextid, ur.id, ur.userid, ur.scaleid
                 ORDER BY r.itemid";
-        $ratingsrecords = $DB->get_records_sql($sql, $params);
+                
+        return array($sql, $params);
+    }
+    
+    /**
+     * @return array the array of items with their ratings attached at $items[0]->rating
+     */
+    public function get_sql_all($options) {
+        global $DB, $USER;
 
-        $ratingoptions = new stdClass;
-        $ratingoptions->context = $options->context;
-        $ratingoptions->component = $options->component;
-        $ratingoptions->ratingarea = $options->ratingarea;
-        $ratingoptions->settings = $this->generate_rating_settings_object($options);
-        foreach ($options->items as $item) {
-            $ratingoptions->aggregate = null;
-            if (array_key_exists($item->id, $ratingsrecords)) {
-                // Note: rec->scaleid = the id of scale at the time the rating was submitted
-                // may be different from the current scale id
-                $rec = $ratingsrecords[$item->id];
-                $ratingoptions->itemid = $item->id;
-                $ratingoptions->scaleid = $rec->scaleid;
-                $ratingoptions->userid = $rec->userid;
-                $ratingoptions->id = $rec->id;
-                $ratingoptions->rating = min($rec->usersrating, $ratingoptions->settings->scale->max);
-                $ratingoptions->count = $rec->numratings;
-
-                if (!empty($optionsaggregate)) {
-                    foreach ($optionsaggregate as $aggregation) {
-                        $aggrmethod = $this->get_aggregation_method($aggregation);
-                        $aggrmethodpref = strtolower($aggrmethod);
-                        $ratingoptions->aggregate[$aggregation] = min($rec->{"{$aggrmethodpref}rating"}, $ratingoptions->settings->scale->max);
-                    }
-                }
-            } else {
-                $ratingoptions->itemid = $item->id;
-                $ratingoptions->scaleid = null;
-                $ratingoptions->userid = null;
-                $ratingoptions->id = null;
-                $ratingoptions->count = 0;
-                $ratingoptions->rating =  null;
-            }
-
-            $rating = new dataform_rating($ratingoptions);
-            $rating->itemtimecreated = $this->get_item_time_created($item);
-            if (!empty($item->userid)) {
-                $rating->itemuserid = $item->userid;
-            }
-            $item->rating = $rating;
+        // User id; default to current user
+        if (empty($options->userid)) {
+            $userid = $USER->id;
+        } else {
+            $userid = $options->userid;
         }
 
-        return $options->items;
+        // Params
+        $params = array();
+        $params['contextid'] = $options->context->id;
+        $params['userid']    = $userid;
+        $params['component']    = $options->component;
+        $params['ratingarea'] = $options->ratingarea;
+
+        // sql for entry ids
+        $andwhereitems = '';
+        if (!empty($options->items)) {
+            $itemids = array_keys($options->items);
+            list($itemidtest, $paramitems) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+            $andwhereitems = " AND r.itemid $itemidtest ";
+            $params = array_merge($params, $paramitems);
+        }
+
+        $sql = "SELECT r.id, r.itemid, r.component, r.ratingarea, r.contextid, r.scaleid,
+                       r.rating, r.userid, r.timecreated, r.timemodified, ".
+                       user_picture::fields('u', array('idnumber', 'username'), 'uid ').
+               " FROM {rating} r 
+                    JOIN {user} u ON u.id = r.userid 
+                    
+                WHERE r.contextid = :contextid 
+                        AND r.component = :component
+                        AND r.ratingarea = :ratingarea
+                        $andwhereitems
+                ORDER BY r.itemid";
+                
+        return array($sql, $params);
     }
+    
+    
+    /**
+     * @return array the array of items with their ratings attached at $items[0]->rating
+     */
+    public function get_rating_settings_object($options) {
+        return $this->generate_rating_settings_object($options);
+    }
+    
+    /**
+     * @return array the array of items with their ratings attached at $items[0]->rating
+     */
+    public function get_rating_object($item, $ratingrecord) {
+
+        $rec = $ratingrecord;
+
+        $options = new object;
+        $options->context = $rec->context;
+        $options->component = 'mod_dataform';
+        $options->ratingarea = $rec->ratingarea; 
+        $options->itemid = $item->id;
+        $options->settings = $rec->settings;
+        // Note: rec->scaleid = the id of scale at the time the rating was submitted
+        // may be different from the current scale id
+        $options->scaleid = $rec->scaleid;
+
+        $options->userid = !empty($rec->userid) ? $rec->userid : 0;
+        $options->id = !empty($rec->id) ? $rec->id : 0;
+        if (!empty($rec->usersrating)) {
+            $options->rating = min($rec->usersrating, $rec->settings->scale->max);
+        } else {
+            $options->rating = null;
+        }
+        $options->count = $rec->numratings;
+        $rec->countratings = $rec->numratings;
+
+        if (!empty($rec->aggregate)) {
+            if (!is_array($rec->aggregate)) {
+                $rec->aggregate = array($rec->aggregate);
+            }
+            foreach ($rec->aggregate as $aggregation) {
+                if (empty($aggregation)) {
+                    continue;
+                }
+                $aggrmethod = $this->get_aggregation_method($aggregation);
+                $aggrmethodpref = strtolower($aggrmethod);
+                $options->aggregate[$aggregation] = min($rec->{"{$aggrmethodpref}ratings"}, $rec->settings->scale->max);
+            }
+        }
+
+        $rating = new dataform_rating($options);
+        $rating->itemtimecreated = $this->get_item_time_created($item);
+        if (!empty($item->userid)) {
+            $rating->itemuserid = $item->userid;
+        }
+
+        return $rating;
+    }
+
+
 }

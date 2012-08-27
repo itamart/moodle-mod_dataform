@@ -2,7 +2,7 @@
  * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
  * @package mod-dataform
- * @subpackage field-nanogong
+ * @subpackage dataformfield-nanogong
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -26,29 +26,41 @@
  */
 
 /**
- * 
+ * Category questions loader
  */
-function uploadNanogongRecording(recorderid, uploadpage, filename) {
-    var recorder = document.getElementById(recorderid);
-    if (recorder == null) {
-        alert('recorder not found');
-        return;
-    }
-    
-    var duration = parseInt(recorder.sendGongRequest('GetMediaDuration', 'audio')) || 0;
-    if (duration <= 0) {
-        alert('no recording found');
-        return;
-    }
-    
-    var ret = recorder.sendGongRequest('PostToForm',
-                                        uploadpage,
-                                        'repo_upload_file',
-                                        '',
-                                        filename);
-    if (ret == null || ret == '') {
-        alert('Failed to submit the voice recording');
-    } else {
-        alert(ret);
-    }
-} 
+M.dataform_field_nanogong_upload_recording = {};
+
+M.dataform_field_nanogong_upload_recording.init = function(Y, options) {
+    YUI().use('node-base', 'event-base', function(Y) {
+
+        var fieldname = options.fieldname;
+        var filename = options.filename;
+        var actionurl = options.acturl;
+
+        Y.on('click', function(e) {
+
+            var recorder = document.getElementById('id_' + fieldname + '_filemanager');
+            if (recorder == null) {
+                alert('recorder not found');
+                return;
+            }
+            
+            var duration = parseInt(recorder.sendGongRequest('GetMediaDuration', 'audio')) || 0;
+            if (duration <= 0) {
+                alert('no recording found');
+                return;
+            }
+            
+            var ret = recorder.sendGongRequest('PostToForm',
+                                                actionurl,
+                                                'repo_upload_file',
+                                                '',
+                                                filename);
+            if (ret == null || ret == '') {
+                alert('Failed to submit the voice recording');
+            } else {
+                alert(ret);
+            }
+        }, '#id_' + fieldname + '_upload');
+    });        
+};

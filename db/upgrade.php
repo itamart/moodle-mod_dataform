@@ -1,31 +1,24 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  * This file keeps track of upgrades to
  * the dataform module
@@ -55,6 +48,244 @@ function xmldb_dataform_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     // Moodle v2.1.0 release upgrade line
+    if ($oldversion < 2012032100) {
+        // add field selection to dataform_filters
+        $table = new xmldb_table('dataform_filters');
+        $field = new xmldb_field('selection', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'perpage');
+
+        // Launch add field selection
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012032100, 'dataform');
+    
+    
+    }
+
+    if ($oldversion < 2012040600) {
+        // add field edits to dataform_fields
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('edits', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '-1', 'description');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012040600, 'dataform');
+    }
+
+    if ($oldversion < 2012050500) {
+        // drop field comments from dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('comments');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        // drop field locks
+        $field = new xmldb_field('locks');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        // add field rules
+        $field = new xmldb_field('rules', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'rating');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012050500, 'dataform');
+    }
+
+    if ($oldversion < 2012051600) {
+        // drop field grading from entries
+        $table = new xmldb_table('dataform_entries');
+        $field = new xmldb_field('grading');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012051600, 'dataform');
+    }
+
+    if ($oldversion < 2012053100) {
+        $table = new xmldb_table('dataform');
+
+        // add field cssincludes
+        $field = new xmldb_field('cssincludes', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'css');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // add field jsincludes
+        $field = new xmldb_field('jsincludes', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'js');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012053100, 'dataform');
+    }
+
+    if ($oldversion < 2012060101) {
+        // changed stored content of view editors from serialized to formatted string
+        // Assumed at this point that serialized content in param fields in the
+        // view table is editor content which needs to be unserialized to 
+        // $text, $format, $trust and restored as "ft:{$format}tr:{$trust}ct:$text" 
+        
+        // Get all views
+        if ($views = $DB->get_records('dataform_views')) {
+            foreach ($views as $view) {
+                $update = false;
+                // section field
+                if (!empty($view->section)) {
+                    $editordata = @unserialize($view->section);
+                    if ($editordata !== false) {
+                        list($text, $format, $trust) = $editordata;
+                        $view->section = "ft:{$format}tr:{$trust}ct:$text";
+                        $update = true;
+                    }
+                }                
+                // 10 param fields
+                for ($i = 1; $i <= 10; ++$i) {
+                    $param = "param$i";
+                    if (!empty($view->$param)) {
+                        $editordata = @unserialize($view->$param);
+                        if ($editordata !== false) {
+                            list($text, $format, $trust) = $editordata;
+                            $view->$param = "ft:{$format}tr:{$trust}ct:$text";
+                            $update = true;
+                        }
+                    }
+                } 
+                if ($update) {
+                    $DB->update_record('dataform_views', $view);
+                }
+            }
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012060101, 'dataform');
+    }
+
+    if ($oldversion < 2012061700) {
+        // Remove version record of dataform views and fields from config_plugin
+        $DB->delete_records_select('config_plugins', $DB->sql_like('plugin', '?'), array('dataform%'));
+        // Change type of view block/blockext to matrix/matrixext
+        $DB->set_field('dataform_views', 'type', 'matrix', array('type' => 'block'));
+        $DB->set_field('dataform_views', 'type', 'matrixext', array('type' => 'blockext'));
+        
+        // Move content of matrixext param1 -> param4 and param3 -> param5 
+       if ($views = $DB->get_records('dataform_views', array('type' => 'matrixext'))) {
+            foreach ($views as $view) {
+                if (!empty($view->param1) or !empty($view->param3)) {
+                    $view->param4 = $view->param1;
+                    $view->param5 = $view->param3;
+                    $view->param1 = null;
+                    $view->param3 = null;
+                    $DB->update_record('dataform_views', $view);
+                }
+            }
+        }
+        
+        // Move content of editon param3 -> param7 
+       if ($views = $DB->get_records('dataform_views', array('type' => 'editon'))) {
+            foreach ($views as $view) {
+                if (!empty($view->param3)) {
+                    $view->param7 = $view->param3;
+                    $view->param1 = null;
+                    $view->param3 = null;
+                    $DB->update_record('dataform_views', $view);
+                }
+            }
+        }
+        
+        // Move content of tabular param1 -> param3 
+       if ($views = $DB->get_records('dataform_views', array('type' => 'tabular'))) {
+            foreach ($views as $view) {
+                $view->param3 = $view->param1;
+                $view->param1 = null;
+                $DB->update_record('dataform_views', $view);
+            }
+        }
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012061700, 'dataform');
+    }
+
+    if ($oldversion < 2012070601) {
+        // add field default filter to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('defaultfilter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'defaultview');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Move content of dataform->defaultsort to a new default filter
+       if ($dataforms = $DB->get_records('dataform')) {
+            $strdefault = get_string('default');
+            foreach ($dataforms as $dfid => $dataform) {
+                if (!empty($dataform->defaultsort)) {
+                    // Add a new 'Default filter' filter
+                    $filter = new object;
+                    $filter->dataid = $dfid;
+                    $filter->name = $strdefault. '_0';
+                    $filter->description = '';
+                    $filter->visible = 0;
+                    $filter->customsort = $dataform->defaultsort;
+
+                    if ($filterid = $DB->insert_record('dataform_filters', $filter)) {
+                        $DB->set_field('dataform', 'defaultfilter', $filterid, array('id' => $dfid));
+                    }
+                }
+            }
+        }
+        
+        // drop dataform field defaultsort
+        $field = new xmldb_field('defaultsort');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012070601, 'dataform');
+    }
+
+    if ($oldversion < 2012081801) {
+        // add field visible to dataform_fields
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('visible', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '2', 'description');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012081801, 'dataform');
+    }
+
+    if ($oldversion < 2012082600) {
+        // Change timelimit field to signed, default -1
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('timelimit', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '-1', 'maxentries');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_unsigned($table, $field);
+            $dbman->change_field_default($table, $field);
+        }
+        
+        // Update existing 0 timelimit to -1
+        //if ($dataforms = $DB->get_records('dataform')) {
+        //    foreach ($dataforms as $dfid => $dataform) {
+        //        if ($dataform->timelimit == 0) {
+        //            $DB->set_field('dataform', 'timelimit', -1, array('id' => $dfid));
+        //        }
+        //    }
+        //}
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012082600, 'dataform');
+    }
 
     return true;
 }

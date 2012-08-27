@@ -1,32 +1,25 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @subpackage field-_entry
+ * @subpackage dataformfield-_entry
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
 defined('MOODLE_INTERNAL') or die();
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
@@ -39,7 +32,9 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function get_replacements($tags = null, $entry = null, $edit = false, $managable = false) {
+    public function get_replacements($tags = null, $entry = null, array $options = null) {
+
+        $managable = !empty($options['managable']) ? $options['managable'] : false;
         // no edit mode
         $replacements = array();
         foreach ($tags as $tag) {
@@ -71,21 +66,23 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    protected function display_more($entry, $url = false) {
+    protected function display_more($entry, $href = false) {
         global $OUTPUT;
-        $field = $this->_field;
-        $baseurl = htmlspecialchars_decode($entry->baseurl);         
-
-        $strmore = get_string('more', 'dataform');
-        if ($field->df()->data->singleview) {
-            $baseurl = preg_replace('/([\s\S]+)view=\d+([\s\S]*)/', '$1view='. $field->df()->data->singleview. '$2', $baseurl);
-        }
         
-        $moreurl = $baseurl. '&eid='. $entry->id;
-        if (!$url) {
-            return html_writer::link($moreurl, $OUTPUT->pix_icon('i/search', $strmore));
+        $field = $this->_field;
+        $params = array(
+            'eids' => $entry->id
+        );       
+        $url = new moodle_url($entry->baseurl, $params);         
+        if ($field->df()->data->singleview) {
+            $url->param('ret', $url->param('view'));
+            $url->param('view', $field->df()->data->singleview);
+        }
+        $str = get_string('more', 'dataform');
+        if (!$href) {
+            return html_writer::link($url->out(false), $OUTPUT->pix_icon('i/search', $str));
          } else {
-            return $moreurl;
+            return $url->out(false);
         }
     }
 
@@ -96,13 +93,17 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
         global $OUTPUT;
 
         $field = $this->_field;
-        $baseurl = htmlspecialchars_decode($entry->baseurl);         
+        $params = array(
+            'editentries' => $entry->id,
+            'sesskey' => sesskey()
+        );       
+        $url = new moodle_url($entry->baseurl, $params);         
         if ($field->df()->data->singleedit) {
-            $baseurl = preg_replace('/([\s\S]+)view=\d+([\s\S]*)/', '$1view='. $field->df()->data->singleedit. '$2', $baseurl). '&eid='. $entry->id;
+            $url->param('view', $field->df()->data->singleedit);
+            $url->param('eids', $entry->id);
         }
-        $editurl = $baseurl. '&editentries='. $entry->id. '&sesskey='. sesskey();
-        $stredit = get_string('edit');
-        return html_writer::link($editurl, $OUTPUT->pix_icon('t/edit', $stredit));
+        $str = get_string('edit');
+        return html_writer::link($url->out(false), $OUTPUT->pix_icon('t/edit', $str));
     }
 
     /**
@@ -112,10 +113,13 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
         global $OUTPUT;
 
         $field = $this->_field;
-        $baseurl = htmlspecialchars_decode($entry->baseurl);         
-        $strdelete = get_string('delete');
-        $deleteurl = $baseurl. '&delete='. $entry->id. '&sesskey='. sesskey();
-        return html_writer::link($deleteurl, $OUTPUT->pix_icon('t/delete', $strdelete));
+        $params = array(
+            'delete' => $entry->id,
+            'sesskey' => sesskey()
+        );       
+        $url = new moodle_url($entry->baseurl, $params);         
+        $str = get_string('delete');
+        return html_writer::link($url->out(false), $OUTPUT->pix_icon('t/delete', $str));
     }
 
     /**

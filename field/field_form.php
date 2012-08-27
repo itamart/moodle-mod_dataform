@@ -1,62 +1,52 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/.
- *
  * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
- * To the extent that Dataform code corresponds to Database code,
- * certain copyrights on the Database module may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
-
-defined('MOODLE_INTERNAL') or die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->libdir/formslib.php");
 
 class mod_dataform_field_form extends moodleform {
+    protected $_field = null;
+    protected $_df = null;
 
-    function definition() {
-
-        $field = $this->_customdata['field'];
+    function definition() {        
+        $this->_field = $this->_customdata['field'];
+        $this->_df = $this->_field->df();
         $mform = &$this->_form;
 
-        $mform->addElement('hidden', 'type', $field->type());
-        $mform->setType('type', PARAM_ALPHA);
+        $streditinga = $this->_field->id() ? get_string('fieldedit', 'dataform', $this->_field->name()) : get_string('fieldnew', 'dataform', $this->_field->type());
+        $mform->addElement('html', html_writer::tag('h2', format_string($streditinga), array('class' => 'mdl-align')));
 
-        $mform->addElement('hidden', 'fid', $field->id());
-        $mform->setType('fid', PARAM_INT);
-
-        $streditinga = $field->id() ? get_string('fieldedit', 'dataform', $field->name()) : get_string('fieldnew', 'dataform', $field->type());
-        $mform->addElement('html', '<h2 class="mdl-align">'.format_string($streditinga).'</h2>');
-
-    // buttons
-    //-------------------------------------------------------------------------------
+        // buttons
+        //-------------------------------------------------------------------------------
         $this->add_action_buttons();
 
-    //-------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // name and description
+        // name
         $mform->addElement('text', 'name', get_string('name'), array('size'=>'32'));
         $mform->addRule('name', null, 'required', null, 'client');
         
+        // description
         $mform->addElement('text', 'description', get_string('description'), array('size'=>'64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
@@ -66,11 +56,24 @@ class mod_dataform_field_form extends moodleform {
             $mform->setType('description', PARAM_CLEAN);
         }
 
-    //-------------------------------------------------------------------------------
+        // visible
+        $options = array(
+            dataform_field_base::VISIBLE_NONE => get_string('fieldvisiblenone', 'dataform'),
+            dataform_field_base::VISIBLE_OWNER => get_string('fieldvisibleowner', 'dataform'),
+            dataform_field_base::VISIBLE_ALL => get_string('fieldvisibleall', 'dataform'),
+        );
+        $mform->addElement('select', 'visible', get_string('fieldvisibility', 'dataform'), $options);
+
+        // edits
+        $options = array(-1 => get_string('unlimited'), 0 => get_string('none'));
+        $options = $options + array_combine(range(1,50), range(1,50));
+        $mform->addElement('select', 'edits', get_string('fieldedits', 'dataform'), $options);
+
+        //-------------------------------------------------------------------------------
         $this->field_definition();
 
-    // buttons
-    //-------------------------------------------------------------------------------
+        // buttons
+        //-------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
 
@@ -83,7 +86,7 @@ class mod_dataform_field_form extends moodleform {
     /**
      *
      */
-    function add_action_buttons(){
+    function add_action_buttons($cancel = true, $submit = null){
         $mform = &$this->_form;
 
         $buttonarray=array();
@@ -100,14 +103,11 @@ class mod_dataform_field_form extends moodleform {
     /**
      *
      */
-    function validation($data) {
-        $errors= array();
+    function validation($data, $files) {
+        $errors = parent::validation($data, $files);
 
-        $df = $this->_customdata['df'];
-        $field = $this->_customdata['field'];
-
-        if ($df->name_exists('fields', $data['name'], $field->id())) {
-            $errors['invalidname'] = get_string('invalidname','dataform', get_string('field', 'dataform'));
+        if ($this->_df->name_exists('fields', $data['name'], $this->_field->id())) {
+            $errors['name'] = get_string('invalidname','dataform', get_string('field', 'dataform'));
         }
 
         return $errors;

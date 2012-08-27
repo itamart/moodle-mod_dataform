@@ -1,30 +1,26 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/.
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+ 
 /**
  * This file is part of the Dataform module for Moodle - http://moodle.org/. 
  *
  * @package mod-dataform
- * @author Itamar Tzadok
- * @copyright 2011 Moodle contributors
+ * @subpackage dataformview-import
+ * @copyright 2012 Itamar Tzadok 
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * The Dataform has been developed as an enhanced counterpart
- * of Moodle's standard Database activity module. To the extent that the
- * Dataform code corresponds to the Database code (1.9.11+ (20110323)),
- * certain copyrights on certain files may obtain.
- *
- * Moodle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moodle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  */
 
 defined('MOODLE_INTERNAL') or die;
@@ -82,10 +78,10 @@ class mod_dataform_view_import_import_form extends moodleform {
         $mform = &$this->_form;
 
         $mform->addElement('header', 'fieldsettingshdr', get_string('fieldsimportsettings', 'dataformview_import'));
-
         foreach ($view->get__patterns('field') as $fieldid => $patterns) {
-            $field = $df->get_field_from_id($fieldid);
-            $field->patterns()->display_import($mform, $patterns);
+            if ($field = $df->get_field_from_id($fieldid)) {
+                $field->patterns()->display_import($mform, $patterns);
+            }
         }
     }    
 
@@ -107,9 +103,8 @@ class mod_dataform_view_import_import_form extends moodleform {
         $mform->setDefault('enclosure', '');
 
         // encoding
-        $textlib = textlib_get_instance();
-        $choices = $textlib->get_encodings();
-        $mform->addElement('select', 'encoding', get_string('encoding', 'admin'), $choices);
+        $choices = textlib::get_encodings();
+        $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
 
         // upload file
