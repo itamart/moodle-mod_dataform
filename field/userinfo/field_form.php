@@ -36,7 +36,7 @@ class mod_dataform_field_userinfo_form extends mod_dataform_field_form {
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
         
         // Info field
-        $options = $DB->get_records_menu('user_info_field', array(), 'name', 'id,name');
+        $options = $DB->get_records_menu('user_info_field', array(), 'shortname', 'id,shortname');
         $options = array('' => get_string('choosedots')) + $options;
         $mform->addElement('select', "param1", get_string('infofield', 'dataformfield_userinfo'), $options);
     }

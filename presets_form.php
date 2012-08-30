@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,27 +26,27 @@ require_once("$CFG->libdir/formslib.php");
 /**
  *
  */
-class mod_dataform_packages_form extends moodleform {
+class mod_dataform_presets_form extends moodleform {
 
     function definition() {
         global $COURSE;
 
         $mform = &$this->_form;
 
-        $mform->addElement('header', 'packageshdr', get_string('packageadd', 'dataform'));
-        // package source
+        $mform->addElement('header', 'presetshdr', get_string('presetadd', 'dataform'));
+        // preset source
         $grp = array();
-        $grp[] = &$mform->createElement('radio', 'package_source', null, get_string('packagefromdataform', 'dataform'), 'current');
+        $grp[] = &$mform->createElement('radio', 'preset_source', null, get_string('presetfromdataform', 'dataform'), 'current');
         
         $packdata = array(
-            'nodata' => get_string('packagenodata', 'dataform'),
-            'data' => get_string('packagedata', 'dataform'),
-            'dataanon' => get_string('packagedataanon', 'dataform'),
+            'nodata' => get_string('presetnodata', 'dataform'),
+            'data' => get_string('presetdata', 'dataform'),
+            'dataanon' => get_string('presetdataanon', 'dataform'),
         );
-        $grp[] = &$mform->createElement('select', 'package_data', null, $packdata);
-        $grp[] = &$mform->createElement('radio', 'package_source', null, get_string('packagefromfile', 'dataform'), 'file');
+        $grp[] = &$mform->createElement('select', 'preset_data', null, $packdata);
+        $grp[] = &$mform->createElement('radio', 'preset_source', null, get_string('presetfromfile', 'dataform'), 'file');
         $mform->addGroup($grp, 'psourcegrp', null, array('  ', '<br />'), false);
-        $mform->setDefault('package_source', 'current');
+        $mform->setDefault('preset_source', 'current');
         
         // upload file
         $options = array('subdirs' => 0,
@@ -53,7 +54,7 @@ class mod_dataform_packages_form extends moodleform {
                             'maxfiles' => 1,
                             'accepted_types' => array('*.zip','*.mbz'));
         $mform->addElement('filepicker', 'uploadfile', null, null, $options);
-        $mform->disabledIf('uploadfile', 'package_source', 'neq', 'file');
+        $mform->disabledIf('uploadfile', 'preset_source', 'neq', 'file');
 
         $mform->addElement('html', '<br /><div class="mdl-align">');
         $mform->addElement('submit', 'add', '    '. get_string('add'). '    ');

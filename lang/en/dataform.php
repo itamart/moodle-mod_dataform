@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod
+ * $subpackage dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -73,10 +74,10 @@ $string['dataform:exportentry'] = 'Export entry';
 $string['dataform:exportownentry'] = 'Export own entries';
 $string['dataform:managecomments'] = 'Manage comments';
 $string['dataform:manageentries'] = 'Manage entries';
-$string['dataform:managepackages'] = 'Manage packages';
+$string['dataform:managepresets'] = 'Manage presets';
 $string['dataform:manageratings'] = 'Manage ratings';
 $string['dataform:managetemplates'] = 'Manage templates';
-$string['dataform:packagesviewall'] = 'View packages from all users';
+$string['dataform:presetsviewall'] = 'View presets from all users';
 $string['dataform:rate'] = 'Rate entries';
 $string['dataform:ratingsviewall'] = 'View all ratings';
 $string['dataform:ratingsviewany'] = 'View any ratings';
@@ -227,8 +228,8 @@ $string['formemptyadd'] = 'You did not fill out any fields!';
 $string['fromfile'] = 'Import from zip file';
 $string['generalactions'] = 'General actions';
 $string['getstartedfields'] = 'You can add fields in the {$a} section.';
-$string['getstartedpackages'] = 'You can check out available dataform packages and apply a package in the {$a} section.';
-$string['getstarted'] = 'This dataform appears to be new or with incomplete setup.<br /> You can get the dataform started by applying a package<br />or adding fields and views.';
+$string['getstartedpresets'] = 'You can check out available dataform presets and apply a preset in the {$a} section.';
+$string['getstarted'] = 'This dataform appears to be new or with incomplete setup.<br /> You can get the dataform started by applying a preset<br />or adding fields and views.';
 $string['getstartedviews'] = 'You can add views in the {$a} section.';
 $string['grade'] = 'Grade';
 $string['gradeinputtype'] = 'Grade input type';
@@ -298,30 +299,30 @@ $string['optionalfilename'] = 'Filename (optional)';
 $string['other'] = 'Other';
 $string['overwrite'] = 'Overwrite';
 $string['overwritesettings'] = 'Overwrite current settings';
-$string['packageadd'] = 'Add packages';
-$string['packageapply'] = 'Apply';
-$string['packageavailableincourse'] = 'Course packages';
-$string['packageavailableinsite'] = 'Site packages';
-$string['packagechoose'] = 'choose a predfined package';
-$string['packagedataanon'] = 'with user data anonymized';
-$string['packagedata'] = 'with user data';
-$string['packagefaileddelete'] = 'Error deleting a package!';
-$string['packagefromdataform'] = 'Package this dataform';
-$string['packagefromfile'] = 'Upload package from file';
-$string['packageimportsuccess'] = 'The package has been successfully applied.';
-$string['packageinfo'] = 'Saving as a package will publish this view. Other users may be able to use it in their dataforms.';
-$string['packagemap'] = 'map fields';
-$string['packagenodata'] = 'without user data';
-$string['packagenodefinedfields'] = 'New package has no defined fields!';
-$string['packagenodefinedviews'] = 'New package has no defined views!';
-$string['packagenoneavailable'] = 'No available packages to display';
-$string['packageplugin'] = 'Plug in';
-$string['packagerefreshlist'] = 'Refresh list';
-$string['packageshare'] = 'Share';
-$string['packagesharesuccess'] = 'Saved successfully. Your package will now be available across the site.';
-$string['packagesource'] = 'Package source';
-$string['packages'] = 'Packages';
-$string['packageusestandard'] = 'Use a package';
+$string['presetadd'] = 'Add presets';
+$string['presetapply'] = 'Apply';
+$string['presetavailableincourse'] = 'Course presets';
+$string['presetavailableinsite'] = 'Site presets';
+$string['presetchoose'] = 'choose a predfined preset';
+$string['presetdataanon'] = 'with user data anonymized';
+$string['presetdata'] = 'with user data';
+$string['presetfaileddelete'] = 'Error deleting a preset!';
+$string['presetfromdataform'] = 'Make a preset of this dataform';
+$string['presetfromfile'] = 'Upload preset from file';
+$string['presetimportsuccess'] = 'The preset has been successfully applied.';
+$string['presetinfo'] = 'Saving as a preset will publish this view. Other users may be able to use it in their dataforms.';
+$string['presetmap'] = 'map fields';
+$string['presetnodata'] = 'without user data';
+$string['presetnodefinedfields'] = 'New preset has no defined fields!';
+$string['presetnodefinedviews'] = 'New preset has no defined views!';
+$string['presetnoneavailable'] = 'No available presets to display';
+$string['presetplugin'] = 'Plug in';
+$string['presetrefreshlist'] = 'Refresh list';
+$string['presetshare'] = 'Share';
+$string['presetsharesuccess'] = 'Saved successfully. Your preset will now be available across the site.';
+$string['presetsource'] = 'Preset source';
+$string['presets'] = 'Presets';
+$string['presetusestandard'] = 'Use a preset';
 $string['page-mod-dataform-x'] = 'Any dataform activity module page';
 $string['pagesize'] = 'Entries per page';
 $string['pagingbar'] = 'Paging bar';
@@ -411,8 +412,6 @@ $string['submission'] = 'Submission';
 $string['submissionsview'] = 'Submissions view';
 $string['subplugintype_dataformfield'] = 'Dataform field type';
 $string['subplugintype_dataformfield_plural'] = 'Dataform field types';
-$string['subplugintype_dataformpackage'] = 'Dataform package type';
-$string['subplugintype_dataformpackage_plural'] = 'Dataform package types';
 $string['subplugintype_dataformview'] = 'Dataform view type';
 $string['subplugintype_dataformview_plural'] = 'Dataform view types';
 $string['teachersandstudents'] = '{$a->teachers} and {$a->students}';

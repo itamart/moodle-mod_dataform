@@ -54,7 +54,18 @@ class restore_dataform_activity_task extends restore_activity_task {
     }
 
     /**
-     * Override to remove the course module step if restoring a package
+     * 
+     */
+    public function get_comment_mapping_itemname($commentarea) {
+        if ($commentarea == 'entry') {
+            return 'dataform_entry';
+        } else if ($commentarea == 'activity') {
+            return 'user';
+        }
+    }
+
+    /**
+     * Override to remove the course module step if restoring a preset
      */
     public function build() {
 

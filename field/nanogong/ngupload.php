@@ -30,7 +30,7 @@ $itemid = required_param('itemid', PARAM_INT);
 $saveas_filename = optional_param('title', '', PARAM_FILE);
 $maxbytes = optional_param('maxbytes', 0, PARAM_INT);
 
-$usercontext = get_context_instance(CONTEXT_USER, $userid);
+$usercontext = context_user::instance($userid);
 
 $record = new object;
 $record->userid = $userid;

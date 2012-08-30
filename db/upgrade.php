@@ -274,17 +274,52 @@ function xmldb_dataform_upgrade($oldversion) {
             $dbman->change_field_default($table, $field);
         }
         
-        // Update existing 0 timelimit to -1
-        //if ($dataforms = $DB->get_records('dataform')) {
-        //    foreach ($dataforms as $dfid => $dataform) {
-        //        if ($dataform->timelimit == 0) {
-        //            $DB->set_field('dataform', 'timelimit', -1, array('id' => $dfid));
-        //        }
-        //    }
-        //}
-
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012082600, 'dataform');
+    }
+
+    if ($oldversion < 2012082900) {
+        $fs = get_file_storage();
+        // Move presets from course_packages to course_presets
+        if ($dataforms = $DB->get_records('dataform')) {
+            foreach ($dataforms as $df) {
+                $context = context_course::instance($df->course);
+                if ($presets = $fs->get_area_files($context->id, 'mod_dataform', 'course_packages')) {
+                
+                    $filerecord = new object;
+                    $filerecord->contextid = $context->id;
+                    $filerecord->component = 'mod_dataform';
+                    $filerecord->filearea = 'course_presets';
+                    $filerecord->filepath = '/';
+
+                    foreach ($presets as $preset) {
+                        if (!$preset->is_directory()) {
+                            $fs->create_file_from_storedfile($filerecord, $preset);
+                        }
+                    }
+                    $fs->delete_area_files($context->id, 'mod_dataform', 'course_packages');
+                }
+            }
+        }
+
+        // Move presets from site_packages to site_presets
+        $filerecord = new object;
+        $filerecord->contextid = SYSCONTEXTID;
+        $filerecord->component = 'mod_dataform';
+        $filerecord->filearea = 'site_presets';
+        $filerecord->filepath = '/';
+
+        if ($presets = $fs->get_area_files(SYSCONTEXTID, 'mod_dataform', 'course_packages')) {
+            foreach ($presets as $preset) {
+                if (!$preset->is_directory()) {
+                    $fs->create_file_from_storedfile($filerecord, $preset);
+                }
+            }
+        }
+        $fs->delete_area_files(SYSCONTEXTID, 'mod_dataform', 'site_packages');
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012082900, 'dataform');
     }
 
     return true;

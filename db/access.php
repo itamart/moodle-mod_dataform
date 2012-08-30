@@ -267,9 +267,9 @@ $capabilities = array(
         'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
     ),
 
-// PACKAGES
-// manage user packages
-    'mod/dataform:managepackages' => array(
+// PRESETS
+// manage user presets
+    'mod/dataform:managepresets' => array(
 
         'riskbitmask' => RISK_SPAM | RISK_XSS,
 
@@ -280,8 +280,8 @@ $capabilities = array(
         )
     ),
 
-// view all user packages
-    'mod/dataform:packagesviewall' => array(
+// view all user presets
+    'mod/dataform:presetsviewall' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,

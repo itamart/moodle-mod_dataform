@@ -35,9 +35,9 @@ class backup_dataform_activity_task extends backup_activity_task {
         global $SESSION;
         // No particular settings for this activity
         
-        // For packaging get root settings from SESSION and adjust root task
-        if (isset($SESSION->{"dataform_{$this->moduleid}_package"})) {
-            list($users, $anon) = explode(' ', $SESSION->{"dataform_{$this->moduleid}_package"});
+        // For preseting get root settings from SESSION and adjust root task
+        if (isset($SESSION->{"dataform_{$this->moduleid}_preset"})) {
+            list($users, $anon) = explode(' ', $SESSION->{"dataform_{$this->moduleid}_preset"});
             list($roottask,,) = $this->plan->get_tasks();
             // set users setting
             $userssetting = &$roottask->get_setting('users');

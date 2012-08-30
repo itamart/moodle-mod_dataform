@@ -28,6 +28,7 @@ class dataform_field_userinfo extends dataform_field_base {
     public $type = 'userinfo';
     
     public $infoid;
+    public $infoshortname;
     public $infotype;
     public $defaultdata;
     public $defaultdataformat;
@@ -35,9 +36,10 @@ class dataform_field_userinfo extends dataform_field_base {
     public function __construct($df = 0, $field = 0) {       
         parent::__construct($df, $field);
         $this->infoid = $this->field->param1;
-        $this->infotype = $this->field->param2;
-        $this->defaultdata = $this->field->param3;
-        $this->defaultdataformat = $this->field->param4;
+        $this->infoshortname = $this->field->param2;
+        $this->infotype = $this->field->param3;
+        $this->defaultdata = $this->field->param4;
+        $this->defaultdataformat = $this->field->param5;
     }
 
     /**
@@ -50,11 +52,12 @@ class dataform_field_userinfo extends dataform_field_base {
         parent::set_field($forminput);
         
         if ($this->field->param1 and ($this->field->param1 != $infoid or !$this->field->param2)) {
-            $infoitems = 'datatype,defaultdata,defaultdataformat,param1,param2,param3,param4,param5';
+            $infoitems = 'shortname,datatype,defaultdata,defaultdataformat,param1,param2,param3,param4,param5';
             if ($info = $DB->get_record('user_info_field', array('id' => $this->field->param1), $infoitems)) {
-                $this->field->param2 = $info->datatype;
-                $this->field->param3 = $info->defaultdata;
-                $this->field->param4 = $info->defaultdataformat;
+                $this->field->param2 = $info->shortname;
+                $this->field->param3 = $info->datatype;
+                $this->field->param4 = $info->defaultdata;
+                $this->field->param5 = $info->defaultdataformat;
 
                 $this->field->param6 = $info->param1;
                 $this->field->param7 = $info->param2;
@@ -90,7 +93,8 @@ class dataform_field_userinfo extends dataform_field_base {
     public function get_sort_from_sql($paramname = 'sortie', $paramcount = '') {
         $fieldid = $this->field->id;
         if ($fieldid > 0) {
-            $sql = " LEFT JOIN {user_info_data} c$fieldid ON (c$fieldid.userid = e.userid AND c$fieldid.fieldid = :$paramname$paramcount) ";
+            $sql = " LEFT JOIN {user_info_data} c$fieldid ON 
+                (c$fieldid.userid = e.userid AND c$fieldid.fieldid = :$paramname$paramcount) ";
             return array($sql, $this->infoid);
         } else {
             return null;

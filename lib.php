@@ -498,7 +498,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
-    if (($filearea === 'course_packages' or $filearea === 'site_packages')) {
+    if (($filearea === 'course_presets' or $filearea === 'site_presets')) {
 //                and $context->contextlevel == CONTEXT_MODULE) {
         require_course_login($course, true, $cm);
 
@@ -588,7 +588,7 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
     if ($templatesmanager or $entriesmanager) {
         $manage = $dfnode->add(get_string('manage', 'dataform'));
         if ($templatesmanager) {
-            $manage->add(get_string('packages', 'dataform'), new moodle_url('/mod/dataform/packages.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/presets.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/fields.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/views.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filters.php', array('id' => $PAGE->cm->id)));

@@ -77,9 +77,9 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $rating = new backup_nested_element('rating', array('id'), array(
             'component', 'ratingarea', 'scaleid', 'value', 'userid', 'timecreated', 'timemodified'));
 
-        //$comments = new backup_nested_element('comments');
-        //$comment = new backup_nested_element('comment', array('id'), array(
-        //    'commentarea', 'content', 'format', 'userid', 'timecreated'));
+        $grades = new backup_nested_element('grades');
+        $grade = new backup_nested_element('grade', array('id'), array(
+            'component', 'ratingarea', 'scaleid', 'value', 'userid', 'timecreated', 'timemodified'));
 
         // Build the tree
         $dataform->add_child($fields);
@@ -100,8 +100,8 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $entry->add_child($ratings);
         $ratings->add_child($rating);
 
-        //$entry->add_child($comments);
-        //$comments->add_child($comment);
+        $dataform->add_child($grades);
+        $grades->add_child($grade);
 
         // Define sources
         $dataform->set_source_table('dataform', array('id' => backup::VAR_ACTIVITYID));
@@ -114,19 +114,22 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             $entry->set_source_table('dataform_entries', array('dataid' => backup::VAR_PARENTID));
             $content->set_source_table('dataform_contents', array('entryid' => backup::VAR_PARENTID));
 
-            $rating->set_source_table('rating', array('contextid'  => backup::VAR_CONTEXTID,
-                                                      'itemid'     => backup::VAR_PARENTID,
-                                                      'component'  => backup_helper::is_sqlparam('mod_dataform'),
-                                                      'ratingarea' => backup_helper::is_sqlparam('entry')));
+            // Entry ratings
+            $rating->set_source_table('rating', array(
+                'contextid'  => backup::VAR_CONTEXTID,
+                'itemid'     => backup::VAR_PARENTID,
+                'component'  => backup_helper::is_sqlparam('mod_dataform'),
+                'ratingarea' => backup_helper::is_sqlparam('entry'))
+            );
             $rating->set_source_alias('rating', 'value');
 
-            //TODO add activity rating 
-
-            //$comment->set_source_table('comments', array('contextid'  => backup::VAR_CONTEXTID,
-            //                                          'itemid'     => backup::VAR_PARENTID,
-            //                                          'commentarea' => backup_helper::is_sqlparam('entry')));
-            //$comment->set_source_alias('comment', 'value');
-
+            // Activity grade
+            $grade->set_source_table('rating', array(
+                'contextid'  => backup::VAR_CONTEXTID,
+                'component'  => backup_helper::is_sqlparam('mod_dataform'),
+                'ratingarea' => backup_helper::is_sqlparam('activity'))
+            );
+            $grade->set_source_alias('rating', 'value');
         }
 
         // Define id annotations
@@ -142,7 +145,6 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         // Define file annotations
         $dataform->annotate_files('mod_dataform', 'intro', null); // This file area hasn't itemid
         $view->annotate_files('mod_dataform', 'view', 'id'); // By view->id
-        //$field->annotate_files('mod_dataform', 'field', 'id'); // By view->id
         $content->annotate_files('mod_dataform', 'content', 'id'); // By content->id
 
         // Return the root element (data), wrapped into standard activity structure

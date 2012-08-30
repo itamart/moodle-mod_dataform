@@ -15,26 +15,28 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
 require_once('mod_class.php');
-require_once('packages_form.php');
+require_once('presets_form.php');
 
 $urlparams = new object();
 
 $urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
 $urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
 
-// packages list actions
-$urlparams->apply =     optional_param('apply', 0, PARAM_INT);  // path of package to apply
-$urlparams->map =       optional_param('map', 0, PARAM_BOOL);  // map new package fields to old fields
-$urlparams->delete =    optional_param('delete', '', PARAM_SEQUENCE);   // ids of packages to delete
-$urlparams->share =     optional_param('share', '', PARAM_SEQUENCE);     // ids of packages to share
-$urlparams->download =     optional_param('download', '', PARAM_SEQUENCE);     // ids of packages to download in one zip
+// presets list actions
+$urlparams->apply =     optional_param('apply', 0, PARAM_INT);  // path of preset to apply
+$urlparams->torestorer =     optional_param('torestorer', 1, PARAM_INT);  // apply user data to restorer
+$urlparams->map =       optional_param('map', 0, PARAM_BOOL);  // map new preset fields to old fields
+$urlparams->delete =    optional_param('delete', '', PARAM_SEQUENCE);   // ids of presets to delete
+$urlparams->share =     optional_param('share', '', PARAM_SEQUENCE);     // ids of presets to share
+$urlparams->download =     optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
 
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
@@ -42,21 +44,21 @@ $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 $df = new dataform($urlparams->d, $urlparams->id);
 require_capability('mod/dataform:managetemplates', $df->context);
 
-$df->set_page('packages', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('presets', array('modjs' => true, 'urlparams' => $urlparams));
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/packages.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/presets.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
-$df->process_packages('/mod/dataform/packages.php', $urlparams);
+$df->process_presets('/mod/dataform/presets.php', $urlparams);
 
-$localpackages = $df->get_user_packages(dataform::PACKAGE_COURSEAREA);
-$sharedpackages = $df->get_user_packages(dataform::PACKAGE_SITEAREA);
+$localpresets = $df->get_user_presets(dataform::PRESET_COURSEAREA);
+$sharedpresets = $df->get_user_presets(dataform::PRESET_SITEAREA);
 
 // any notifications
-$df->notifications['bad']['getstartedpackages'] = '';
-if (!$localpackages and !$sharedpackages) {
-    $df->notifications['bad']['getstartedpackages'] = get_string('packagenoneavailable','dataform');  // nothing in dataform
+$df->notifications['bad']['getstartedpresets'] = '';
+if (!$localpresets and !$sharedpresets) {
+    $df->notifications['bad']['getstartedpresets'] = get_string('presetnoneavailable','dataform');  // nothing in dataform
     if (!$df->get_user_defined_fields()) {
         $linktofields = html_writer::link(new moodle_url('fields.php', array('d' => $df->id())), get_string('fields', 'dataform'));
         $df->notifications['bad']['getstartedfields'] = get_string('getstartedfields','dataform', $linktofields);
@@ -68,16 +70,16 @@ if (!$localpackages and !$sharedpackages) {
 }
 
 // print header
-$df->print_header(array('tab' => 'packages', 'urlparams' => $urlparams));
+$df->print_header(array('tab' => 'presets', 'urlparams' => $urlparams));
 
 // print the add form
 echo html_writer::start_tag('div', array('style' => 'width:80%;margin:auto;'));
-$mform = new mod_dataform_packages_form(new moodle_url('/mod/dataform/packages.php', array('d' => $df->id(), 'sesskey' => sesskey(), 'add' => 1)));
+$mform = new mod_dataform_presets_form(new moodle_url('/mod/dataform/presets.php', array('d' => $df->id(), 'sesskey' => sesskey(), 'add' => 1)));
 $mform->set_data(null);
 $mform->display();
 echo html_writer::end_tag('div');
 
-// if there are packages print admin style list of them
-$df->print_packages_list('/mod/dataform/packages.php', $localpackages, $sharedpackages);
+// if there are presets print admin style list of them
+$df->print_presets_list('/mod/dataform/presets.php', $localpresets, $sharedpresets);
 
 $df->print_footer();

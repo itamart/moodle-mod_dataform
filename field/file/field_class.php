@@ -71,7 +71,7 @@ class dataform_field_file extends dataform_field_base {
         // store uploaded files
         $contentid = isset($entry->{"c{$this->field->id}_id"}) ? $entry->{"c{$this->field->id}_id"} : null;
         $draftarea = $filemanager;
-        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $usercontext = context_user::instance($USER->id);
 
         $fs = get_file_storage();
         $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftarea);
@@ -135,7 +135,7 @@ class dataform_field_file extends dataform_field_base {
         $fieldname = $this->field->name;
         
         $draftid = $importsettings[$fieldname]['filepicker'];
-        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $usercontext = context_user::instance($USER->id);
         $fs = get_file_storage();
         if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
             $zipfile = reset($files);

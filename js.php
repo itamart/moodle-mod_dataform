@@ -95,7 +95,7 @@ if ($urlparams->jsedit) {
         $df->update($rec, get_string('jssaved', 'dataform'));
         
         // add uploaded files
-        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $usercontext = context_user::instance($USER->id);
         $fs = get_file_storage();
         if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $data->jsupload, 'sortorder', false)) {
             $filerec = new object;

@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -52,9 +53,9 @@ class dataform {
     const _RATINGMIN = -144;
     const _RATINGSUM = -145;
 
-    const PACKAGE_COURSEAREA = 'course_packages';
-    const PACKAGE_SITEAREA = 'site_packages';
-    const PACKAGE_SITECONTEXT = SYSCONTEXTID;
+    const PRESET_COURSEAREA = 'course_presets';
+    const PRESET_SITEAREA = 'site_presets';
+    const PRESET_SITECONTEXT = SYSCONTEXTID;
 
     const USER_FILTER = -1;
     const USER_FILTER_SET = -2;
@@ -463,8 +464,8 @@ class dataform {
             $views = $this->get_views();
             if (!$views) {
                 $this->notifications['bad']['getstarted'] = get_string('getstarted','dataform');
-                $linktopackages = html_writer::link(new moodle_url('packages.php', array('d' => $thisid)), get_string('packages', 'dataform'));
-                $this->notifications['bad']['getstartedpackages'] = get_string('getstartedpackages','dataform', $linktopackages);
+                $linktopresets = html_writer::link(new moodle_url('presets.php', array('d' => $thisid)), get_string('presets', 'dataform'));
+                $this->notifications['bad']['getstartedpresets'] = get_string('getstartedpresets','dataform', $linktopresets);
                 $linktofields = html_writer::link(new moodle_url('fields.php', array('d' => $thisid)), get_string('fields', 'dataform'));
                 $this->notifications['bad']['getstartedfields'] = get_string('getstartedfields','dataform', $linktofields);
                 $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $thisid)), get_string('views', 'dataform'));
@@ -1554,53 +1555,53 @@ class dataform {
 
 
 /**********************************************************************************
- * PACKAGES
+ * PRESETS
  *********************************************************************************/
 
     /**
-     * Returns an array of the shared packages (in moodledata) the user is allowed to access
-     * @param in $packagearea  PACKAGE_COURSEAREA/PACKAGE_SITEAREA
+     * Returns an array of the shared presets (in moodledata) the user is allowed to access
+     * @param in $presetarea  PRESET_COURSEAREA/PRESET_SITEAREA
      */
-    public function get_user_packages($packagearea) {
+    public function get_user_presets($presetarea) {
         global $USER;
 
-        $packages = array();
+        $presets = array();
         $course_context = context_course::instance($this->course->id);
 
         $fs = get_file_storage();
-        if ($packagearea == 'course_packages') {
-            $files = $fs->get_area_files($course_context->id, 'mod_dataform', $packagearea);
-        } else if ($packagearea == 'site_packages') {
-            $files = $fs->get_area_files(dataform::PACKAGE_SITECONTEXT, 'mod_dataform', $packagearea);
+        if ($presetarea == 'course_presets') {
+            $files = $fs->get_area_files($course_context->id, 'mod_dataform', $presetarea);
+        } else if ($presetarea == 'site_presets') {
+            $files = $fs->get_area_files(dataform::PRESET_SITECONTEXT, 'mod_dataform', $presetarea);
         }
-        $canviewall = has_capability('mod/dataform:packagesviewall', $this->context);
+        $canviewall = has_capability('mod/dataform:presetsviewall', $this->context);
         if (!empty($files)) {
             foreach ($files as $file) {
                 if ($file->is_directory() || ($file->get_userid() != $USER->id and !$canviewall)) {
                     continue;
                 }
-                $package = new object;
-                $package->contextid = $file->get_contextid();
-                $package->path = $file->get_filepath();
-                $package->name = $file->get_filename();
-                $package->shortname = pathinfo($package->name, PATHINFO_FILENAME);
-                $package->userid = $file->get_userid();
-                $package->itemid = $file->get_itemid();
-                $package->id = $file->get_id();
-                $packages[] = $package;
+                $preset = new object;
+                $preset->contextid = $file->get_contextid();
+                $preset->path = $file->get_filepath();
+                $preset->name = $file->get_filename();
+                $preset->shortname = pathinfo($preset->name, PATHINFO_FILENAME);
+                $preset->userid = $file->get_userid();
+                $preset->itemid = $file->get_itemid();
+                $preset->id = $file->get_id();
+                $presets[] = $preset;
             }
         }
 
-        return $packages;
+        return $presets;
     }
 
     /**
      *
      */
-    public function print_packages_list($targetpage, $localpackages, $sharedpackages) {
+    public function print_presets_list($targetpage, $localpresets, $sharedpresets) {
         global $CFG, $OUTPUT;
         
-        if ($localpackages or $sharedpackages) {
+        if ($localpresets or $sharedpresets) {
 
             $linkparams = array('d' => $this->id(), 'sesskey' => sesskey());
             $actionurl = htmlspecialchars_decode(new moodle_url($targetpage, $linkparams));
@@ -1612,19 +1613,19 @@ class dataform {
             $strname = get_string('name');
             $strdescription = get_string('description');
             $strscreenshot = get_string('screenshot');
-            $strapply = get_string('packageapply', 'dataform');
-            $strmap = get_string('packagemap', 'dataform');
+            $strapply = get_string('presetapply', 'dataform');
+            $strmap = get_string('presetmap', 'dataform');
             $strdownload = get_string('download', 'dataform');
             $strdelete = get_string('delete');
-            $strshare = get_string('packageshare', 'dataform');
+            $strshare = get_string('presetshare', 'dataform');
 
-            $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'package\'&#44;this.checked)'));
+            $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'preset\'&#44;this.checked)'));
             
-            $multidownload = html_writer::tag('button', $OUTPUT->pix_icon('t/download', get_string('multidownload', 'dataform')), array('name' => 'multidownload', 'onclick' => 'bulk_action(\'package\'&#44; \''. $actionurl. '\'&#44; \'download\')'));
+            $multidownload = html_writer::tag('button', $OUTPUT->pix_icon('t/download', get_string('multidownload', 'dataform')), array('name' => 'multidownload', 'onclick' => 'bulk_action(\'preset\'&#44; \''. $actionurl. '\'&#44; \'download\')'));
             
-            $multidelete = html_writer::tag('button', $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), array('name' => 'multidelete', 'onclick' => 'bulk_action(\'package\'&#44; \''. $actionurl. '\'&#44; \'delete\')'));
+            $multidelete = html_writer::tag('button', $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), array('name' => 'multidelete', 'onclick' => 'bulk_action(\'preset\'&#44; \''. $actionurl. '\'&#44; \'delete\')'));
             
-            $multishare = html_writer::tag('button', $OUTPUT->pix_icon('i/group', get_string('multishare', 'dataform')), array('name' => 'multishare', 'onclick' => 'bulk_action(\'package\'&#44; \''. $actionurl. '\'&#44; \'share\')'));
+            $multishare = html_writer::tag('button', $OUTPUT->pix_icon('i/group', get_string('multishare', 'dataform')), array('name' => 'multishare', 'onclick' => 'bulk_action(\'preset\'&#44; \''. $actionurl. '\'&#44; \'share\')'));
 
             $table = new html_table();
             $table->head = array($strname, $strdescription, $strscreenshot, $strapply, $multidownload, $multishare, $multidelete, $selectallnone);
@@ -1632,11 +1633,11 @@ class dataform {
             $table->wrap = array(false, false, false, false, false, false, false, false);
             $table->attributes['align'] = 'center';
 
-            // print local packages
-            if ($localpackages) {
+            // print local presets
+            if ($localpresets) {
                 // headingg
                 $lpheadingcell = new html_table_cell();
-                $lpheadingcell->text = html_writer::tag('h4', get_string('packageavailableincourse', 'dataform'));
+                $lpheadingcell->text = html_writer::tag('h4', get_string('presetavailableincourse', 'dataform'));
                 $lpheadingcell->colspan = 9;
                 
                 $lpheadingrow = new html_table_row();
@@ -1644,50 +1645,50 @@ class dataform {
 
                 $table->data[] = $lpheadingrow;
 
-                foreach ($localpackages as $package) {
+                foreach ($localpresets as $preset) {
 
-                    $packagename = $package->shortname;
-                    $packagedescription = '';
-                    $packagescreenshot = '';
-                    //if ($package->screenshot) {
-                    //    $packagescreenshot = '<img width="150" class="packagescreenshot" src="'. $package->screenshot. '" alt="'. get_string('screenshot'). '" />';
+                    $presetname = $preset->shortname;
+                    $presetdescription = '';
+                    $presetscreenshot = '';
+                    //if ($preset->screenshot) {
+                    //    $presetscreenshot = '<img width="150" class="presetscreenshot" src="'. $preset->screenshot. '" alt="'. get_string('screenshot'). '" />';
                     //}
-                    $packageapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $package->id)),
+                    $presetapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $preset->id)),
                                     $OUTPUT->pix_icon('t/switch_whole', $strapply));
-                    //$packageapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $package->id)),
+                    //$presetapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $preset->id)),
                     //                $OUTPUT->pix_icon('t/switch_plus', $strapply));
-                    $packagedownload = html_writer::link(
-                        moodle_url::make_file_url("/pluginfile.php", "/$package->contextid/mod_dataform/course_packages/$package->itemid/$package->name"),
+                    $presetdownload = html_writer::link(
+                        moodle_url::make_file_url("/pluginfile.php", "/$preset->contextid/mod_dataform/course_presets/$preset->itemid/$preset->name"),
                         $OUTPUT->pix_icon('t/download', $strdownload)
                     );
-                    $packageshare = '';
-                    if (has_capability('mod/dataform:packagesviewall', $this->context)) {
-                        $packageshare = html_writer::link(new moodle_url($targetpage, $linkparams + array('share' => $package->id)),
+                    $presetshare = '';
+                    if (has_capability('mod/dataform:presetsviewall', $this->context)) {
+                        $presetshare = html_writer::link(new moodle_url($targetpage, $linkparams + array('share' => $preset->id)),
                                     $OUTPUT->pix_icon('i/group', $strshare));
                     }
-                    $packagedelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $package->id)),
+                    $presetdelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $preset->id)),
                                     $OUTPUT->pix_icon('t/delete', $strdelete));
-                    $packageselector = html_writer::checkbox("packageselector", $package->id, false);
+                    $presetselector = html_writer::checkbox("presetselector", $preset->id, false);
 
                     $table->data[] = array(
-                        $packagename,
-                        $packagedescription,
-                        $packagescreenshot,
-                        $packageapply,
-                        $packagedownload,
-                        $packageshare,
-                        $packagedelete,
-                        $packageselector
+                        $presetname,
+                        $presetdescription,
+                        $presetscreenshot,
+                        $presetapply,
+                        $presetdownload,
+                        $presetshare,
+                        $presetdelete,
+                        $presetselector
                    );
                 }
                 
             }
 
-            // print shared packages
-            if ($sharedpackages) {
+            // print shared presets
+            if ($sharedpresets) {
                 // heading
                 $lpheadingcell = new html_table_cell();
-                $lpheadingcell->text = html_writer::tag('h4', get_string('packageavailableinsite', 'dataform'));
+                $lpheadingcell->text = html_writer::tag('h4', get_string('presetavailableinsite', 'dataform'));
                 $lpheadingcell->colspan = 9;
                 
                 $lpheadingrow = new html_table_row();
@@ -1695,38 +1696,35 @@ class dataform {
 
                 $table->data[] = $lpheadingrow;
                 
-                $linkparams['area'] = dataform::PACKAGE_SITEAREA;
+                $linkparams['area'] = dataform::PRESET_SITEAREA;
 
-                foreach ($sharedpackages as $package) {
+                foreach ($sharedpresets as $preset) {
 
-                    $packagename = $package->shortname;
-                    $packagedescription = '';
-                    $packagescreenshot = '';
-                    $packageapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $package->id)),
-                                    $OUTPUT->pix_icon('t/switch_whole', $strapply));
-                    //$packageapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $package->id)),
-                    //                $OUTPUT->pix_icon('t/switch_plus', $strapply));
-                    $packagedownload = html_writer::link(
-                        moodle_url::make_file_url("/pluginfile.php", "/$package->contextid/mod_dataform/site_packages/$package->itemid/$package->name"),
+                    $presetname = $preset->shortname;
+                    $presetdescription = '';
+                    $presetscreenshot = '';
+                    $presetapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $preset->id)), $OUTPUT->pix_icon('t/switch_whole', $strapply));
+                    //$presetapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $preset->id)), $OUTPUT->pix_icon('t/switch_plus', $strapply));
+                    $presetdownload = html_writer::link(
+                        moodle_url::make_file_url("/pluginfile.php", "/$preset->contextid/mod_dataform/site_presets/$preset->itemid/$preset->name"),
                         $OUTPUT->pix_icon('t/download', $strdownload)
                     );
-                    $packageshare = '';
-                    $packagedelete = '';
-                    if (has_capability('mod/dataform:managepackages', $this->context)) {            
-                        $packagedelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $package->id)),
-                                        $OUTPUT->pix_icon('t/delete', $strdelete));
+                    $presetshare = '';
+                    $presetdelete = '';
+                    if (has_capability('mod/dataform:managepresets', $this->context)) {            
+                        $presetdelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $preset->id)), $OUTPUT->pix_icon('t/delete', $strdelete));
                     }                
-                    $packageselector = html_writer::checkbox("packageselector", $package->id, false);
+                    $presetselector = html_writer::checkbox("presetselector", $preset->id, false);
 
                     $table->data[] = array(
-                        $packagename,
-                        $packagedescription,
-                        $packagescreenshot,
-                        $packageapply,
-                        $packagedownload,
-                        $packageshare,
-                        $packagedelete,
-                        $packageselector
+                        $presetname,
+                        $presetdescription,
+                        $presetscreenshot,
+                        $presetapply,
+                        $presetdownload,
+                        $presetshare,
+                        $presetdelete,
+                        $presetselector
                    );
                 }
             }
@@ -1739,46 +1737,46 @@ class dataform {
     /**
      *
      */
-    public function process_packages($targetpage, $params) {
+    public function process_presets($targetpage, $params) {
         global $CFG;
         
-        require_once('packages_form.php');
+        require_once('presets_form.php');
 
-        $mform = new mod_dataform_packages_form(new moodle_url($targetpage, array('d' => $this->id(), 'sesskey' => sesskey(), 'add' => 1)));
-        // add packages
+        $mform = new mod_dataform_presets_form(new moodle_url($targetpage, array('d' => $this->id(), 'sesskey' => sesskey(), 'add' => 1)));
+        // add presets
         if ($data = $mform->get_data()) { 
-            // package this dataform
-            if ($data->package_source == 'current') {
-                $this->create_package_from_backup($data->package_data);
+            // preset this dataform
+            if ($data->preset_source == 'current') {
+                $this->create_preset_from_backup($data->preset_data);
 
-            // upload packages
-            } else if ($data->package_source == 'file') {
-                $this->create_package_from_upload($data->uploadfile);
+            // upload presets
+            } else if ($data->preset_source == 'file') {
+                $this->create_preset_from_upload($data->uploadfile);
             }
-        // apply a package
-        } else if ($params->apply and confirm_sesskey()) {    // apply package
-            $this->apply_package($params->apply);
+        // apply a preset
+        } else if ($params->apply and confirm_sesskey()) {
+            $this->apply_preset($params->apply, $params->torestorer);
             // rebuild course cache to show new dataform name on the course page
             rebuild_course_cache($this->course->id);
             
         // download (bulk in zip)
         } else if ($params->download and confirm_sesskey()) {
-            $this->download_packages($params->download);
+            $this->download_presets($params->download);
 
-        // share packages
-        } else if ($params->share and confirm_sesskey()) {  // share selected packages
-            $this->share_packages($params->share);
+        // share presets
+        } else if ($params->share and confirm_sesskey()) {
+            $this->share_presets($params->share);
 
-        // delete packages
-        } else if ($params->delete and confirm_sesskey()) { // delete selected packages
-            $this->delete_packages($params->delete);
+        // delete presets
+        } else if ($params->delete and confirm_sesskey()) {
+            $this->delete_presets($params->delete);
         }
     }
 
     /**
      *
      */
-    public function create_package_from_backup($userdata) {
+    public function create_preset_from_backup($userdata) {
         global $CFG, $USER, $SESSION;
         
         require_once("$CFG->dirroot/backup/util/includes/backup_includes.php");
@@ -1792,13 +1790,13 @@ class dataform {
                 $users = 1;
         }
         
-        // store package settings in $SESSION
-        $SESSION->{"dataform_{$this->cm->id}_package"} = "$users $anon";
+        // store preset settings in $SESSION
+        $SESSION->{"dataform_{$this->cm->id}_preset"} = "$users $anon";
 
         $bc = new backup_controller(backup::TYPE_1ACTIVITY, $this->cm->id, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
 
-        // clear package settings from $SESSION
-        unset($SESSION->{"dataform_{$this->cm->id}_package"});
+        // clear preset settings from $SESSION
+        unset($SESSION->{"dataform_{$this->cm->id}_preset"});
 
         // set users and anon in plan
         $bc->get_plan()->get_setting('users')->set_value($users);        
@@ -1813,7 +1811,7 @@ class dataform {
             $contextid = $this->context->id;
             $files = $fs->get_area_files($contextid, 'backup', 'activity', 0, 'timemodified', false);
         } else {
-            $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+            $usercontext = context_user::instance($USER->id);
             $contextid = $usercontext->id;
             $files = $fs->get_area_files($contextid, 'user', 'backup', 0, 'timemodified', false);
         }
@@ -1823,17 +1821,17 @@ class dataform {
                 if ($file->get_contextid() != $contextid) {
                     continue;
                 }
-                $package = new object;
-                $package->contextid = $course_context->id;
-                $package->component = 'mod_dataform';
-                $package->filearea = dataform::PACKAGE_COURSEAREA;
-                $package->filepath = '/';
-                $package->filename = clean_filename(str_replace(' ', '_', $this->data->name).
-                                    '-dataform-package-'.
+                $preset = new object;
+                $preset->contextid = $course_context->id;
+                $preset->component = 'mod_dataform';
+                $preset->filearea = dataform::PRESET_COURSEAREA;
+                $preset->filepath = '/';
+                $preset->filename = clean_filename(str_replace(' ', '_', $this->data->name).
+                                    '-dataform-preset-'.
                                     gmdate("Ymd_Hi"). '-'.
-                                    str_replace(' ', '-', get_string("package$userdata", 'dataform')). '.mbz');
+                                    str_replace(' ', '-', get_string("preset$userdata", 'dataform')). '.mbz');
 
-                $fs->create_file_from_storedfile($package, $file);
+                $fs->create_file_from_storedfile($preset, $file);
                 $file->delete();
                 return true;
             }
@@ -1844,23 +1842,23 @@ class dataform {
     /**
      *
      */
-    public function create_package_from_upload($draftid) {
+    public function create_preset_from_upload($draftid) {
         global $USER;
 
-        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $usercontext = context_user::instance($USER->id);
         $fs = get_file_storage();
         if ($file = reset($fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false))) {
             $course_context = context_course::instance($this->course->id);
-            $package = new object;
-            $package->contextid = $course_context->id;
-            $package->component = 'mod_dataform';
-            $package->filearea = dataform::PACKAGE_COURSEAREA;
-            $package->filepath = '/';
+            $preset = new object;
+            $preset->contextid = $course_context->id;
+            $preset->component = 'mod_dataform';
+            $preset->filearea = dataform::PRESET_COURSEAREA;
+            $preset->filepath = '/';
             
             $ext = pathinfo($file->get_filename(), PATHINFO_EXTENSION);            
             if ($ext == 'mbz') {
-                $package->filename = $file->get_filename();
-                $fs->create_file_from_storedfile($package, $file);
+                $preset->filename = $file->get_filename();
+                $fs->create_file_from_storedfile($preset, $file);
             } else if ($ext == 'zip') {
                 // extract files to the draft area
                 $zipper = get_file_packer('application/zip');
@@ -1871,8 +1869,8 @@ class dataform {
                     foreach ($files as $file) {
                         $ext = pathinfo($file->get_filename(), PATHINFO_EXTENSION);
                         if ($ext == 'mbz') {
-                            $package->filename = $file->get_filename();
-                            $fs->create_file_from_storedfile($package, $file);
+                            $preset->filename = $file->get_filename();
+                            $fs->create_file_from_storedfile($preset, $file);
                         }
                     }
                 }
@@ -1887,7 +1885,7 @@ class dataform {
     /**
      *
      */
-    public function apply_package($userpackage) {
+    public function apply_preset($userpreset, $torestorer = true) {
         global $DB, $CFG, $USER;
         
         // extract the backup file to the temp folder
@@ -1895,7 +1893,7 @@ class dataform {
         $backuptempdir = make_temp_directory("backup/$folder");
         $zipper = get_file_packer('application/zip');
         $fs = get_file_storage();
-        $file = $fs->get_file_by_id($userpackage);
+        $file = $fs->get_file_by_id($userpreset);
         $file->extract_to_pathname($zipper, $backuptempdir);           
         
         require_once("$CFG->dirroot/backup/util/includes/restore_includes.php");
@@ -1927,7 +1925,9 @@ class dataform {
             $dataformtask->set_activityid($this->id());
             $dataformtask->set_moduleid($this->cm->id);
             $dataformtask->set_contextid($this->context->id);
-            $dataformtask->set_ownerid($USER->id);
+            if ($torestorer) {
+                $dataformtask->set_ownerid($USER->id);
+            }
 
             //$rc->set_status(backup::STATUS_AWAITING);
             $rc->execute_plan();
@@ -1947,32 +1947,32 @@ class dataform {
     /**
      *
      */
-    public function download_packages($packageids) {
+    public function download_presets($presetids) {
         global $CFG;
         
         if (headers_sent()) {
             throw new moodle_exception('headerssent');
         }
 
-        if (!$pids = explode(',', $packageids)) {
+        if (!$pids = explode(',', $presetids)) {
             return false;
         }
 
-        $packages = array();
+        $presets = array();
         $fs = get_file_storage();
 
         // try first course area
         $course_context = context_course::instance($this->course->id);
         $contextid = $course_context->id;
 
-        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PACKAGE_COURSEAREA)) {
+        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PRESET_COURSEAREA)) {
             foreach ($files as $file) {
                 if (empty($pids)) break;
                 
                 if (!$file->is_directory()) {
                     $key = array_search($file->get_id(), $pids);
                     if ($key !== false) {
-                        $packages[$file->get_filename()] = $file;
+                        $presets[$file->get_filename()] = $file;
                         unset($pids[$key]);
                     }
                 }
@@ -1981,14 +1981,14 @@ class dataform {
 
         // try site area
         if (!empty($pids)) {
-            if ($files = $fs->get_area_files(dataform::PACKAGE_SITECONTEXT, 'mod_dataform', dataform::PACKAGE_SITEAREA)) {
+            if ($files = $fs->get_area_files(dataform::PRESET_SITECONTEXT, 'mod_dataform', dataform::PRESET_SITEAREA)) {
                 foreach ($files as $file) {
                     if (empty($pids)) break;
                     
                     if (!$file->is_directory()) {
                         $key = array_search($file->get_id(), $pids);
                         if ($key !== false) {
-                            $packages[$file->get_filename()] = $file;
+                            $presets[$file->get_filename()] = $file;
                             unset($pids[$key]);
                         }
                     }
@@ -1997,11 +1997,11 @@ class dataform {
         }
 
         $downloaddir = make_temp_directory('download');
-        $filename = 'packages.zip';
+        $filename = 'presets.zip';
         $downloadfile = "$downloaddir/$filename";
         
         $zipper = get_file_packer('application/zip');
-        $zipper->archive_to_pathname($packages, $downloadfile);
+        $zipper->archive_to_pathname($presets, $downloadfile);
 
         header("Content-Type: application/download\n");
         header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -2018,21 +2018,21 @@ class dataform {
     /**
      *
      */
-    public function share_packages($packageids) {
+    public function share_presets($presetids) {
         global $CFG, $USER;
 
-        if (!has_capability('mod/dataform:packagesviewall', $this->context)) {
+        if (!has_capability('mod/dataform:presetsviewall', $this->context)) {
             return false;
         }
                     
         $fs = get_file_storage();
         $filerecord = new object;
-        $filerecord->contextid = dataform::PACKAGE_SITECONTEXT;
+        $filerecord->contextid = dataform::PRESET_SITECONTEXT;
         $filerecord->component = 'mod_dataform';
-        $filerecord->filearea = dataform::PACKAGE_SITEAREA;
+        $filerecord->filearea = dataform::PRESET_SITEAREA;
         $filerecord->filepath = '/';
 
-        foreach (explode(',', $packageids) as $pid) {
+        foreach (explode(',', $presetids) as $pid) {
             $fs->create_file_from_storedfile($filerecord, $pid);
         }
         return true;
@@ -2041,33 +2041,33 @@ class dataform {
     /**
      *
      */
-    public function plug_in_packages($idorpath, $delete = false) {
+    public function plug_in_presets($idorpath, $delete = false) {
         global $CFG, $USER;
 
-        if (!has_capability('mod/dataform:managepackages', $this->context)) {
+        if (!has_capability('mod/dataform:managepresets', $this->context)) {
             return false;
         }
                     
         if ($delete) {
-            return unlink("$CFG->dirroot/mod/dataform/package/{$idorpath}");
+            return unlink("$CFG->dirroot/mod/dataform/preset/{$idorpath}");
 
         } else {
             $fs = get_file_storage();
             $file = $fs->get_file_by_id($idorpath);
             $filename = $file->get_filename();
-            return $file->copy_content_to("$CFG->dirroot/mod/dataform/package/{$filename}");
+            return $file->copy_content_to("$CFG->dirroot/mod/dataform/preset/{$filename}");
         }    
     }
 
     /**
      *
      */
-    public function delete_packages($packageids) {
-        if (!$pids = explode(',', $packageids)) {
+    public function delete_presets($presetids) {
+        if (!$pids = explode(',', $presetids)) {
             return false;
         }
         
-        if (!has_capability('mod/dataform:managepackages', $this->context)) {
+        if (!has_capability('mod/dataform:managepresets', $this->context)) {
             return false;
         }
                     
@@ -2077,7 +2077,7 @@ class dataform {
         $course_context = context_course::instance($this->course->id);
         $contextid = $course_context->id;
 
-        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PACKAGE_COURSEAREA)) {
+        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PRESET_COURSEAREA)) {
             foreach ($files as $file) {
                 if (empty($pids)) break;
                 
@@ -2093,7 +2093,7 @@ class dataform {
 
         // try site area
         if (!empty($pids)) {
-            if ($files = $fs->get_area_files(dataform::PACKAGE_SITECONTEXT, 'mod_dataform', dataform::PACKAGE_SITEAREA)) {
+            if ($files = $fs->get_area_files(dataform::PRESET_SITECONTEXT, 'mod_dataform', dataform::PRESET_SITEAREA)) {
                 foreach ($files as $file) {
                     if (empty($pids)) break;
                     

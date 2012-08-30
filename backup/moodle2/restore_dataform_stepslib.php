@@ -35,7 +35,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     protected function define_structure() {
 
         $paths = array();
-        $owner = $this->task->get_ownerid(''); // restore content associated to the restorer
         $userinfo = $this->get_setting_value('userinfo'); // restore content and user info (requires the backup users)
 
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
@@ -47,6 +46,11 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             $paths[] = new restore_path_element('dataform_entry', '/activity/dataform/entries/entry');
             $paths[] = new restore_path_element('dataform_content', '/activity/dataform/entries/entry/contents/content');
             $paths[] = new restore_path_element('dataform_rating', '/activity/dataform/entries/entry/ratings/rating');
+            $paths[] = new restore_path_element('dataform_grade', '/activity/dataform/grades/grade');
+/*
+            $paths[] = new restore_path_element('dataform_comment', '/activity/dataform/entries/entry/comments/comment');
+            $paths[] = new restore_path_element('dataform_gradecomment', '/activity/dataform/gradecomments/gradecomment');
+*/
         }
 
         // Return the paths wrapped into standard activity structure
@@ -265,13 +269,28 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
      *
      */
     protected function process_dataform_rating($data) {
-        global $DB;
+        $data = (object)$data;
+        $data->itemid = $this->get_new_parentid('dataform_entry');
+        $this->process_this_rating($data);        
+    }
 
+    /**
+     *
+     */
+    protected function process_dataform_grade($data) {
+        $data = (object)$data;
+        $data->itemid = $this->get_mappingid('user', $data->itemid);
+        $this->process_this_rating($data);        
+    }
+
+    /**
+     *
+     */
+    protected function process_this_rating($data) {
+        global $DB;
         $data = (object)$data;
 
-        // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created)
         $data->contextid = $this->task->get_contextid();
-        $data->itemid    = $this->get_new_parentid('dataform_entry');
         if ($data->scaleid < 0) { // scale found, get mapping
             $data->scaleid = -($this->get_mappingid('scale', abs($data->scaleid)));
         }
@@ -280,17 +299,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-        // We need to check that component and ratingarea are both set here.
-        if (empty($data->component)) {
-            $data->component = 'mod_dataform';
-        }
-        if (empty($data->ratingarea)) {
-            $data->ratingarea = 'entry';
-        }
-
         $newitemid = $DB->insert_record('rating', $data);
     }
-
+    
     /**
      *
      */
@@ -302,8 +313,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         // Add content related files, matching by item id (dataform_content)
         $this->add_related_files('mod_dataform', 'content', 'dataform_content');
 
-        // TODO Add package related files, matching by itemname (data_content)
-        //$this->add_related_files('mod_dataform', 'course_packages', 'dataform');
+        // TODO Add preset related files, matching by itemname (data_content)
+        //$this->add_related_files('mod_dataform', 'course_presets', 'dataform');
 
         $dataformnewid = $this->get_new_parentid('dataform');
         
@@ -332,6 +343,17 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         if ($singleview = $DB->get_field('dataform', 'singleview', array('id' => $dataformnewid))) {
             if ($singleview = $this->get_mappingid('dataform_view', $singleview)) {
                 $DB->set_field('dataform', 'singleview', $singleview, array('id' => $dataformnewid));
+            }
+        }
+
+        // Update id of userinfo fields if needed
+        // TODO can we condition this on restore to new site?
+        if ($userinfofields = $DB->get_records('dataform_fields', array('dataid' => $dataformnewid, 'type' => 'userinfo'), '', 'id,param1,param2')) {
+            foreach ($userinfofields as $fieldid => $uifield) {
+                $infoid = $DB->get_field('user_info_field', 'id', array('shortname' => $uifield->param2));
+                if ($infoid != (int) $uifield->param1) {
+                    $DB->set_field('dataform_fields', 'param1', $infoid, array('id' => $fieldid));
+                }
             }
         }
 
