@@ -26,8 +26,8 @@
  */
 
 $module->component = 'mod_dataform';
-$module->version  = 2012082900;
+$module->version  = 2012090500;
 $module->release = '2.0.0';
 $module->requires = 2010112400;
-$module->maturity = MATURITY_BETA;
+$module->maturity = MATURITY_RC;
 //$module->cron     = 60;

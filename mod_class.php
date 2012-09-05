@@ -296,14 +296,15 @@ class dataform {
      */
     public function set_page($page = 'view', $params = null) {
         global $CFG, $PAGE, $USER;
-
+        
         $this->pagefile = $page;
         $thisid = $this->id();
         
         // guest auto login
         $autologinguest = false;
-        if ($page == 'view' or $page == 'embed') {
+        if ($page == 'view' or $page == 'embed' or $page == 'external') {
             $autologinguest = true;
+
         }
         
         // require login
@@ -337,10 +338,6 @@ class dataform {
             }
         }
 
-        // Is user editing
-        $urlparams['edit'] = optional_param('edit', 0, PARAM_BOOL);
-        $PAGE->set_url("/mod/dataform/$page.php", $urlparams);
-
         // RSS
         if (!empty($params->rss) and
                 !empty($CFG->enablerssfeeds) and
@@ -351,107 +348,139 @@ class dataform {
             rss_add_http_header($this->context, 'mod_dataform', $this->data, $rsstitle);
         }
         
-        $fs = get_file_storage();
-        
-        // CSS
-        if (!empty($params->css)) {
-            // js includes from the js template
-            if ($this->data->cssincludes) {
-                foreach (explode("\n", $this->data->cssincludes) as $cssinclude) {
-                    $cssinclude = trim($cssinclude);
-                    if ($cssinclude) {
-                        $PAGE->requires->css(new moodle_url($cssinclude));
-                    }
-                }
-            }
-            // Uploaded css files
-            if ($files = $fs->get_area_files($this->context->id, 'mod_dataform', 'css', 0, 'sortorder', false)) {
-                $path = "/pluginfile.php/{$this->context->id}/mod_dataform/css/0";
-                foreach ($files as $file) {
-                    $filename = $file->get_filename();
-                    $PAGE->requires->css("$path/$filename");
-                }
-            }                
-            // css code from the css template
-            if ($this->data->css) {
-                $PAGE->requires->css("/mod/dataform/css.php?d=$thisid");
-            }
-        }
-        
-        // JS
-        if (!empty($params->js)) {
-            // js includes from the js template
-            if ($this->data->jsincludes) {
-                foreach (explode("\n", $this->data->jsincludes) as $jsinclude) {
-                    $jsinclude = trim($jsinclude);
-                    if ($jsinclude) {
-                        $PAGE->requires->js(new moodle_url($jsinclude));
-                    }
-                }
-            }
-            // Uploaded js files
-            if ($files = $fs->get_area_files($this->context->id, 'mod_dataform', 'js', 0, 'sortorder', false)) {
-                $path = "/pluginfile.php/{$this->context->id}/mod_dataform/js/0";
-                foreach ($files as $file) {
-                    $filename = $file->get_filename();
-                    $PAGE->requires->js("$path/$filename");
-                }
-            }                
-            // js code from the js template
-            if ($this->data->js) {
-                $PAGE->requires->js("/mod/dataform/js.php?d=$thisid");
-            }
-        }
-        
-        // MOD JS
-        if (!empty($params->modjs)) {
-            $PAGE->requires->js('/mod/dataform/dataform.js');
-        }
-        
         // COMMENTS
         if (!empty($params->comments)) {
             require_once("$CFG->dirroot/comment/lib.php");
             comment::init();
         }
 
-        // editing button (omit in embedded dataforms)
-        if ($page != 'embed' and $PAGE->user_allowed_editing()) {
-             // teacher editing mode
-            if ($urlparams['edit'] != -1) {
-                $USER->editing = $urlparams['edit'];
+        $fs = get_file_storage();
+
+        /////////////////////////////////////
+        // PAGE setup for activity pages only
+        
+        if ($page != 'external') {
+            // Is user editing
+            $urlparams['edit'] = optional_param('edit', 0, PARAM_BOOL);
+            $PAGE->set_url("/mod/dataform/$page.php", $urlparams);
+            
+            // editing button (omit in embedded dataforms)
+            if ($page != 'embed' and $PAGE->user_allowed_editing()) {
+                 // teacher editing mode
+                if ($urlparams['edit'] != -1) {
+                    $USER->editing = $urlparams['edit'];
+                }
+
+                $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
+                    '<input type="hidden" name="d" value="'.$thisid.'" />'.
+                    '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing()?0:1).'" />'.
+                    '<input type="submit" value="'.get_string($PAGE->user_is_editing()?'blockseditoff':'blocksediton').'" /></div></form></td></tr></table>';
+                $PAGE->set_button($buttons);
             }
 
-            $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
-                '<input type="hidden" name="d" value="'.$thisid.'" />'.
-                '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing()?0:1).'" />'.
-                '<input type="submit" value="'.get_string($PAGE->user_is_editing()?'blockseditoff':'blocksediton').'" /></div></form></td></tr></table>';
-            $PAGE->set_button($buttons);
+            // auto refresh
+            if (!empty($urlparams['refresh'])) {
+               $PAGE->set_periodic_refresh_delay($urlparams['refresh']);
+            }
+
+            // page layout
+            if (!empty($params->pagelayout)) {
+                $PAGE->set_pagelayout($params->pagelayout);
+            }
+            
+            // Mark as viewed
+            if (!empty($params->completion)) {
+                require_once($CFG->libdir . '/completionlib.php');
+                $completion = new completion_info($this->course);
+                $completion->set_module_viewed($this->cm);
+            }
+
+            $PAGE->set_title($this->name());
+            $PAGE->set_heading($this->course->fullname);
         }
 
+        ////////////////////////////////////
+        // PAGE setup for dataform content anywhere
+        
+        // Use this to return css if this df page is set after header 
+        $output = '';
+
+        // CSS (cannot be required after head)
+        $cssurls = array();
+        if (!empty($params->css)) {
+            // js includes from the js template
+            if ($this->data->cssincludes) {
+                foreach (explode("\n", $this->data->cssincludes) as $cssinclude) {
+                    $cssinclude = trim($cssinclude);
+                    if ($cssinclude) {
+                        $cssurls[] = new moodle_url($cssinclude);
+                    }
+                }
+            }
+            // Uploaded css files
+            if ($files = $fs->get_area_files($this->context->id, 'mod_dataform', 'css', 0, 'sortorder', false)) {
+                $path = "/{$this->context->id}/mod_dataform/css/0";
+                foreach ($files as $file) {
+                    $filename = $file->get_filename();
+                    $cssurls[] = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
+                }
+            }                
+            // css code from the css template
+            if ($this->data->css) {
+                $cssurls[] = new moodle_url('/mod/dataform/css.php', array('d' => $thisid));
+            }
+        }
+        if ($PAGE->state == moodle_page::STATE_BEFORE_HEADER) {
+            foreach ($cssurls as $cssurl) {
+                $PAGE->requires->css($cssurl);
+            }
+        } else {
+            $attrs = array('rel' => 'stylesheet', 'type' => 'text/css');
+            foreach ($cssurls as $cssurl) {
+                $attrs['href'] = $cssurl;
+                $output .= html_writer::empty_tag('link', $attrs). "\n";
+                unset($attrs['id']);
+            }
+        }
+
+        // JS
+        $jsurls = array();
+        if (!empty($params->js)) {
+            // js includes from the js template
+            if ($this->data->jsincludes) {
+                foreach (explode("\n", $this->data->jsincludes) as $jsinclude) {
+                    $jsinclude = trim($jsinclude);
+                    if ($jsinclude) {
+                        $jsurls[] = new moodle_url($jsinclude);
+                    }
+                }
+            }
+            // Uploaded js files
+            if ($files = $fs->get_area_files($this->context->id, 'mod_dataform', 'js', 0, 'sortorder', false)) {
+                $path = "/{$this->context->id}/mod_dataform/js/0";
+                foreach ($files as $file) {
+                    $filename = $file->get_filename();
+                    $jsurls[] = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
+                }
+            }                
+            // js code from the js template
+            if ($this->data->js) {
+                $jsurls[] = new moodle_url('/mod/dataform/js.php', array('d' => $thisid));
+            }
+        }
+        foreach ($jsurls as $jsurl) {
+            $PAGE->requires->js($jsurl);
+        }
+       
+        // MOD JS
+        if (!empty($params->modjs)) {
+            $PAGE->requires->js('/mod/dataform/dataform.js');
+        }
+        
         // TODO
         //if ($mode == 'asearch') {
         //    $PAGE->navbar->add(get_string('search'));
         //}
-
-        // Mark as viewed
-        if (!empty($params->completion)) {
-            require_once($CFG->libdir . '/completionlib.php');
-            $completion = new completion_info($this->course);
-            $completion->set_module_viewed($this->cm);
-        }
-
-        // auto refresh
-        if (!empty($urlparams['refresh'])) {
-           $PAGE->set_periodic_refresh_delay($urlparams['refresh']);
-        }
-
-        // page layout
-        if (!empty($params->pagelayout)) {
-            $PAGE->set_pagelayout($params->pagelayout);
-        }
-        
-        $PAGE->set_title($this->name());
-        $PAGE->set_heading($this->course->fullname);
 
         // set current view and view's page requirements
         $currentview = !empty($urlparams['view']) ? $urlparams['view'] : 0;
@@ -476,7 +505,7 @@ class dataform {
             }
         }
 
-        return true;
+        return $output;
     }
 
     /**
@@ -1929,7 +1958,7 @@ class dataform {
                 $dataformtask->set_ownerid($USER->id);
             }
 
-            //$rc->set_status(backup::STATUS_AWAITING);
+            $rc->set_status(backup::STATUS_AWAITING);
             $rc->execute_plan();
             
             $transaction->allow_commit();
