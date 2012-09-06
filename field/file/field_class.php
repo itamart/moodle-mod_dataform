@@ -110,7 +110,7 @@ class dataform_field_file extends dataform_field_base {
     /**
      *
      */
-    public function format_content($entry, array $values = null) {
+    protected function format_content($entry, array $values = null) {
         return array(null, null, null);
     }
 

@@ -39,7 +39,7 @@ class dataform_field_checkbox extends dataform_field_multiselect {
     /**
      *
      */
-    protected function format_content($entry, $values = null) {
+    protected function format_content($entry, array $values = null) {
         $fieldid = $this->field->id;
         $entryid = $entry->id;
 
