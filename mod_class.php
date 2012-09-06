@@ -300,16 +300,6 @@ class dataform {
         $this->pagefile = $page;
         $thisid = $this->id();
         
-        // guest auto login
-        $autologinguest = false;
-        if ($page == 'view' or $page == 'embed' or $page == 'external') {
-            $autologinguest = true;
-
-        }
-        
-        // require login
-        require_login($this->course->id, $autologinguest, $this->cm);
-
         $params = (object) $params;
         $urlparams = array();
         if (!empty($params->urlparams)) {
@@ -318,6 +308,18 @@ class dataform {
                     $urlparams[$param] = $value;
                 }
             }
+        }
+
+        if (empty($params->nologin)) {
+            // guest auto login
+            $autologinguest = false;
+            if ($page == 'view' or $page == 'embed' or $page == 'external') {
+                $autologinguest = true;
+
+            }
+            
+            // require login
+            require_login($this->course->id, $autologinguest, $this->cm);
         }
 
         // make sure there is at least dataform id param
