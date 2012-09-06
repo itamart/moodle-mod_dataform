@@ -32,7 +32,10 @@ class dataform_field_checkbox extends dataform_field_multiselect {
      */
     protected function content_names() {
         $optioncount = count(explode("\n",$this->field->param1));
-        $contentnames = range(1, $optioncount) + array('selected', 'newvalue');
+        $contentnames = array('newvalue');
+        foreach (range(1, $optioncount) as $key) {
+            $contentnames[] = "selected_$key";
+        }
         return $contentnames;
     }
     
@@ -46,18 +49,15 @@ class dataform_field_checkbox extends dataform_field_multiselect {
         // collate the selected to one array
         $selected = array();
         if (!empty($values)) {
-            foreach ($values as $name => $value) {
-                if (!empty($name) and $name == 'selected') {
-                    if (!empty($value)) {
-                        $selected[] = $value;
-                    }
-                    unset($values[$name]);
+            $optioncount = count(explode("\n",$this->field->param1));
+            foreach (range(1, $optioncount) as $key) {
+                if (!empty($values["selected_$key"])) {
+                    $selected[] = $key;
                 }
             }
         }
-        if (!empty($selected)) {
-            $values["field_{$fieldid}_{$entryid}_selected"] = $selected;
-        }
+        $values['selected'] = $selected;
+
         return parent::format_content($entry, $values);
     }
     
