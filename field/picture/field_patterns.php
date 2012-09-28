@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-picture
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -51,7 +51,7 @@ class mod_dataform_field_picture_patterns extends mod_dataform_field_file_patter
             if ($edit) {
                 if ($cleantag != "[[$fieldname:tn-url]]" and in_array($cleantag, array_keys($this->patterns()))) {
                     $required = $this->is_required($tag);
-                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
                 }
             } else {
                 $displaybrowse = '';

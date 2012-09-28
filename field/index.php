@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -25,8 +25,8 @@
  * certain copyrights on the Database module may obtain.
  */
 
-require_once('../../config.php');
-require_once('mod_class.php');
+require_once('../../../config.php');
+require_once('../mod_class.php');
 
 $urlparams = new object();
 
@@ -47,10 +47,10 @@ $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 $df = new dataform($urlparams->d, $urlparams->id);
 require_capability('mod/dataform:managetemplates', $df->context);
 
-$df->set_page('fields', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('field/index', array('modjs' => true, 'urlparams' => $urlparams));
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/fields.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
 // Duplicate requested fields
@@ -68,7 +68,6 @@ if ($urlparams->duplicate and confirm_sesskey()) {
 }
 
 // any notifications
-$df->notifications['bad']['getstartedfields'] = '';
 if (!$fields = $df->get_user_defined_fields(true)) {
     $df->notifications['bad'][] = get_string('fieldnoneindataform','dataform');  // nothing in dataform
 }
@@ -100,7 +99,7 @@ echo html_writer::tag('div', $br. $OUTPUT->render($fieldselect). $br, array('cla
 if ($fields) {
     
     $editbaseurl = '/mod/dataform/field/field_edit.php';
-    $actionbaseurl = '/mod/dataform/fields.php';
+    $actionbaseurl = '/mod/dataform/field/index.php';
     $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
 
     // table headings

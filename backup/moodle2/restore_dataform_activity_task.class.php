@@ -191,15 +191,18 @@ class restore_dataform_activity_task extends restore_activity_task {
         $rules[] = new restore_log_rule('dataform', 'update', 'view.php?d={dataform}&eid={dataform_entry}', '{dataform}');
         $rules[] = new restore_log_rule('dataform', 'view', 'view.php?id={course_module}', '{dataform}');
         $rules[] = new restore_log_rule('dataform', 'entry delete', 'view.php?id={course_module}', '{dataform}');
-        $rules[] = new restore_log_rule('dataform', 'fields add', 'fields.php?d={dataform}&fid={dataform_field}', '{dataform_field}');
-        $rules[] = new restore_log_rule('dataform', 'fields update', 'fields.php?d={dataform}&fid={dataform_field}', '{dataform_field}');
-        $rules[] = new restore_log_rule('dataform', 'fields delete', 'fields.php?d={dataform}', '[name]');
-        $rules[] = new restore_log_rule('dataform', 'views add', 'views.php?d={dataform}&vid={dataform_view}', '{dataform_view}');
-        $rules[] = new restore_log_rule('dataform', 'views update', 'views.php?d={dataform}&vid={dataform_view}', '{dataform_view}');
-        $rules[] = new restore_log_rule('dataform', 'views delete', 'views.php?d={dataform}', '[name]');
-        $rules[] = new restore_log_rule('dataform', 'filters add', 'filters.php?d={dataform}&fid={dataform_filter}', '{dataform_filter}');
-        $rules[] = new restore_log_rule('dataform', 'filters update', 'filters.php?d={dataform}&fid={dataform_filter}', '{dataform_filter}');
-        $rules[] = new restore_log_rule('dataform', 'filters delete', 'filters.php?d={dataform}', '[name]');
+        $rules[] = new restore_log_rule('dataform', 'fields add', 'field/index.php?d={dataform}&fid={dataform_field}', '{dataform_field}');
+        $rules[] = new restore_log_rule('dataform', 'fields update', 'field/index.php?d={dataform}&fid={dataform_field}', '{dataform_field}');
+        $rules[] = new restore_log_rule('dataform', 'fields delete', 'field/index.php?d={dataform}', '[name]');
+        $rules[] = new restore_log_rule('dataform', 'views add', 'view/index.php?d={dataform}&vid={dataform_view}', '{dataform_view}');
+        $rules[] = new restore_log_rule('dataform', 'views update', 'view/index.php?d={dataform}&vid={dataform_view}', '{dataform_view}');
+        $rules[] = new restore_log_rule('dataform', 'views delete', 'view/index.php?d={dataform}', '[name]');
+        $rules[] = new restore_log_rule('dataform', 'filters add', 'filter/index.php?d={dataform}&fid={dataform_filter}', '{dataform_filter}');
+        $rules[] = new restore_log_rule('dataform', 'filters update', 'filter/index.php?d={dataform}&fid={dataform_filter}', '{dataform_filter}');
+        $rules[] = new restore_log_rule('dataform', 'filters delete', 'filter/index.php?d={dataform}', '[name]');
+        $rules[] = new restore_log_rule('dataform', 'rules add', 'rule/index.php?d={dataform}&rid={dataform_rule}', '{dataform_rule}');
+        $rules[] = new restore_log_rule('dataform', 'rules update', 'rule/index.php?d={dataform}&rid={dataform_rule}', '{dataform_rule}');
+        $rules[] = new restore_log_rule('dataform', 'rules delete', 'rule/index.php?d={dataform}', '[name]');
 
         return $rules;
     }

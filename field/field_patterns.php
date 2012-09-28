@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -138,11 +138,11 @@ abstract class mod_dataform_field_patterns {
     /**
      *
      */
-    public final function get_menu() {
+    public final function get_menu($showall = false) {
         // the default menu category for fields
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
-            if ($pattern[self::PATTERN_SHOW_IN_MENU]) {
+            if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
                 // which category
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];

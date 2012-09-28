@@ -15,8 +15,9 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
+ * @package mod
+ * @subpackage dataform
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */ 
 $subplugins = array(

@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-text
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -46,7 +46,7 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
             if ($edit) {
                 if ($cleantag == "[[$fieldname]]") {
                     $required = $this->is_required($tag);
-                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
                 } else {
                     $replacements[$tag] = '';
                 }
@@ -94,7 +94,7 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         $field = $this->_field;
         $fieldid = $field->id();
         $entryid = $entry->id;
@@ -118,6 +118,7 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
         $fieldname = "field_{$fieldid}_{$entryid}";
         $mform->addElement('text', $fieldname, null, $fieldattr);
         $mform->setDefault($fieldname, s($content));
+        $required = !empty($options['required']);
         if ($required) {
             $mform->addRule($fieldname, null, 'required', null, 'client');
         }

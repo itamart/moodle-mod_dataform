@@ -93,6 +93,10 @@ class mod_dataform_filter_form extends moodleform {
             $sortfields = unserialize($filter->customsort);
 
             foreach ($sortfields as $fieldid => $sortdir) {
+                if (empty($fields[$fieldid])) {
+                    continue;
+                }
+
                 $optionsarr = array();
                 $optionsarr[] = &$mform->createElement('select', 'sortfield'. $count, '', $fieldsoptions);
                 $optionsarr[] = &$mform->createElement('select', 'sortdir'. $count, '', $diroptions);
@@ -146,6 +150,10 @@ class mod_dataform_filter_form extends moodleform {
             if (key($searchfields)) {
                 $searcharr = array();
                 foreach ($searchfields as $fieldid => $searchfield) {
+                    if (empty($fields[$fieldid])) {
+                        continue;
+                    }
+
                     foreach ($searchfield as $andor => $searchoptions) {
                         foreach ($searchoptions as $searchoption) {
                             if ($searchoption) {
@@ -159,8 +167,12 @@ class mod_dataform_filter_form extends moodleform {
                 }
                 $searchfields = $searcharr;
             }
-            
+
             foreach ($searchfields as $searchcriterion) {
+                if (count($searchcriterion) != 5) {
+                    continue;
+                }
+
                 list($fieldid, $andor, $not, $operator, $value) = $searchcriterion;
                 $mform->addElement('html', '<tr style="border-bottom:1px solid #dddddd;"><td valign="top" nowrap="nowrap">');
 

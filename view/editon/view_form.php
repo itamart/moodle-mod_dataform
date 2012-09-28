@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformview-editon
+ * @package dataformview
+ * @subpackage editon
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -49,6 +49,12 @@ class mod_dataform_view_editon_form extends mod_dataform_view_matrix_form {
 
         // Submit button label (param4)
         $mform->addElement('text', 'param4', get_string('submitlabel', 'dataformview_editon'));
+
+        // Show cancel button (param8)
+        $mform->addElement('selectyesno', 'param8', get_string('showcancel', 'dataformview_editon'));
+
+        // Show save and continue (param9)
+        $mform->addElement('selectyesno', 'param9', get_string('showsavecontinue', 'dataformview_editon'));
 
         // Response for submission (param7)       
         $mform->addElement('editor', 'eparam7_editor', get_string('responsemessage', 'dataformview_editon'), $editorattr, $editoroptions['param7']);

@@ -21,9 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
-require_once('mod_class.php');
-require_once('presets_form.php');
+require_once('../../../config.php');
+require_once('../mod_class.php');
+require_once('preset_form.php');
 
 $urlparams = new object();
 
@@ -43,28 +43,28 @@ $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 // Set a dataform object
 $df = new dataform($urlparams->d, $urlparams->id);
 require_capability('mod/dataform:managetemplates', $df->context);
-
-$df->set_page('presets', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('preset/index', array('modjs' => true, 'urlparams' => $urlparams));
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/presets.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/preset/index.php', array('id' => $df->cm->id)));
+
+$pm = $df->get_preset_manager();
 
 // DATA PROCESSING
-$df->process_presets('/mod/dataform/presets.php', $urlparams);
+$pm->process_presets($urlparams);
 
-$localpresets = $df->get_user_presets(dataform::PRESET_COURSEAREA);
-$sharedpresets = $df->get_user_presets(dataform::PRESET_SITEAREA);
+$localpresets = $pm->get_user_presets($pm::PRESET_COURSEAREA);
+$sharedpresets = $pm->get_user_presets($pm::PRESET_SITEAREA);
 
 // any notifications
-$df->notifications['bad']['getstartedpresets'] = '';
 if (!$localpresets and !$sharedpresets) {
     $df->notifications['bad']['getstartedpresets'] = get_string('presetnoneavailable','dataform');  // nothing in dataform
     if (!$df->get_user_defined_fields()) {
-        $linktofields = html_writer::link(new moodle_url('fields.php', array('d' => $df->id())), get_string('fields', 'dataform'));
+        $linktofields = html_writer::link(new moodle_url('field/index.php', array('d' => $df->id())), get_string('fields', 'dataform'));
         $df->notifications['bad']['getstartedfields'] = get_string('getstartedfields','dataform', $linktofields);
     }
     if (!$df->get_views()) {
-        $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $df->id())), get_string('views', 'dataform'));
+        $linktoviews = html_writer::link(new moodle_url('view/index.php', array('d' => $df->id())), get_string('views', 'dataform'));
         $df->notifications['bad']['getstartedviews'] = get_string('getstartedviews','dataform', $linktoviews);
     }
 }
@@ -72,14 +72,10 @@ if (!$localpresets and !$sharedpresets) {
 // print header
 $df->print_header(array('tab' => 'presets', 'urlparams' => $urlparams));
 
-// print the add form
-echo html_writer::start_tag('div', array('style' => 'width:80%;margin:auto;'));
-$mform = new mod_dataform_presets_form(new moodle_url('/mod/dataform/presets.php', array('d' => $df->id(), 'sesskey' => sesskey(), 'add' => 1)));
-$mform->set_data(null);
-$mform->display();
-echo html_writer::end_tag('div');
+// print the preset form
+$pm->print_preset_form();
 
 // if there are presets print admin style list of them
-$df->print_presets_list('/mod/dataform/presets.php', $localpresets, $sharedpresets);
+$pm->print_presets_list($localpresets, $sharedpresets);
 
 $df->print_footer();

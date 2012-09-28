@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -324,8 +325,6 @@ class dataform_entries {
         return $files;
     }
 
-    
-
     /**
      * @return array notification string, list of processed ids 
      */
@@ -417,7 +416,7 @@ class dataform_entries {
                 exit(0);
 
             } else {
-                $processedeids = array();
+                $processed = array();
                 $strnotify = '';
 
                 switch ($action) {
@@ -467,21 +466,30 @@ class dataform_entries {
                             }
 
                             // now update entry and contents
+                            $addorupdate = '';
                             foreach ($entries as $eid => $entry) {
                                 if ($entry->id = $this->update_entry($entry, $contents[$eid]['info'])) {
-
-                                    $processedeids[] = $entry->id;
                                     // $eid should be different from $entryid only in new entries
                                     foreach ($contents[$eid]['fields'] as $fieldid => $content) {
                                         $fields[$fieldid]->update_content($entry, $content);
                                     }
+                                    $processed[$entry->id] = $entry;
+                                    
+                                    if (!$addorupdate) {
+                                        $addorupdate = $eid < 0 ? 'added' : 'updated';
+                                    }
                                 }
                             }                            
+                            if ($processed) {
+                                $eventdata = (object) array('items' => $processed);
+                                $df->events_trigger("entry$addorupdate", $eventdata);
+                            }
+
                         }
                         break;
 
                     case 'duplicate':
-                        foreach ($entries as $entrie) {
+                        foreach ($entries as $entry) {
                             // can user add anymore entries?
                             if (!$df->user_can_manage_entry()) {
                                 // TODO: notify something
@@ -489,28 +497,33 @@ class dataform_entries {
                             }
 
                             // Get content of entrie to duplicat
-                            $contents = $DB->get_records('dataform_contents', array('entryid' => $entrie->id));
+                            $contents = $DB->get_records('dataform_contents', array('entryid' => $entry->id));
 
                             // Add a duplicated entrie and content
-                            $newrec = $entrie;
-                            $newrec->userid = $USER->id;
-                            $newrec->dataid = $df->id();
-                            $newrec->groupid = $df->currentgroup;
-                            $newrec->timecreated = $newrec->timemodified = time();
+                            $newentry = $entry;
+                            $newentry->userid = $USER->id;
+                            $newentry->dataid = $df->id();
+                            $newentry->groupid = $df->currentgroup;
+                            $newentry->timecreated = $newentry->timemodified = time();
 
                             if ($df->data->approval and !has_capability('mod/dataform:approve', $df->context)) {
-                                $newrec->approved = 0;
+                                $newentry->approved = 0;
                             }
-                            $entrieid = $DB->insert_record('dataform_entries',$newrec);
+                            $newentry->id = $DB->insert_record('dataform_entries',$newentry);
 
                             foreach ($contents as $content) {
                                 $newcontent = $content;
-                                $newcontent->entryid = $entrieid;
+                                $newcontent->entryid = $newentry->id;
                                 if (!$DB->insert_record('dataform_contents', $newcontent)) {
-                                    throw new moodle_exception('cannotinsertrecord', null, null, $entrieid);
+                                    throw new moodle_exception('cannotinsertrecord', null, null, $newentry->id);
                                 }
                             }
-                            $processedeids[] = $entrieid;
+                            $processed[$newentry->id] = $newentry;
+                        }
+
+                        if ($processed) {
+                            $eventdata = (object) array('items' => $processed);
+                            $df->events_trigger("entryadded", $eventdata);
                         }
 
                         $strnotify = 'entriesduplicated';
@@ -521,7 +534,11 @@ class dataform_entries {
                         $entryids = array_keys($entries);
                         $ids = implode(',', $entryids);
                         $DB->set_field_select('dataform_entries', 'approved', 1, " dataid = ? AND id IN ($ids) ", array($df->id()));        
-                        $processedeids = $entryids;
+                        $processed = $entries;
+                        if ($processed) {
+                            $eventdata = (object) array('items' => $processed);
+                            $df->events_trigger("entryupdated", $eventdata);
+                        }
 
                         $strnotify = 'entriesapproved';
                         break;
@@ -531,7 +548,11 @@ class dataform_entries {
                         $entryids = array_keys($entries);
                         $ids = implode(',', $entryids);
                         $DB->set_field_select('dataform_entries', 'approved', 0, " dataid = ? AND id IN ($ids) ", array($df->id()));        
-                        $processedeids = $entryids;
+                        $processed = $entries;
+                        if ($processed) {
+                            $eventdata = (object) array('items' => $processed);
+                            $df->events_trigger("entryupdated", $eventdata);
+                        }
 
                         $strnotify = 'entriesdisapproved';
                         break;
@@ -545,7 +566,11 @@ class dataform_entries {
                             }
 
                             $DB->delete_records('dataform_entries', array('id' => $entry->id));
-                            $processedeids[] = $entry->id;
+                            $processed[$entry->id] = $entry;
+                        }
+                        if ($processed) {
+                            $eventdata = (object) array('items' => $processed);
+                            $df->events_trigger("entrydeleted", $eventdata);
                         }
 
                         $strnotify = 'entriesdeleted';
@@ -568,7 +593,7 @@ class dataform_entries {
                                 $content->content1 = $siblingid;
                                 $DB->update_record($content);
                                 
-                                $processedeids[] = $content->entryid;
+                                $processed[] = $content->entryid;
                             }
                         }
 
@@ -581,13 +606,13 @@ class dataform_entries {
 
                 $df->add_to_log($action);
 
-                if ($processedeids) {
-                    $strnotify = get_string($strnotify, 'dataform', count($processedeids));
+                if ($processed) {
+                    $strnotify = get_string($strnotify, 'dataform', count($processed));
                 } else {
                     $strnotify = get_string($strnotify, 'dataform', get_string('no'));
                 }
 
-                return array($strnotify, $processedeids);
+                return array($strnotify, array_keys($processed));
             }
         }
     }
@@ -661,5 +686,4 @@ class dataform_entries {
         return $param. $p;    
     }
     
-
 }

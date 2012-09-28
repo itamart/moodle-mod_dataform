@@ -15,12 +15,13 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once('../../config.php');
-require_once('mod_class.php');
+require_once('../../../config.php');
+require_once('../mod_class.php');
 
 $urlparams = new object();
 
@@ -44,10 +45,10 @@ $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 $df = new dataform($urlparams->d, $urlparams->id);
 require_capability('mod/dataform:managetemplates', $df->context);
 
-$df->set_page('views', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('view/index', array('modjs' => true, 'urlparams' => $urlparams));
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/views.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/view/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
 if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested views
@@ -117,7 +118,7 @@ if ($views) {
 
     $viewbaseurl = '/mod/dataform/view.php';
     $editbaseurl = '/mod/dataform/view/view_edit.php';
-    $actionbaseurl = '/mod/dataform/views.php';
+    $actionbaseurl = '/mod/dataform/view/index.php';
     $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
                         
     /// table headings

@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -145,6 +146,7 @@ class dataform_filter {
         
         $searchfields = $this->_searchfields;
         $simplesearch = $this->search;
+        $searchtables = '';
 
         if ($searchfields) {
 
@@ -186,8 +188,20 @@ class dataform_filter {
             if ($whereor) {
                 $searchwhere[] = '('. implode(' OR ', $whereor). ')';
             }
+
+            // compile sql for search settings
+            if ($searchfrom) {
+                foreach ($searchfrom as $fieldid) {
+                    // add only tables which are not already added
+                    if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
+                        $this->_filteredtables[] = $fieldid;
+                        $searchtables .= $fields[$fieldid]->get_search_from_sql();
+                    } 
+                }
+            }
+
         } else if ($simplesearch) {
-            $searchfrom[] = 's';
+            $searchtables .= " JOIN {dataform_contents} cs ON cs.entryid = e.id ";
             $searchwhere[] = ' ('. $DB->sql_like('cs.content', ':search1', false).
                                 ' OR '. $DB->sql_like('u.firstname', ':search2', false).
                                 ' OR '. $DB->sql_like('u.lastname', ':search3', false).') ';
@@ -196,17 +210,6 @@ class dataform_filter {
             $searchparams['search3'] = "%$simplesearch%";
         }
     
-        // compile sql for search settings
-        $searchtables = '';
-        if ($searchfrom) {
-            foreach ($searchfrom as $fieldid) {
-                // add only tables which are not already added
-                if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
-                    $this->_filteredtables[] = $fieldid;
-                    $searchtables .= $fields[$fieldid]->get_search_from_sql();
-                } 
-            }
-        }
         $wheresearch = $searchwhere ? ' AND '. implode(' AND ', $searchwhere) : '';
 
         // register referred tables
@@ -466,11 +469,11 @@ class dataform_filter_manager {
 
                 // Print a confirmation page
                 echo $OUTPUT->confirm(get_string("filtersconfirm$action", 'dataform', count($filters)),
-                        new moodle_url('/mod/dataform/filters.php', array('d' => $df->id(),
+                        new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id(),
                                                                         $action => implode(',', array_keys($filters)),
                                                                         'sesskey' => sesskey(),
                                                                         'confirmed' => 1)),
-                        new moodle_url('/mod/dataform/filters.php', array('d' => $df->id())));
+                        new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id())));
 
                 echo $OUTPUT->footer();
                 exit;
@@ -569,7 +572,7 @@ class dataform_filter_manager {
                         break;
                 }
 
-                add_to_log($df->course->id, 'dataform', 'filter '. $action, 'filters.php?id='. $df->cm->id, $df->id(), $df->cm->id);
+                add_to_log($df->course->id, 'dataform', 'filter '. $action, 'filter/index.php?id='. $df->cm->id, $df->id(), $df->cm->id);
                 if (!empty($strnotify)) {
                     $filtersprocessed = $processedfids ? count($processedfids) : 'No';
                     $df->notifications['good'][] = get_string($strnotify, 'dataform', $filtersprocessed);
@@ -588,7 +591,7 @@ class dataform_filter_manager {
         require_once("$CFG->dirroot/mod/dataform/filter/filter_form.php");
 
         $formurl = new moodle_url(
-            '/mod/dataform/filters.php',
+            '/mod/dataform/filter/index.php',
             array('d' => $this->_df->id(), 'fid' => $filter->id, 'update' => 1)
         );
         $mform = new mod_dataform_filter_form($formurl, array('df' => $this->_df, 'filter' => $filter));
@@ -707,7 +710,7 @@ class dataform_filter_manager {
         
         $df = $this->_df;
         
-        $filterbaseurl = '/mod/dataform/filters.php';
+        $filterbaseurl = '/mod/dataform/filter/index.php';
         $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
                         
         // table headings
@@ -741,7 +744,6 @@ class dataform_filter_manager {
         $table->attributes['align'] = 'center';
         
         foreach ($this->_filters as $filterid => $filter) {
-
             $filtername = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('fedit' => $filterid, 'fid' => $filterid)), $filter->name);
             $filterdescription = shorten_text($filter->description, 30);
             $filteredit = html_writer::link(new moodle_url($filterbaseurl, $linkparams + array('fedit' => $filterid, 'fid' => $filterid)),
@@ -787,10 +789,13 @@ class dataform_filter_manager {
                 
                 if ($sortfields) {
                     $sortarr = array();
-                    foreach ($sortfields as $sortieid => $sortdir) {
+                    foreach ($sortfields as $fieldid => $sortdir) {
+                        if (empty($fields[$fieldid])) {
+                            continue;
+                        }
                         // check if field participates in default sort
                         $strsortdir = $sortdir ? 'Descending' : 'Ascending';
-                        $sortarr[] = $OUTPUT->pix_icon('t/'. ($sortdir ? 'down' : 'up'), $strsortdir). ' '. $fields[$sortieid]->field->name;
+                        $sortarr[] = $OUTPUT->pix_icon('t/'. ($sortdir ? 'down' : 'up'), $strsortdir). ' '. $fields[$fieldid]->field->name;
                     }
                     $sortoptions = implode('<br />', $sortarr);
                 }
@@ -798,6 +803,9 @@ class dataform_filter_manager {
                 if ($searchfields) {
                     $searcharr = array();
                     foreach ($searchfields as $fieldid => $searchfield) {
+                        if (empty($fields[$fieldid])) {
+                            continue;
+                        }
                         $fieldoptions = array();
                         if (!empty($searchfield['AND'])) {
                             //$andoptions = array_map("$fields[$fieldid]->format_search_value", $searchfield['AND']);
@@ -860,7 +868,7 @@ class dataform_filter_manager {
     public function print_add_filter() {
         echo html_writer::empty_tag('br');
         echo html_writer::start_tag('div', array('class'=>'fieldadd mdl-align'));
-        echo html_writer::link(new moodle_url('/mod/dataform/filters.php', array('d' => $this->_df->id(), 'sesskey' => sesskey(), 'new' => 1)), get_string('filteradd','dataform'));
+        echo html_writer::link(new moodle_url('/mod/dataform/filter/index.php', array('d' => $this->_df->id(), 'sesskey' => sesskey(), 'new' => 1)), get_string('filteradd','dataform'));
         //echo $OUTPUT->help_icon('filteradd', 'dataform');
         echo html_writer::end_tag('div');
         echo html_writer::empty_tag('br');

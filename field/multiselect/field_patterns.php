@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-multiselect
+ * @package dataformfield
+ * @subpackage multiselect
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,13 +39,33 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
 
         // there is only one possible tag here so no check
         $replacements = array();
-        $tag = reset($tags);        
+        // rules support
+        $tags = $this->add_clean_pattern_keys($tags);        
 
-        if ($edit) {
-            $required = $this->is_required($tag);
-            $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry, $required)));
-        } else {
-            $replacements[$tag] = array('html', $this->display_browse($entry));
+        foreach ($tags as $cleantag => $tag) {
+            if ($edit) {
+                $params = array('required' => $this->is_required($tag));
+                $displayedit = array($this ,'display_edit');
+                switch ($cleantag) {
+                    case "[[$fieldname]]":
+                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
+                        break;
+                    case "[[$fieldname:addnew]]":
+                        $params['addnew'] = true;
+                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
+                        break;
+                    default:
+                        $replacements[$tag] = null;
+                }
+            } else {
+                switch ($cleantag) {
+                    case "[[$fieldname]]":
+                        $replacements[$tag] = array('html', $this->display_browse($entry));
+                        break;
+                    default:
+                        $replacements[$tag] = null;
+                }
+            }
         }
 
         return $replacements;
@@ -54,12 +74,13 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         $field = $this->_field;
         $fieldid = $field->id();
-
         $entryid = $entry->id;
-        $options = $field->options_menu();
+        $fieldname = "field_{$fieldid}_$entryid";
+        $menuoptions = $field->options_menu();
+        $required = !empty($options['required']);
         $selected = array();
 
         if ($entryid > 0){
@@ -73,15 +94,16 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
             $selected = $field->default_values();
         }
 
-        $fieldname = "field_{$fieldid}_$entryid";
-        $this->render($mform, "{$fieldname}_selected", $options, $selected, $required);
+        $this->render($mform, "{$fieldname}_selected", $menuoptions, $selected, $required);
 
-        // add option
-        if ($field->get('param4') or has_capability('mod/dataform:managetemplates', $field->df()->context)) {
-            $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
-            $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
+        // Input field for adding a new option
+        if (!empty($options['addnew'])) {
+            if ($field->get('param4') or has_capability('mod/dataform:managetemplates', $field->df()->context)) {
+                $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
+                $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
+            }
+            return;
         }
-
     }
 
     /**
@@ -177,6 +199,7 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
+        $patterns["[[$fieldname:addnew]]"] = array(false);
 
         return $patterns; 
     }

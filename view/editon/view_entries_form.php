@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformview
  * @package view-editon
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -41,6 +41,16 @@ class mod_dataform_view_editon_entries_form extends mod_dataform_view_entries_fo
 
         // buttons
         //-------------------------------------------------------------------------------
-        $this->add_action_buttons(false, $view->get_submit_label());
+        $this->add_action_buttons($view->show_cancel(), $view->get_submit_label());
     }
+    
+    /**
+     *
+     */
+    protected function add_action_save_continue() {
+        $view = $this->_customdata['view'];
+        return $view->show_save_continue();
+    }
+
+    
 }

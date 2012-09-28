@@ -26,7 +26,7 @@ require_once("$CFG->libdir/formslib.php");
 /**
  *
  */
-class mod_dataform_presets_form extends moodleform {
+class mod_dataform_preset_form extends moodleform {
 
     function definition() {
         global $COURSE;

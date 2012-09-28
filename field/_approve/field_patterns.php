@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-_approve
+ * @package dataformfield
+ * @subpackage _approve
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -72,7 +72,7 @@ class mod_dataform_field__approve_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_edit(&$mform, $entry) {
+    public function display_edit(&$mform, $entry, array $options = null) {
 
         $field = $this->_field;
         $fieldid = $field->id();

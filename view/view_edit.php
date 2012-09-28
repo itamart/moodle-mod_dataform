@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformview
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -52,7 +52,7 @@ if ($mform->is_cancelled()){
         if ($urlparams->returnurl) {
             redirect($urlparams->returnurl);
         } else {
-            redirect(new moodle_url('/mod/dataform/views.php', array('d' => $urlparams->d)));
+            redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
         }
 
 // no submit buttons: reset to default 
@@ -85,7 +85,7 @@ if ($mform->is_cancelled()){
     $df->notifications['good'][] = $log;
 
     add_to_log($df->course->id, 'dataform', $log,
-               'views.php?d='. $df->id(). '&amp;vedit=', $view->id(), $df->cm->id);
+               'view/index.php?d='. $df->id(). '&amp;vedit=', $view->id(), $df->cm->id);
 
     // TODO: set default view       
 
@@ -93,7 +93,7 @@ if ($mform->is_cancelled()){
         if ($urlparams->returnurl) {
             redirect($urlparams->returnurl);
         } else {
-            redirect(new moodle_url('/mod/dataform/views.php', array('d' => $urlparams->d)));
+            redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
         }
     }
     
@@ -102,7 +102,7 @@ if ($mform->is_cancelled()){
 }
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/views.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/view/index.php', array('id' => $df->cm->id)));
 
 // print header
 $df->print_header(array('tab' => 'views', 'nonotifications' => true, 'urlparams' => $urlparams));

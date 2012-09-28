@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformview-import
+ * @package dataformview
+ * @subpackage import
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,7 +46,7 @@ class dataform_view_import extends dataform_view_base {
      */
     public function process_data() {
         global $CFG;
-    
+
         $mform = $this->get_import_form();
         
         if ($mform->is_cancelled()) {
@@ -167,7 +167,6 @@ class dataform_view_import extends dataform_view_base {
                 $field = $this->_df->get_field_from_id($fieldid);
                 $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
             }
-
         }
         $cir->cleanup(true);
         $cir->close();

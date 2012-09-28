@@ -15,9 +15,9 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-_group
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield
+ * @subpackage _group
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,5 +26,3 @@ $string['##group:id##'] = '##group:id##';
 $string['##group:name##'] = '##group:name##';
 $string['group'] = 'Group';
 $string['pluginname'] = 'Internal';
-
-

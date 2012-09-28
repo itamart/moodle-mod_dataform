@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -352,4 +353,84 @@ class dataform_file_info_container extends file_info {
     public function get_parent() {
         return $this->browser->get_file_info($this->context);
     }
+}
+
+/**
+ * Event handler for Dataform notifications
+ */
+class dataform_notification_handler {
+    /**
+     *
+     */
+    public static function notify_entry($data) {
+        self::notify($data);
+    }
+    
+    /**
+     *
+     */
+    public static function notify_commentadded($data) {
+        self::notify($data);
+    }
+    
+    /**
+     *
+     */
+    public static function notify_ratingadded($data) {
+        self::notify($data);
+    }
+    
+    /**
+     *
+     */
+    public static function notify_ratingupdated($data) {
+        self::notify($data);
+    }
+    
+    /**
+     *
+     */
+    protected static function notify($data) {
+        global $SITE, $USER;
+
+		if (empty($data->users) or empty($data->event)) {
+            return true;
+        }
+        
+        $users = $data->users;
+        $event = $data->event;
+        
+        // Prepare message
+		$strdataform = get_string('pluginname', 'dataform');
+        $sitename = format_string($SITE->fullname);
+        $coursename = !empty($data->coursename) ? $data->coursename : 'Unspecified course';
+        $dataformname = !empty($data->dataformname) ? $data->dataformname : 'Unspecified dataform';
+        $notename = get_string("messageprovider:dataform_$event", 'dataform');
+        $notedetails = get_string("message_$event", 'dataform', $data);
+        
+		$subject = "$sitename -> $coursename -> $strdataform $dataformname:  $notename";
+		$content = $notedetails;
+		$contenthtml = text_to_html($content, false, false, true);
+		
+        // Send message
+        $message = new object;
+        $message->siteshortname   = format_string($SITE->shortname);
+        $message->component       = 'mod_dataform';
+        $message->name            = "dataform_$event";
+        $message->context         = $data->context;
+        $message->userfrom        = $USER;
+        $message->subject         = $subject;
+        $message->fullmessage     = $content;
+        $message->fullmessageformat = FORMAT_HTML;
+        $message->fullmessagehtml = $contenthtml;
+        $message->smallmessage    = '';
+
+        foreach ($users as $user) {
+            $message->userto = $user;
+            message_send($message);
+        }
+
+        return true;
+    }
+
 }

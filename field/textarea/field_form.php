@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-textarea
+ * @package dataformfield
+ * @subpackage textarea
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -56,7 +56,6 @@ class mod_dataform_field_textarea_form extends mod_dataform_field_form {
         // word count
         $mform->addElement('text', 'param7', get_string('wordcountmin', 'dataformfield_textarea'), array('size'=>'4'));
         $mform->addElement('text', 'param8', get_string('wordcountmax', 'dataformfield_textarea'), array('size'=>'4'));
-        $mform->addElement('selectyesno', 'param9', get_string('wordcountshow', 'dataformfield_textarea'));
 
     // editor files settings
     //-------------------------------------------------------------------------------

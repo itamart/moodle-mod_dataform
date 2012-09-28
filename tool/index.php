@@ -15,12 +15,12 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformtool
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once('../../config.php');
-require_once('mod_class.php');
+require_once('../../../config.php');
+require_once('../mod_class.php');
 
 $urlparams = new object();
 
@@ -36,10 +36,10 @@ $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 $df = new dataform($urlparams->d, $urlparams->id);
 require_capability('mod/dataform:managetemplates', $df->context);
 
-$df->set_page('tools', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('tool/index', array('modjs' => true, 'urlparams' => $urlparams));
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/tools.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/tool/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
 if ($urlparams->run and confirm_sesskey()) {  // Run selected tool
@@ -78,7 +78,7 @@ $df->print_header(array('tab' => 'tools', 'urlparams' => $urlparams));
 
 // if there are tools print admin style list of them
 if ($tools) {
-    $actionbaseurl = '/mod/dataform/tools.php';
+    $actionbaseurl = '/mod/dataform/tool/index.php';
     $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
                         
     /// table headings

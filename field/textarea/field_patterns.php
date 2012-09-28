@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-textarea
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -48,7 +48,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
 
                 case "[[$fieldname]]":
                     if ($edit) {
-                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
                     } else {
                         $replacements[$tag] = array('html', $this->display_browse($entry));
                     }
@@ -57,7 +57,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
                 // plain text, no links
                 case "[[$fieldname:text]]":
                     if ($edit) {
-                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
                     } else {
                         $replacements[$tag] = array('html', $this->display_browse($entry, array('text' => true)));
                     }
@@ -66,7 +66,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
                 // plain text, with links
                 case "[[$fieldname:textlinks]]":
                     if ($edit) {
-                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
                     } else {
                         $replacements[$tag] = array('html', $this->display_browse($entry, array('text' => true, 'links' => true)));
                     }
@@ -124,44 +124,13 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         global $PAGE, $CFG;
 
         $field = $this->_field;
         $fieldid = $field->id();
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
-
-        // word count
-        if ($field->get('param9')) {
-            $mform->addElement('html', '<link type="text/css" rel="stylesheet" href="'. "$CFG->libdir/yui/2.8.2/build/progressbar/assets/skins/sam/progressbar.css". '">');
-
-            $pbcontainer = '<div id="'. "id_{$fieldname}_wordcount_pb". '"></div>';
-            $minvaluecontainer = '<div id="'. "id_{$fieldname}_wordcount_minvalue". '" class="yui-pb-range" style="float:left;">0</div>';
-            $maxvaluecontainer = '<div id="'. "id_{$fieldname}_wordcount_maxvalue". '" class="yui-pb-range" style="float:right;">'.$this->field->param8.'</div>';
-            $valuecontainer = '<div class="yui-pb-caption"><span id="'. "id_{$fieldname}_wordcount_value". '"></span></div>';
-            $captionscontainer = '<div id="'. "id_{$fieldname}_wordcount_captions". '">'.
-                                    $minvaluecontainer. $maxvaluecontainer. $valuecontainer.
-                                    '</div>';
-            $mform->addElement('html', '<table style="margin-left:16%;"><tr><td>'.
-                                        $pbcontainer.
-                                        $captionscontainer.
-                                        '</td></tr></table>');
-
-            $options = new object;
-            $options->minValue = 0;
-            $options->maxValue = $field->get('param8');
-            $options->value = 0;
-            $options->minRequired = $field->get('param7');
-            $options->identifier = $fieldname;
-
-            $module = array(
-                'name' => 'M.dataform_wordcount_bar',
-                'fullpath' => '/mod/dataform/dataform.js',
-                'requires' => array('yui2-yahoo-dom-event', 'yui2-element', 'yui2-animation', 'yui2-progressbar'));
-
-            $PAGE->requires->js_init_call('M.dataform_wordcount_bar.init', array($options), true, $module);
-        }
 
         // editor
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
@@ -172,6 +141,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
 
         $data = new object;
         $data->$fieldname = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : '';
+        $required = !empty($options['required']);
 
         if (!$field->is_editor() or !can_use_html_editor()) {
             $mform->addElement('textarea', $fieldname, null, $attr);

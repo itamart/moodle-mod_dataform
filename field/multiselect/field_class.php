@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-multiselect
+ * @package dataformfield
+ * @subpackage multiselect
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -55,7 +55,7 @@ class dataform_field_multiselect extends dataform_field_base {
         list($not, $operator, $value) = $searchparams;
         if (is_array($value)){
             $selected = implode(', ', $value['selected']);
-            $allrequired = '('. ($value['allrequired'] ? get_string('requiredall') : get_string('requirednotall')). ')';
+            $allrequired = '('. ($value['allrequired'] ? get_string('requiredall') : get_string('requirednotall', 'dataform')). ')';
             return $not. ' '. $operator. ' '. $selected. ' '. $allrequired;
         } else {
             return false;
@@ -191,7 +191,7 @@ class dataform_field_multiselect extends dataform_field_base {
             $csvname = $importsettings[$fieldname]['name'];
             $allownew = $importsettings[$fieldname]['allownew'];
             $labels = !empty($csvrecord[$csvname]) ? explode('#', $csvrecord[$csvname]) : null;
-            
+
             if ($labels) {
                 $options = $this->options_menu();
                 $selected = array();

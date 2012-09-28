@@ -65,6 +65,12 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             'param1', 'param2', 'param3', 'param4', 'param5', 
             'param6', 'param7', 'param8', 'param9', 'param10'));
 
+        $rules = new backup_nested_element('rules');
+        $rule = new backup_nested_element('rule', array('id'), array(
+            'type', 'name', 'description', 'enabled',
+            'param1', 'param2', 'param3', 'param4', 'param5', 
+            'param6', 'param7', 'param8', 'param9', 'param10'));
+
         $entries = new backup_nested_element('entries');
         $entry = new backup_nested_element('entry', array('id'), array(
             'userid', 'groupid', 'timecreated', 'timemodified', 'approved'));
@@ -91,6 +97,9 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $dataform->add_child($views);
         $views->add_child($view);
 
+        $dataform->add_child($rules);
+        $rules->add_child($rule);
+
         $dataform->add_child($entries);
         $entries->add_child($entry);
 
@@ -108,6 +117,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $field->set_source_table('dataform_fields', array('dataid' => backup::VAR_PARENTID));
         $filter->set_source_table('dataform_filters', array('dataid' => backup::VAR_PARENTID));
         $view->set_source_table('dataform_views', array('dataid' => backup::VAR_PARENTID));
+        $rule->set_source_table('dataform_rules', array('dataid' => backup::VAR_PARENTID));
 
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {

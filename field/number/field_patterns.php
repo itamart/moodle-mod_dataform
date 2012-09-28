@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-number
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -32,8 +32,8 @@ class mod_dataform_field_number_patterns extends mod_dataform_field_text_pattern
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
-        parent::display_edit($mform, $entry, $required);
+    public function display_edit(&$mform, $entry, array $options = null) {
+        parent::display_edit($mform, $entry, $options);
         
         $fieldid = $this->_field->id();
         $entryid = $entry->id;

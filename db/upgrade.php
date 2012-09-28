@@ -322,5 +322,17 @@ function xmldb_dataform_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2012082900, 'dataform');
     }
 
+    if ($oldversion < 2012092002) {
+        // Add rules table
+        $table = new xmldb_table('dataform_rules');
+        if (!$dbman->table_exists($table)) {
+            $filepath = "$CFG->dirroot/mod/dataform/db/install.xml";
+            $dbman->install_one_table_from_xmldb_file($filepath, 'dataform_rules');
+        }
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012092002, 'dataform');
+    }
+
     return true;
 }

@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-_user
+ * @package dataformfield
+ * @subpackage _user
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -72,7 +72,7 @@ class mod_dataform_field__user_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function display_edit(&$mform, $entry) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         global $USER;
         
         if ($entry->id < 0) { // new entry

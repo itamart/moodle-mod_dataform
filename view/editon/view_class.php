@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformview-editon
+ * @package dataformview
+ * @subpackage editon
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -49,10 +49,19 @@ class dataform_view_editon extends dataform_view_matrix {
      * Overriding parent method to always redirect to adding new  entry
      */
     public function process_data() {
-        $processed = parent::process_data();
+        // If cancelled redirect
+        if ($cancel = optional_param('cancel', 0, PARAM_BOOL)) {
+            // Redirect if needed (to new form or to caller view)
+            if ($redirecturl = $this->get_return_url()) {
+                redirect($redirecturl);
+            }
+        }
 
-        // Entry has been added
-        if (is_array($processed)) {
+        // Process entry
+        $processed = $this->process_entries_data();
+
+        // Proceed to redirect
+        if (!$this->_editentries) {
             $response = '';
             $timeout = -1;
     
@@ -72,14 +81,61 @@ class dataform_view_editon extends dataform_view_matrix {
             // otherwise proceed to show response to submission and 'add new' link 
         }
         
-        // Proceed to form
-        $this->_editentries = -1;
+        // Proceed to form (new or current)
+        if ($this->view->param6 == self::RETURN_NEW) {
+            $this->_editentries = -1;
+        }
     }
 
     /**
-     * No need to set content
+     *
      */
-    public function set_content() {
+    public function process_entries_data() {
+        global $CFG;
+
+        $update = optional_param('update', '', PARAM_TAGLIST);
+        if ($update and confirm_sesskey()) {
+
+            // get entries only if updating existing entries
+            if ($update != self::ADD_NEW_ENTRY) {
+                // fetch entries
+                $this->_entries->set_content();
+            }
+
+            // set the display definition for the form
+            $this->_editentries = $update;
+            $this->set__display_definition();
+
+            $entriesform = $this->get_entries_form();
+            // we already know that it isn't cancelled
+            if ($data = $entriesform->get_data()) {
+                // validated successfully so process request
+                $processed = $this->_entries->process_entries('update', $update, $data, true);
+
+                if (!empty($data->submitreturnbutton)) {
+                    // If we have just added new entries refresh the content
+                    // This is far from ideal because this new entries may be
+                    // spread out in the form when we return to edit them
+                    if ($this->_editentries < 0) {
+                        $this->_entries->set_content();
+                    }                        
+
+                    // so that return after adding new entry will return the added entry 
+                    $this->_editentries = implode(',',$processed[1]);
+                    $this->_returntoentriesform = true;
+                    return true;
+                } else {                    
+                    $this->_editentries = '';
+                    $this->_returntoentriesform = false;
+                    return $processed;
+                }
+            } else {
+                // form validation failed so return to form
+                $this->_returntoentriesform = true;
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -226,6 +282,28 @@ class dataform_view_editon extends dataform_view_matrix {
             return s($this->view->param4);
         } else {
             return get_string('submit');
+        }
+    }
+    
+    /**
+     *
+     */
+    public function show_cancel() {
+        if (!empty($this->view->param8)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     *
+     */
+    public function show_save_continue() {
+        if (!empty($this->view->param9)) {
+            return true;
+        } else {
+            return false;
         }
     }
     

@@ -15,7 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package mod
+ * @subpackage dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -570,7 +571,7 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
  * @param navigation_node $datanode The node to add module settings to
  */
 function dataform_extend_settings_navigation(settings_navigation $settings, navigation_node $dfnode) {
-    global $PAGE;
+    global $PAGE, $USER;
     
     $templatesmanager = has_capability('mod/dataform:managetemplates', $PAGE->cm->context);
     $entriesmanager = has_capability('mod/dataform:manageentries', $PAGE->cm->context);
@@ -584,16 +585,21 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
     // index
     $dfnode->add(get_string('index', 'dataform'), new moodle_url('/mod/dataform/index.php', array('id' => $PAGE->course->id)));    
 
+    // notifications
+    if (isloggedin() and !isguestuser()) {
+        $dfnode->add(get_string('messaging', 'message'), new moodle_url('/message/edit.php', array('id' => $USER->id, 'course' => $PAGE->course->id, 'context' => $PAGE->context->id)));    
+    }
+    
     // manage
     if ($templatesmanager or $entriesmanager) {
         $manage = $dfnode->add(get_string('manage', 'dataform'));
         if ($templatesmanager) {
-            $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/presets.php', array('id' => $PAGE->cm->id)));
-            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/fields.php', array('id' => $PAGE->cm->id)));
-            $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/views.php', array('id' => $PAGE->cm->id)));
-            $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filters.php', array('id' => $PAGE->cm->id)));
-            //$manage->add(get_string('rules', 'dataform'), new moodle_url('/mod/dataform/rules.php', array('id' => $PAGE->cm->id)));
-            $manage->add(get_string('tools', 'dataform'), new moodle_url('/mod/dataform/tools.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/preset/index.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/view/index.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filter/index.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('rules', 'dataform'), new moodle_url('/mod/dataform/rule/index.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('tools', 'dataform'), new moodle_url('/mod/dataform/tool/index.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('jsinclude', 'dataform'), new moodle_url('/mod/dataform/js.php', array('id' => $PAGE->cm->id, 'jsedit' => 1)));
             $manage->add(get_string('cssinclude', 'dataform'), new moodle_url('/mod/dataform/css.php', array('id' => $PAGE->cm->id, 'cssedit' => 1)));
         }
@@ -792,6 +798,15 @@ function dataform_comment_validate($comment_param) {
     return $comment->validation($comment_param);
 }
 
+/**
+ *
+ */
+function dataform_comment_add($newcomment, $comment_param) {
+    $df = new dataform(null, $comment_param->cm->instance);
+    $eventdata = (object) array('items' => $newcomment);
+    $df->events_trigger("commentadded", $eventdata);
+}
+
 //------------------------------------------------------------
 // Grading
 //------------------------------------------------------------
@@ -980,6 +995,7 @@ function dataform_grade_item_delete($data) {
 
     return grade_update('mod/dataform', $data->course, 'mod', 'dataform', $data->id, 0, NULL, array('deleted'=>1));
 }
+
 
 // NOTIFICATIONS //
 
@@ -1581,147 +1597,3 @@ function dataform_cron_TODO() {
 
     return true;
 }
-
-/**
- * Builds and returns the body of the email notification in plain text.
- *
- * @global object
- * @global object
- * @uses CONTEXT_MODULE
- * @param object $course
- * @param object $cm
- * @param object $forum
- * @param object $discussion
- * @param object $post
- * @param object $userfrom
- * @param object $userto
- * @param boolean $bare
- * @return string The email body in plain text format.
- */
-function dataform_make_mail_text($course, $cm, $forum, $discussion, $post, $userfrom, $userto, $bare = false) {
-    global $CFG, $USER;
-
-    $modcontext = context_module::instance($cm->id);
-
-    if (!isset($userto->viewfullnames[$forum->id])) {
-        $viewfullnames = has_capability('moodle/site:viewfullnames', $modcontext, $userto->id);
-    } else {
-        $viewfullnames = $userto->viewfullnames[$forum->id];
-    }
-
-    if (!isset($userto->canpost[$discussion->id])) {
-        $canreply = forum_user_can_post($forum, $discussion, $userto, $cm, $course, $modcontext);
-    } else {
-        $canreply = $userto->canpost[$discussion->id];
-    }
-
-    $by = New stdClass;
-    $by->name = fullname($userfrom, $viewfullnames);
-    $by->date = userdate($post->modified, "", $userto->timezone);
-
-    $strbynameondate = get_string('bynameondate', 'forum', $by);
-
-    $strforums = get_string('forums', 'forum');
-
-    $canunsubscribe = ! forum_is_forcesubscribed($forum);
-
-    $posttext = '';
-
-    if (!$bare) {
-        $shortname = format_string($course->shortname, true, array('context' => context_course::instance($course->id)));
-        $posttext  = "$shortname -> $strforums -> ".format_string($forum->name,true);
-
-        if ($discussion->name != $forum->name) {
-            $posttext  .= " -> ".format_string($discussion->name,true);
-        }
-    }
-
-    // add absolute file links
-    $post->message = file_rewrite_pluginfile_urls($post->message, 'pluginfile.php', $modcontext->id, 'mod_forum', 'post', $post->id);
-
-    $posttext .= "\n---------------------------------------------------------------------\n";
-    $posttext .= format_string($post->subject,true);
-    if ($bare) {
-        $posttext .= " ($CFG->wwwroot/mod/forum/discuss.php?d=$discussion->id#p$post->id)";
-    }
-    $posttext .= "\n".$strbynameondate."\n";
-    $posttext .= "---------------------------------------------------------------------\n";
-    $posttext .= format_text_email($post->message, $post->messageformat);
-    $posttext .= "\n\n";
-    $posttext .= forum_print_attachments($post, $cm, "text");
-
-    if (!$bare && $canreply) {
-        $posttext .= "---------------------------------------------------------------------\n";
-        $posttext .= get_string("postmailinfo", "forum", $shortname)."\n";
-        $posttext .= "$CFG->wwwroot/mod/forum/post.php?reply=$post->id\n";
-    }
-    if (!$bare && $canunsubscribe) {
-        $posttext .= "\n---------------------------------------------------------------------\n";
-        $posttext .= get_string("unsubscribe", "forum");
-        $posttext .= ": $CFG->wwwroot/mod/forum/subscribe.php?id=$forum->id\n";
-    }
-
-    return $posttext;
-}
-
-/**
- * Builds and returns the body of the email notification in html format.
- *
- * @global object
- * @param object $course
- * @param object $cm
- * @param object $forum
- * @param object $discussion
- * @param object $post
- * @param object $userfrom
- * @param object $userto
- * @return string The email text in HTML format
- */
-function dataform_make_mail_html($course, $cm, $forum, $discussion, $post, $userfrom, $userto) {
-    global $CFG;
-
-    if ($userto->mailformat != 1) {  // Needs to be HTML
-        return '';
-    }
-
-    if (!isset($userto->canpost[$discussion->id])) {
-        $canreply = forum_user_can_post($forum, $discussion, $userto, $cm, $course);
-    } else {
-        $canreply = $userto->canpost[$discussion->id];
-    }
-
-    $strforums = get_string('forums', 'forum');
-    $canunsubscribe = ! forum_is_forcesubscribed($forum);
-    $shortname = format_string($course->shortname, true, array('context' => context_course::instance($course->id)));
-
-    $posthtml = '<head>';
-/*    foreach ($CFG->stylesheets as $stylesheet) {
-        //TODO: MDL-21120
-        $posthtml .= '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />'."\n";
-    }*/
-    $posthtml .= '</head>';
-    $posthtml .= "\n<body id=\"email\">\n\n";
-
-    $posthtml .= '<div class="navbar">'.
-    '<a target="_blank" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">'.$shortname.'</a> &raquo; '.
-    '<a target="_blank" href="'.$CFG->wwwroot.'/mod/forum/index.php?id='.$course->id.'">'.$strforums.'</a> &raquo; '.
-    '<a target="_blank" href="'.$CFG->wwwroot.'/mod/forum/view.php?f='.$forum->id.'">'.format_string($forum->name,true).'</a>';
-    if ($discussion->name == $forum->name) {
-        $posthtml .= '</div>';
-    } else {
-        $posthtml .= ' &raquo; <a target="_blank" href="'.$CFG->wwwroot.'/mod/forum/discuss.php?d='.$discussion->id.'">'.
-                     format_string($discussion->name,true).'</a></div>';
-    }
-    $posthtml .= forum_make_mail_post($course, $cm, $forum, $discussion, $post, $userfrom, $userto, false, $canreply, true, false);
-
-    if ($canunsubscribe) {
-        $posthtml .= '<hr /><div class="mdl-align unsubscribelink">
-                      <a href="'.$CFG->wwwroot.'/mod/forum/subscribe.php?id='.$forum->id.'">'.get_string('unsubscribe', 'forum').'</a>&nbsp;
-                      <a href="'.$CFG->wwwroot.'/mod/forum/unsubscribeall.php">'.get_string('unsubscribeall', 'forum').'</a></div>';
-    }
-
-    $posthtml .= '</body>';
-
-    return $posthtml;
-}
-

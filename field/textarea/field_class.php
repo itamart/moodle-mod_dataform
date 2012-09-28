@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-textarea
+ * @package dataformfield
+ * @subpackage textarea
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -64,19 +64,6 @@ class dataform_field_textarea extends dataform_field_base {
     }
 
     /**
-     * Override parent to set key as the content name
-     */
-    public function get_content_from_data($entryid, $data) {
-        $fieldid = $this->field->id;
-        $content = array();
-        $contentname = "field_{$fieldid}_$entryid";
-        if (isset($data->$contentname)) {
-            $content[$contentname] = $data->$contentname;
-        }
-        return $content;
-    }
-
-    /**
      *
      */
     public function update_content($entry, array $values = null) {
@@ -98,23 +85,16 @@ class dataform_field_textarea extends dataform_field_base {
         if (!$rec->id = $contentid) {
             $rec->id = $DB->insert_record('dataform_contents', $rec);
         }        
-        
+
         // Editor content
         if ($this->is_editor()) {
             $data = (object) $values;
-            // check if the content is from a new entry
-            // in which case entry id in the data is < 0
-            $names = explode('_',key($values));
-            if ((int) $names[2] < 0) {
-                $adjustedfieldname = "field_{$fieldid}_{$names[2]}";
-            } else {
-                $adjustedfieldname = "field_{$fieldid}_{$entry->id}";
-            }        
+            $data->{'editor_editor'} = $data->editor;
 
-            $data = file_postupdate_standard_editor($data, $adjustedfieldname, $this->editoroptions, $this->df->context, 'mod_dataform', 'content', $rec->id);
+            $data = file_postupdate_standard_editor($data, 'editor', $this->editoroptions, $this->df->context, 'mod_dataform', 'content', $rec->id);
 
-            $rec->content = $data->{$adjustedfieldname};
-            $rec->content1 = $data->{"{$adjustedfieldname}format"};
+            $rec->content = $data->editor;
+            $rec->content1 = $data->{'editorformat'};
 
         // Text area content
         } else {
@@ -160,4 +140,14 @@ class dataform_field_textarea extends dataform_field_base {
         return true;
     }
 
+    /**
+     *
+     */
+    protected function content_names() {
+        if ($this->is_editor()) {
+            return array('editor');
+        } else {
+            return array('');
+        }
+    }
 }

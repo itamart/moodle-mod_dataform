@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,7 +45,7 @@ if ($urlparams->fid) {
 $mform = $field->get_form();
 
 if ($mform->is_cancelled()){
-    redirect(new moodle_url('/mod/dataform/fields.php', array('d' => $df->id())));
+    redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id())));
 
 // no submit buttons    
 } else if ($mform->no_submit_button_pressed()) {
@@ -62,11 +62,11 @@ if ($mform->is_cancelled()){
     } else {
         $data->id = $field->id();
         $field->update_field($data);
-        add_to_log($df->course->id, 'dataform', 'fields update', 'fields.php?d='. $df->id(). '&amp;id=', $urlparams->fid, $df->cm->id);
+        add_to_log($df->course->id, 'dataform', 'fields update', 'field/index.php?d='. $df->id(). '&amp;id=', $urlparams->fid, $df->cm->id);
     }
 
     if ($data->submitbutton != get_string('savecontinue', 'dataform')) {
-        redirect(new moodle_url('/mod/dataform/fields.php', array('d' => $df->id())));
+        redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id())));
     }
     
     // continue to edit so refresh the form
@@ -74,7 +74,7 @@ if ($mform->is_cancelled()){
 }
 
 // activate navigation node
-navigation_node::override_active_url(new moodle_url('/mod/dataform/fields.php', array('id' => $df->cm->id)));
+navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 // print header
 $df->print_header(array('tab' => 'fields', 'nonotifications' => true, 'urlparams' => $urlparams));

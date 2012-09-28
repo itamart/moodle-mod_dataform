@@ -26,8 +26,6 @@
  * certain copyrights on the Database module may obtain.
  */
 
-require_once('filter/filter_class.php');
-
 /**
  * Dataform class
  */
@@ -53,14 +51,6 @@ class dataform {
     const _RATINGMIN = -144;
     const _RATINGSUM = -145;
 
-    const PRESET_COURSEAREA = 'course_presets';
-    const PRESET_SITEAREA = 'site_presets';
-    const PRESET_SITECONTEXT = SYSCONTEXTID;
-
-    const USER_FILTER = -1;
-    const USER_FILTER_SET = -2;
-    const USER_FILTER_RESET = -3;
- 
     const COUNT_ALL = 0;
     const COUNT_APPROVED = 1;
     const COUNT_UNAPPROVED = 2;
@@ -77,10 +67,12 @@ class dataform {
     public $notifications = array('bad' => array(), 'good' => array());
 
     protected $pagefile = 'view';
+    
     protected $fields = array();
     protected $views = array();
-    protected $filtermanager = null;
-    protected $rules = array();
+    protected $_filtermanager = null;
+    protected $_rulemanager = null;
+    protected $_presetmanager = null;
     protected $_currentview = null;
 
     // internal fields
@@ -135,11 +127,11 @@ class dataform {
         }
         
         // set fields manager
-        
+        //$this->_fieldmanager = new dataform_field_manager($this);        
+
         // set views manager
-        
-        // set filters manager
-        $this->_filtermanager = new dataform_filter_manager($this);
+        //$this->_viewmanager = new dataform_view_manager($this);
+
     }
 
     /**
@@ -174,7 +166,36 @@ class dataform {
      *
      */
     public function get_filter_manager() {
+        // set filters manager
+        if (!$this->_filtermanager) { 
+            require_once('filter/filter_class.php');
+            $this->_filtermanager = new dataform_filter_manager($this);
+        }
         return $this->_filtermanager;
+    }
+
+    /**
+     *
+     */
+    public function get_rule_manager() {
+        // set rules manager
+        if (!$this->_rulemanager) { 
+            require_once('rule/rule_manager.php');
+            $this->_rulemanager = new dataform_rule_manager($this);
+        }
+        return $this->_rulemanager;
+    }
+
+    /**
+     *
+     */
+    public function get_preset_manager() {
+        // set preset manager
+        if (!$this->_presetmanager) { 
+            require_once('preset/preset_manager.php');
+            $this->_presetmanager = new dataform_preset_manager($this);
+        }
+        return $this->_presetmanager;
     }
 
     /**
@@ -295,7 +316,7 @@ class dataform {
      * @param array $params 
      */
     public function set_page($page = 'view', $params = null) {
-        global $CFG, $PAGE, $USER;
+        global $CFG, $PAGE, $USER, $OUTPUT;
         
         $this->pagefile = $page;
         $thisid = $this->id();
@@ -399,6 +420,18 @@ class dataform {
 
             $PAGE->set_title($this->name());
             $PAGE->set_heading($this->course->fullname);
+            
+            // Include blocks dragdrop when editing
+            if ($PAGE->user_is_editing()) {
+                $params = array(
+                    'courseid' => $this->course->id,
+                    'cmid' => $this->cm->id,
+                    'pagetype' => $PAGE->pagetype,
+                    'pagelayout' => $PAGE->pagelayout,
+                    'regions' => $PAGE->blocks->get_regions(),
+                );
+                $PAGE->requires->yui_module('moodle-core-blocks', 'M.core_blocks.init_dragdrop', array($params), null, true);
+            }            
         }
 
         ////////////////////////////////////
@@ -494,15 +527,16 @@ class dataform {
         if ($manager) {
             $views = $this->get_views();
             if (!$views) {
-                $this->notifications['bad']['getstarted'] = get_string('getstarted','dataform');
-                $linktopresets = html_writer::link(new moodle_url('presets.php', array('d' => $thisid)), get_string('presets', 'dataform'));
-                $this->notifications['bad']['getstartedpresets'] = get_string('getstartedpresets','dataform', $linktopresets);
-                $linktofields = html_writer::link(new moodle_url('fields.php', array('d' => $thisid)), get_string('fields', 'dataform'));
-                $this->notifications['bad']['getstartedfields'] = get_string('getstartedfields','dataform', $linktofields);
-                $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $thisid)), get_string('views', 'dataform'));
-                $this->notifications['bad']['getstartedviews'] = get_string('getstartedviews','dataform', $linktoviews);
+                if ($page == 'view' or $page == 'embed') {
+                    $getstarted = new object;
+                    $getstarted->presets = html_writer::link(new moodle_url('preset/index.php', array('d' => $thisid)), get_string('presets', 'dataform'));
+                    $getstarted->fields = html_writer::link(new moodle_url('field/index.php', array('d' => $thisid)), get_string('fields', 'dataform'));
+                    $getstarted->views = html_writer::link(new moodle_url('view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
+
+                    $this->notifications['bad']['getstarted'] = html_writer::tag('div', get_string('getstarted', 'dataform', $getstarted), array('class' => 'mdl-left'));
+                }
             } else if (!$this->data->defaultview) {
-                $linktoviews = html_writer::link(new moodle_url('views.php', array('d' => $thisid)), get_string('views', 'dataform'));
+                $linktoviews = html_writer::link(new moodle_url('view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
                 $this->notifications['bad']['defaultview'] = get_string('viewnodefault','dataform', $linktoviews);
             }
         }
@@ -852,11 +886,11 @@ class dataform {
 
                 // Print a confirmation page
                 echo $OUTPUT->confirm(get_string("fieldsconfirm$action", 'dataform', count($fields)),
-                        new moodle_url('/mod/dataform/fields.php', array('d' => $this->id(),
+                        new moodle_url('/mod/dataform/field/index.php', array('d' => $this->id(),
                                                                         $action => implode(',', array_keys($fields)),
                                                                         'sesskey' => sesskey(),
                                                                         'confirmed' => 1)),
-                        new moodle_url('/mod/dataform/fields.php', array('d' => $this->id())));
+                        new moodle_url('/mod/dataform/field/index.php', array('d' => $this->id())));
 
                 echo $OUTPUT->footer();
                 exit;
@@ -944,7 +978,7 @@ class dataform {
                         break;
                 }
 
-                add_to_log($this->course->id, 'dataform', 'field '. $action, 'fields.php?id='. $this->cm->id, $this->id(), $this->cm->id);
+                add_to_log($this->course->id, 'dataform', 'field '. $action, 'field/index.php?id='. $this->cm->id, $this->id(), $this->cm->id);
                 if ($strnotify) {
                     $fieldsprocessed = $processedfids ? count($processedfids) : 'No';
                     $this->notifications['good'][] = get_string($strnotify, 'dataform', $fieldsprocessed);
@@ -1166,11 +1200,11 @@ class dataform {
 
                 // Print a confirmation page
                 echo $OUTPUT->confirm(get_string("viewsconfirm$action", 'dataform', count($views)),
-                        new moodle_url('/mod/dataform/views.php', array('d' => $this->id(),
+                        new moodle_url('/mod/dataform/view/index.php', array('d' => $this->id(),
                                                                         $action => implode(',', array_keys($views)),
                                                                         'sesskey' => sesskey(),
                                                                         'confirmed' => 1)),
-                        new moodle_url('/mod/dataform/views.php', array('d' => $this->id())));
+                        new moodle_url('/mod/dataform/view/index.php', array('d' => $this->id())));
 
                 echo $OUTPUT->footer();
                 exit;
@@ -1281,7 +1315,7 @@ class dataform {
                         break;
                 }
 
-                add_to_log($this->course->id, 'dataform', 'view '. $action, 'views.php?id='. $this->cm->id, $this->id(), $this->cm->id);
+                add_to_log($this->course->id, 'dataform', 'view '. $action, 'view/index.php?id='. $this->cm->id, $this->id(), $this->cm->id);
                 if ($strnotify) {
                     $viewsprocessed = $processedvids ? count($processedvids) : 'No';
                     $this->notifications['good'][] = get_string($strnotify, 'dataform', $viewsprocessed);
@@ -1290,10 +1324,6 @@ class dataform {
             }
         }
     }
-
-/**********************************************************************************
- * RULES
- *********************************************************************************/
 
 
 /**********************************************************************************
@@ -1586,562 +1616,6 @@ class dataform {
 
 
 /**********************************************************************************
- * PRESETS
- *********************************************************************************/
-
-    /**
-     * Returns an array of the shared presets (in moodledata) the user is allowed to access
-     * @param in $presetarea  PRESET_COURSEAREA/PRESET_SITEAREA
-     */
-    public function get_user_presets($presetarea) {
-        global $USER;
-
-        $presets = array();
-        $course_context = context_course::instance($this->course->id);
-
-        $fs = get_file_storage();
-        if ($presetarea == 'course_presets') {
-            $files = $fs->get_area_files($course_context->id, 'mod_dataform', $presetarea);
-        } else if ($presetarea == 'site_presets') {
-            $files = $fs->get_area_files(dataform::PRESET_SITECONTEXT, 'mod_dataform', $presetarea);
-        }
-        $canviewall = has_capability('mod/dataform:presetsviewall', $this->context);
-        if (!empty($files)) {
-            foreach ($files as $file) {
-                if ($file->is_directory() || ($file->get_userid() != $USER->id and !$canviewall)) {
-                    continue;
-                }
-                $preset = new object;
-                $preset->contextid = $file->get_contextid();
-                $preset->path = $file->get_filepath();
-                $preset->name = $file->get_filename();
-                $preset->shortname = pathinfo($preset->name, PATHINFO_FILENAME);
-                $preset->userid = $file->get_userid();
-                $preset->itemid = $file->get_itemid();
-                $preset->id = $file->get_id();
-                $presets[] = $preset;
-            }
-        }
-
-        return $presets;
-    }
-
-    /**
-     *
-     */
-    public function print_presets_list($targetpage, $localpresets, $sharedpresets) {
-        global $CFG, $OUTPUT;
-        
-        if ($localpresets or $sharedpresets) {
-
-            $linkparams = array('d' => $this->id(), 'sesskey' => sesskey());
-            $actionurl = htmlspecialchars_decode(new moodle_url($targetpage, $linkparams));
-            
-            // prepare to make file links
-            require_once("$CFG->libdir/filelib.php");
-
-            /// table headings
-            $strname = get_string('name');
-            $strdescription = get_string('description');
-            $strscreenshot = get_string('screenshot');
-            $strapply = get_string('presetapply', 'dataform');
-            $strmap = get_string('presetmap', 'dataform');
-            $strdownload = get_string('download', 'dataform');
-            $strdelete = get_string('delete');
-            $strshare = get_string('presetshare', 'dataform');
-
-            $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'preset\'&#44;this.checked)'));
-            
-            $multidownload = html_writer::tag('button', $OUTPUT->pix_icon('t/download', get_string('multidownload', 'dataform')), array('name' => 'multidownload', 'onclick' => 'bulk_action(\'preset\'&#44; \''. $actionurl. '\'&#44; \'download\')'));
-            
-            $multidelete = html_writer::tag('button', $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), array('name' => 'multidelete', 'onclick' => 'bulk_action(\'preset\'&#44; \''. $actionurl. '\'&#44; \'delete\')'));
-            
-            $multishare = html_writer::tag('button', $OUTPUT->pix_icon('i/group', get_string('multishare', 'dataform')), array('name' => 'multishare', 'onclick' => 'bulk_action(\'preset\'&#44; \''. $actionurl. '\'&#44; \'share\')'));
-
-            $table = new html_table();
-            $table->head = array($strname, $strdescription, $strscreenshot, $strapply, $multidownload, $multishare, $multidelete, $selectallnone);
-            $table->align = array('left', 'left', 'center', 'center', 'center', 'center', 'center', 'center');
-            $table->wrap = array(false, false, false, false, false, false, false, false);
-            $table->attributes['align'] = 'center';
-
-            // print local presets
-            if ($localpresets) {
-                // headingg
-                $lpheadingcell = new html_table_cell();
-                $lpheadingcell->text = html_writer::tag('h4', get_string('presetavailableincourse', 'dataform'));
-                $lpheadingcell->colspan = 9;
-                
-                $lpheadingrow = new html_table_row();
-                $lpheadingrow->cells[] = $lpheadingcell;
-
-                $table->data[] = $lpheadingrow;
-
-                foreach ($localpresets as $preset) {
-
-                    $presetname = $preset->shortname;
-                    $presetdescription = '';
-                    $presetscreenshot = '';
-                    //if ($preset->screenshot) {
-                    //    $presetscreenshot = '<img width="150" class="presetscreenshot" src="'. $preset->screenshot. '" alt="'. get_string('screenshot'). '" />';
-                    //}
-                    $presetapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $preset->id)),
-                                    $OUTPUT->pix_icon('t/switch_whole', $strapply));
-                    //$presetapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $preset->id)),
-                    //                $OUTPUT->pix_icon('t/switch_plus', $strapply));
-                    $presetdownload = html_writer::link(
-                        moodle_url::make_file_url("/pluginfile.php", "/$preset->contextid/mod_dataform/course_presets/$preset->itemid/$preset->name"),
-                        $OUTPUT->pix_icon('t/download', $strdownload)
-                    );
-                    $presetshare = '';
-                    if (has_capability('mod/dataform:presetsviewall', $this->context)) {
-                        $presetshare = html_writer::link(new moodle_url($targetpage, $linkparams + array('share' => $preset->id)),
-                                    $OUTPUT->pix_icon('i/group', $strshare));
-                    }
-                    $presetdelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $preset->id)),
-                                    $OUTPUT->pix_icon('t/delete', $strdelete));
-                    $presetselector = html_writer::checkbox("presetselector", $preset->id, false);
-
-                    $table->data[] = array(
-                        $presetname,
-                        $presetdescription,
-                        $presetscreenshot,
-                        $presetapply,
-                        $presetdownload,
-                        $presetshare,
-                        $presetdelete,
-                        $presetselector
-                   );
-                }
-                
-            }
-
-            // print shared presets
-            if ($sharedpresets) {
-                // heading
-                $lpheadingcell = new html_table_cell();
-                $lpheadingcell->text = html_writer::tag('h4', get_string('presetavailableinsite', 'dataform'));
-                $lpheadingcell->colspan = 9;
-                
-                $lpheadingrow = new html_table_row();
-                $lpheadingrow->cells[] = $lpheadingcell;
-
-                $table->data[] = $lpheadingrow;
-                
-                $linkparams['area'] = dataform::PRESET_SITEAREA;
-
-                foreach ($sharedpresets as $preset) {
-
-                    $presetname = $preset->shortname;
-                    $presetdescription = '';
-                    $presetscreenshot = '';
-                    $presetapply = html_writer::link(new moodle_url($targetpage, $linkparams + array('apply' => $preset->id)), $OUTPUT->pix_icon('t/switch_whole', $strapply));
-                    //$presetapplymap = html_writer::link(new moodle_url($targetpage, $linkparams + array('applymap' => $preset->id)), $OUTPUT->pix_icon('t/switch_plus', $strapply));
-                    $presetdownload = html_writer::link(
-                        moodle_url::make_file_url("/pluginfile.php", "/$preset->contextid/mod_dataform/site_presets/$preset->itemid/$preset->name"),
-                        $OUTPUT->pix_icon('t/download', $strdownload)
-                    );
-                    $presetshare = '';
-                    $presetdelete = '';
-                    if (has_capability('mod/dataform:managepresets', $this->context)) {            
-                        $presetdelete = html_writer::link(new moodle_url($targetpage, $linkparams + array('delete' => $preset->id)), $OUTPUT->pix_icon('t/delete', $strdelete));
-                    }                
-                    $presetselector = html_writer::checkbox("presetselector", $preset->id, false);
-
-                    $table->data[] = array(
-                        $presetname,
-                        $presetdescription,
-                        $presetscreenshot,
-                        $presetapply,
-                        $presetdownload,
-                        $presetshare,
-                        $presetdelete,
-                        $presetselector
-                   );
-                }
-            }
-            
-            echo html_writer::table($table);
-            echo html_writer::empty_tag('br');           
-        }
-    }
-
-    /**
-     *
-     */
-    public function process_presets($targetpage, $params) {
-        global $CFG;
-        
-        require_once('presets_form.php');
-
-        $mform = new mod_dataform_presets_form(new moodle_url($targetpage, array('d' => $this->id(), 'sesskey' => sesskey(), 'add' => 1)));
-        // add presets
-        if ($data = $mform->get_data()) { 
-            // preset this dataform
-            if ($data->preset_source == 'current') {
-                $this->create_preset_from_backup($data->preset_data);
-
-            // upload presets
-            } else if ($data->preset_source == 'file') {
-                $this->create_preset_from_upload($data->uploadfile);
-            }
-        // apply a preset
-        } else if ($params->apply and confirm_sesskey()) {
-            $this->apply_preset($params->apply, $params->torestorer);
-            // rebuild course cache to show new dataform name on the course page
-            rebuild_course_cache($this->course->id);
-            
-        // download (bulk in zip)
-        } else if ($params->download and confirm_sesskey()) {
-            $this->download_presets($params->download);
-
-        // share presets
-        } else if ($params->share and confirm_sesskey()) {
-            $this->share_presets($params->share);
-
-        // delete presets
-        } else if ($params->delete and confirm_sesskey()) {
-            $this->delete_presets($params->delete);
-        }
-    }
-
-    /**
-     *
-     */
-    public function create_preset_from_backup($userdata) {
-        global $CFG, $USER, $SESSION;
-        
-        require_once("$CFG->dirroot/backup/util/includes/backup_includes.php");
-        
-        $users = 0;
-        $anon = 0;
-        switch ($userdata) {
-            case 'dataanon':
-                $anon = 1;
-            case 'data':
-                $users = 1;
-        }
-        
-        // store preset settings in $SESSION
-        $SESSION->{"dataform_{$this->cm->id}_preset"} = "$users $anon";
-
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $this->cm->id, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
-
-        // clear preset settings from $SESSION
-        unset($SESSION->{"dataform_{$this->cm->id}_preset"});
-
-        // set users and anon in plan
-        $bc->get_plan()->get_setting('users')->set_value($users);        
-        $bc->get_plan()->get_setting('anonymize')->set_value($anon);
-        $bc->set_status(backup::STATUS_AWAITING);
-
-        $bc->execute_plan();
-        $bc->destroy();
-        
-        $fs = get_file_storage();
-        if ($users and !$anon) {
-            $contextid = $this->context->id;
-            $files = $fs->get_area_files($contextid, 'backup', 'activity', 0, 'timemodified', false);
-        } else {
-            $usercontext = context_user::instance($USER->id);
-            $contextid = $usercontext->id;
-            $files = $fs->get_area_files($contextid, 'user', 'backup', 0, 'timemodified', false);
-        }
-        if (!empty($files)) {
-            $course_context = context_course::instance($this->course->id);
-            foreach ($files as $file) {
-                if ($file->get_contextid() != $contextid) {
-                    continue;
-                }
-                $preset = new object;
-                $preset->contextid = $course_context->id;
-                $preset->component = 'mod_dataform';
-                $preset->filearea = dataform::PRESET_COURSEAREA;
-                $preset->filepath = '/';
-                $preset->filename = clean_filename(str_replace(' ', '_', $this->data->name).
-                                    '-dataform-preset-'.
-                                    gmdate("Ymd_Hi"). '-'.
-                                    str_replace(' ', '-', get_string("preset$userdata", 'dataform')). '.mbz');
-
-                $fs->create_file_from_storedfile($preset, $file);
-                $file->delete();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     *
-     */
-    public function create_preset_from_upload($draftid) {
-        global $USER;
-
-        $usercontext = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        if ($file = reset($fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false))) {
-            $course_context = context_course::instance($this->course->id);
-            $preset = new object;
-            $preset->contextid = $course_context->id;
-            $preset->component = 'mod_dataform';
-            $preset->filearea = dataform::PRESET_COURSEAREA;
-            $preset->filepath = '/';
-            
-            $ext = pathinfo($file->get_filename(), PATHINFO_EXTENSION);            
-            if ($ext == 'mbz') {
-                $preset->filename = $file->get_filename();
-                $fs->create_file_from_storedfile($preset, $file);
-            } else if ($ext == 'zip') {
-                // extract files to the draft area
-                $zipper = get_file_packer('application/zip');
-                $file->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
-                $file->delete();
-
-                if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'sortorder', false)) {
-                    foreach ($files as $file) {
-                        $ext = pathinfo($file->get_filename(), PATHINFO_EXTENSION);
-                        if ($ext == 'mbz') {
-                            $preset->filename = $file->get_filename();
-                            $fs->create_file_from_storedfile($preset, $file);
-                        }
-                    }
-                }
-            }
-            $fs->delete_area_files($usercontext->id, 'user', 'draft', $draftid);
-            return true;
-        }
-        return false;
-    }
-
-
-    /**
-     *
-     */
-    public function apply_preset($userpreset, $torestorer = true) {
-        global $DB, $CFG, $USER;
-        
-        // extract the backup file to the temp folder
-        $folder = $this->context->id. '-'. time();
-        $backuptempdir = make_temp_directory("backup/$folder");
-        $zipper = get_file_packer('application/zip');
-        $fs = get_file_storage();
-        $file = $fs->get_file_by_id($userpreset);
-        $file->extract_to_pathname($zipper, $backuptempdir);           
-        
-        require_once("$CFG->dirroot/backup/util/includes/restore_includes.php");
-
-        // anonymous users cleanup
-        $DB->delete_records_select('user', $DB->sql_like('firstname', '?'), array('%anonfirstname%'));
-        
-        $transaction = $DB->start_delegated_transaction();
-        $rc = new restore_controller($folder,
-                                    $this->course->id,
-                                    backup::INTERACTIVE_NO,
-                                    backup::MODE_GENERAL,
-                                    $USER->id,
-                                    backup::TARGET_CURRENT_ADDING);
-
-        $rc->execute_precheck();
-
-        // get the dataform restore activity task
-        $tasks = $rc->get_plan()->get_tasks();
-        $dataformtask = null;
-        foreach ($tasks as &$task) {
-            if ($task instanceof restore_dataform_activity_task) {
-                $dataformtask = &$task;
-                break;
-            }
-        }
-
-        if ($dataformtask) {
-            $dataformtask->set_activityid($this->id());
-            $dataformtask->set_moduleid($this->cm->id);
-            $dataformtask->set_contextid($this->context->id);
-            if ($torestorer) {
-                $dataformtask->set_ownerid($USER->id);
-            }
-
-            $rc->set_status(backup::STATUS_AWAITING);
-            $rc->execute_plan();
-            
-            $transaction->allow_commit();
-            // rc cleanup
-            $rc->destroy();
-            // anonymous users cleanup
-            $DB->delete_records_select('user', $DB->sql_like('firstname', '?'), array('%anonfirstname%'));
-            
-            redirect(new moodle_url('/mod/dataform/view.php', array('d' => $this->id())));        
-        } else {
-            $rc->destroy();
-        }        
-    }
-
-    /**
-     *
-     */
-    public function download_presets($presetids) {
-        global $CFG;
-        
-        if (headers_sent()) {
-            throw new moodle_exception('headerssent');
-        }
-
-        if (!$pids = explode(',', $presetids)) {
-            return false;
-        }
-
-        $presets = array();
-        $fs = get_file_storage();
-
-        // try first course area
-        $course_context = context_course::instance($this->course->id);
-        $contextid = $course_context->id;
-
-        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PRESET_COURSEAREA)) {
-            foreach ($files as $file) {
-                if (empty($pids)) break;
-                
-                if (!$file->is_directory()) {
-                    $key = array_search($file->get_id(), $pids);
-                    if ($key !== false) {
-                        $presets[$file->get_filename()] = $file;
-                        unset($pids[$key]);
-                    }
-                }
-            }
-        }
-
-        // try site area
-        if (!empty($pids)) {
-            if ($files = $fs->get_area_files(dataform::PRESET_SITECONTEXT, 'mod_dataform', dataform::PRESET_SITEAREA)) {
-                foreach ($files as $file) {
-                    if (empty($pids)) break;
-                    
-                    if (!$file->is_directory()) {
-                        $key = array_search($file->get_id(), $pids);
-                        if ($key !== false) {
-                            $presets[$file->get_filename()] = $file;
-                            unset($pids[$key]);
-                        }
-                    }
-                }
-            }            
-        }
-
-        $downloaddir = make_temp_directory('download');
-        $filename = 'presets.zip';
-        $downloadfile = "$downloaddir/$filename";
-        
-        $zipper = get_file_packer('application/zip');
-        $zipper->archive_to_pathname($presets, $downloadfile);
-
-        header("Content-Type: application/download\n");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate,post-check=0,pre-check=0');
-        header('Pragma: public');
-        $downloadhandler = fopen($downloadfile, 'rb');
-        print fread($downloadhandler, filesize($downloadfile));
-        fclose($downloadhandler);
-        unlink($downloadfile);
-        exit(0);
-    }
-
-    /**
-     *
-     */
-    public function share_presets($presetids) {
-        global $CFG, $USER;
-
-        if (!has_capability('mod/dataform:presetsviewall', $this->context)) {
-            return false;
-        }
-                    
-        $fs = get_file_storage();
-        $filerecord = new object;
-        $filerecord->contextid = dataform::PRESET_SITECONTEXT;
-        $filerecord->component = 'mod_dataform';
-        $filerecord->filearea = dataform::PRESET_SITEAREA;
-        $filerecord->filepath = '/';
-
-        foreach (explode(',', $presetids) as $pid) {
-            $fs->create_file_from_storedfile($filerecord, $pid);
-        }
-        return true;
-    }
-
-    /**
-     *
-     */
-    public function plug_in_presets($idorpath, $delete = false) {
-        global $CFG, $USER;
-
-        if (!has_capability('mod/dataform:managepresets', $this->context)) {
-            return false;
-        }
-                    
-        if ($delete) {
-            return unlink("$CFG->dirroot/mod/dataform/preset/{$idorpath}");
-
-        } else {
-            $fs = get_file_storage();
-            $file = $fs->get_file_by_id($idorpath);
-            $filename = $file->get_filename();
-            return $file->copy_content_to("$CFG->dirroot/mod/dataform/preset/{$filename}");
-        }    
-    }
-
-    /**
-     *
-     */
-    public function delete_presets($presetids) {
-        if (!$pids = explode(',', $presetids)) {
-            return false;
-        }
-        
-        if (!has_capability('mod/dataform:managepresets', $this->context)) {
-            return false;
-        }
-                    
-        $fs = get_file_storage();
-
-        // try first course area
-        $course_context = context_course::instance($this->course->id);
-        $contextid = $course_context->id;
-
-        if ($files = $fs->get_area_files($contextid, 'mod_dataform', dataform::PRESET_COURSEAREA)) {
-            foreach ($files as $file) {
-                if (empty($pids)) break;
-                
-                if (!$file->is_directory()) {
-                    $key = array_search($file->get_id(), $pids);
-                    if ($key !== false) {
-                        $file->delete();
-                        unset($pids[$key]);
-                    }
-                }
-            }
-        }
-
-        // try site area
-        if (!empty($pids)) {
-            if ($files = $fs->get_area_files(dataform::PRESET_SITECONTEXT, 'mod_dataform', dataform::PRESET_SITEAREA)) {
-                foreach ($files as $file) {
-                    if (empty($pids)) break;
-                    
-                    if (!$file->is_directory()) {
-                        $key = array_search($file->get_id(), $pids);
-                        if ($key !== false) {
-                            $file->delete();
-                            unset($pids[$key]);
-                        }
-                    }
-                }
-            }            
-        }
-        return true;        
-    }
-
-/**********************************************************************************
  * UTILITY
  *********************************************************************************/
 
@@ -2190,6 +1664,34 @@ class dataform {
         add_to_log($this->course->id, 'dataform', 'entry '. $action, $this->pagefile. '.php?id='. $this->cm->id, $this->id(), $this->cm->id);
     }
     
-    
+    /**
+     * 
+     */
+    public function events_trigger($event, $data) {
 
+        // Get capability users
+        $capability = "mod/dataform:notify$event";
+        $users = get_users_by_capability($this->context, $capability, 'u.id,u.auth,u.suspended,u.deleted,u.lastaccess,u.emailstop');
+
+        // Get event notificataion rule users
+        $rm = $this->get_rule_manager();
+        if ($rules = $rm->get_rules_by_type('eventnotification')) {
+            foreach ($rules as $rule) {
+                if ($rule->is_enabled() and in_array($event, $rule->get_selected_events())) {
+                    $users = array_merge($users, $rule->get_recipient_users($event, $data->items));
+                }
+            }
+        }
+
+        if (!$users) {
+            return;
+        }    
+       
+        $data->users = $users;       
+        $data->coursename = $this->course->shortname;
+        $data->dataformname = $this->name();
+        $data->context = $this->context->id;
+        $data->event = $event;
+        events_trigger("dataform_$event", $data);
+    }    
 }

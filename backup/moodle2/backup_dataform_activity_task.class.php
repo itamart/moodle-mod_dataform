@@ -40,19 +40,23 @@ class backup_dataform_activity_task extends backup_activity_task {
             list($users, $anon) = explode(' ', $SESSION->{"dataform_{$this->moduleid}_preset"});
             list($roottask,,) = $this->plan->get_tasks();
             // set users setting
-            $userssetting = &$roottask->get_setting('users');
+//            $userssetting = &$roottask->get_setting('users');
+            $userssetting = $roottask->get_setting('users');
             $userssetting->set_value($users);
             $this->plan->get_setting('users')->set_value($users);        
             // disable dependencies if needed
             if (!$users) {
-                $dependencies = &$userssetting->get_dependencies();
+//                $dependencies = &$userssetting->get_dependencies();
+                $dependencies = $userssetting->get_dependencies();
                 foreach ($dependencies as &$dependent) {
-                    $dependent_setting = &$dependent->get_dependent_setting();
+//                    $dependent_setting = &$dependent->get_dependent_setting();
+                    $dependent_setting = $dependent->get_dependent_setting();
                     $dependent_setting->set_value(0);
                 }
             }
             // set anonymize
-            $anonsetting = &$roottask->get_setting('anonymize');
+//            $anonsetting = &$roottask->get_setting('anonymize');
+            $anonsetting = $roottask->get_setting('anonymize');
             $anonsetting->set_value($anon);
             $this->plan->get_setting('anonymize')->set_value($anon);        
 
@@ -76,35 +80,11 @@ class backup_dataform_activity_task extends backup_activity_task {
 
         $base = preg_quote($CFG->wwwroot,"/");
 
-        // Link to the list of dataforms
+        // Index: id
         $search="/(".$base."\/mod\/dataform\/index.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@DFINDEX*$2@$', $content);
 
-        // Link to dataform by moduleid
-        $search = array(
-            "/(".$base."\/mod\/dataform\/view.php\?id\=)([0-9]+)/",
-            "/(".$base."\/mod\/dataform\/embed.php\?id\=)([0-9]+)/"
-        );
-        $replacement = array('$@DFVIEWBYID*$2@$', '$@DFEMBEDBYID*$2@$');
-        $content= preg_replace($search, $replacement, $content);
-
-        /// Link to dataform by dataform id
-        $search = array(
-            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)/",
-            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)/"
-        );
-        $replacement = array('$@DFVIEWBYD*$2@$', '$@DFEMBEDBYD*$2@$');
-        $content= preg_replace($search, $replacement, $content);
-
-        /// Link to one dataform view
-        $search = array(
-            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/",
-            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/"
-        );
-        $replacement = array('$@DFVIEWVIEW*$2*$4@$', '$@DFEMBEDVIEW*$2*$4@$');
-        $content= preg_replace($search, $replacement, $content);
-
-        /// Link to one dataform view and filter
+        // View/embed: d, view, filter
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/"
@@ -112,12 +92,36 @@ class backup_dataform_activity_task extends backup_activity_task {
         $replacement = array('$@DFVIEWVIEWFILTER*$2*$4*$6@$', '$@DFEMBEDVIEWFILTER*$2*$4*$6@$');
         $content= preg_replace($search, $replacement, $content);
 
-        /// Link to one entry of the dataform
+        // View/embed: d, view
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWVIEW*$2*$4@$', '$@DFEMBEDVIEW*$2*$4@$');
+        $content= preg_replace($search, $replacement, $content);
+
+        // View/embed: d, eid
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/"
         );
         $replacement = array('$@DFVIEWENTRY*$2*$4@$', '$@DFEMBEDENTRY*$2*$4@$');
+        $content= preg_replace($search, $replacement, $content);
+
+        // View/embed: id
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?id\=)([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?id\=)([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWBYID*$2@$', '$@DFEMBEDBYID*$2@$');
+        $content= preg_replace($search, $replacement, $content);
+
+        // View/embed: d
+        $search = array(
+            "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)/",
+            "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)/"
+        );
+        $replacement = array('$@DFVIEWBYD*$2@$', '$@DFEMBEDBYD*$2@$');
         $content= preg_replace($search, $replacement, $content);
 
         return $content;

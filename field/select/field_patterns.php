@@ -15,12 +15,12 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformfield-select
+ * @package dataformfield
+ * @subpackage select
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') or die();
+defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->dirroot/mod/dataform/field/field_patterns.php");
 
@@ -45,8 +45,19 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
 
         foreach ($tags as $cleantag => $tag) {
             if ($edit) {
-                $required = $this->is_required($tag);
-                $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry, $required)));
+                $params = array('required' => $this->is_required($tag));
+                $displayedit = array($this ,'display_edit');
+                switch ($cleantag) {
+                    case "[[$fieldname]]":
+                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
+                        break;
+                    case "[[$fieldname:addnew]]":
+                        $params['addnew'] = true;
+                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
+                        break;
+                    default:
+                        $replacements[$tag] = null;
+                }
             } else {
                 switch ($cleantag) {
                     case "[[$fieldname]]":
@@ -55,6 +66,8 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
                     case "[[$fieldname:cat]]":
                         $replacements[$tag] = array('html', $this->display_category($entry));
                         break;
+                    default:
+                        $replacements[$tag] = null;
                 }
             }
         }
@@ -65,12 +78,13 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         $field = $this->_field;
         $fieldid = $field->id();
-
         $entryid = $entry->id;
-        $options = $field->options_menu();
+        $menuoptions = $field->options_menu();
+        $fieldname = "field_{$fieldid}_$entryid";
+        $required = !empty($options['required']);
         $selected = 0;
         
         if ($entryid > 0){
@@ -79,17 +93,19 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
         
         // check for default value
         if (!$selected and $defaultval = $field->get('param2')) {
-            $selected = (int) array_search($defaultval, $options);
+            $selected = (int) array_search($defaultval, $menuoptions);
         }
 
-        $fieldname = "field_{$fieldid}_$entryid";
-        $this->render($mform, "{$fieldname}_selected", $options, $selected, $required);
+        $this->render($mform, "{$fieldname}_selected", $menuoptions, $selected, $required);
 
-        // add option
-        if ($field->get('param4') or has_capability('mod/dataform:managetemplates', $field->df()->context)) {
-            $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
-            $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
-        }
+        // Input field for adding a new option
+        if (!empty($options['addnew'])) {
+            if ($field->get('param4') or has_capability('mod/dataform:managetemplates', $field->df()->context)) {
+                $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
+                $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
+            }
+            return;
+        }        
     }
 
     /**
@@ -185,6 +201,7 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
+        $patterns["[[$fieldname:newvalue]]"] = array(false);
         $patterns["[[$fieldname:cat]]"] = array(false);
 
         return $patterns; 

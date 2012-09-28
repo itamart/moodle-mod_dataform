@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-nanogong
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -39,7 +39,7 @@ class mod_dataform_field_nanogong_patterns extends mod_dataform_field_file_patte
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         global $USER, $PAGE;
 
         $field = $this->_field;

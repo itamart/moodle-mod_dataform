@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformview
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -57,12 +57,21 @@ class mod_dataform_view_entries_form extends moodleform {
         $arr = array();
         $submitlabel = $submit ? $submit : get_string('savechanges');
         $arr[] = &$mform->createElement('submit', 'submitbutton', $submitlabel);
-        //$arr[] = &$mform->createElement('submit', 'submitreturnbutton', get_string('savecontinue', 'dataform'));
+        if ($this->add_action_save_continue()) {
+            $arr[] = &$mform->createElement('submit', 'submitreturnbutton', get_string('savecontinue', 'dataform'));
+        }
         if ($cancel) {
             $arr[] = &$mform->createElement('cancel');
         }
         $mform->addGroup($arr, 'buttonarr', null, ' ', false);
         $mform->addElement('html', '</div>');
+    }
+
+    /**
+     *
+     */
+    protected function add_action_save_continue() {
+        return false;
     }
 
     /**

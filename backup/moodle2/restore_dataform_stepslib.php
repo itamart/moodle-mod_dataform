@@ -41,6 +41,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
         $paths[] = new restore_path_element('dataform_view', '/activity/dataform/views/view');
+        $paths[] = new restore_path_element('dataform_rule', '/activity/dataform/rules/rule');
 
         if ($userinfo) {
             $paths[] = new restore_path_element('dataform_entry', '/activity/dataform/entries/entry');
@@ -225,6 +226,22 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     /**
      *
      */
+    protected function process_dataform_rule($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        $data->dataid = $this->get_new_parentid('dataform');
+
+        // insert the dataform_fields record
+        $newitemid = $DB->insert_record('dataform_rules', $data);
+        $this->set_mapping('dataform_rule', $oldid, $newitemid, false); // no files
+    }
+
+    /**
+     *
+     */
     protected function process_dataform_entry($data) {
         global $DB;
 
@@ -313,6 +330,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         // Add content related files, matching by item id (dataform_content)
         $this->add_related_files('mod_dataform', 'content', 'dataform_content');
 
+        // Add content related files, matching by item id (dataform_view)
+        // TODO it's not quite item id; need to add folders there
+        $this->add_related_files('mod_dataform', 'view', 'dataform_view');
+
         // TODO Add preset related files, matching by itemname (data_content)
         //$this->add_related_files('mod_dataform', 'course_presets', 'dataform');
 
@@ -345,6 +366,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
                 $DB->set_field('dataform', 'singleview', $singleview, array('id' => $dataformnewid));
             }
         }
+
+        // Update group mode if the original was set to internal mode
+        
+
 
         // Update id of userinfo fields if needed
         // TODO can we condition this on restore to new site?

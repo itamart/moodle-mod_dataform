@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-file
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -46,7 +46,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
             if ($edit) {
                 if ($cleantag == "[[$fieldname]]") {
                     $required = $this->is_required($tag);
-                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
                 } else {
                     $replacements[$tag] = '';
                 }
@@ -95,7 +95,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         $field = $this->_field;
         $fieldid = $field->id();
 
@@ -116,13 +116,14 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         // file manager
         $mform->addElement('filemanager', "{$fieldname}_filemanager", null, null, $fmoptions);
         $mform->setDefault("{$fieldname}_filemanager", $draftitemid);
+        $required = !empty($options['required']);
         if ($required) {
             $mform->addRule("{$fieldname}_filemanager", null, 'required', null, 'client');
         }
 
         // alt text
-        $options = array();
-        $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext','dataformfield_file'), $options);
+        $altoptions = array();
+        $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext','dataformfield_file'), $altoptions);
         $mform->setDefault("{$fieldname}_alttext", s($content1));
 
         // delete (only for multiple files)

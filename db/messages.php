@@ -17,21 +17,36 @@
 /**
  * Defines message providers (types of messages being sent)
  *
- * @package mod-dataform
+ * @package mod
+ * @package dataform
  * @copyright  2012 Itamar Tzadok
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $messageproviders = array (
 
-    // Submitting a feedback
-    'submission' => array (
+    'dataform_entryadded' => array (
+        'capability' => 'mod/dataform:notifyentryadded',
     ),
-    // Message to nonrespondents
-    'message' => array (
+
+    'dataform_entryupdated' => array (
+        'capability' => 'mod/dataform:notifyentryupdated',
     ),
-    // Message to nonrespondents
-    'paypal' => array (
-    )
+
+    'dataform_entrydeleted' => array (
+        'capability' => 'mod/dataform:notifyentrydeleted',
+    ),
+
+    'dataform_commentadded' => array (
+        'capability' => 'mod/dataform:notifycommentadded',
+    ),
+
+    'dataform_ratingadded' => array (
+        'capability' => 'mod/dataform:notifyratingadded',
+    ),
+
+    'dataform_ratingupdated' => array (
+        'capability' => 'mod/dataform:notifyratingadded',
+    ),
 
 );

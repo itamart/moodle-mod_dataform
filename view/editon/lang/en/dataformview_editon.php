@@ -15,8 +15,8 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @subpackage dataformview-addentry
+ * @package dataformview
+ * @subpackage editon
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,6 +29,8 @@ $string['responsetimeout'] = 'Response timeout';
 $string['returncaller'] = 'Return to caller view';
 $string['returnnew'] = 'Open new entry form';
 $string['returnself'] = 'Show link to add a new entry';
+$string['showcancel'] = 'Show \'cancel\' button';
+$string['showsavecontinue'] = 'Show \'save and continue\' button';
 $string['submitfailure'] = 'Your submission could not be saved. Please try again.';
 $string['submitlabel'] = 'Submit button label';
 $string['submitreturn'] = 'Return after submission';

@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
+ * @package dataformfield
  * @package field-time
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -44,7 +44,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         foreach ($tags as $cleantag => $tag) {
             if ($edit) {
                 $required = $this->is_required($tag);
-                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $required)));
+                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
 
             } else {
                 $format = (strpos($tag, "{$fieldname}:") !== false ? str_replace("{$fieldname}:", '', trim($tag, '[]')) : '');
@@ -66,7 +66,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    public function display_edit(&$mform, $entry, $required = false) {
+    public function display_edit(&$mform, $entry, array $options = null) {
         $fieldid = $this->_field->id();
         $entryid = $entry->id;
         
@@ -79,6 +79,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         $fieldname = "field_{$fieldid}_{$entryid}";
         $mform->addElement('date_time_selector', $fieldname, null, array('optional' => true));
         $mform->setDefault($fieldname, $content);
+        $required = !empty($options['required']);
         if ($required) {
             $mform->addRule($fieldname, null, 'required', null, 'client');
         }

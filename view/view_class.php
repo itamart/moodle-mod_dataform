@@ -15,7 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package dataformview
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -1345,8 +1345,11 @@ class dataform_view_base {
                                                     '',
                                                     true);
                      // standard paging bar case
-                    } else if (isset($params['entriescount']) and isset($params['entriesfiltercount'])
+                    } else if (!empty($filter->perpage)
+                                and isset($params['entriescount'])
+                                and isset($params['entriesfiltercount'])
                                 and $params['entriescount'] != $params['entriesfiltercount']) {
+                                
                         $pagingbar = new paging_bar($params['entriesfiltercount'],
                                                     $filter->page,
                                                     $filter->perpage,
@@ -1491,8 +1494,8 @@ class dataform_view_base {
         $menufilters = $this->get_filters(null, true);
 
         // TODO check session
-        $menufilters[dataform::USER_FILTER] = get_string('filteruserpref', 'dataform');
-        $menufilters[dataform::USER_FILTER_RESET] = get_string('filteruserreset', 'dataform');
+        $menufilters[dataform_filter_manager::USER_FILTER] = get_string('filteruserpref', 'dataform');
+        $menufilters[dataform_filter_manager::USER_FILTER_RESET] = get_string('filteruserreset', 'dataform');
 
         $baseurl = $this->_baseurl->out_omit_querystring();
         $baseurlparams = array('d' => $this->_df->id(),
@@ -1526,9 +1529,9 @@ class dataform_view_base {
         $baseurlparams = array('d' => $this->_df->id(),
                                 'sesskey' => sesskey(),
                                 'view' => $this->view->id,
-                                'filter' => dataform::USER_FILTER_SET);
+                                'filter' => dataform_filter_manager::USER_FILTER_SET);
 
-        if ($filter->id == dataform::USER_FILTER and $filter->search) {
+        if ($filter->id == dataform_filter_manager::USER_FILTER and $filter->search) {
             $searchvalue = $filter->search;
         } else {
             $searchvalue = '';
@@ -1576,9 +1579,9 @@ class dataform_view_base {
         $baseurlparams = array('d' => $this->_df->id(),
                                 'sesskey' => sesskey(),
                                 'view' => $this->view->id,
-                                'filter' => dataform::USER_FILTER_SET);
+                                'filter' => dataform_filter_manager::USER_FILTER_SET);
 
-        if ($filter->id == dataform::USER_FILTER and $filter->perpage) {
+        if ($filter->id == dataform_filter_manager::USER_FILTER and $filter->perpage) {
             $perpagevalue = $filter->perpage;
         } else {
             $perpagevalue = 0;
