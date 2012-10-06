@@ -334,5 +334,14 @@ function xmldb_dataform_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2012092002, 'dataform');
     }
 
+    if ($oldversion < 2012092207) {
+        // Change type of view matrix/matrixext to grid/gridext
+        $DB->set_field('dataform_views', 'type', 'grid', array('type' => 'matrix'));
+        $DB->set_field('dataform_views', 'type', 'gridext', array('type' => 'matrixext'));
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012092207, 'dataform');
+    }
+
     return true;
 }

@@ -16,7 +16,7 @@
  
 /**
  * @package dataformfield
- * @package field-file
+ * @subpackage file
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -122,14 +122,14 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         }
 
         // alt text
-        $altoptions = array();
-        $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext','dataformfield_file'), $altoptions);
-        $mform->setDefault("{$fieldname}_alttext", s($content1));
+        //$altoptions = array();
+        //$mform->addElement('text', "{$fieldname}_alttext", get_string('alttext','dataformfield_file'), $altoptions);
+        //$mform->setDefault("{$fieldname}_alttext", s($content1));
 
         // delete (only for multiple files)
-        if ($field->get('param2') > 1) {
-            $mform->addElement('checkbox', "{$fieldname}_delete", get_string('clearcontent','dataformfield_file'));
-        }
+        //if ($field->get('param2') > 1) {
+        //    $mform->addElement('checkbox', "{$fieldname}_delete", get_string('clearcontent','dataformfield_file'));
+        //}
     }
 
     /**

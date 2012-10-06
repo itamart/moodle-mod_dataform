@@ -16,7 +16,7 @@
  
 /**
  * @package dataformfield
- * @package field-checkbox
+ * @subpackage checkbox
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -49,4 +49,33 @@ class mod_dataform_field_checkbox_patterns extends mod_dataform_field_multiselec
         }
         // add checkbox controller
     }
+    
+    /**
+     *
+     */
+    public function validate_data($entryid, $tags, $data) {
+        $field = $this->_field;
+        $fieldid = $field->id();
+        $fieldname = $field->name();
+
+        $formfieldname = "field_{$fieldid}_{$entryid}_selected";
+        $tags = $this->add_clean_pattern_keys($tags);
+
+        // only [[$fieldname]] is editable so check it if exists
+        if (array_key_exists("[[$fieldname]]", $tags) and $this->is_required($tags["[[$fieldname]]"])) {
+            $emptyfield  = true;
+            foreach ($field->options_menu() as $key => $unused) {
+                $formelementname = "{$formfieldname}_$key";
+                if (!empty($data->$formelementname)) {
+                    $emptyfield = false;
+                    break;
+                }
+            }
+            if ($emptyfield) {
+                return array("{$fieldname}_grp", get_string('fieldrequired', 'dataform'));
+            }
+        }
+        return null;
+    }
+    
 }

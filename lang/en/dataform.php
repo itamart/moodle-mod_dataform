@@ -176,6 +176,7 @@ $string['fieldnotmatched'] = 'The following fields in your file are not known in
 $string['fieldoptionsdefault'] = 'Default values (one per line)';
 $string['fieldoptions'] = 'Options (one per line)';
 $string['fieldoptionsseparator'] = 'Options separator';
+$string['fieldrequired'] = 'You must supply a value here.';
 $string['fieldrules'] = 'Field edit rules';
 $string['fieldsadded'] = 'Fields added';
 $string['fieldsconfirmdelete'] = 'You are about to delete {$a} field(s). Would you like to proceed?';
@@ -271,12 +272,12 @@ $string['maxsize'] = 'Maximum size';
 $string['mediafile'] = 'Media file';
 $string['menus'] = 'Menus';
 /// Message strings
-$string['message_entryadded'] = 'Dataform entry added.';
-$string['message_entryupdated'] = 'Dataform entry updated.';
-$string['message_entrydeleted'] = 'Dataform entry deleted.';
-$string['message_commentadded'] = 'Dataform comment added.';
-$string['message_ratingadded'] = 'Dataform rating added.';
-$string['message_ratingupdated'] = 'Dataform rating updated.';
+$string['message_entryadded'] = 'Dataform entry added';
+$string['message_entryupdated'] = 'Dataform entry updated';
+$string['message_entrydeleted'] = 'Dataform entry deleted';
+$string['message_commentadded'] = 'Dataform comment added';
+$string['message_ratingadded'] = 'Dataform rating added';
+$string['message_ratingupdated'] = 'Dataform rating updated';
 /// End Message strings
 /// Message provider strings
 $string['messageprovider:dataform_entryadded'] = 'Dataform entry added';
@@ -309,6 +310,7 @@ $string['noaccess'] = 'You do not have access to this page';
 $string['nomatch'] = 'No matching entries found!';
 $string['nomaximum'] = 'No maximum';
 $string['notapproved'] = 'Entry is not approved yet.';
+$string['notificationenable'] = 'Enable notifications for';
 $string['notinjectivemap'] = 'Not an injective map';
 $string['notopenyet'] = 'Sorry, this activity is not available until {$a}';
 $string['numberrssarticles'] = 'RSS articles';

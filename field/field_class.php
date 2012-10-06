@@ -36,7 +36,7 @@ abstract class dataform_field_base {
     public $df = null;       // The dataform object that this field belongs to
     public $field = null;      // The field object itself, if we know it
 
-    protected $_patterns = null;      // The field object itself, if we know it
+    protected $_patterns = null;
 
     /**
      * Class constructor
@@ -316,7 +316,6 @@ abstract class dataform_field_base {
 
         $fieldid = $this->field->id;
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-
         list($contents, $oldcontents) = $this->format_content($entry, $values);
 
         $rec = new object();
@@ -483,18 +482,20 @@ abstract class dataform_field_base {
         $fieldid = $this->field->id;
         $oldcontents = array();
         $contents = array();
-        // old contents
+        // old content
         if (isset($entry->{"c{$fieldid}_content"})) {
-            $oldcontents[] = $entry->{"c{$fieldid}_content"};
+            $oldcontent = $entry->{"c{$fieldid}_content"};
+        } else {
+            $oldcontent = null;
         }
-        // new contents
+        // new content
         if (!empty($values)) {
-            $content = (string) clean_param(reset($values), PARAM_NOTAGS);
-                if (!empty($content)) {
-                $contents[] = $content;
-            }
+            $content = reset($values);
+            $content = (string) clean_param($content, PARAM_NOTAGS);
+        } else {
+            $content = null;
         }
-        return array($contents, $oldcontents);
+        return array(array($content), array($oldcontent));
     }
 
     /**
@@ -602,8 +603,7 @@ abstract class dataform_field_base {
      * Validate form data in entries form
      */
     public function validate($eid, $patterns, $formdata) {
-        //return $this->_patterns->validate_data($eid, $patterns, $formdata);
-        return null;
+        return $this->_patterns->validate_data($eid, $patterns, $formdata);
     }
 
     /**

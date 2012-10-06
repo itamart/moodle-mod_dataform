@@ -38,11 +38,12 @@ class dataform_view_base {
 
     protected $_df = NULL;           // The dataform object that this view belongs to
     protected $_filter = null;
+    protected $_patterns = null;
 
     protected $_editors = array('section');
-    protected $_patterns = array();
     protected $_entries = null;
 
+    protected $_tags = array();
     protected $_baseurl = '';
 
     protected $_notifications = array('good' => array(), 'bad' => array());
@@ -313,32 +314,6 @@ class dataform_view_base {
     /**
      *
      */
-    public function set_filter($fid = 0, $eids = null, $page = 0) {
-        // set filter
-        $filter = $this->filter_options();
-        if (!$filterid = $filter['filterid']) {
-            $filterid = $fid;
-        }
-        $this->_filter = $this->_df->get_filter_manager()->get_filter_from_id($filterid);
-        // set specific entry id, if requested
-        $this->_filter->eids = $eids;
-        // add view specific perpage
-        if ($filter['perpage']) {
-            $this->_filter->perpage = $filter['perpage'];
-        }
-        // add view specific groupby
-        if ($filter['groupby']) {
-            $this->_filter->groupby = $filter['groupby'];
-        }
-        // add page
-        $this->_filter->page = !empty($filter['page']) ? $filter['page'] : $page;
-        // content fields
-        $this->_filter->contentfields = array_keys($this->get__patterns('field'));
-    }
-
-    /**
-     *
-     */
     public function set_page($page = null) {
     }
 
@@ -372,12 +347,21 @@ class dataform_view_base {
         $processed = $this->process_entries_data();
         if (is_array($processed)) {
             list($strnotify, $processedeids) = $processed;
-            if ($processedeids) {
-               $this->_notifications['good']['entries'] = $strnotify;
-            } else {
-               $this->_notifications['bad']['entries'] = $strnotify;
-            }
+        } else {
+            list($strnotify, $processedeids) = array('', '');
         }
+        
+        if ($processedeids) {
+           $this->_notifications['good']['entries'] = $strnotify;
+        } else if ($strnotify) {
+           $this->_notifications['bad']['entries'] = $strnotify;
+        }
+
+        if ($processedeids and $this->_editentries and !$this->_returntoentriesform) {
+            $this->_filter->eids = $this->_editentries;
+            $this->_editentries = '';
+        }
+
         return $processed;
     }
 
@@ -413,6 +397,13 @@ class dataform_view_base {
         }
         // do we need comments?
 
+        // Hacking here the case of add new entry form that doesn't display any existing entries
+        // This would be the case when view perpage is set to 1
+        if ($this->_editentries < 0 and $this->view->perpage == 1) {
+            return;
+        }
+        
+        // Get the entries
         $this->_entries->set_content($options);
     }
 
@@ -502,9 +493,9 @@ class dataform_view_base {
     public function get_view_fields() {
         $viewfields = array();
 
-        if (!empty($this->_patterns['field'])) {
+        if (!empty($this->_tags['field'])) {
             $fields = $this->_df->get_fields();
-            foreach (array_keys($this->_patterns['field']) as $fieldid) {
+            foreach (array_keys($this->_tags['field']) as $fieldid) {
                 if (array_key_exists($fieldid, $fields)) {
                     $viewfields[$fieldid] = $fields[$fieldid];
                 }
@@ -592,15 +583,48 @@ class dataform_view_base {
     /**
      *
      */
-    public function supports_activity_grading() {
-        return true;
+    public function set_filter($fid = 0, $eids = null, $page = 0) {
+        // set filter
+        $filter = $this->filter_options();
+        if (!$filterid = $filter['filterid']) {
+            $filterid = $fid;
+        }
+        $this->_filter = $this->_df->get_filter_manager()->get_filter_from_id($filterid);
+        // set specific entry id, if requested
+        $this->_filter->eids = $eids;
+        // add view specific perpage
+        if ($filter['perpage']) {
+            $this->_filter->perpage = $filter['perpage'];
+        }
+        // add view specific groupby
+        if ($filter['groupby']) {
+            $this->_filter->groupby = $filter['groupby'];
+        }
+        // add page
+        $this->_filter->page = !empty($filter['page']) ? $filter['page'] : $page;
+        // content fields
+        $this->_filter->contentfields = array_keys($this->get__patterns('field'));
     }
 
     /**
      *
      */
-    public function general_tags() {
-        return $this->patterns();
+    public function is_forcing_filter() {
+        return $this->view->filter;
+    }
+
+    /**
+     *
+     */
+    public function get_filter() {
+        return $this->_filter;
+    }
+
+    /**
+     *
+     */
+    public function get_filters($exclude = null, $menu = false, $forceget = false) {
+        return $this->_df->get_filter_manager()->get_filters($exclude, $menu, $forceget);
     }
 
     /**
@@ -612,6 +636,13 @@ class dataform_view_base {
         $options['perpage'] = $this->view->perpage;
         $options['groupby'] = $this->view->groupby;
         return $options;
+    }
+
+    /**
+     *
+     */
+    public function get_baseurl() {
+        return $this->_baseurl;
     }
 
     /**
@@ -670,20 +701,6 @@ class dataform_view_base {
     /**
      *
      */
-    public function get_filter() {
-        return $this->_filter;
-    }
-
-    /**
-     *
-     */
-    public function get_filters($exclude = null, $menu = false, $forceget = false) {
-        return $this->_df->get_filter_manager()->get_filters($exclude, $menu, $forceget);
-    }
-
-    /**
-     *
-     */
     public function editors() {
         $editors = array();
 
@@ -705,28 +722,20 @@ class dataform_view_base {
     /**
      *
      */
-    public function patterns_exist($text) {
-        $usedpatterns = array();
-        // all this nasty nesting due to Moodle implementation of nested select
-        foreach ($this->patterns() as $patternset) {
-            foreach ($patternset as $patterns) {
-                foreach ($patterns as $pattern) {
-                    if (strpos($text, $pattern)) {
-                        $usedpatterns[] = $pattern;
-                    }
-                }
-            }
+    public function patterns() {
+        if (!$this->_patterns) {
+            require_once('view_patterns.php');
+            $this->_patterns = new mod_dataform_view_patterns($this);
         }
-
-        return $usedpatterns;
+        return $this->_patterns;
     }
 
     /**
      *
      */
-    public function set_view_tags($params) {
-        $tags = $this->_patterns['view'];
-        $replacements = $this->get_tags_replacements($this->patterns($tags, $params));
+    public function set_view_tags($options) {
+        $tags = $this->_tags['view'];
+        $replacements = $this->patterns()->get_replacements($tags, null, $options);
         $this->view->esection = str_replace($tags, $replacements, $this->view->esection);
     }
 
@@ -735,9 +744,9 @@ class dataform_view_base {
      */
     public function get__patterns($set = null) {
         if (is_null($set)) {
-            return $this->_patterns;
+            return $this->_tags;
         } else if ($set == 'view' or $set == 'field') {
-            return $this->_patterns[$set];
+            return $this->_tags[$set];
         } else {
             return false;
         }
@@ -767,9 +776,9 @@ class dataform_view_base {
         if (empty($set) or $set == 'field') {
             // find which fields actually display files/images in the view
             $fids = array();
-            if (!empty($this->_patterns['field'])) {
+            if (!empty($this->_tags['field'])) {
                 $fields = $this->_df->get_fields();
-                foreach ($this->_patterns['field'] as $fieldid => $tags) {
+                foreach ($this->_tags['field'] as $fieldid => $tags) {
                     if (array_intersect($tags, $fields[$fieldid]->patterns()->pluginfile_patterns())) {
                         $fids[] = $fieldid;
                     }
@@ -806,110 +815,12 @@ class dataform_view_base {
             }
             $groupedelements[$name] = $this->group_entries_definition($definitions, $name);
         }
-        // Add activity grading definitions if applicable
-        if ($this->supports_activity_grading() and $this->is_grading() and $users = $this->_df->get_gradebook_users($this->_filter->users)) {
-            $elements = $this->activity_grading_definition($users, $display_definition, $groupedelements);
-
-        // otherwise just flatten the elements
-        } else {
-            $elements = array();
-            foreach ($groupedelements as $group) {
-                $elements = array_merge($elements, $group);
-            }
-        }
-        
-        return $elements;
-    }
-
-    /**
-     * @param object $entry
-     */
-    public function activity_grading_definition($users, $display_definition, $groupedelements) {
-        global $CFG, $USER, $DB, $OUTPUT;
-
-        require_once("$CFG->dirroot/mod/dataform/field/_rating/lib.php");
-
-        // add grading to users
-        $rm = new dataform_rating_manager();
-        $gradingoptions = $this->get_grading_options();
-        $gradingoptions->items = $users;
-        $users = $rm->get_ratings($gradingoptions);
-
-        list(
-            $gradeinputtype,
-            $commentinputtype,
-            $showuserpicture,
-            $showusername,
-            $showuseridnumber,
-            $showsubmissionsinpopup
-        ) = explode(',', $this->view->param1);
-
-        // Get from display_definition array(userid => groupname)
-        $groupuserids = array();
-        foreach ($display_definition as $name => $entriesset) {
-            if (!empty($entriesset)) {
-                // get the userid from the entry of the first item 
-                list($entry,,) = reset($entriesset);
-                $groupuserids[$entry->userid] = $name;
-            }
-        }
-        
-        $usernamefield = $this->_df->get_field_from_id(dataform::_USERNAME);
-        $userpicfield = $this->_df->get_field_from_id(dataform::_USERPICTURE);
-        $gradefield = $this->_df->get_field_from_id(dataform::_RATING);
-        $commentfield = $this->_df->get_field_from_id(dataform::_COMMENT);
-
+        // Flatten the elements
         $elements = array();
-        $elements[] = array('html', html_writer::start_tag('table', array('class' => 'generaltable')));
-        // Iterate gradebook users and add comment and grader to their definitions
-        foreach ($users as $userid => $user) {
-            if (!empty($groupuserids[$userid])) {
-                $name = $groupuserids[$userid];
-            } else {
-                $user->userid = $userid;
-                $name = $usernamefield->patterns()->display_name($user);
-            }
-
-            // user name definitions
-            if ($showusername) {
-                $username = $name;
-            }
-            
-            // user name definitions
-            if ($showuserpicture) {
-                $user->uid = $user->id;
-                $userpicture = $userpicfield->patterns()->display_picture($user);
-            }
-            
-            // grading input type definitions
-            if ($gradeinputtype) {
-                $gradeinput = $gradefield->patterns()->render_rating($user);
-            }
-            
-            // comment input type definitions
-            if ($commentinputtype) {
-                $options = (object) array('id' => $userid);
-                $commentinput = $commentfield->patterns()->display_browse($options, 'activity');
-            }
-            
-            // open row
-            $tdattr = array('style' => 'vertical-align:top;');           
-            $elements[] = array('html', html_writer::start_tag('tr'));
-            $elements[] = array('html', html_writer::nonempty_tag('td', $userpicture, $tdattr));
-            $elements[] = array('html', html_writer::nonempty_tag('td', $username, $tdattr));
-            $elements[] = array('html', html_writer::nonempty_tag('td', $gradeinput, $tdattr));
-            $elements[] = array('html', html_writer::nonempty_tag('td', $commentinput, $tdattr));
-            $elements[] = array('html', html_writer::start_tag('td', $tdattr));
-            if (isset($groupedelements[$name])) {
-                $elements = array_merge($elements, $groupedelements[$name]);
-            }
-            $elements[] = array('html', html_writer::end_tag('td'));
-
-            // close row            
-            $elements[] = array('html', html_writer::end_tag('tr'));
+        foreach ($groupedelements as $group) {
+            $elements = array_merge($elements, $group);
         }
-        $elements[] = array('html', html_writer::end_tag('table'));
-        // grade input type definitions
+        
         return $elements;
     }
 
@@ -986,33 +897,33 @@ class dataform_view_base {
         // new view or from DB so set the _patterns property
         if (is_null($data)) {
             if (!empty($this->view->patterns)) {
-                $this->_patterns = unserialize($this->view->patterns);
+                $this->_tags = unserialize($this->view->patterns);
             } else {
-                $this->_patterns = array('view' => array(), 'field' => array());
+                $this->_tags = array('view' => array(), 'field' => array());
             }
 
         // view from form or editor areas updated
         } else {
-            $this->_patterns = array('view' => array(), 'field' => array());
+            $this->_tags = array('view' => array(), 'field' => array());
             $text = '';
             foreach ($this->_editors as $editor) {
                 $text .= !empty($data->{"e$editor"}) ? ' '. $data->{"e$editor"} : '';
             }
 
             if (trim($text)) {
-                if ($patterns = $this->patterns_exist($text)) {
-                    $this->_patterns['view'] = $patterns;
+                if ($patterns = $this->patterns()->search($text)) {
+                    $this->_tags['view'] = $patterns;
                 }
                 if ($fields = $this->_df->get_fields()) {
                     foreach ($fields as $fieldid => $field) {
                         if ($patterns = $field->patterns()->search($text)) {
-                            $this->_patterns['field'][$fieldid] = $patterns;
+                            $this->_tags['field'][$fieldid] = $patterns;
                         }
                     }
                 }
 
             }
-            $this->view->patterns = serialize($this->_patterns);
+            $this->view->patterns = serialize($this->_tags);
         }
     }
 
@@ -1031,348 +942,6 @@ class dataform_view_base {
     }
 
     /**
-     * @param array $patterns array of arrays of pattern replacement pairs
-     */
-    protected function get_tags_replacements($patterns) {
-        $replacements = array();
-        foreach ($patterns as $tag => $val) {
-            $replacements[$tag] = $val;
-        }
-
-        return $replacements;
-    }
-
-    /**
-     *
-     */
-    protected function patterns($tags = null, $params = null) {
-        global $CFG, $OUTPUT;
-
-        $info = array(
-            '##numentriestotal##',
-            '##numentriesdisplayed##',
-        );
-
-        $menus = array(
-            '##viewsmenu##',
-            '##filtersmenu##'
-        );
-
-        $userpref = array(
-            '##quicksearch##',
-            '##quickperpage##',
-            '##quickreset##'
-        );
-
-        $generalactions = array(
-            '##addnewentry##',
-            '##addnewentries##',
-            '##selectallnone##',
-            '##multiduplicate##',
-            '##multiedit##',
-            '##multiedit:icon##',
-            '##multidelete##',
-            '##multidelete:icon##',
-            '##multiapprove##',
-            '##multiapprove:icon##',
-            '##multiexport##',
-            '##multiexport:icon##',
-            '##multiexport:csv##',
-            '##multiimport##',
-            '##multiimporty:icon##',
-        );
-
-        // if no tags are requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array(
-                'info' => array('info' => array()),
-                'menus' => array('menus' => array()),
-                'userpref' => array('userpref' => array()),
-                'generalactions' => array('generalactions' => array())
-            );
-            foreach ($patterns as $set => $unused) {
-                foreach (${$set} as $pattern) {
-                    $patterns[$set][$set][$pattern] = $pattern;
-                }
-            }
-
-        } else {
-
-            $patterns = array();
-            $filter = $this->_filter;
-            $baseurl = htmlspecialchars_decode($this->_baseurl. '&sesskey='. sesskey());
-            // TODO: move to a view attribute so as to call only once
-            // Can this user registered or anonymous add entries
-            $usercanaddentries = $this->_df->user_can_manage_entry();
-
-            foreach ($tags as $tag) {
-                if (in_array($tag, $info)) {
-                    switch ($tag) {
-                        case '##numentriestotal##':
-                            $patterns[$tag] = empty($params['entriescount']) ? 0 : $params['entriescount'];
-                            break;
-
-                        case '##numentriesdisplayed##':
-                            $patterns[$tag] = empty($params['entriesfiltercount']) ? 0 : $params['entriesfiltercount'];
-                            break;
-                    }
-
-                } else if (in_array($tag, $menus)) {
-                    switch ($tag) {
-                        case '##viewsmenu##':
-                            $patterns[$tag] = $this->print_views_menu($filter, true);
-                            break;
-
-                        case '##filtersmenu##':
-                            if ($this->view->filter or (!$filter->id and empty($params['entriescount']))) {
-                                $patterns[$tag] = '';
-                            } else {
-                                $patterns[$tag] = $this->print_filters_menu($filter, true);
-                            }
-                            break;
-                    }
-
-                } else if (in_array($tag, $userpref)) {
-                    if ($this->view->filter or (!$filter->id and empty($params['entriescount']))) {
-                        $patterns[$tag] = '';
-                    } else {
-                        switch ($tag) {
-                            case '##quicksearch##':
-                                $patterns[$tag] = $this->print_quick_search($filter, true);
-                                break;
-
-                            case '##quickperpage##':
-                                $patterns[$tag] = $this->print_quick_perpage($filter, true);
-                                break;
-
-                        }
-                    }
-
-                } else if (in_array($tag, $generalactions)) {
-                    $showentryactions = (!empty($params['showentryactions'])
-                                            or has_capability('mod/dataform:manageentries', $this->_df->context));
-                    switch ($tag) {
-                        case '##addnewentry##':
-                        case '##addnewentries##':
-                            if (empty($params['hidenewentry']) and $usercanaddentries) {
-                                if ($tag == '##addnewentry##') {
-                                    if (!empty($this->_df->data->singleedit)) {
-                                        $editurl = preg_replace('/([\s\S]+)view=\d+([\s\S]*)/', '$1view='. $this->_df->data->singleedit. '$2', $baseurl). '&new=1';
-                                    } else {
-                                        $editurl = $baseurl. '&new=1';
-                                    }
-                                    $label = html_writer::tag('span', get_string('entryaddnew', 'dataform'));
-                                    $patterns[$tag] =
-                                        html_writer::link($editurl, $label, array('class' => 'addnewentry'));
-                                } else {
-                                    $range = range(1, 20);
-                                    $options = array_combine($range, $range);
-                                    $select = new single_select(new moodle_url($baseurl), 'new', $options, null, array(0 => get_string('dots', 'dataform')), 'newentries_jump');
-                                    $select->set_label(get_string('entryaddmultinew','dataform'). '&nbsp;');
-                                    $patterns[$tag] = $OUTPUT->render($select);
-                                }
-                            } else {
-                                 $patterns[$tag] = '';
-                            }
-
-                            break;
-
-                        case '##multiduplicate##':
-                            $patterns[$tag] =
-                                html_writer::empty_tag('input',
-                                                        array('type' => 'button',
-                                                                'name' => 'multiduplicate',
-                                                                'value' => get_string('multiduplicate', 'dataform'),
-                                                                'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'duplicate\')'));
-                            break;
-
-                        case '##multiedit##':
-                            if (!$showentryactions) {
-                                $str = '';
-                            } else {
-                                $str = html_writer::empty_tag('input',
-                                                        array('type' => 'button',
-                                                                'name' => 'multiedit',
-                                                                'value' => get_string('multiedit', 'dataform'),
-                                                                'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'editentries\')'));
-                            }
-                            $patterns[$tag] = $str;
-                            break;
-
-                        case '##multiedit:icon##':
-                            if (!$showentryactions) {
-                                $str = '';
-                            } else {
-                                $str = html_writer::tag('button',
-                                            $OUTPUT->pix_icon('t/edit', get_string('multiedit', 'dataform')),
-                                            array('type' => 'button',
-                                                    'name' => 'multiedit',
-                                                    'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'editentries\')'));
-                            }
-                            $patterns[$tag] = $str;
-                            break;
-
-                        case '##multidelete##':
-                            if (!$showentryactions) {
-                                $str = '';
-                            } else {
-                                $str = html_writer::empty_tag('input',
-                                                        array('type' => 'button',
-                                                                'name' => 'multidelete',
-                                                                'value' => get_string('multidelete', 'dataform'),
-                                                                'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'delete\')'));
-                            }
-                            $patterns[$tag] = $str;
-                            break;
-
-                        case '##multidelete:icon##':
-                            if (!$showentryactions) {
-                                $str = '';
-                            } else {
-                                $str = html_writer::tag('button',
-                                            $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')),
-                                            array('type' => 'button',
-                                                    'name' => 'multidelete',
-                                                    'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'delete\')'));
-                            }
-                            $patterns[$tag] = $str;
-                            break;
-
-                        case '##multiapprove##':
-                        case '##multiapprove:icon##':
-                            if ($this->_df->data->approval and has_capability('mod/dataform:approve', $this->_df->context)) {
-                                if ($tag == '##multiapprove##') {
-                                    $patterns[$tag] =
-                                        html_writer::empty_tag('input',
-                                                                array('type' => 'button',
-                                                                        'name' => 'multiapprove',
-                                                                        'value' => get_string('multiapprove', 'dataform'),
-                                                                        'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'approve\')'));
-                                } else {
-                                    $patterns[$tag] =
-                                        html_writer::tag('button',
-                                                    $OUTPUT->pix_icon('i/tick_green_big', get_string('multiapprove', 'dataform')),
-                                                    array('type' => 'button',
-                                                            'name' => 'multiapprove',
-                                                            'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'approve\')'));
-                                }
-                            } else {
-                                $patterns[$tag] = '';
-                            }
-                            break;
-
-                        case '##multiexport##':
-                            $buttonval = get_string('multiexport', 'dataform');
-                        case '##multiexport:icon##':
-                            $buttonval = !isset($buttonval) ? $OUTPUT->pix_icon('t/portfolioadd', get_string('multiexport', 'dataform')) : $buttonval;
-                        case '##multiexport:csv##':
-                            $format = !isset($format) ? 'spreadsheet' : $format;
-                            $buttonval = !isset($buttonval) ? $OUTPUT->pix_icon('f/ods', get_string('multiexport', 'dataform')) : $buttonval;
-
-                            if (!empty($CFG->enableportfolios)) {
-                                if (!empty($format)) {
-                                    $baseurl = "$baseurl&format=$format";
-                                }
-                                //list(,$ext,) = explode(':', $tag);
-                                $patterns[$tag] =
-                                    html_writer::tag('button',
-                                            $buttonval,
-                                            array('type' => 'button',
-                                                    'name' => 'multiexport',
-                                                    'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl. '\'&#44; \'export\'&#44;-1)'));
-                            } else {
-                                $patterns[$tag] = '';
-                            }
-                            break;
-
-                        case '##selectallnone##':
-                            $patterns[$tag] =
-                                    html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'entry\'&#44;this.checked)'));
-
-                            break;
-                    }
-                }
-            }
-        }
-        $patterns = array_merge_recursive($patterns, $this->paging_bar_patterns($tags, $params));
-
-        return $patterns;
-    }
-
-    /**
-     *
-     */
-    protected function paging_bar_patterns($tags = null,$params = null) {
-        global $OUTPUT;
-
-        // if no tags are requested, return select menu
-        if (is_null($tags)) {
-            $patterns = array('pagingbar' => array('pagingbar' => array()));
-            // TODO use get strings
-            $patterns['pagingbar']['pagingbar']['##pagingbar##'] = '##pagingbar##';
-
-
-        } else {
-            $patterns = array();
-            $pagingbar = '';
-            foreach ($tags as $tag) {
-                if ($tag == '##pagingbar##') {
-                    $filter = $this->_filter;
-
-                    // typical entry 'more' request. If not single view (1 per page) show return to list instead of paging bar
-                    if (!empty($filter->eids)) {
-                        $url = new moodle_url($this->_baseurl);
-                        // Add page
-                        if ($filter->page) {
-                            $url->param('page', $filter->page);
-                        }
-                        // Change view to caller
-                        if ($ret = optional_param('ret', 0, PARAM_INT)) {
-                            $url->param('view', $ret);
-                        }
-                        // Remove eids so that we return to list
-                        $url->remove_params('eids');
-                        // Make the link
-                        $pagingbar = html_writer::link($url->out(false), get_string('viewreturntolist', 'dataform'));
-
-                    // typical groupby, one group per page case. show paging bar as per number of groups
-                    } else if (isset($this->_filter->pagenum)) {
-                        $pagingbar = new paging_bar($filter->pagenum,
-                                                    $filter->page,
-                                                    1,
-                                                    $this->_baseurl. '&amp;',
-                                                    'page',
-                                                    '',
-                                                    true);
-                     // standard paging bar case
-                    } else if (!empty($filter->perpage)
-                                and isset($params['entriescount'])
-                                and isset($params['entriesfiltercount'])
-                                and $params['entriescount'] != $params['entriesfiltercount']) {
-                                
-                        $pagingbar = new paging_bar($params['entriesfiltercount'],
-                                                    $filter->page,
-                                                    $filter->perpage,
-                                                    $this->_baseurl. '&amp;',
-                                                    'page',
-                                                    '',
-                                                    true);
-                    }
-
-                    break;
-                }
-            }
-
-            if ($pagingbar instanceof paging_bar) {
-               $patterns['##pagingbar##'] = $OUTPUT->render($pagingbar);
-            } else {
-               $patterns['##pagingbar##'] = $pagingbar;
-            }
-        }
-        return $patterns;
-    }
-
-    /**
      *
      */
     protected function get_field_definitions($entry, $options) {
@@ -1380,7 +949,7 @@ class dataform_view_base {
         $entry->baseurl = $this->_baseurl;
 
         $definitions = array();
-        foreach ($this->_patterns['field'] as $fieldid => $patterns) {
+        foreach ($this->_tags['field'] as $fieldid => $patterns) {
             if (!isset($fields[$fieldid])) {
                 continue;
             } 
@@ -1400,9 +969,9 @@ class dataform_view_base {
         $fieldid = $this->_filter->groupby;
         $groupbyvalue = '';
 
-        if (array_key_exists($fieldid, $this->_patterns['field'])) {
+        if (array_key_exists($fieldid, $this->_tags['field'])) {
             // first pattern
-            $pattern = reset($this->_patterns['field'][$fieldid]);
+            $pattern = reset($this->_tags['field'][$fieldid]);
             $field = $fields[$fieldid];
             if ($definition = $field->get_definitions(array($pattern), $entry)) {
                $groupbyvalue = $definition[$pattern][1];
@@ -1457,152 +1026,6 @@ class dataform_view_base {
     }
 
     /**
-     *
-     */
-    protected function print_views_menu($filter, $return = false) {
-        global $DB, $OUTPUT;
-
-        $viewjump = '';
-
-        if ($menuviews = $this->get_views(null, true) and count($menuviews) > 1) {
-
-            // Display the view form jump list
-            $baseurl = $this->_baseurl->out_omit_querystring();
-            $baseurlparams = array('d' => $this->_df->id(),
-                                    'sesskey' => sesskey(),
-                                    'filter' => $filter->id);
-            $viewselect = new single_select(new moodle_url($baseurl, $baseurlparams), 'view', $menuviews, $this->view->id, array(''=>'choosedots'), 'viewbrowse_jump');
-            $viewselect->set_label(get_string('viewcurrent','dataform'). '&nbsp;');
-            $viewjump = $OUTPUT->render($viewselect);
-        }
-
-        if ($return) {
-            return $viewjump;
-        } else {
-            echo $viewjump;
-        }
-    }
-
-    /**
-     *
-     */
-    protected function print_filters_menu($filter, $return = false) {
-        global $OUTPUT;
-
-        $filterjump = '';
-
-        $menufilters = $this->get_filters(null, true);
-
-        // TODO check session
-        $menufilters[dataform_filter_manager::USER_FILTER] = get_string('filteruserpref', 'dataform');
-        $menufilters[dataform_filter_manager::USER_FILTER_RESET] = get_string('filteruserreset', 'dataform');
-
-        $baseurl = $this->_baseurl->out_omit_querystring();
-        $baseurlparams = array('d' => $this->_df->id(),
-                                'sesskey' => sesskey(),
-                                'view' => $this->view->id);
-        if ($filter->id) {
-            $menufilters[0] = get_string('filtercancel', 'dataform');
-        }
-
-        // Display the filter form jump list
-        $filterselect = new single_select(new moodle_url($baseurl, $baseurlparams), 'filter', $menufilters, $filter->id, array(''=>'choosedots'), 'filterbrowse_jump');
-        $filterselect->set_label(get_string('filtercurrent','dataform'). '&nbsp;');
-        $filterjump = $OUTPUT->render($filterselect);
-
-        if ($return) {
-            return $filterjump;
-        } else {
-            echo $filterjump;
-        }
-    }
-
-    /**
-     *
-     */
-    protected function print_quick_search($filter, $return = false) {
-        global $CFG;
-
-        $quicksearchjump = '';
-
-        $baseurl = $this->_baseurl->out_omit_querystring();
-        $baseurlparams = array('d' => $this->_df->id(),
-                                'sesskey' => sesskey(),
-                                'view' => $this->view->id,
-                                'filter' => dataform_filter_manager::USER_FILTER_SET);
-
-        if ($filter->id == dataform_filter_manager::USER_FILTER and $filter->search) {
-            $searchvalue = $filter->search;
-        } else {
-            $searchvalue = '';
-        }
-
-        // Display the quick search form
-        $label = html_writer::label(get_string('search'), "usersearch");
-        $inputfield = html_writer::empty_tag('input', array('type' => 'text',
-                                                            'name' => 'usersearch',
-                                                            'value' => $searchvalue,
-                                                            'size' => 20));
-
-        $button = '';
-        //html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('submit')));
-
-        $formparams = '';
-        foreach ($baseurlparams as $var => $val) {
-            $formparams .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => $var, 'value' => $val));
-        }
-
-        $attributes = array('method' => 'post',
-                            'action' => new moodle_url($baseurl));
-
-        $qsform = html_writer::tag('form', "$formparams&nbsp;$label&nbsp;$inputfield&nbsp;$button", $attributes);
-
-        // and finally one more wrapper with class
-        $quicksearchjump = html_writer::tag('div', $qsform, array('class' => 'singleselect'));
-
-        if ($return) {
-            return $quicksearchjump;
-        } else {
-            echo $quicksearchjump;
-        }
-    }
-
-    /**
-     *
-     */
-    protected function print_quick_perpage($filter, $return = false) {
-        global $CFG, $OUTPUT;
-
-        $perpagejump = '';
-
-        $baseurl = $this->_baseurl->out_omit_querystring();
-        $baseurlparams = array('d' => $this->_df->id(),
-                                'sesskey' => sesskey(),
-                                'view' => $this->view->id,
-                                'filter' => dataform_filter_manager::USER_FILTER_SET);
-
-        if ($filter->id == dataform_filter_manager::USER_FILTER and $filter->perpage) {
-            $perpagevalue = $filter->perpage;
-        } else {
-            $perpagevalue = 0;
-        }
-
-        $perpage = array(1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,
-           20=>20,30=>30,40=>40,50=>50,100=>100,200=>200,300=>300,400=>400,500=>500,1000=>1000);
-
-        // Display the view form jump list
-        $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'userperpage', $perpage, $perpagevalue, array(''=>'choosedots'), 'perpage_jump');
-        $select->set_label(get_string('filterperpage','dataform'). '&nbsp;');
-        $perpagejump = $OUTPUT->render($select);
-
-        if ($return) {
-            return $perpagejump;
-        } else {
-            echo $perpagejump;
-        }
-    }
-
-    /**
      * Set sort and search criteria for grouping by
      */
     protected function set_groupby_per_page() {
@@ -1628,20 +1051,10 @@ class dataform_view_base {
         $sortfields = array($fieldid => $sortdir) + $sortfields;
         $this->_filter->customsort = serialize($sortfields);
 
-        // if grading filter entries to get only for graded users 
-        if ($this->supports_activity_grading() and $this->is_grading()) {
-            if ($users = $this->_df->get_gradebook_users()) {
-                $groupbyvalues = array_keys($users);
-            } else {
-                return;
-            }
-            
         // Get the distinct content for the group by field
-        } else {
-            $field = $this->_df->get_field_from_id($fieldid);
-            if (!$groupbyvalues = $field->get_distinct_content($sortdir)) {
-                return;
-            }
+        $field = $this->_df->get_field_from_id($fieldid);
+        if (!$groupbyvalues = $field->get_distinct_content($sortdir)) {
+            return;
         }
 
         // Get the displayed subset according to page         
@@ -1664,22 +1077,17 @@ class dataform_view_base {
         }
         
         // Set the filter search criteria
-        if ($this->supports_activity_grading() and $this->is_grading()) {
-            $this->_filter->users = $vals;
-        
-        } else {        
-            $search = array('', 'IN', $vals);
-            $searchfields = array();
-            if ($this->_filter->customsearch) {
-                $searchfields = unserialize($this->_filter->customsearch);
-            }
-            if (!isset($searchfields[$fieldid]['AND'])) {
-                $searchfields[$fieldid]['AND'] = array($search);
-            } else {
-                array_unshift($searchfields[$fieldid]['AND'], $search);
-            }
-            $this->_filter->customsearch = serialize($searchfields);
+        $search = array('', 'IN', $vals);
+        $searchfields = array();
+        if ($this->_filter->customsearch) {
+            $searchfields = unserialize($this->_filter->customsearch);
         }
+        if (!isset($searchfields[$fieldid]['AND'])) {
+            $searchfields[$fieldid]['AND'] = array($search);
+        } else {
+            array_unshift($searchfields[$fieldid]['AND'], $search);
+        }
+        $this->_filter->customsearch = serialize($searchfields);
     }
 
     /**
@@ -1688,7 +1096,7 @@ class dataform_view_base {
     protected function is_rating() {
         global $USER;
 
-        if (!$this->_df->data->rating or empty($this->_patterns['field'][dataform::_RATING])) {
+        if (!$this->_df->data->rating or empty($this->_tags['field'][dataform::_RATING])) {
             return null;
         }
         
@@ -1697,14 +1105,13 @@ class dataform_view_base {
         $ratingoptions->context = $this->_df->context;
         $ratingoptions->component = 'mod_dataform';
         $ratingoptions->ratingarea = 'entry';
-        $ratingoptions->aggregate = $ratingfield->patterns()->get_aggregations($this->_patterns['field'][dataform::_RATING]);
+        $ratingoptions->aggregate = $ratingfield->patterns()->get_aggregations($this->_tags['field'][dataform::_RATING]);
         $ratingoptions->scaleid = $ratingfield->get_scaleid('entry');
         $ratingoptions->userid = $USER->id;
 
         return $ratingoptions;
     }
         
-
     /**
      *
      */
@@ -1722,7 +1129,6 @@ class dataform_view_base {
         return true;
     }
         
-
     /**
      *
      */
@@ -1891,8 +1297,13 @@ class dataform_view_base {
                     $this->_editentries = implode(',',$processed[1]);
                     $this->_returntoentriesform = true;
                     return true;
-                } else {                    
-                    $this->_editentries = '';
+                } else {
+                    // So that we can show the new entries if we so wish
+                    if ($this->_editentries < 0) {
+                        $this->_editentries = implode(',',$processed[1]);
+                    } else {
+                        $this->_editentries = '';
+                    }
                     $this->_returntoentriesform = false;
                     return $processed;
                 }
@@ -1983,9 +1394,7 @@ class dataform_view_base {
         } else if ($this->_editentries) {
             $editentries = explode(',', $this->_editentries);
         }
-
-        $fields = $this->_df->get_fields();
-
+        
         // compile entries if any
         if ($entries = $this->_entries->entries()) {
             $groupname = '';

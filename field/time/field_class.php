@@ -31,7 +31,7 @@ class dataform_field_time extends dataform_field_base {
      *
      */
     protected function content_names() {
-        return array('', 'year', 'month', 'day', 'hour', 'minute');
+        return array('', 'year', 'month', 'day', 'hour', 'minute', 'enabled');
     }
     
     /**
@@ -46,23 +46,25 @@ class dataform_field_time extends dataform_field_base {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
         // new contents
+        $timestamp = null;
         if (!empty($values)) {
-            $timestamp = 0;
             if (count($values) === 1) {
                 // assuming timestamp is passed (e.g. in import)
                 $timestamp = reset($values);
             } else {
                 // assuming any of year, month, day, hour, minute is passed
-                $year = $month = $day = $hour = $minute = 0;
+                $enabled = $year = $month = $day = $hour = $minute = 0;
                 foreach ($values as $name => $value) {
                     if (!empty($name)) {          // the time unit
                         ${$name} = $value;
                     }
                 }
-                $timestamp = make_timestamp($year, $month, $day, $hour, $minute, 0, 0, false);
+                if ($enabled) {
+                    $timestamp = make_timestamp($year, $month, $day, $hour, $minute, 0, 0, false);
+                }
             }
-            $contents[] = $timestamp;
         }
+        $contents[] = $timestamp;
         return array($contents, $oldcontents);        
     }
 

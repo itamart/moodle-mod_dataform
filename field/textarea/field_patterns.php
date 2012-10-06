@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield
- * @package field-textarea
+ * @subpackage textarea
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,48 +41,43 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);
 
-        foreach ($tags as $cleantag => $tag) {
-            $params = null;
-            $required = $this->is_required($tag);
-            switch ($cleantag) {
+        $replacements = array_fill_keys($tags, '');
+        if ($edit) {
+            foreach ($tags as $cleantag => $tag) {
+                $params = null;
+                $required = $this->is_required($tag);
+                if ($cleantag == "[[{$fieldname}:wordcount]]") {
+                    $replacements[$tag] = '';
+                    continue;
+                }
+                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
+                break;
+            }
 
-                case "[[$fieldname]]":
-                    if ($edit) {
-                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
-                    } else {
+        } else {
+            foreach ($tags as $cleantag => $tag) {
+                switch ($cleantag) {
+                    case "[[$fieldname]]":
                         $replacements[$tag] = array('html', $this->display_browse($entry));
-                    }
-                    break;
+                        break;
 
-                // plain text, no links
-                case "[[$fieldname:text]]":
-                    if ($edit) {
-                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
-                    } else {
+                    // plain text, no links
+                    case "[[$fieldname:text]]":
                         $replacements[$tag] = array('html', $this->display_browse($entry, array('text' => true)));
-                    }
-                    break;
+                        break;
 
-                // plain text, with links
-                case "[[$fieldname:textlinks]]":
-                    if ($edit) {
-                        $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
-                    } else {
+                    // plain text, with links
+                    case "[[$fieldname:textlinks]]":
                         $replacements[$tag] = array('html', $this->display_browse($entry, array('text' => true, 'links' => true)));
-                    }
-                    break;
+                        break;
 
-                case "[[{$fieldname}:wordcount]]":
-                    if ($edit) {
-                        $patterns[$tag] = '';
-                    } else {
-                        $patterns[$tag] = array('html', $this->word_count($entry));
-                    }
-                    break;
+                    case "[[{$fieldname}:wordcount]]":
+                        $replacements[$tag] = array('html', $this->word_count($entry));
+                        break;
+                }
             }
         }
-
-
+        
         return $replacements;
     }
 
@@ -105,20 +100,29 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
             $formfieldname = "field_{$fieldid}_{$entryid}";
             $cleanformat = PARAM_NOTAGS;
         } else {
-            $formfieldname = "field_{$fieldid}_{$entryid}[text]";
+            $formfieldname = "field_{$fieldid}_{$entryid}_editor";
             $cleanformat = PARAM_CLEANHTML;
         }
 
         foreach ($editabletags as $cleantag) {
            if (array_key_exists($cleantag, $tags)) {
                 if ($this->is_required($tags[$cleantag])) {
-                    if (!isset($data->$formfieldname)
-                            or !$content = clean_param($data->$formfieldname, $cleanformat)) {
+                    if (empty($data->$formfieldname)) {
                         return array($formfieldname, get_string('fieldrequired', 'dataform'));
+                    }
+                    if (!$field->is_editor() or !can_use_html_editor()) {
+                        if (!$content = clean_param($data->$formfieldname, $cleanformat)) {
+                            return array($formfieldname, get_string('fieldrequired', 'dataform'));
+                        }
+                    } else {
+                        if (!$content = clean_param($data->$formfieldname['text'], $cleanformat)) {
+                            return array($formfieldname, get_string('fieldrequired', 'dataform'));
+                        }
                     }
                 }
             }
         }
+        return null;
     }
 
     /**
@@ -160,7 +164,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
             $mform->setDefault("{$fieldname}[text]", $data->$fieldname);
             $mform->setDefault("{$fieldname}[format]", $data->{"{$fieldname}format"});
             if ($required) {
-                $mform->addRule("{$fieldname}[text]", null, 'required', null, 'client');
+                $mform->addRule("{$fieldname}_editor", null, 'required', null, 'client');
             }
         }
     }
@@ -174,11 +178,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
 
         if (isset($entry->{"c{$fieldid}_content"})) {
             $text = $entry->{"c{$fieldid}_content"};
-
-            return '';
-            //$options = new object();
-            //$options->para = false;
-            //$str = format_text($text, FORMAT_PLAIN, $options);
+            return str_word_count($text);
         } else {
             return '';
         }

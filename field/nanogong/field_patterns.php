@@ -16,7 +16,7 @@
  
 /**
  * @package dataformfield
- * @package field-nanogong
+ * @subpackage nanogong
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -60,7 +60,7 @@ class mod_dataform_field_nanogong_patterns extends mod_dataform_field_file_patte
         file_prepare_draft_area($draftitemid, $field->df()->context->id, 'mod_dataform', 'content', $contentid, $fmoptions);
 
         if ($contentid) {
-            $fileurl = new moodle_url("/pluginfile.php/{$field->df()->context->id}/mod_dataform/content/$contentid/voicefile_{$fieldid}_{$entryid}.wav");
+            $fileurl = moodle_url::make_file_url('/pluginfile.php', "/{$field->df()->context->id}/mod_dataform/content/$contentid/voicefile_{$fieldid}_{$entryid}.wav");
             $paramfileurl = html_writer::empty_tag('param', array('name' => 'SoundFileURL', 'value' => $fileurl));
         } else {
             $paramfileurl = '';
@@ -130,6 +130,7 @@ class mod_dataform_field_nanogong_patterns extends mod_dataform_field_file_patte
             return moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
                     
         } else if ($file->is_valid_image()) {
+            /*
             return html_writer::empty_tag(
                 'img',
                 array(
@@ -138,6 +139,7 @@ class mod_dataform_field_nanogong_patterns extends mod_dataform_field_file_patte
                     'title' => $altname
                 )
             );
+            */
         } else {
         
             $fileurl = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");       
@@ -159,7 +161,6 @@ class mod_dataform_field_nanogong_patterns extends mod_dataform_field_file_patte
             
             $appletwrapper = html_writer::tag('div', $applet);
             return $appletwrapper;
-
         }
     }
 

@@ -29,6 +29,8 @@
  */
 class restore_dataform_activity_structure_step extends restore_activity_structure_step {
 
+    protected $groupmode = 0;
+    
     /**
      *
      */
@@ -37,7 +39,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $paths = array();
         $userinfo = $this->get_setting_value('userinfo'); // restore content and user info (requires the backup users)
 
+        
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
+        $paths[] = new restore_path_element('dataform_module', '/activity/dataform/module');
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
         $paths[] = new restore_path_element('dataform_view', '/activity/dataform/views/view');
@@ -103,19 +107,30 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         if ($newitemid == $this->task->get_activityid()) {
             // remap task module id
             $this->set_mapping('course_module', $this->task->get_old_moduleid(), $this->task->get_moduleid());
-
             // remap task context id
-
             $this->set_mapping('context', $this->task->get_old_contextid(), $this->task->get_contextid());
         } else {
             // Save activity id in task
             $this->task->set_activityid($newitemid); 
-            // Apply the id to course_sections->instanceid
+            // Apply the id to course_modules->instance
             $DB->set_field('course_modules', 'instance', $newitemid, array('id' => $this->task->get_moduleid()));
         }
         // Do the mapping for modulename, preparing it for files by oldcontext
         $oldid = $this->task->get_old_activityid();
         $this->set_mapping('dataform', $oldid, $newitemid, true);
+    }
+
+    /**
+     *
+     */
+    protected function process_dataform_module($data) {
+        global $DB;
+
+        $data = (object)$data;
+        // Adjust groupmode in course_modules->groupmode
+        if (isset($data->groupmode)) {
+            $DB->set_field('course_modules', 'groupmode', $data->groupmode, array('id' => $this->task->get_moduleid()));
+        }
     }
 
     /**

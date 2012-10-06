@@ -38,7 +38,7 @@ class mod_dataform_field__group_patterns extends mod_dataform_field_patterns {
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
         // set the group object
-        $group = new object();
+        $group = new object;
         if ($entry->id < 0) { // new record (0)
             $entry->groupid = $this->df->currentgroup;
             $group->id = $entry->groupid;
@@ -56,9 +56,12 @@ class mod_dataform_field__group_patterns extends mod_dataform_field_patterns {
         $replacements = array();
 
         foreach ($tags as $tag) {
-              switch ($tag) {
+            $replacements[$tag] = '';
+            switch ($tag) {
                 case '##group:id##':
-                    $replacements[$tag] = array('html', $gropu->id);
+                    if (!empty($group->id)) {
+                        $replacements[$tag] = array('html', $group->id);
+                    }
                     break;
 
                 case '##group:name##':
@@ -81,7 +84,7 @@ class mod_dataform_field__group_patterns extends mod_dataform_field_patterns {
                     if ($edit and has_capability('mod/dataform:manageentries', $field->df()->context)) {
                         $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry)));
                     } else {
-                        $replacements[$tag] = '';
+                        $replacements[$tag] = array('html', $group->name);
                     }
                     break;
             }
@@ -94,16 +97,16 @@ class mod_dataform_field__group_patterns extends mod_dataform_field_patterns {
      *
      */
     public function display_edit(&$mform, $entry, array $options = null) {
-        $fieldid = $this->_field->id();
+        $field = $this->_field;
+        $fieldid = $field->id();
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
 
         $selected = $entry->groupid;
-
         static $groupsmenu = null;
         if (is_null($groupsmenu)) {
             $groupsmenu = array(0 => get_string('choosedots'));        
-            if ($groups = groups_get_activity_allowed_groups($this->df->cm)) {
+            if ($groups = groups_get_activity_allowed_groups($field->df()->cm)) {
                 foreach ($groups as $groupid => $group) {
                     $groupsmenu[$groupid] = $group->name;
                 }

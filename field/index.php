@@ -27,6 +27,7 @@
 
 require_once('../../../config.php');
 require_once('../mod_class.php');
+require_once("$CFG->libdir/tablelib.php");
 
 $urlparams = new object();
 
@@ -68,7 +69,7 @@ if ($urlparams->duplicate and confirm_sesskey()) {
 }
 
 // any notifications
-if (!$fields = $df->get_user_defined_fields(true)) {
+if (!$fields = $df->get_user_defined_fields(true, flexible_table::get_sort_for_table('dataformfieldsindex'. $df->id()))) {
     $df->notifications['bad'][] = get_string('fieldnoneindataform','dataform');  // nothing in dataform
 }
 
@@ -97,20 +98,14 @@ echo html_writer::tag('div', $br. $OUTPUT->render($fieldselect). $br, array('cla
 
 // if there are user fields print admin style list of them
 if ($fields) {
-    
+
     $editbaseurl = '/mod/dataform/field/field_edit.php';
     $actionbaseurl = '/mod/dataform/field/index.php';
     $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
 
-    // table headings
-    $strname = get_string('name');
-    $strtype = get_string('type', 'dataform');
-    $strdescription = get_string('description');
     $stredit = get_string('edit');
     $strduplicate =  get_string('duplicate');
     $strdelete = get_string('delete');
-    $strvisible = get_string('visible');
-    $streditable = get_string('fieldeditable', 'dataform');
     $strhide = get_string('hide');
     $strshow = get_string('show');
     $strlock = get_string('lock', 'dataform');
@@ -131,11 +126,41 @@ if ($fields) {
         array('type' => 'button', 'name' => 'multiduplicate', 'onclick' => 'bulk_action(\'field\'&#44; \''. $multiactionurl->out(false). '\'&#44; \'duplicate\')')
     );
 
-    $table = new html_table();
-    $table->head = array($strname, $strtype, $strdescription, $strvisible, $streditable, $stredit, $multiduplicate, $multidelete, $selectallnone);
-    $table->align = array('left','left','left', 'center', 'center', 'center', 'center', 'center', 'center');
-    $table->wrap = array(false, false, false, false, false, false, false, false, false);
-    $table->attributes['align'] = 'center';
+    // table headers
+    $headers = array(
+        'name' => get_string('name'),
+        'type' => get_string('type', 'dataform'),
+        'description' => get_string('description'),
+        'visible' => get_string('visible'),
+        'edits' => get_string('fieldeditable', 'dataform'),
+        'edit' => $stredit,
+        'duplicate' => $multiduplicate,
+        'delete' => $multidelete,
+        'selectallnone' => $selectallnone,
+    );
+
+    $table = new flexible_table('dataformfieldsindex'. $df->id());
+    $table->define_baseurl(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id())));
+    $table->define_columns(array_keys($headers));
+    $table->define_headers(array_values($headers));
+
+    // Column sorting
+    $table->sortable(true);
+    $table->no_sorting('description');
+    $table->no_sorting('edit');
+    $table->no_sorting('duplicate');
+    $table->no_sorting('delete');
+    $table->no_sorting('selectallnone');
+
+    // Column styles
+    $table->set_attribute('class', 'generaltable generalbox boxaligncenter boxwidthwide');
+    $table->column_style('visible', 'text-align', 'center');
+    $table->column_style('edits', 'text-align', 'center');
+    $table->column_style('edit', 'text-align', 'center');
+    $table->column_style('duplicate', 'text-align', 'center');
+    $table->column_style('delete', 'text-align', 'center');
+
+    $table->setup();
 
     foreach ($fields as $fieldid => $field) {
         // Skip internal fields
@@ -169,8 +194,7 @@ if ($fields) {
         }
         $fieldeditable = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('editable' => $fieldid)), $editableicon);
 
-
-        $table->data[] = array(
+        $table->add_data(array(
             $fieldname,
             $fieldtype,
             $fielddescription,
@@ -180,10 +204,10 @@ if ($fields) {
             $fieldduplicate,
             $fielddelete,
             $fieldselector
-        );
+        ));
     }
-    
-    echo html_writer::tag('div', html_writer::table($table), array('class' => 'fieldslist'));
+
+    $table->finish_output();
 }
 
 $df->print_footer();

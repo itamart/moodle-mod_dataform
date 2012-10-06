@@ -1,6 +1,5 @@
 Dataform
 ========
-
 This Moodle module is a major enhancement of Moodle standard Database module activity.
 
 Installation:
@@ -9,12 +8,12 @@ Default installation instructions for plugins in category Activities.
 
 Status:
 ------
-Beta.
+RC
 
 
 Requires:
 --------
-Moodle 2.0
+Moodle 2.0 or higher.
 
 
 Documentation:
@@ -32,7 +31,7 @@ Bug reports:
 
 Change log:
 -----------
-2.0.0
+2.1.1
 
 Notes
 -----

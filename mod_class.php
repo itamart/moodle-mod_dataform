@@ -31,6 +31,11 @@
  */
 class dataform {
 
+    const NOTIFICATION_ENTRY_ADDED = 1;
+    const NOTIFICATION_ENTRY_UPDATED = 2;
+    const NOTIFICATION_ENTRY_DELETED = 4;
+    const NOTIFICATION_COMMENT_ADDED = 8;
+
     const _ENTRY = -1;
     const _TIMECREATED = -2;
     const _TIMEMODIFIED = -3;
@@ -741,8 +746,8 @@ class dataform {
     /**
      *
      */
-    public function get_user_defined_fields($forceget = false) {
-        $this->get_fields(null, false, $forceget);
+    public function get_user_defined_fields($forceget = false, $sort = '') {
+        $this->get_fields(null, false, $forceget, $sort);
         return $this->fields;
     }
 
@@ -817,13 +822,13 @@ class dataform {
     /**
      *
      */
-    public function get_fields($exclude = null, $menu = false, $forceget = false) {
+    public function get_fields($exclude = null, $menu = false, $forceget = false, $sort = '') {
         global $DB;
 
         if (!$this->fields or $forceget) {
             $this->fields = array();
             // collate user fields
-            if ($fields = $DB->get_records('dataform_fields', array('dataid' => $this->id()))) {
+            if ($fields = $DB->get_records('dataform_fields', array('dataid' => $this->id()), $sort)) {
                 foreach ($fields as $fieldid => $field) {
                     $this->fields[$fieldid] = $this->get_field($field);
                 }
@@ -1058,12 +1063,12 @@ class dataform {
     /**
      *
      */
-    public function get_views($exclude = null, $menu = false, $forceget = false) {
+    public function get_views($exclude = null, $menu = false, $forceget = false, $sort = '') {
         global $DB;
 
         if (empty($this->views) or $forceget) {
             $this->views = array();
-            if ($views = $DB->get_records('dataform_views', array('dataid' => $this->id()))) {
+            if ($views = $DB->get_records('dataform_views', array('dataid' => $this->id()), $sort)) {
                 // collate user views
                 foreach ($views as $viewid => $view) {
                     $this->views[$viewid] = $this->get_view($view);
@@ -1669,9 +1674,13 @@ class dataform {
      */
     public function events_trigger($event, $data) {
 
-        // Get capability users
-        $capability = "mod/dataform:notify$event";
-        $users = get_users_by_capability($this->context, $capability, 'u.id,u.auth,u.suspended,u.deleted,u.lastaccess,u.emailstop');
+        $users = array();
+        // Get capability users if notifications for the event are enabled
+        $notificationtypes = self::get_notification_types();
+        if ($this->data->notification & $notificationtypes[$event]) {
+            $capability = "mod/dataform:notify$event";
+            $users = get_users_by_capability($this->context, $capability, 'u.id,u.auth,u.suspended,u.deleted,u.lastaccess,u.emailstop');
+        }
 
         // Get event notificataion rule users
         $rm = $this->get_rule_manager();
@@ -1683,7 +1692,7 @@ class dataform {
             }
         }
 
-        if (!$users) {
+        if (empty($users)) {
             return;
         }    
        
@@ -1692,6 +1701,20 @@ class dataform {
         $data->dataformname = $this->name();
         $data->context = $this->context->id;
         $data->event = $event;
+        $data->notification = 1;
         events_trigger("dataform_$event", $data);
-    }    
+    }
+    
+    /**
+     * 
+     */
+    public static function get_notification_types() {
+        return array(
+            'entryadded' => self::NOTIFICATION_ENTRY_ADDED,
+            'entryupdated' => self::NOTIFICATION_ENTRY_UPDATED,
+            'entrydeleted' => self::NOTIFICATION_ENTRY_DELETED,
+            'commentadded' => self::NOTIFICATION_COMMENT_ADDED,
+        );
+    }
+            
 }

@@ -21,9 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->dirroot/mod/dataform/view/matrix/view_form.php");
+require_once("$CFG->dirroot/mod/dataform/view/grid/view_form.php");
 
-class mod_dataform_view_editon_form extends mod_dataform_view_matrix_form {
+class mod_dataform_view_editon_form extends mod_dataform_view_grid_form {
 
     /**
      *
@@ -38,10 +38,9 @@ class mod_dataform_view_editon_form extends mod_dataform_view_matrix_form {
         $mform =& $this->_form;
 
         // Disable unrequired parent fields
-        $mform->addElement('hidden', 'disableif', '1');
-        $mform->disabledIf('filter', 'filter', 'eq', 0);
-        $mform->disabledIf('groupby', 'groupby', 'eq', 0);
-        $mform->disabledIf('perpage', 'perpage', 'eq', 0);
+        //$mform->disabledIf('filter', 'filter', 'eq', 0);
+        //$mform->disabledIf('groupby', 'groupby', 'eq', 0);
+        //$mform->disabledIf('perpage', 'perpage', 'eq', 0);
 
         // View settings
         //-------------------------------------------------------------------------------

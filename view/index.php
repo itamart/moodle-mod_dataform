@@ -22,6 +22,7 @@
  */
 require_once('../../../config.php');
 require_once('../mod_class.php');
+require_once("$CFG->libdir/tablelib.php");
 
 $urlparams = new object();
 
@@ -87,7 +88,7 @@ if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested v
 
 // any notifications?
 $df->notifications['bad']['defaultview'] = '';
-if (!$views = $df->get_views(null, false, true)) {
+if (!$views = $df->get_views(null, false, true, flexible_table::get_sort_for_table('dataformviewsindex'. $df->id()))) {
     $df->notifications['bad']['getstartedviews'] = get_string('viewnoneindataform','dataform');  // nothing in database
 } else if (empty($df->data->defaultview)) {
     $df->notifications['bad']['defaultview'] = get_string('viewnodefault','dataform', '');
@@ -122,10 +123,6 @@ if ($views) {
     $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
                         
     /// table headings
-    $strviews = get_string('views', 'dataform');
-    $strtype = get_string('type', 'dataform');
-    $strdescription = get_string('description');
-    $strvisible = get_string('visible');
     $strdefault = get_string('defaultview', 'dataform');
     $strsingleedit = get_string('singleedit', 'dataform');
     $strsinglemore = get_string('singlemore', 'dataform');
@@ -136,11 +133,16 @@ if ($views) {
     $strchoose = get_string('choose');
 
     $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'view\'&#44;this.checked)'));
-    $multideleteurl = new moodle_url($actionbaseurl, $linkparams);
+    $multiactionurl = new moodle_url($actionbaseurl, $linkparams);
     $multidelete = html_writer::tag(
         'button', 
         $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), 
-        array('name' => 'multidelete', 'onclick' => 'bulk_action(\'view\'&#44; \''. $multideleteurl->out(false). '\'&#44; \'delete\')'));
+        array('name' => 'multidelete', 'onclick' => 'bulk_action(\'view\'&#44; \''. $multiactionurl->out(false). '\'&#44; \'delete\')'));
+    $multiduplicate = html_writer::tag(
+        'button', 
+        $OUTPUT->pix_icon('t/copy', get_string('multiduplicate', 'dataform')), 
+        array('type' => 'button', 'name' => 'multiduplicate', 'onclick' => 'bulk_action(\'view\'&#44; \''. $multiactionurl->out(false). '\'&#44; \'duplicate\')')
+    );
 
     $strhide = get_string('hide');
     $strshow = get_string('show');
@@ -148,12 +150,51 @@ if ($views) {
     
     $filtersmenu = $df->get_filter_manager()->get_filters(null, true);
         
-    $table = new html_table();
-    $table->head = array($strviews, $strtype, $strdescription, $strvisible, $strdefault, $strsingleedit, $strsinglemore, $strfilter, $stredit, $strduplicate, $strreset, $multidelete, $selectallnone);
-    $table->align = array('left', 'left', 'left', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center', 'center');
-    $table->wrap = array(false, false, false, false, false, false, false, false, false, false, false, false, false);
-    $table->attributes['align'] = 'center';
+    // table headers
+    $headers = array(
+        'name' => get_string('name'),
+        'type' => get_string('type', 'dataform'),
+        'description' => get_string('description'),
+        'visible' => get_string('visible'),
+        'default' => $strdefault, 
+        'singleedit' => $strsingleedit, 
+        'singlemore' => $strsinglemore, 
+        'filter' => $strfilter, 
+        'edit' => $stredit,
+        'duplicate' => $multiduplicate,
+        'reset' => $strreset,
+        'delete' => $multidelete,
+        'selectallnone' => $selectallnone,
+    );
+
+    $table = new flexible_table('dataformviewsindex'. $df->id());
+    $table->define_baseurl(new moodle_url('/mod/dataform/view/index.php', array('d' => $df->id())));
+    $table->define_columns(array_keys($headers));
+    $table->define_headers(array_values($headers));
+
+    // Column sorting
+    $table->sortable(true);
+    $table->no_sorting('description');
+    $table->no_sorting('default');
+    $table->no_sorting('singleedit');
+    $table->no_sorting('singlemore');
+    $table->no_sorting('filter');
+    $table->no_sorting('edit');
+    $table->no_sorting('duplicate');
+    $table->no_sorting('reset');
+    $table->no_sorting('delete');
+    $table->no_sorting('selectallnone');
+
+    // Styles
+    $table->set_attribute('class', 'generaltable generalbox boxaligncenter boxwidthwide');
+    $table->column_style('visible', 'text-align', 'center');
+    $table->column_style('edit', 'text-align', 'center');
+    $table->column_style('duplicate', 'text-align', 'center');
+    $table->column_style('reset', 'text-align', 'center');
+    $table->column_style('delete', 'text-align', 'center');
     
+    $table->setup();
+
     foreach ($views as $viewid => $view) {
         
         $viewname = html_writer::link(new moodle_url($viewbaseurl, array('d' => $df->id(), 'view' => $viewid)), $view->name());
@@ -223,7 +264,7 @@ if ($views) {
             $viewfilter = get_string('filtersnonedefined', 'dataform');
         }
         
-        $table->data[] = array(
+        $table->add_data(array(
             $viewname,
             $viewtype,
             $viewdescription,
@@ -237,9 +278,10 @@ if ($views) {
             $viewreset,
             $viewdelete,
             $viewselector
-       );
+        ));
     }
-    echo html_writer::table($table);
+
+    $table->finish_output();
 }
 
 $df->print_footer();

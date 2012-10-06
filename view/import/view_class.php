@@ -28,13 +28,6 @@ class dataform_view_import extends dataform_view_base {
     protected $_editors = array('section');
     
     /**
-     *
-     */
-    public function supports_activity_grading() {
-        return false;
-    }
-
-    /**
      * redirect to import page
      */
     public function set_page($page = null) {
@@ -249,13 +242,13 @@ class dataform_view_import extends dataform_view_base {
                 if ($fields = $this->_df->get_fields()) {
                     foreach ($fields as $fieldid => $field) {
                         if ($patterns = $field->patterns()->search($text)) {
-                            $this->_patterns['field'][$fieldid] = $patterns;
+                            $this->_tags['field'][$fieldid] = $patterns;
                         }
                     }
                 }
                 
             }
-            $this->view->patterns = serialize($this->_patterns);
+            $this->view->patterns = serialize($this->_tags);
         }
     }
         

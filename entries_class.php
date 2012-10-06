@@ -360,6 +360,7 @@ class dataform_entries {
                 // Prepare the entries to process
                 foreach ($eids as $eid) {
                     $entry = new object();
+
                     // existing entry from view
                     if ($eid > 0 and isset($this->_entries[$eid])) {
                         $entries[$eid] = $this->_entries[$eid];
@@ -450,6 +451,7 @@ class dataform_entries {
                                         continue;
                                     }
                                     
+                                    // Entry info
                                     if (in_array($fieldid, $entryinfo)) {
                                         // TODO
                                         if ($fieldid == dataform::_USERID or $fieldid == dataform::_USERNAME) {
@@ -458,7 +460,8 @@ class dataform_entries {
                                             $entryvar = $field->get_internalname();
                                         }
                                         $contents[$entryid]['info'][$entryvar] = $value;
-                                    
+
+                                    // Entry content
                                     } else if (!array_key_exists($fieldid, $contents[$entryid]['fields'])) {
                                         $contents[$entryid]['fields'][$fieldid] = $field->get_content_from_data($entryid, $data);
                                     }
@@ -620,13 +623,13 @@ class dataform_entries {
     /**
      *
      */
-    public function update_entry($entry, $params = null, $updatetime = true) {
+    public function update_entry($entry, $data = null, $updatetime = true) {
         global $CFG, $DB, $USER;
 
         $df = $this->_df;
         
-        if ($params and has_capability('mod/dataform:manageentries', $df->context)) {
-            foreach ($params as $key => $value) {
+        if ($data and has_capability('mod/dataform:manageentries', $df->context)) {
+            foreach ($data as $key => $value) {
                 if ($key == 'name') {
                     $entry->userid = $value;
                 } else {    
@@ -637,7 +640,7 @@ class dataform_entries {
                 }
             }
         } 
-        
+
         // update existing entry (only authenticated users)
         if ($entry->id > 0) {
             if ($df->user_can_manage_entry($entry)) { // just in case the user opens two forms at the same time

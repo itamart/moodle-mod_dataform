@@ -16,7 +16,7 @@
  
 /**
  * @package dataformfield
- * @package field-radiobutton
+ * @subpackage radiobutton
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

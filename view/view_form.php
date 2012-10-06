@@ -117,10 +117,6 @@ class mod_dataform_view_base_form extends moodleform {
         //-------------------------------------------------------------------------------
         $this->view_definition_after_gps();
 
-        // activity grading (param1)
-        //-------------------------------------------------------------------------------
-        $this->activity_grading_settings();        
-
         // buttons
         //-------------------------------------------------------------------------------
         $this->add_action_buttons();
@@ -136,48 +132,6 @@ class mod_dataform_view_base_form extends moodleform {
      *
      */
     function view_definition_after_gps() {
-    }
-
-    /**
-     *
-     */
-    function activity_grading_settings() {
-        $view = $this->_customdata['view'];
-        $df = $this->_customdata['df'];
-        
-        if (!$view->supports_activity_grading() or !$df->data->grade) {
-            return;
-        }
-
-        $mform =& $this->_form;
-
-        // grading settings
-        //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'gradingsettinshdr', get_string('gradingsettings', 'dataform'));
-        
-        // grade input (none, text, scale menu)
-        $options = array(
-            0 => get_string('choosedots'),
-            1 => get_string('textbox', 'dataform'),
-            2 => get_string('dropdown', 'grades')
-        );
-        $mform->addElement('select', 'gradeinputtype', get_string('gradeinputtype', 'dataform'), $options);
-
-        // Comment input (none, simple text, rich text)
-        $options = array(
-            0 => get_string('choosedots'),
-            1 => get_string('textbox', 'dataform'),
-            2 => get_string('htmleditor')
-        );
-        $mform->addElement('select', 'commentinputtype', get_string('commentinputtype', 'dataform'), $options);
-
-        // Participant info display (picture, name, idnumber)
-        $userinfogrp=array();
-        $userinfogrp[] = &$mform->createElement('checkbox', 'userpicture', null, get_string('userpicture', 'dataform'));
-        $userinfogrp[] = &$mform->createElement('checkbox', 'username', null, get_string('username', 'dataform'));
-        $userinfogrp[] = &$mform->createElement('checkbox', 'useridnumber', null, get_string('useridnumber', 'dataform'));
-        $userinfogrp[] = &$mform->createElement('checkbox', 'submissionsinpopup', null, get_string('submissionsinpopup', 'dataform'));
-        $mform->addGroup($userinfogrp, 'userinfo', get_string('userinfo', 'dataform'), '<br />', false);
     }
 
     /**
@@ -210,7 +164,7 @@ class mod_dataform_view_base_form extends moodleform {
 
         switch ($tagstype) {
             case 'general':
-                $tags = $view->general_tags();
+                $tags = $view->patterns()->get_menu();
                 $label = get_string('viewgeneraltags','dataform');
                 break;
                 
@@ -242,78 +196,6 @@ class mod_dataform_view_base_form extends moodleform {
      *
      */
     function data_preprocessing(&$data){
-        $view = $this->_customdata['view'];
-        $df = $this->_customdata['df'];
-        
-        // activity grading
-        if ($view->supports_activity_grading() and $df->data->grade) {
-            if (!empty($data->param1)){
-                if ($activitygrading = explode(',', $data->param1) and count($activitygrading) == 6) {
-                    list(
-                        $data->gradeinputtype,
-                        $data->commentinputtype,
-                        $data->userpicture,
-                        $data->username,
-                        $data->useridnumber,
-                        $data->submissionsinpopup
-                    ) = $activitygrading;
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    function set_data($data) {
-        $this->data_preprocessing($data);
-        parent::set_data($data);
-    }
-
-    /**
-     *
-     */
-    function get_data($slashed = true) {
-        if ($data = parent::get_data($slashed)) {
-            $data = $this->get_activity_grading_data($data);
-        }
-        return $data;
-    }
-            
-    /**
-     *
-     */
-    protected function get_activity_grading_data($data) {
-        $view = $this->_customdata['view'];
-        $df = $this->_customdata['df'];
-        
-        // activity grading
-        if ($view->supports_activity_grading() and $df->data->grade) {
-            // activity grading
-            if (!empty($data->gradeinputtype) or !empty($data->commentinputtype)) {
-                $arr = array(
-                    'gradeinputtype',
-                    'commentinputtype',
-                    'userpicture',
-                    'username',
-                    'useridnumber',
-                    'submissionsinpopup'
-                );
-
-                foreach ($arr as $key => $var) {
-                    if (isset($data->$var)) {
-                        $arr[$key] = $data->$var;
-                        unset($data->$var);
-                    } else {
-                        $arr[$key] = 0;
-                    }                        
-                }
-                $data->param1 = implode(',', $arr);
-            } else {
-                $data->param1 = null;
-            }
-        }
-        return $data;
     }
 
     /**

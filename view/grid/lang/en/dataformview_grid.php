@@ -16,13 +16,13 @@
  
 /**
  * @package dataformview
- * @subpackage matrix
+ * @subpackage grid
  * @copyright Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Matrix';
-$string['matrixsettings'] = 'Matrix settings';
+$string['pluginname'] = 'Grid';
+$string['gridsettings'] = 'Grid settings';
 $string['cols'] = 'Number of columns';
 $string['rows'] = 'Aligned rows';
 

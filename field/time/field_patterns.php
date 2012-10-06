@@ -16,7 +16,7 @@
  
 /**
  * @package dataformfield
- * @package field-time
+ * @subpackage time
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,11 +41,16 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);        
         
+        $editonce = false;
         foreach ($tags as $cleantag => $tag) {
             if ($edit) {
-                $required = $this->is_required($tag);
-                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
-
+                if (!$editonce) {
+                    $required = $this->is_required($tag);
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
+                    $editonce = true;
+                } else {
+                    $replacements[$tag] = '';
+                }
             } else {
                 $format = (strpos($tag, "{$fieldname}:") !== false ? str_replace("{$fieldname}:", '', trim($tag, '[]')) : '');
                 switch ($format) {            
@@ -92,16 +97,15 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         $field = $this->_field;
         $fieldid = $field->id();
 
+        $strtime = '';
         if (isset($entry->{"c{$fieldid}_content"})) {
-            $content = $entry->{"c{$fieldid}_content"};
-            $format = !empty($params['format']) ? '%'. $params['format'] : '';
-
-            $str = userdate($content, $format);
-        } else {
-            $str = '';
+            if ($content = $entry->{"c{$fieldid}_content"}) {
+                $format = !empty($params['format']) ? '%'. $params['format'] : '';
+                $strtime = userdate($content, $format);
+            }
         }
         
-        return $str;
+        return $strtime;
     }
 
     /**

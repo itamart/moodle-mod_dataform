@@ -41,16 +41,6 @@ class mod_dataform_field_url_form extends mod_dataform_field_form {
         // force link name
         $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size'=>'32'));
         $mform->setType('param2', PARAM_NOTAGS);
-/*
-        // make link
-        $mform->addElement('selectyesno', 'param1', get_string('makelink', 'dataformfield_url'));
-
-        // make image
-        $mform->addElement('selectyesno', 'param3', get_string('makeimage', 'dataformfield_url'));
-
-        // apply media filter
-        $mform->addElement('selectyesno', 'param4', get_string('applymediafilter', 'dataformfield_url'));
-*/
     }
 
 }

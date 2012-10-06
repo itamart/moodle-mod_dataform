@@ -28,6 +28,7 @@
 defined('MOODLE_INTERNAL') or die;
 
 require_once ("$CFG->dirroot/course/moodleform_mod.php");
+require_once($CFG->dirroot. '/mod/dataform/mod_class.php');
 
 class mod_dataform_mod_form extends moodleform_mod {
     
@@ -37,7 +38,6 @@ class mod_dataform_mod_form extends moodleform_mod {
         global $CFG;
         
         if ($cmid = optional_param('update', 0, PARAM_INT)) {
-            require_once($CFG->dirroot. '/mod/dataform/mod_class.php');
             $this->_df = new dataform(0, $cmid);
         }
         
@@ -122,6 +122,15 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addElement('modgrade', 'rating', get_string('rating', 'dataform'));
         $mform->setDefault('rating', 0);
 
+        // Notifications
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', '', get_string('notifications'));
+        $grp=array();
+        foreach (dataform::get_notification_types() as $type => $key) {
+            $grp[] = &$mform->createElement('advcheckbox', $type, null, get_string("message_$type", 'dataform'), null, array(0,$key));
+        }
+        $mform->addGroup($grp, 'notificationgrp', get_string('notificationenable', 'dataform'), html_writer::empty_tag('br'), false);
+        
         // entry settings
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'entrysettingshdr', get_string('entrysettings', 'dataform'));
@@ -148,6 +157,7 @@ class mod_dataform_mod_form extends moodleform_mod {
             $mform->addRule('entriestoview', null, 'numeric', null, 'client');
             // max entries
             $mform->addElement('text', 'maxentries', get_string('entriesmax', 'dataform'));
+            $mform->setDefault('maxentries', -1);
             $mform->addRule('maxentries', null, 'numeric', null, 'client');
 
         // admin denies non-managers entries
@@ -163,6 +173,8 @@ class mod_dataform_mod_form extends moodleform_mod {
             $mform->addElement('text', 'maxentries', get_string('entriesmax', 'dataform'));
             $mform->disabledIf('maxentries', 'admindeniesentries', 'eq', 1);
         }
+        $mform->setDefault('entriesrequired', 0);
+        $mform->setDefault('entriestoview', 0);
 
         // anonymous entries
         if ($CFG->dataform_anonymous) { 
@@ -178,9 +190,11 @@ class mod_dataform_mod_form extends moodleform_mod {
         // time limit to manage an entry
         $mform->addElement('text', 'timelimit', get_string('entrytimelimit', 'dataform'));
         $mform->setType('timelimit', PARAM_INT);
-        $mform->setDefault('timelimit', '');
+        $mform->setDefault('timelimit', -1);
         $mform->addRule('timelimit', null, 'numeric', null, 'client');
 
+        $mform->addElement('selectyesno', 'approval', get_string('requireapproval', 'dataform'));
+        
         // common course elements
         //-------------------------------------------------------------------------------
         $this->standard_coursemodule_elements();
@@ -198,10 +212,37 @@ class mod_dataform_mod_form extends moodleform_mod {
     /**
      *
      */
+    function data_preprocessing(&$data){
+        if (!empty($data->notification)) {
+            $notification = $data->notification;
+            foreach (dataform::get_notification_types() as $type => $key) {
+                $data->$type = $notification & $key;
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    function set_data($data) {
+        $this->data_preprocessing($data);
+        parent::set_data($data);
+    }
+
+    /**
+     *
+     */
     function get_data($slashed = true) {
         if ($data = parent::get_data($slashed)) {
             if (!empty($data->timeinterval)) {
                 $data->timedue = $data->timeavailable + ($data->timeinterval * $data->intervalcount);
+            }
+            // Set notification
+            $data->notification = 0;
+            foreach (dataform::get_notification_types() as $type => $key) {
+                if (!empty($data->$type)) {
+                    $data->notification = $data->notification | $key;
+                }
             }
         }
         return $data;

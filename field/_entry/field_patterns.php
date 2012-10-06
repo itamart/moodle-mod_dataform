@@ -126,18 +126,21 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
      *
      */
     protected function display_export($entry) {
-        global $OUTPUT;
+        global $CFG, $OUTPUT;
 
+        if (!$CFG->enableportfolios) {
+            return '';
+        }
+
+        $str = '';
         $canexportentry = $this->_field->df()->user_can_export_entry($entry);
         if ($canexportentry) {
             $field = $this->_field;
-            $baseurl = htmlspecialchars_decode($entry->baseurl);         
+            $url = new moodle_url($entry->baseurl, array('export' => $entry->id, 'sesskey' => sesskey()));
             $strexport = get_string('export', 'dataform');
-            $exporturl = $baseurl. '&export='. $entry->id. '&sesskey='. sesskey();
-            return html_writer::link($exporturl, $OUTPUT->pix_icon('t/portfolioadd', $strexport));
-        } else {
-            return '';
+            return html_writer::link($url, $OUTPUT->pix_icon('t/portfolioadd', $strexport));
         }
+        return $str;
     }
 
 
@@ -145,8 +148,6 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
      * Array of patterns this field supports 
      */
     protected function patterns() {
-        global $CFG;
-
         $patterns = array();
         
         // actions
@@ -154,9 +155,7 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
         $patterns["##edit##"] = array(true, $actions);
         $patterns["##delete##"] = array(true, $actions);
         $patterns["##select##"] = array(true, $actions);
-        if ($CFG->enableportfolios) {
-            $patterns["##export##"] = array(true, $actions);
-        }
+        $patterns["##export##"] = array(true, $actions);
         
         // reference
         $reference = get_string('reference', 'dataform');

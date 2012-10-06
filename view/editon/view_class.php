@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->dirroot/mod/dataform/view/matrix/view_class.php");
+require_once("$CFG->dirroot/mod/dataform/view/grid/view_class.php");
 
 /**
  * A dataform view class that displays one new entry for adding.
@@ -29,7 +29,7 @@ require_once("$CFG->dirroot/mod/dataform/view/matrix/view_class.php");
  * users can post messages to site admin but not see any posted messages.
  * TODO Implement return to caller view
  */
-class dataform_view_editon extends dataform_view_matrix {
+class dataform_view_editon extends dataform_view_grid {
 
     protected $type = 'editon';
     protected $_editors = array('section', 'param2', 'param7');
@@ -38,13 +38,6 @@ class dataform_view_editon extends dataform_view_matrix {
     const RETURN_NEW = 1;
     const RETURN_CALLER = 2;
     
-    /**
-     *
-     */
-    public function supports_activity_grading() {
-        return false;
-    }
-
     /**
      * Overriding parent method to always redirect to adding new  entry
      */
@@ -61,7 +54,10 @@ class dataform_view_editon extends dataform_view_matrix {
         $processed = $this->process_entries_data();
 
         // Proceed to redirect
-        if (!$this->_editentries) {
+        if ($this->_editentries and !($this->_editentries < 0)) {
+            // New entries return the new entry id in _editentries so that we know they are new
+            // So _editentries must be emptied
+            $this->_editentries = '';
             $response = '';
             $timeout = -1;
     
@@ -88,54 +84,9 @@ class dataform_view_editon extends dataform_view_matrix {
     }
 
     /**
-     *
+     * No need to set content
      */
-    public function process_entries_data() {
-        global $CFG;
-
-        $update = optional_param('update', '', PARAM_TAGLIST);
-        if ($update and confirm_sesskey()) {
-
-            // get entries only if updating existing entries
-            if ($update != self::ADD_NEW_ENTRY) {
-                // fetch entries
-                $this->_entries->set_content();
-            }
-
-            // set the display definition for the form
-            $this->_editentries = $update;
-            $this->set__display_definition();
-
-            $entriesform = $this->get_entries_form();
-            // we already know that it isn't cancelled
-            if ($data = $entriesform->get_data()) {
-                // validated successfully so process request
-                $processed = $this->_entries->process_entries('update', $update, $data, true);
-
-                if (!empty($data->submitreturnbutton)) {
-                    // If we have just added new entries refresh the content
-                    // This is far from ideal because this new entries may be
-                    // spread out in the form when we return to edit them
-                    if ($this->_editentries < 0) {
-                        $this->_entries->set_content();
-                    }                        
-
-                    // so that return after adding new entry will return the added entry 
-                    $this->_editentries = implode(',',$processed[1]);
-                    $this->_returntoentriesform = true;
-                    return true;
-                } else {                    
-                    $this->_editentries = '';
-                    $this->_returntoentriesform = false;
-                    return $processed;
-                }
-            } else {
-                // form validation failed so return to form
-                $this->_returntoentriesform = true;
-                return false;
-            }
-        }
-        return true;
+    public function set_content() {
     }
 
     /**
@@ -210,40 +161,6 @@ class dataform_view_editon extends dataform_view_matrix {
     }
     
     /**
-     * Override the parent method to override the add new entry string
-     */
-    protected function patterns($tags = null, $params = null) {
-        global $CFG, $OUTPUT;
-
-        $patterns = parent::patterns($tags, $params);
-        
-        if (!empty($tags)) {
-            if (!empty($patterns['##addnewentry##'])) {
-                $baseurl = new moodle_url($this->_baseurl, array('sesskey' => sesskey(), 'new' => 1));
-                $patterns['##addnewentry##'] =
-                    html_writer::link($baseurl, get_string('new'));
-            }
-        }
-        return $patterns;
-    }
-
-    /**
-     *
-     */
-    protected function get_response_for_submission() {
-        $response = file_rewrite_pluginfile_urls($this->view->eparam7,
-                                                'pluginfile.php',
-                                                $this->_df->context->id,
-                                                'mod_dataform',
-                                                'view',
-                                                $this->id(). '2');
-        if (!$response) {
-            $response = get_string('responsedefault', 'dataformview_editon');
-        }
-        return $response;
-    }
-    
-    /**
      *
      */
     protected function get_return_url() {
@@ -261,6 +178,22 @@ class dataform_view_editon extends dataform_view_matrix {
             }
         }
         return $redirecturl;
+    }
+    
+    /**
+     *
+     */
+    protected function get_response_for_submission() {
+        $response = file_rewrite_pluginfile_urls($this->view->eparam7,
+                                                'pluginfile.php',
+                                                $this->_df->context->id,
+                                                'mod_dataform',
+                                                'view',
+                                                $this->id(). '2');
+        if (!$response) {
+            $response = get_string('responsedefault', 'dataformview_editon');
+        }
+        return $response;
     }
     
     /**

@@ -135,9 +135,9 @@ class dataform_view_tabular extends dataform_view_base {
     /**
      *
      */
-    public function set_view_tags($params){
-        $tags = $this->_patterns['view'];
-        $replacements = $this->get_tags_replacements($this->patterns($tags, $params));
+    public function set_view_tags($options){
+        $tags = $this->_tags['view'];
+        $replacements = $this->patterns()->get_replacements($tags, null, $options);
         
         $this->view->esection = str_replace($tags, $replacements, $this->view->esection);
         $this->view->eparam2 = str_replace($tags, $replacements, $this->view->eparam2);
@@ -256,7 +256,7 @@ class dataform_view_tabular extends dataform_view_base {
         $fields = $this->_df->get_fields();
         $fielddefinitions = array();
         $entry = new object;
-        foreach ($this->_patterns['field'] as $fieldid => $patterns) {
+        foreach ($this->_tags['field'] as $fieldid => $patterns) {
             $field = $fields[$fieldid];
             $entry->id = $entryid;
             $options = array('edit' => true, 'manage' => true);

@@ -50,9 +50,9 @@ class mod_dataform_field__time_patterns extends mod_dataform_field_patterns {
                     case 'minute': $format = 'M'; break; 
                     case 'hour': $format = 'H'; break; 
                     case 'day': $format = 'a'; break; 
-                    case 'week': $format = 'V'; break; 
+                    case 'week': $format = 'W'; break; 
                     case 'month': $format = 'b'; break; 
-                    case 'year': $format = 'G'; break;
+                    case 'year': $format = 'Y'; break;
                 }
                 $format = !empty($format) ? "%$format" : '';
                 $replacements[$tag] = array('html', userdate($entry->{$fieldname}, $format));
@@ -102,8 +102,6 @@ class mod_dataform_field__time_patterns extends mod_dataform_field_patterns {
         $patterns["##$fieldname:minute##"] = array(false);
         // Hour (H)
         $patterns["##$fieldname:hour##"] = array(false);
-        // %H:%M
-        $patterns["##$fieldname:R##"] = array(false);
         // Day (a)
         $patterns["##$fieldname:day##"] = array(false);
         $patterns["##$fieldname:d##"] = array(false);

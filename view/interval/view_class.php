@@ -21,10 +21,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->dirroot/mod/dataform/view/matrix/view_class.php");
+require_once("$CFG->dirroot/mod/dataform/view/grid/view_class.php");
 require_once("$CFG->dirroot/mod/dataform/entries_class.php");
 
-class dataform_view_interval extends dataform_view_matrix {
+class dataform_view_interval extends dataform_view_grid {
 
     protected $type = 'interval';
     
@@ -35,13 +35,6 @@ class dataform_view_interval extends dataform_view_matrix {
     protected $page;
     protected $cache = null;
     
-    /**
-     *
-     */
-    public function supports_activity_grading() {
-        return false;
-    }
-
     /**
      * Constructor
      */

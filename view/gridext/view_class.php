@@ -16,15 +16,15 @@
  
 /**
  * @package dataformview
- * @subpackage matrixext
+ * @subpackage gridext
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once("$CFG->dirroot/mod/dataform/view/matrix/view_class.php");
+require_once("$CFG->dirroot/mod/dataform/view/grid/view_class.php");
 
-class dataform_view_matrixext extends dataform_view_matrix {
+class dataform_view_gridext extends dataform_view_grid {
 
-    protected $type = 'matrixext';
+    protected $type = 'gridext';
     protected $_editors = array('section', 'param2', 'param4', 'param5');
     
     /**
@@ -40,9 +40,9 @@ class dataform_view_matrixext extends dataform_view_matrix {
     /**
      *
      */
-    public function set_view_tags($params){
-        $tags = $this->_patterns['view'];
-        $replacements = $this->get_tags_replacements($this->patterns($tags, $params));
+    public function set_view_tags($options){
+        $tags = $this->_tags['view'];
+        $replacements = $this->patterns()->get_replacements($tags, null, $options);
         
         $this->view->esection = str_replace($tags, $replacements, $this->view->esection);
         $this->view->eparam4 = str_replace($tags, $replacements, $this->view->eparam4);

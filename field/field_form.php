@@ -64,10 +64,12 @@ class mod_dataform_field_form extends moodleform {
         );
         $mform->addElement('select', 'visible', get_string('fieldvisibility', 'dataform'), $options);
 
-        // edits
-        $options = array(-1 => get_string('unlimited'), 0 => get_string('none'));
-        $options = $options + array_combine(range(1,50), range(1,50));
-        $mform->addElement('select', 'edits', get_string('fieldedits', 'dataform'), $options);
+        // Editable
+        //$options = array(-1 => get_string('unlimited'), 0 => get_string('none'));
+        $options = array(-1 => get_string('yes'), 0 => get_string('no'));
+        //$options = $options + array_combine(range(1,50), range(1,50));
+        $mform->addElement('select', 'edits', get_string('fieldeditable', 'dataform'), $options);
+        $mform->setDefault('edits', -1);
 
         //-------------------------------------------------------------------------------
         $this->field_definition();

@@ -16,9 +16,9 @@
  
 /**
  * @package dataformview
- * @subpackage matrixext
+ * @subpackage gridext
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['pluginname'] = 'Extended matrix';
+$string['pluginname'] = 'Extended grid';
 

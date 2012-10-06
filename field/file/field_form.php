@@ -35,11 +35,11 @@ class mod_dataform_field_file_form extends mod_dataform_field_form {
     //-------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
         
-        // max bytes
+        // max bytes (param1)
         $options = get_max_upload_sizes($CFG->maxbytes, $this->_df->course->maxbytes);
         $mform->addElement('select', 'param1', get_string('filemaxsize', 'dataform'), $options);
 
-        // max files
+        // max files (param2)
         $range = range(1, 100);
         $options = array_combine($range, $range);
         $options[-1] = get_string('unlimited');
@@ -58,7 +58,7 @@ class mod_dataform_field_file_form extends mod_dataform_field_form {
 
         $mform =& $this->_form;
 
-        // accetped types
+        // accetped types (param3)
         $options = array();
         $options['*'] = get_string('filetypeany', 'dataform');
         $options['*.jpg,*.gif,*.png'] = get_string('filetypeimage', 'dataform');

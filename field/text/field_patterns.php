@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield
- * @package field-text
+ * @subpackage text
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -37,7 +37,6 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
         $fieldname = $field->name();
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        // there is only one possible tag here so no check
         $replacements = array();
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);
@@ -89,6 +88,7 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
                 }
             }
         }
+        return null;
     }
 
     /**

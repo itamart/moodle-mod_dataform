@@ -171,7 +171,7 @@ abstract class mod_dataform_field_patterns {
      *
      */
     public function validate_data($entryid, $tags, $data) {
-//        throw new coding_exception('validate_data() method needs to be overridden in each subclass of mod_dataform_field_patterns');
+        return null;
     }
 
     /**

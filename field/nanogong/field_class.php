@@ -37,41 +37,9 @@ class dataform_field_nanogong extends dataform_field_file {
     public $type = 'nanogong';
 
     /**
-     *
-     */
-    public function update_field1($fromform = null) {
-        global $DB, $OUTPUT;
-
-        // Get the old field data so that we can check whether the thumbnail dimensions have changed
-        $oldfield = $this->field;
-        if (!parent::update_field($fromform)) {
-            echo $OUTPUT->notification('updating of new field failed!');
-            return false;
-        }
-        // Have the dimensions changed?
-        if ($oldfield and $updatefile = ($oldfield->param7 != $this->field->param7 or $oldfield->param8 != $this->field->param8)) {
-            // Check through all existing records and update the image
-            if ($contents = $DB->get_records('dataform_contents', array('fieldid' => $this->field->id))) {
-                if (count($contents) > 20) {
-                    echo $OUTPUT->notification(get_string('resizingimages', 'dataformfield_picture'), 'notifysuccess');
-                    echo "\n\n";
-                    // To make sure that ob_flush() has the desired effect
-                    ob_flush();
-                }
-                foreach ($contents as $content) {
-                    @set_time_limit(3000);
-                    // Might be slow!
-                    $this->update_content_files($content->id);
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
      * (Re)generate graphical wav pattern of the recording
      */
-    protected function update_content_files($contentid, $params = null) {
+    protected function update_content_files1($contentid, $params = null) {
 
         $fs = get_file_storage();
 

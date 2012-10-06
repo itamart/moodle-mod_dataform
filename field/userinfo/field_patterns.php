@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield
- * @package field-userinfo
+ * @subpackage userinfo
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -16,16 +16,16 @@
  
 /**
  * @package dataformview
- * @subpackage matrix
+ * @subpackage grid
  * @copyright 2012 Itamar Tzadok 
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 
-class dataform_view_matrix extends dataform_view_base {
+class dataform_view_grid extends dataform_view_base {
 
-    protected $type = 'matrix';
+    protected $type = 'grid';
     protected $_editors = array('section', 'param2');
     
     /**
@@ -108,7 +108,7 @@ class dataform_view_matrix extends dataform_view_base {
         
         $elements = array();
 
-        // Prepare matrix table if needed
+        // Prepare grid table if needed
         if ($name != 'newentry' and !empty($this->view->param3)) {
             $entriescount = count($entriesset);
             list($cols, $rows) = explode(' ', $this->view->param3);
@@ -200,7 +200,7 @@ class dataform_view_matrix extends dataform_view_base {
         $tags = array();
         $patterndefinitions = array();
         $entry = new object;
-        foreach ($this->_patterns['field'] as $fieldid => $patterns) {
+        foreach ($this->_tags['field'] as $fieldid => $patterns) {
             $field = $fields[$fieldid];
             $entry->id = $entryid;
             $options = array('edit' => true, 'manage' => true);

@@ -45,7 +45,8 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             'rssarticles', 'rss', 'css', 'cssincludes', 'js', 'jsincludes',
             'defaultview', 'defaultfilter'));
  
-
+        $module = new backup_nested_element('module', array('id'), array('groupmode'));
+        
         $fields = new backup_nested_element('fields');
         $field = new backup_nested_element('field', array('id'), array(
             'type', 'name', 'description', 'visible', 'edits',
@@ -88,6 +89,8 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             'component', 'ratingarea', 'scaleid', 'value', 'userid', 'timecreated', 'timemodified'));
 
         // Build the tree
+        $dataform->add_child($module);
+
         $dataform->add_child($fields);
         $fields->add_child($field);
 
@@ -114,6 +117,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
 
         // Define sources
         $dataform->set_source_table('dataform', array('id' => backup::VAR_ACTIVITYID));
+        $module->set_source_table('course_modules', array('id' => backup::VAR_MODID));
         $field->set_source_table('dataform_fields', array('dataid' => backup::VAR_PARENTID));
         $filter->set_source_table('dataform_filters', array('dataid' => backup::VAR_PARENTID));
         $view->set_source_table('dataform_views', array('dataid' => backup::VAR_PARENTID));

@@ -16,14 +16,14 @@
  
 /**
  * @package dataformview
- * @subpackage matrix
+ * @subpackage grid
  * @copyright 2012 Itamar Tzadok 
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once("$CFG->dirroot/mod/dataform/view/view_form.php");
 
-class mod_dataform_view_matrix_form extends mod_dataform_view_base_form {
+class mod_dataform_view_grid_form extends mod_dataform_view_base_form {
 
     /**
      *
@@ -36,17 +36,17 @@ class mod_dataform_view_matrix_form extends mod_dataform_view_base_form {
 
         $mform =& $this->_form;
 
-        // Matrix layout (param3)
+        // Grid layout (param3)
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', '', get_string('matrixsettings', 'dataformview_matrix'));
+        $mform->addElement('header', '', get_string('gridsettings', 'dataformview_grid'));
 
         // cols
         $range = range(2, 50);
         $options = array('' => get_string('choosedots')) + array_combine($range, $range);
-        $mform->addElement('select', 'cols', get_string('cols', 'dataformview_matrix'), $options);
+        $mform->addElement('select', 'cols', get_string('cols', 'dataformview_grid'), $options);
         
         // rows
-        $mform->addElement('selectyesno', 'rows', get_string('rows', 'dataformview_matrix'));
+        $mform->addElement('selectyesno', 'rows', get_string('rows', 'dataformview_grid'));
         $mform->disabledIf('rows', 'cols', 'eq', '');
 
         // repeated entry (param2)
@@ -65,7 +65,7 @@ class mod_dataform_view_matrix_form extends mod_dataform_view_base_form {
      */
     function data_preprocessing(&$data){
         parent::data_preprocessing($data);
-        // matrix layout
+        // grid layout
         if (!empty($data->param3)){
             list(
                 $data->cols,
@@ -87,7 +87,7 @@ class mod_dataform_view_matrix_form extends mod_dataform_view_base_form {
      */
     function get_data($slashed = true) {
         if ($data = parent::get_data($slashed)) {
-            // matrix layout
+            // grid layout
             if (!empty($data->cols)) {
                 $data->param3 = $data->cols. ' '. (int) !empty($data->rows);
             } else {

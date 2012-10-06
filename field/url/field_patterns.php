@@ -16,7 +16,7 @@
  
 /**
  * @package dataformfield
- * @package field-url
+ * @subpackage url
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,16 +38,21 @@ class mod_dataform_field_url_patterns extends mod_dataform_field_patterns {
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
         $replacements = array();
-
-        foreach ($tags as $tag) {
+        // rules support
+        $tags = $this->add_clean_pattern_keys($tags);        
+        
+        $editonce = false;
+        foreach ($tags as $cleantag => $tag) {
             if ($edit) {
-                if ($tag == "[[$fieldname]]") {                
-                    $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry)));
+                if (!$editonce) {
+                    $required = $this->is_required($tag);
+                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
+                    $editonce = true;
                 } else {
                     $replacements[$tag] = '';
                 }
             } else {
-                $parts = explode(':', trim($tag, '[]'));
+                $parts = explode(':', trim($cleantag, '[]'));
                 if (!empty($parts[1])) {
                     $type = $parts[1];
                 } else {
@@ -76,12 +81,11 @@ class mod_dataform_field_url_patterns extends mod_dataform_field_patterns {
         $alt = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
         
         $url = empty($url) ? 'http://' : $url;
-        $usepicker = $field->field->param1;
+        $usepicker = empty($field->field->param1) ? false : true;
         $options = array(
             'title' => s($field->field->description),
-            'size' => 40
+            'size' => 64
         );        
-        
         $mform->addElement('url', "{$fieldname}_url", null, $options, array('usefilepicker' => $usepicker));
         $mform->setDefault("{$fieldname}_url", s($url));
 
@@ -159,5 +163,13 @@ class mod_dataform_field_url_patterns extends mod_dataform_field_patterns {
         $patterns["[[$fieldname:media]]"] = array(false);
 
         return $patterns; 
+    }
+    /**
+     * Array of patterns this field supports 
+     */
+    protected function supports_rules() {
+        return array(
+            self::RULE_REQUIRED
+        );
     }
 }
