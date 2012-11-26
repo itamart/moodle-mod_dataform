@@ -42,7 +42,7 @@ class mod_dataform_field_url_patterns extends mod_dataform_field_patterns {
         $tags = $this->add_clean_pattern_keys($tags);        
         
         $editonce = false;
-        foreach ($tags as $cleantag => $tag) {
+        foreach ($tags as $tag => $cleantag) {
             if ($edit) {
                 if (!$editonce) {
                     $required = $this->is_required($tag);

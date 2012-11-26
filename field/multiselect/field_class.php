@@ -26,6 +26,7 @@ require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 class dataform_field_multiselect extends dataform_field_base {
 
     public $type = 'multiselect';
+    protected $_options = array();
     public $separators = array(
             array('name' => 'New line', 'chr' => '<br />'),
             array('name' => 'Space', 'chr' => '&#32;'),
@@ -34,6 +35,19 @@ class dataform_field_multiselect extends dataform_field_base {
     );
 
     
+    /**
+     * Class constructor
+     *
+     * @param var $df       dataform id or class object
+     * @param var $field    field id or DB record
+     */
+    public function __construct($df = 0, $field = 0) {
+        parent::__construct($df, $field);
+        
+        // Set the options
+        $this->options_menu();
+    }
+
     /**
      *
      */
@@ -128,28 +142,21 @@ class dataform_field_multiselect extends dataform_field_base {
         }
 
         // parse values
-        $selected = array();
-        $newvalue = null;
-        if (!empty($values)) {
-            foreach ($values as $name => $value) {
-                if (!empty($name) and $value !== '') {
-                    ${$name} = $value;
-                }
-            }
-        }
+        $selected = !empty($values['selected']) ? $values['selected'] : array();
+        $newvalues = !empty($values['newvalue']) ? explode('#', $values['newvalue']) : array();
 
         // update new values in field type
-        if (s($newvalue) and $newvalues = explode('#', s($newvalue))) {
-            $options = $this->options_menu();
-            $count = count($options);
+        if ($newvalues) {
+            $update = false;
             foreach ($newvalues as $newvalue) {
-                if (!$optionkey = (int) array_search($newvalue, $options)) {
-                    $this->field->param1 = trim($this->field->param1). "\n$newvalue";
-                    $count++;
-                    $selected[] = $count;
+                if (!$optionkey = (int) array_search($newvalue, $this->_options)) {
+                    $update = true;
+                    $selected[] = count($this->_options);
+                    $this->_options[] = $newvalue;
                 }
             }
-            if ($count > count($options)) {
+            if ($update) {
+                $this->field->param1 = implode("\n", $this->_options);
                 $this->update_field();
             }
         }
@@ -165,19 +172,19 @@ class dataform_field_multiselect extends dataform_field_base {
     /**
      * 
      */
-    public function options_menu() {
-        $rawoptions = explode("\n",$this->field->param1);
-
-        $options = array();
-        $key = 1;
-        foreach ($rawoptions as $option) {
-            $option = trim($option);
-            if ($option) {
-                $options[$key] = $option;
-                $key++;
+    public function options_menu($forceget = false) {
+        if (!$this->_options or $forceget) {
+            if (!empty($this->field->param1)) {
+                $rawoptions = explode("\n",$this->field->param1);
+                foreach ($rawoptions as $key => $option) {
+                    $option = trim($option);
+                    if ($option != '') {
+                        $this->_options[$key + 1] = $option;
+                    }
+                }
             }
         }
-        return $options;
+        return $this->_options;
     }
 
     /**
@@ -197,10 +204,13 @@ class dataform_field_multiselect extends dataform_field_base {
                 $selected = array();
                 $newvalues = array();
                 foreach ($labels as $label) {
-                    if ($optionkey = array_search($label, $options)) {
-                        $selected[] = $optionkey;
-                    } else if ($allownew) {
-                        $newvalues[] = $label;
+                    if (!$optionkey = array_search($label, $options)) {
+                        if ($allownew) {
+                            $newvalues[] = $label;
+                            $selected[] = count($options) + count($newvalues);
+                        }
+                    } else {
+                        $selected[] = $optionkey;                    
                     }
                 }
                 if ($selected) {

@@ -110,7 +110,7 @@ class dataform_import_test extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('dataform_contents'));
 
         // Test 3: Filter
-        $importview->set_filter(1);
+        $importview->set_filter(array('filterid' => 1));
         $dfentries = new dataform_entries($this->dataform, $importview);
         $entries = $dfentries->get_entries();
         $this->assertEquals(1, count($entries));

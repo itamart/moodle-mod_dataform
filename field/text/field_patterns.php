@@ -41,8 +41,9 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);
 
-        foreach ($tags as $cleantag => $tag) {
-            if ($edit) {
+        foreach ($tags as $tag => $cleantag) {
+            $noedit = $this->is_noedit($tag);
+            if ($edit and !$noedit) {
                 if ($cleantag == "[[$fieldname]]") {
                     $required = $this->is_required($tag);
                     $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
@@ -81,11 +82,9 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
         $tags = $this->add_clean_pattern_keys($tags);
 
         // only [[$fieldname]] is editable so check it if exists
-        if (array_key_exists("[[$fieldname]]", $tags) and isset($data->$formfieldname)) {
-            if ($this->is_required($tags["[[$fieldname]]"])) {
-                if (!$content = clean_param($data->$formfieldname, PARAM_NOTAGS)) {
-                    return array($formfieldname, get_string('fieldrequired', 'dataform'));
-                }
+        if (array_key_exists("[[*$fieldname]]", $tags) and isset($data->$formfieldname)) {
+            if (!$content = clean_param($data->$formfieldname, PARAM_NOTAGS)) {
+                return array($formfieldname, get_string('fieldrequired', 'dataform'));
             }
         }
         return null;
@@ -117,7 +116,7 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
 
         $fieldname = "field_{$fieldid}_{$entryid}";
         $mform->addElement('text', $fieldname, null, $fieldattr);
-        $mform->setDefault($fieldname, s($content));
+        $mform->setDefault($fieldname, $content);
         $required = !empty($options['required']);
         if ($required) {
             $mform->addRule($fieldname, null, 'required', null, 'client');
@@ -156,7 +155,7 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
             $format = FORMAT_PLAIN;
             if ($field->get('param1') == '1') {  // We are autolinking this field, so disable linking within us
                 $content = '<span class="nolink">'. $content .'</span>';
-                $format = FORMAT_HTML;
+                $format = FORMAT_PLAIN;
                 $options->filter=false;
             }
 
@@ -238,7 +237,8 @@ class mod_dataform_field_text_patterns extends mod_dataform_field_patterns {
      */
     protected function supports_rules() {
         return array(
-            self::RULE_REQUIRED
+            self::RULE_REQUIRED,
+            self::RULE_NOEDIT,
         );
     }
 }

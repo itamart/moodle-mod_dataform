@@ -92,7 +92,7 @@ class mod_dataform_field__approve_patterns extends mod_dataform_field_patterns {
     /**
      * 
      */
-    protected function display_browse($entry) {
+    protected function display_browse($entry, $params = null) {
         global $OUTPUT;
         
         $field = $this->_field;

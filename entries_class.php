@@ -70,7 +70,7 @@ class dataform_entries {
         if (isset($options['entriesset'])) {
             $entriesset = $options['entriesset'];
         } else if (!empty($options['user'])) {
-            $entriesset = $this->get_entries(array('userid' => $options['user']));
+            $entriesset = $this->get_entries(array('search' => array('userid' => $options['user'])));
         } else {
             $entriesset = $this->get_entries();
         }            
@@ -87,8 +87,14 @@ class dataform_entries {
         global $CFG, $DB, $USER;
         
         $df = &$this->_df;
-        $filter = $this->_view->get_filter();      
         $fields = $df->get_fields();
+
+        // Get the filter
+        if (empty($options['filter'])) {
+            $filter = $this->_view->get_filter();
+        } else {
+            $filter = $options['filter'];
+        }
 
         // Filter sql
         list($filtertables,
@@ -152,8 +158,8 @@ class dataform_entries {
                     LEFT JOIN {groups} g ON g.id = e.groupid ';
         $wheredfid =  " e.dataid = :{$this->sqlparams($params, 'dataid', $df->id())} ";
         $whereoptions = '';
-        if (!empty($options)) {
-            foreach ($options as $key => $val) {
+        if (!empty($options['search'])) {
+            foreach ($options['search'] as $key => $val) {
                 $whereoptions .=  " e.$key = :{$this->sqlparams($params, $key, $val)} ";
             }
         }
@@ -270,7 +276,7 @@ class dataform_entries {
         if (empty($userid)) {
             $userid = $USER->id;
         }
-        return $this->get_entries(array('userid' => $userid));
+        return $this->get_entries(array('search' => array('userid' => $userid)));
     }
 
     /**
@@ -484,7 +490,7 @@ class dataform_entries {
                                 }
                             }                            
                             if ($processed) {
-                                $eventdata = (object) array('items' => $processed);
+                                $eventdata = (object) array('view' => $this->_view, 'items' => $processed);
                                 $df->events_trigger("entry$addorupdate", $eventdata);
                             }
 
@@ -499,10 +505,10 @@ class dataform_entries {
                                 break;
                             }
 
-                            // Get content of entrie to duplicat
+                            // Get content of entry to duplicate
                             $contents = $DB->get_records('dataform_contents', array('entryid' => $entry->id));
 
-                            // Add a duplicated entrie and content
+                            // Add a duplicated entry and content
                             $newentry = $entry;
                             $newentry->userid = $USER->id;
                             $newentry->dataid = $df->id();
@@ -525,7 +531,7 @@ class dataform_entries {
                         }
 
                         if ($processed) {
-                            $eventdata = (object) array('items' => $processed);
+                            $eventdata = (object) array('view' => $this->_view, 'items' => $processed);
                             $df->events_trigger("entryadded", $eventdata);
                         }
 
@@ -539,7 +545,7 @@ class dataform_entries {
                         $DB->set_field_select('dataform_entries', 'approved', 1, " dataid = ? AND id IN ($ids) ", array($df->id()));        
                         $processed = $entries;
                         if ($processed) {
-                            $eventdata = (object) array('items' => $processed);
+                            $eventdata = (object) array('view' => $this->_view, 'items' => $processed);
                             $df->events_trigger("entryupdated", $eventdata);
                         }
 
@@ -553,7 +559,7 @@ class dataform_entries {
                         $DB->set_field_select('dataform_entries', 'approved', 0, " dataid = ? AND id IN ($ids) ", array($df->id()));        
                         $processed = $entries;
                         if ($processed) {
-                            $eventdata = (object) array('items' => $processed);
+                            $eventdata = (object) array('view' => $this->_view, 'items' => $processed);
                             $df->events_trigger("entryupdated", $eventdata);
                         }
 
@@ -572,7 +578,7 @@ class dataform_entries {
                             $processed[$entry->id] = $entry;
                         }
                         if ($processed) {
-                            $eventdata = (object) array('items' => $processed);
+                            $eventdata = (object) array('view' => $this->_view, 'items' => $processed);
                             $df->events_trigger("entrydeleted", $eventdata);
                         }
 

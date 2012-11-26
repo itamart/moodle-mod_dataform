@@ -105,8 +105,8 @@ class dataform_field_time extends dataform_field_base {
         
         static $i=0;
         $i++;
-        $namefrom = "df_{$this->field->id}_$i_from";
-        $nameto = "df_{$this->field->id}_$i_to";
+        $namefrom = "df_{$this->field->id}_{$i}_from";
+        $nameto = "df_{$this->field->id}_{$i}_to";
         $varcharcontent = $this->get_sql_compare_text();
         $params = array();
         
@@ -114,11 +114,11 @@ class dataform_field_time extends dataform_field_base {
             if (!$operator) {
                 $operator = '=';
             }
-            $params[$namefrom] = from;
+            $params[$namefrom] = $from;
             return array(" $not $varcharcontent $operator :$namefrom ", $params);
         } else {
-            $params[$namefrom] = from;
-            $params[$nameto] = to;
+            $params[$namefrom] = $from;
+            $params[$nameto] = $to;
             return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent <= :$nameto) ", $params);
         }
     }
@@ -132,16 +132,20 @@ class dataform_field_time extends dataform_field_base {
             $fieldid = $this->field->id;
             $fieldname = $this->name();
             $csvname = $importsettings[$fieldname]['name'];
-            $timestamp = $importsettings[$fieldname]['timestamp'];
             $timestr = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
             
             if ($timestr) {
-                if (!$timestamp) {
-                    $timestr = strtotime($timestr);
-                }
+                // It's a timestamp
+                if (((string) (int) $timestr === $timestr) 
+                        && ($timestr <= PHP_INT_MAX)
+                        && ($timestr >= ~PHP_INT_MAX)) {
 
-                // TODO check validity of timestamp
-                $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
+                    $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
+                    
+                // It's a valid time string
+                } else if ($timestr = strtotime($timestr)) {
+                    $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
+                }
             }
         }
     

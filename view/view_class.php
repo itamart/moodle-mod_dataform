@@ -41,6 +41,7 @@ class dataform_view_base {
     protected $_patterns = null;
 
     protected $_editors = array('section');
+    protected $_vieweditors = array('section');
     protected $_entries = null;
 
     protected $_tags = array();
@@ -96,10 +97,15 @@ class dataform_view_base {
         $this->set__patterns();
 
         // filter
-        $filterid = optional_param('filter', 0, PARAM_INT);
-        $eids = optional_param('eids', 0, PARAM_INT);
-        $page = optional_param('page', 0, PARAM_INT);
-        $this->set_filter($filterid, $eids, $page);
+        $options = array(
+            'filterid' => optional_param('filter', 0, PARAM_INT),
+            'eids' => optional_param('eids', 0, PARAM_INT),
+            'page' => optional_param('page', 0, PARAM_INT),
+            'usort' => optional_param('usort', '', PARAM_RAW),
+            'usearch' => optional_param('usearch', '', PARAM_RAW)
+        );
+
+        $this->set_filter($options);
 
         // base url params
         $baseurlparams = array();
@@ -251,16 +257,14 @@ class dataform_view_base {
         $data = $this->view;
         $editors = $this->editors();
 
-        $i = 0;
         foreach ($editors as $editorname => $options) {
              $data = file_prepare_standard_editor($data,
                                                 "e$editorname",
                                                 $options,
                                                 $this->_df->context,
                                                 'mod_dataform',
-                                                'view',
-                                                $this->view->id. $i);
-            $i++;
+                                                "view$editorname",
+                                                $this->view->id);
         }
 
         return $data;
@@ -272,16 +276,14 @@ class dataform_view_base {
     public function from_form($data) {
         $editors = $this->editors();
 
-        $i = 0;
         foreach ($editors as $editorname => $options) {
             $data = file_postupdate_standard_editor($data,
                                                     "e$editorname",
                                                     $options,
                                                     $this->_df->context,
                                                     'mod_dataform',
-                                                    'view',
-                                                    $this->view->id. $i);
-            $i++;
+                                                    "view$editorname",
+                                                    $this->view->id);
         }
 
         return $data;
@@ -357,8 +359,11 @@ class dataform_view_base {
            $this->_notifications['bad']['entries'] = $strnotify;
         }
 
+        // With one entry per page show the saved entry
         if ($processedeids and $this->_editentries and !$this->_returntoentriesform) {
-            $this->_filter->eids = $this->_editentries;
+            if ($this->_filter->perpage == 1) {
+                $this->_filter->eids = $this->_editentries;
+            }
             $this->_editentries = '';
         }
 
@@ -418,30 +423,14 @@ class dataform_view_base {
         $displaycontrols = isset($params['controls']) ? $params['controls'] : true;
         $notify = isset($params['notify']) ? $params['notify'] : true;
         $tohtml = isset($params['tohtml']) ? $params['tohtml'] : false;
-        $pluginfileurl = isset($params['pluginfileurl']) ? $params['pluginfileurl'] : null;
-
-        // rewrite plugin urls
-        foreach ($this->_editors as $key => $editorname) {
-            $editor = "e$editorname";
-
-            // export with files should provide the file path
-            if ($pluginfileurl) {
-                $this->view->$editor = str_replace('@@PLUGINFILE@@/', $pluginfileurl, $this->view->$editor);
-            } else {
-                $this->view->$editor = file_rewrite_pluginfile_urls($this->view->$editor,
-                                                                            'pluginfile.php',
-                                                                            $this->_df->context->id,
-                                                                            'mod_dataform',
-                                                                            'view',
-                                                                            $this->id(). $key);
-            }
-        }
+        $pluginfileurl = isset($params['pluginfileurl']) ? $params['pluginfileurl'] : null;      
 
         // build entries display definition
         $requiresmanageentries = $this->set__display_definition();
 
         // set view specific tags
         $options = array();
+        $options['pluginfileurl'] = $pluginfileurl;      
         $options['entriescount'] = $this->_entries->get_count();
         $options['entriesfiltercount'] = $this->_entries->get_count(true);
         // adding one or more new entries
@@ -583,7 +572,14 @@ class dataform_view_base {
     /**
      *
      */
-    public function set_filter($fid = 0, $eids = null, $page = 0) {
+    public function set_filter(array $options) {
+
+        $fid = !empty($options['filterid']) ? $options['filterid'] : 0;
+        $eids = !empty($options['eids']) ? $options['eids'] : null;
+        $page = !empty($options['page']) ? $options['page'] : 0;
+        $usort = !empty($options['usort']) ? $options['usort'] : null;
+        $usearch = !empty($options['usearch']) ? $options['usearch'] : null;
+
         // set filter
         $filter = $this->filter_options();
         if (!$filterid = $filter['filterid']) {
@@ -604,6 +600,12 @@ class dataform_view_base {
         $this->_filter->page = !empty($filter['page']) ? $filter['page'] : $page;
         // content fields
         $this->_filter->contentfields = array_keys($this->get__patterns('field'));
+        // Append url sort options
+        if ($usort) {
+            $usort = urldecode($usort);
+            $usort = array_map(function($a) {return explode(' ', $a);}, explode(',', $usort));
+            $this->_filter->append_sort_options($usort);
+        }
     }
 
     /**
@@ -723,9 +725,19 @@ class dataform_view_base {
      *
      */
     public function patterns() {
+        global $CFG;
+        
         if (!$this->_patterns) {
-            require_once('view_patterns.php');
-            $this->_patterns = new mod_dataform_view_patterns($this);
+            $viewtype = $this->type;
+            
+            if (file_exists("$CFG->dirroot/mod/dataform/view/$viewtype/view_patterns.php")) {
+                require_once("$CFG->dirroot/mod/dataform/view/$viewtype/view_patterns.php");
+                $patternsclass = "mod_dataform_view_{$viewtype}_patterns";
+            } else {
+                require_once("$CFG->dirroot/mod/dataform/view/view_patterns.php");
+                $patternsclass = "mod_dataform_view_patterns";
+            }
+            $this->_patterns = new $patternsclass($this);
         }
         return $this->_patterns;
     }
@@ -734,9 +746,34 @@ class dataform_view_base {
      *
      */
     public function set_view_tags($options) {
+        // rewrite plugin urls
+        $pluginfileurl = !empty($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
+        foreach ($this->_editors as $editorname) {
+            $editor = "e$editorname";
+
+            // export with files should provide the file path
+            if ($pluginfileurl) {
+                $this->view->$editor = str_replace('@@PLUGINFILE@@/', $pluginfileurl, $this->view->$editor);
+            } else {
+                $this->view->$editor = file_rewrite_pluginfile_urls($this->view->$editor,
+                                                                            'pluginfile.php',
+                                                                            $this->_df->context->id,
+                                                                            'mod_dataform',
+                                                                            "view$editorname",
+                                                                            $this->id());
+            }
+        }
+
         $tags = $this->_tags['view'];
         $replacements = $this->patterns()->get_replacements($tags, null, $options);
-        $this->view->esection = str_replace($tags, $replacements, $this->view->esection);
+        foreach ($this->_vieweditors as $editor) {
+            // Format to apply filters if html
+            if ($this->view->{"e$editor".'format'} == FORMAT_HTML) {
+                $this->view->{"e$editor"} = format_text($this->view->{"e$editor"}, FORMAT_HTML, array('trusted' => 1));
+            }
+            
+            $this->view->{"e$editor"} = str_replace($tags, $replacements, $this->view->{"e$editor"});
+        }
     }
 
     /**
@@ -796,8 +833,9 @@ class dataform_view_base {
     /**
      * @param array $entriesset entryid => array(entry, edit, editable)
      */
-    public function get_entries_definition($display_definition) {
+    public function get_entries_definition() {
 
+        $display_definition = $this->_display_definition;
         $groupedelements = array();
         foreach ($display_definition as $name => $entriesset) {
             $definitions = array();
@@ -848,6 +886,26 @@ class dataform_view_base {
     /**
      *
      */
+    protected function get_field_definitions($entry, $options) {
+        $fields = $this->_df->get_fields();
+        $entry->baseurl = $this->_baseurl;
+
+        $definitions = array();
+        foreach ($this->_tags['field'] as $fieldid => $patterns) {
+            if (!isset($fields[$fieldid])) {
+                continue;
+            } 
+            $field = $fields[$fieldid];
+            if ($fielddefinitions = $field->get_definitions($patterns, $entry, $options)) {
+                $definitions = array_merge($definitions, $fielddefinitions);
+            }
+        }
+        return $definitions;
+    }
+
+    /**
+     *
+     */
     protected function set__editors($data = null) {
         foreach ($this->_editors as $editor) {
             // new view or from DB so add editor fields
@@ -861,20 +919,20 @@ class dataform_view_base {
                         $trust = substr($editordata, 7, 1);
                         $text = substr($editordata, 11);
                     } else {
-                        list($format, $trust, $text) = array(FORMAT_HTML, 0, $editordata);
+                        list($format, $trust, $text) = array(FORMAT_HTML, 1, $editordata);
                     }
                 } else {
-                    list($format, $trust, $text) = array(FORMAT_HTML, 0, '');
+                    list($format, $trust, $text) = array(FORMAT_HTML, 1, '');
                 }
-                $this->view->{"e$editor"} = $text;
                 $this->view->{"e$editor".'format'} = $format;
                 $this->view->{"e$editor".'trust'} = $trust;
+                $this->view->{"e$editor"} = $text;                    
 
             // view from form or editor areas updated
             } else {
-                $text = !empty($data->{"e$editor"}) ? $data->{"e$editor"} : '';
                 $format = !empty($data->{"e$editor".'format'}) ? $data->{"e$editor".'format'} : FORMAT_HTML;
-                $trust = !empty($data->{"e$editor".'trust'}) ? $data->{"e$editor".'trust'} : 0;
+                $trust = !empty($data->{"e$editor".'trust'}) ? $data->{"e$editor".'trust'} : 1;
+                $text = !empty($data->{"e$editor"}) ? $data->{"e$editor"} : '';
 
                 // replace \n in non text format
                 if ($format != FORMAT_PLAIN) {
@@ -939,26 +997,6 @@ class dataform_view_base {
         $elements = preg_split("/($delims)/", $subject, null, PREG_SPLIT_DELIM_CAPTURE);
 
         return $elements;
-    }
-
-    /**
-     *
-     */
-    protected function get_field_definitions($entry, $options) {
-        $fields = $this->_df->get_fields();
-        $entry->baseurl = $this->_baseurl;
-
-        $definitions = array();
-        foreach ($this->_tags['field'] as $fieldid => $patterns) {
-            if (!isset($fields[$fieldid])) {
-                continue;
-            } 
-            $field = $fields[$fieldid];
-            if ($fielddefinitions = $field->get_definitions($patterns, $entry, $options)) {
-                $definitions = array_merge($definitions, $fielddefinitions);
-            }
-        }
-        return $definitions;
     }
 
     /**
@@ -1168,9 +1206,9 @@ class dataform_view_base {
             // all _display_definition elements should be html
             $html = $this->definition_to_html();
             
-            // replace pluginfile urls if needed (e.g. in export)
+            // Replace pluginfile urls if needed (e.g. in export)
             if ($pluginfileurl) {
-                $pluginfilepath = new moodle_url("/pluginfile.php/{$this->_df->context->id}/mod_dataform/content");
+                $pluginfilepath = moodle_url::make_file_url("/pluginfile.php", "/{$this->_df->context->id}/mod_dataform/content");
                 $pattern = str_replace('/', '\/', $pluginfilepath);
                 $pattern = "/$pattern\/\d+\//";
                 $html = preg_replace($pattern, $pluginfileurl, $html);
@@ -1182,6 +1220,42 @@ class dataform_view_base {
             $html = $entriesform->html();
         }
         
+        // Process calculations if any
+        if (preg_match_all("/%%F\d*:=[^%]+%%/", $html, $matches)) {
+            require_once("$CFG->libdir/mathslib.php");
+            sort($matches[0]);
+            $replacements = array();
+            $formulas = array();
+            foreach ($matches[0] as $pattern) {
+                $cleanpattern = trim($pattern, '%');
+                list($fid, $formula) = explode(':=', $cleanpattern, 2);
+                if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
+                    foreach ($frefs[0] as $fref) {
+                        $fref = trim($fref, '_');
+                        if (isset($formulas[$fref])) {
+                            $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
+                        }
+                    }
+                }
+                isset($formulas[$fid]) or $formulas[$fid] = array();
+                $formulas[$fid][] = $formula;
+                $replacements[$pattern] = $formula;
+            }
+
+            foreach ($replacements as $pattern => $formula) {
+                $calc = new calc_formula("=$formula");
+                $result = $calc->evaluate();
+                // false as result indicates some problem
+                if ($result === false) {
+                    // TODO: add more error hints
+                    $replacements[$pattern] = html_writer::tag('span', $formula, array('style' => 'color:red;')); //get_string('errorcalculationunknown', 'grades');
+                } else {
+                    $replacements[$pattern] = $result;
+                }
+            }
+            $html = str_replace(array_keys($replacements), $replacements, $html);
+        }
+            
         if ($tohtml) {
             return $html;
         } else {
@@ -1193,8 +1267,7 @@ class dataform_view_base {
      *
      */
     public function definition_to_form(&$mform) {
-        $elements = $this->get_entries_definition($this->_display_definition);
-
+        $elements = $this->get_entries_definition();
         foreach ($elements as $element) {
             if (!empty($element)) {
                 list($type, $content) = $element;
@@ -1213,7 +1286,7 @@ class dataform_view_base {
      */
     public function definition_to_html() {
         $html = '';
-        $elements = $this->get_entries_definition($this->_display_definition);
+        $elements = $this->get_entries_definition();
         // if $mform is null, simply echo/return html string
         foreach ($elements as $element) {
             list(, $content) = $element;

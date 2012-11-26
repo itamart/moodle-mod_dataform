@@ -58,15 +58,7 @@ $sharedpresets = $pm->get_user_presets($pm::PRESET_SITEAREA);
 
 // any notifications
 if (!$localpresets and !$sharedpresets) {
-    $df->notifications['bad']['getstartedpresets'] = get_string('presetnoneavailable','dataform');  // nothing in dataform
-    if (!$df->get_user_defined_fields()) {
-        $linktofields = html_writer::link(new moodle_url('field/index.php', array('d' => $df->id())), get_string('fields', 'dataform'));
-        $df->notifications['bad']['getstartedfields'] = get_string('getstartedfields','dataform', $linktofields);
-    }
-    if (!$df->get_views()) {
-        $linktoviews = html_writer::link(new moodle_url('view/index.php', array('d' => $df->id())), get_string('views', 'dataform'));
-        $df->notifications['bad']['getstartedviews'] = get_string('getstartedviews','dataform', $linktoviews);
-    }
+    $df->notifications['bad'][] = get_string('presetnoneavailable','dataform');  // No presets in dataform
 }
 
 // print header

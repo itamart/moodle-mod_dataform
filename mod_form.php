@@ -127,7 +127,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addElement('header', '', get_string('notifications'));
         $grp=array();
         foreach (dataform::get_notification_types() as $type => $key) {
-            $grp[] = &$mform->createElement('advcheckbox', $type, null, get_string("message_$type", 'dataform'), null, array(0,$key));
+            $grp[] = &$mform->createElement('advcheckbox', $type, null, get_string("messageprovider:dataform_$type", 'dataform'), null, array(0,$key));
         }
         $mform->addGroup($grp, 'notificationgrp', get_string('notificationenable', 'dataform'), html_writer::empty_tag('br'), false);
         

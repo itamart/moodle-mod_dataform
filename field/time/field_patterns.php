@@ -37,29 +37,28 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         $fieldname = $field->name();
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        $replacements = array();
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);        
+
+        $replacements = array_fill_keys($tags, '');
         
-        $editonce = false;
-        foreach ($tags as $cleantag => $tag) {
+        foreach ($tags as $tag => $cleantag) {
             if ($edit) {
-                if (!$editonce) {
-                    $required = $this->is_required($tag);
-                    $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, array('required' => $required))));
-                    $editonce = true;
-                } else {
-                    $replacements[$tag] = '';
-                }
+                $required = $this->is_required($tag);
+                $date = ($cleantag == "[[$fieldname:date]]" ? true : false);
+                $options = array('required' => $required, 'date' => $date);
+                $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $options)));
+                break;
             } else {
-                $format = (strpos($tag, "{$fieldname}:") !== false ? str_replace("{$fieldname}:", '', trim($tag, '[]')) : '');
+                $format = (strpos($tag, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($tag, '[]')) : '');
                 switch ($format) {            
-                    case 'minute': $format = 'M'; break; 
-                    case 'hour': $format = 'H'; break; 
-                    case 'day': $format = 'a'; break; 
-                    case 'week': $format = 'V'; break; 
-                    case 'month': $format = 'b'; break; 
-                    case 'year': $format = 'G'; break;
+                    case 'date': $format = get_string('strftimedate'); break; 
+                    case 'minute': $format = '%M'; break; 
+                    case 'hour': $format = '%H'; break; 
+                    case 'day': $format = '%a'; break; 
+                    case 'week': $format = '%V'; break; 
+                    case 'month': $format = '%b'; break; 
+                    case 'year': $format = '%G'; break;
                 }
                 $replacements[$tag] = array('html', $this->display_browse($entry, array('format' => $format)));
             }
@@ -81,13 +80,13 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
             $content = 0;
         }
 
+        // With the date pattern don't add time to selector
+        $time = (empty($options['date']) ? 'time_' : '');      
         $fieldname = "field_{$fieldid}_{$entryid}";
-        $mform->addElement('date_time_selector', $fieldname, null, array('optional' => true));
+        $optional = (!empty($options['required']) ? false : true);
+
+        $mform->addElement("date_{$time}selector", $fieldname, null, array('optional' => $optional));
         $mform->setDefault($fieldname, $content);
-        $required = !empty($options['required']);
-        if ($required) {
-            $mform->addRule($fieldname, null, 'required', null, 'client');
-        }
     }
     
     /**
@@ -100,7 +99,7 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         $strtime = '';
         if (isset($entry->{"c{$fieldid}_content"})) {
             if ($content = $entry->{"c{$fieldid}_content"}) {
-                $format = !empty($params['format']) ? '%'. $params['format'] : '';
+                $format = !empty($params['format']) ? $params['format'] : '';
                 $strtime = userdate($content, $format);
             }
         }
@@ -136,23 +135,6 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
     }
     
     /**
-     *
-     */
-    public function display_import(&$mform, $tags) {
-        $fieldid = $this->_field->id();
-        $tagname = $this->_field->name();
-        $name = "f_{$fieldid}_$tagname";
-
-        $grp = array();
-        $grp[] = &$mform->createElement('text', "{$name}_name", null, array('size'=>'16'));                   
-        $grp[] = &$mform->createElement('selectyesno', "{$name}_timestamp");
-        $mform->addGroup($grp, "grp$tagname", $tagname, ' '. get_string('fromtimestamp', 'dataformfield_time'), false);
-                            
-        $mform->setType("{$name}_name", PARAM_NOTAGS);
-        $mform->setDefault("{$name}_name", $tagname);
-    }
-
-    /**
      * Array of patterns this field supports 
      */
     protected function patterns() {
@@ -160,12 +142,11 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
+        $patterns["[[$fieldname:date]]"] = array(true);
         // Minute (M)
         $patterns["[[$fieldname:minute]]"] = array(false);
         // Hour (H)
         $patterns["[[$fieldname:hour]]"] = array(false);
-        // %H:%M
-        $patterns["[[$fieldname:R]]"] = array(false);
         // Day (a)
         $patterns["[[$fieldname:day]]"] = array(false);
         $patterns["[[$fieldname:d]]"] = array(false);

@@ -170,6 +170,13 @@ class dataform {
     /**
      *
      */
+    public function get_current_view() {
+        return $this->_currentview;
+    }
+
+    /**
+     *
+     */
     public function get_filter_manager() {
         // set filters manager
         if (!$this->_filtermanager) { 
@@ -1673,13 +1680,14 @@ class dataform {
      * 
      */
     public function events_trigger($event, $data) {
+        global $USER;
 
         $users = array();
         // Get capability users if notifications for the event are enabled
         $notificationtypes = self::get_notification_types();
         if ($this->data->notification & $notificationtypes[$event]) {
             $capability = "mod/dataform:notify$event";
-            $users = get_users_by_capability($this->context, $capability, 'u.id,u.auth,u.suspended,u.deleted,u.lastaccess,u.emailstop');
+            $users = get_users_by_capability($this->context, $capability, 'u.id,u.email,u.auth,u.suspended,u.deleted,u.lastaccess,u.emailstop');
         }
 
         // Get event notificataion rule users
@@ -1699,6 +1707,9 @@ class dataform {
         $data->users = $users;       
         $data->coursename = $this->course->shortname;
         $data->dataformname = $this->name();
+        $data->dataformlink = html_writer::link($data->view->get_baseurl(), $data->dataformname);
+        $data->sender = $USER;
+        $data->senderprofilelink = html_writer::link(new moodle_url('/user/profile.php', array('id' => $USER->id)), fullname($USER));
         $data->context = $this->context->id;
         $data->event = $event;
         $data->notification = 1;

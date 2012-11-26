@@ -174,7 +174,7 @@ function dataform_reset_course_form_definition(&$mform) {
  * @return array
  */
 function dataform_reset_course_form_defaults($course) {
-    return array('reset_data'=>0, 'reset_dataform_ratings'=>1, 'reset_dataform_comments'=>1, 'reset_dataform_notenrolled'=>0);
+    return array('reset_dataform_data'=>0, 'reset_dataform_ratings'=>1, 'reset_dataform_comments'=>1, 'reset_dataform_notenrolled'=>0);
 }
 
 /**
@@ -232,7 +232,7 @@ function dataform_reset_userdata($data) {
     $ratingdeloptions->ratingarea = 'entry';
 
     // delete entries if requested
-    if (!empty($data->reset_data)) {
+    if (!empty($data->reset_dataform_data)) {
         $DB->delete_records_select('comments', "itemid IN ($allrecordssql) AND commentarea='entry'", array($data->courseid));
         $DB->delete_records_select('dataform_contents', "entryid IN ($allrecordssql)", array($data->courseid));
         $DB->delete_records_select('dataform_entries', "dataid IN ($alldatassql)", array($data->courseid));
@@ -405,6 +405,7 @@ function dataform_get_file_areas($course, $cm, $context) {
 function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $CFG, $DB, $USER;
 
+    // FIELD CONTENT files
     if ($filearea === 'content' and $context->contextlevel == CONTEXT_MODULE) {
 
         $contentid = (int)array_shift($args);
@@ -484,7 +485,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
-    if ($filearea === 'view' and $context->contextlevel == CONTEXT_MODULE) {
+    // VIEW TEMPLATE files
+    if (strpos($filearea, 'view') !== false and $context->contextlevel == CONTEXT_MODULE) {
         require_course_login($course, true, $cm);
 
         $relativepath = implode('/', $args);
@@ -499,6 +501,24 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
+    // PDF VIEW files
+    $viewpdfareas = array('view_pdfframe', 'view_pdfwmark', 'view_pdfcert');
+    if (in_array($filearea, $viewpdfareas) and $context->contextlevel == CONTEXT_MODULE) {
+        require_course_login($course, true, $cm);
+
+        $relativepath = implode('/', $args);
+        $fullpath = "/$context->id/mod_dataform/$filearea/$relativepath";
+
+        $fs = get_file_storage();
+        if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+            return false;
+        }
+
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+    }
+
+    // PRESET files
     if (($filearea === 'course_presets' or $filearea === 'site_presets')) {
 //                and $context->contextlevel == CONTEXT_MODULE) {
         require_course_login($course, true, $cm);
@@ -604,7 +624,6 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
             $manage->add(get_string('cssinclude', 'dataform'), new moodle_url('/mod/dataform/css.php', array('id' => $PAGE->cm->id, 'cssedit' => 1)));
         }
         $manage->add(get_string('import', 'dataform'), new moodle_url('/mod/dataform/import.php', array('id' => $PAGE->cm->id)));
-
     }
 
 }

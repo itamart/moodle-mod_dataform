@@ -132,8 +132,7 @@ class dataform_filter {
         }
         return false;
     }
-    
-    
+
     /**
      *
      */
@@ -163,18 +162,22 @@ class dataform_filter {
                 // add AND search clauses
                 if (!empty($searchfield['AND'])) {
                     foreach ($searchfield['AND'] as $option) {
-                        list($fieldsql, $fieldparams) = $field->get_search_sql($option);
-                        $whereand[] = $fieldsql;
-                        $searchparams = array_merge($searchparams, $fieldparams);
+                        if ($fieldsqloptions = $field->get_search_sql($option)) {
+                            list($fieldsql, $fieldparams) = $fieldsqloptions;
+                            $whereand[] = $fieldsql;
+                            $searchparams = array_merge($searchparams, $fieldparams);
+                        }
                     }
                 }
 
                 // add OR search clause
                 if (!empty($searchfield['OR'])) {
                     foreach ($searchfield['OR'] as $option) {
-                        list($fieldsql, $fieldparams) = $field->get_search_sql($option);
-                        $whereor[] = $fieldsql;
-                        $searchparams = array_merge($searchparams, $fieldparams);
+                        if ($fieldsqloptions = $field->get_search_sql($option)) {
+                            list($fieldsql, $fieldparams) = $fieldsqloptions;
+                            $whereor[] = $fieldsql;
+                            $searchparams = array_merge($searchparams, $fieldparams);
+                        }
                     }
                 }
             }
@@ -202,12 +205,16 @@ class dataform_filter {
 
         } else if ($simplesearch) {
             $searchtables .= " JOIN {dataform_contents} cs ON cs.entryid = e.id ";
-            $searchwhere[] = ' ('. $DB->sql_like('cs.content', ':search1', false).
-                                ' OR '. $DB->sql_like('u.firstname', ':search2', false).
-                                ' OR '. $DB->sql_like('u.lastname', ':search3', false).') ';
-            $searchparams['search1'] = "%$simplesearch%";
-            $searchparams['search2'] = "%$simplesearch%";
-            $searchparams['search3'] = "%$simplesearch%";
+            $searchlike = array(
+                'search1' => $DB->sql_like('cs.content', ':search1', false),
+                'search2' => $DB->sql_like('u.firstname', ':search2', false),
+                'search3' => $DB->sql_like('u.lastname', ':search3', false),
+                'search4' => $DB->sql_like('u.username', ':search4', false)
+            );
+            $searchwhere[] = ' ('. implode(' OR ', $searchlike). ') ';
+            foreach ($searchlike as $namekey => $unused) {
+                $searchparams[$namekey] = "%$simplesearch%";
+            }
         }
     
         $wheresearch = $searchwhere ? ' AND '. implode(' AND ', $searchwhere) : '';
@@ -297,6 +304,19 @@ class dataform_filter {
     }
 
     // Append sort option
+    /**
+     *
+     */
+    public function append_sort_options(array $sorties) {
+        if ($sorties) {
+            $sortoptions = $this->customsort ? unserialize($this->customsort) : array();
+            foreach ($sorties as $sorty) {
+                list($fieldid, $sortdir) = $sorty;
+                $sortoptions[$fieldid] = $sortdir;
+            }
+            $this->customsort = serialize($sortoptions);
+        }
+    }
     // Prepend sort option
     // Append search option
     // Prepend search option
@@ -719,6 +739,7 @@ class dataform_filter_manager {
         $strperpage = get_string('filterperpage', 'dataform');
         $strcustomsort = get_string('filtercustomsort', 'dataform');
         $strcustomsearch = get_string('filtercustomsearch', 'dataform');
+        $strurlquery = get_string('filterurlquery', 'dataform');
         $strvisible = get_string('visible');
         $strhide = get_string('hide');
         $strshow = get_string('show');
@@ -737,10 +758,10 @@ class dataform_filter_manager {
 
         $table = new html_table();
         $table->head = array($strfilters, $strdescription, $strperpage, 
-                            $strcustomsort, $strcustomsearch, $strvisible, 
-                            $strdefault, $stredit, $strduplicate, $multidelete, $selectallnone);
-        $table->align = array('left', 'left', 'center', 'left', 'left', 'center', 'center', 'center', 'center', 'center');
-        $table->wrap = array(false, false, false, false, false, false, false, false, false, false);
+                            $strcustomsort, $strcustomsearch, $strurlquery,
+                            $strvisible, $strdefault, $stredit, $strduplicate, $multidelete, $selectallnone);
+        $table->align = array('left', 'left', 'center', 'left', 'left', 'left', 'center', 'center', 'center', 'center', 'center');
+        $table->wrap = array(false, false, false, false, false, false, false, false, false, false, false);
         $table->attributes['align'] = 'center';
         
         foreach ($this->_filters as $filterid => $filter) {
@@ -770,36 +791,47 @@ class dataform_filter_manager {
             }
             // parse custom settings
             $sortoptions = '';
-            $searchoptions = '';            
+            $sorturlquery = '';
+            $searchoptions = '';
+            $searchurlquery = '';
+            
             if ($filter->customsort or $filter->customsearch) {
-                // parse filter sort settings
+                // Get field objects
+                $fields = $df->get_fields();
+                
+                // Parse filter sort settings
                 $sortfields = array();
                 if ($filter->customsort) {
                     $sortfields = unserialize($filter->customsort);
                 }
                 
-                // parse filter search settings
-                $searchfields = array();
-                if ($filter->customsearch) {
-                    $searchfields = unserialize($filter->customsearch);
-                }
-
-                // get fields objects
-                $fields = $df->get_fields();
-                
                 if ($sortfields) {
                     $sortarr = array();
+                    $sorturlarr = array();
                     foreach ($sortfields as $fieldid => $sortdir) {
                         if (empty($fields[$fieldid])) {
                             continue;
                         }
+                        
+                        // Sort url query
+                        $sorturlarr[] = "$fieldid $sortdir";
+
+                        // Verbose sort criteria
                         // check if field participates in default sort
                         $strsortdir = $sortdir ? 'Descending' : 'Ascending';
                         $sortarr[] = $OUTPUT->pix_icon('t/'. ($sortdir ? 'down' : 'up'), $strsortdir). ' '. $fields[$fieldid]->field->name;
                     }
                     $sortoptions = implode('<br />', $sortarr);
+                    $sorturlquery = implode(',', $sorturlarr);
+                }            
+                
+                // Parse filter search settings
+                $searchfields = array();
+                if ($filter->customsearch) {
+                    $searchfields = unserialize($filter->customsearch);
                 }
-            
+
+                // Verbose search criteria
                 if ($searchfields) {
                     $searcharr = array();
                     foreach ($searchfields as $fieldid => $searchfield) {
@@ -838,11 +870,21 @@ class dataform_filter_manager {
                     $searchoptions = $filter->search ? $filter->search : '';
                 }
             }
+            
             $sortoptions = !empty($sortoptions) ? $sortoptions : '---';
             $searchoptions = !empty($searchoptions) ? $searchoptions : '---';
             
             // Per page
             $perpage = empty($filter->perpage) ?  '---' : $filter->perpage;
+
+            // Url query
+            $urlquery = '';
+            if ($sorturlquery)  {
+                $urlquery .= '&usort='. urlencode($sorturlquery);
+            }
+            if ($searchurlquery)  {
+                $urlquery .= '&usearch='. urlencode($searchurlquery);
+            }
 
             $table->data[] = array(
                 $filtername,
@@ -850,6 +892,7 @@ class dataform_filter_manager {
                 $perpage,
                 $sortoptions,
                 $searchoptions,
+                $urlquery,
                 $visible,
                 $defaultfilter,
                 $filteredit,

@@ -30,6 +30,8 @@ abstract class mod_dataform_field_patterns {
     const PATTERN_CATEGORY = 1;
 
     const RULE_REQUIRED = '*';
+    const RULE_HIDDEN = '^';
+    const RULE_NOEDIT = '!';
 
     protected $_field = null;
 
@@ -83,7 +85,7 @@ abstract class mod_dataform_field_patterns {
     protected function add_clean_pattern_keys(array $patterns) {
         $keypatterns = array();
         foreach ($patterns as $pattern) {
-            $keypatterns[str_replace($this->supports_rules(), '', $pattern)] = $pattern;
+            $keypatterns[$pattern] = str_replace($this->supports_rules(), '', $pattern);
         }
         return $keypatterns;
     }
@@ -93,7 +95,7 @@ abstract class mod_dataform_field_patterns {
      */
     public function is_required($pattern) {
         // TODO must be after opening brackets and before field name
-        return strpos($pattern, '*') !== false;
+        return strpos($pattern, self::RULE_REQUIRED) !== false;
     }
 
     /**
@@ -101,7 +103,15 @@ abstract class mod_dataform_field_patterns {
      */
     public function is_hidden($pattern) {
         // TODO must be after opening brackets and before field name
-        return strpos($pattern, '^') !== false;
+        return strpos($pattern, self::RULE_HIDDEN) !== false;
+    }
+
+    /**
+     *
+     */
+    public function is_noedit($pattern) {
+        // TODO must be after opening brackets and before field name
+        return strpos($pattern, self::RULE_NOEDIT) !== false;
     }
 
     /**

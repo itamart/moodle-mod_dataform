@@ -49,18 +49,17 @@ class mod_dataform_field_number_patterns extends mod_dataform_field_text_pattern
         $fieldid = $field->id();
         if (isset($entry->{"c{$fieldid}_content"})) {
             $number = (float) $entry->{"c{$fieldid}_content"};
-            $decimals = (int) trim($field->get('param1'));
-            // only apply number formatting if param1 contains an integer number >= 0:
-            if ($decimals) {
-                // removes leading zeros (eg. '007' -> '7'; '00' -> '0')
-                $str = sprintf("%4.{$decimals}f", $number);
-                //$str = round($number, $decimals);
-            } else {
-                $str = (int) $number;
-                //$str = round($number);
-            }
         } else {
-            $str = '';
+            $number = 0;
+        }
+        
+        $decimals = (int) trim($field->get('param1'));
+        // only apply number formatting if param1 contains an integer number >= 0:
+        if ($decimals) {
+            // removes leading zeros (eg. '007' -> '7'; '00' -> '0')
+            $str = sprintf("%4.{$decimals}f", $number);
+        } else {
+            $str = (int) $number;
         }
         
         return $str;

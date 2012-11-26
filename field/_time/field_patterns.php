@@ -47,14 +47,14 @@ class mod_dataform_field__time_patterns extends mod_dataform_field_patterns {
             } else {
                 $format = (strpos($tag, "{$fieldname}:") !== false ? str_replace("{$fieldname}:", '', trim($tag, '#')) : '');
                 switch ($format) {            
-                    case 'minute': $format = 'M'; break; 
-                    case 'hour': $format = 'H'; break; 
-                    case 'day': $format = 'a'; break; 
-                    case 'week': $format = 'W'; break; 
-                    case 'month': $format = 'b'; break; 
-                    case 'year': $format = 'Y'; break;
+                    case 'date': $format = get_string('strftimedate'); break; 
+                    case 'minute': $format = '%M'; break; 
+                    case 'hour': $format = '%H'; break; 
+                    case 'day': $format = '%a'; break; 
+                    case 'week': $format = '%V'; break; 
+                    case 'month': $format = '%b'; break; 
+                    case 'year': $format = '%G'; break;
                 }
-                $format = !empty($format) ? "%$format" : '';
                 $replacements[$tag] = array('html', userdate($entry->{$fieldname}, $format));
             }
         }    
@@ -97,7 +97,8 @@ class mod_dataform_field__time_patterns extends mod_dataform_field_patterns {
         $cat = get_string('entryinfo', 'dataform');
 
         $patterns = array();
-        $patterns["##$fieldname##"] = array(true, $cat);
+        $patterns["##$fieldname##"] = array(true);
+        $patterns["##$fieldname:date##"] = array(true);
         // Minute (M)
         $patterns["##$fieldname:minute##"] = array(false);
         // Hour (H)

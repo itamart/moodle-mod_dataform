@@ -386,15 +386,15 @@ abstract class dataform_rule_notification extends dataform_rule_base {
                             $user = $USER;
                         } else {
                             $user = new object;
-                            foreach (explode(',', user_picture::rules()) as $userrule) {
-                                if ($userrule == 'id') {
-                                    $user->id = $entry->uid;
-                                } else {
-                                    $user->{$userrule} = $entry->{$userrule};
+                            foreach (explode(',', user_picture::fields()) as $userfield) {
+                                if ($userfield == 'id') {
+                                    $user->id = $entry->userid;
+                                } else if (isset($entry->{$userfield})) {
+                                    $user->{$userfield} = $entry->{$userfield};
                                 }
                             }
                         }
-                        $users[$entry->userid] = $USER;
+                        $users[$entry->userid] = $user;
                     }
                 }
         }
@@ -411,11 +411,11 @@ abstract class dataform_rule_notification extends dataform_rule_base {
             $user = $USER;
         } else {
             $user = new object;
-            foreach (explode(',', user_picture::rules()) as $userrule) {
-                if ($userrule == 'id') {
-                    $user->id = $entry->uid;
+            foreach (explode(',', user_picture::fields()) as $userfield) {
+                if ($userfield == 'id') {
+                    $user->id = $entry->userid;
                 } else {
-                    $user->{$userrule} = $entry->{$userrule};
+                    $user->{$userfield} = $entry->{$userfield};
                 }
             }
         }

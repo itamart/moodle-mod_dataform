@@ -16,7 +16,7 @@
 
 /**
  * @package dataformview
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
@@ -180,7 +180,7 @@ class mod_dataform_view_patterns {
      *
      */
     protected function get_action_replacements($tag, $entry = null, array $options = null) {
-        global $OUTPUT;
+        global $CFG, $OUTPUT;
 
         $replacement = '';
         
@@ -229,6 +229,16 @@ class mod_dataform_view_patterns {
                                                     'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl->out(false). '\'&#44; \'duplicate\')'));
                 break;
 
+            case '##multiduplicate:icon##':
+                if ($showentryactions) {
+                    $replacement = html_writer::tag('button',
+                                $OUTPUT->pix_icon('t/copy', get_string('multiduplicate', 'dataform')),
+                                array('type' => 'button',
+                                        'name' => 'multiduplicate',
+                                        'onclick' => 'bulk_action(\'entry\'&#44; \''. $baseurl->out(false). '\'&#44; \'duplicate\')'));
+                }
+                break;
+               
             case '##multiedit##':
                 if ($showentryactions) {
                     $replacement = html_writer::empty_tag('input',
@@ -294,9 +304,6 @@ class mod_dataform_view_patterns {
                 $buttonval = get_string('multiexport', 'dataform');
             case '##multiexport:icon##':
                 $buttonval = !isset($buttonval) ? $OUTPUT->pix_icon('t/portfolioadd', get_string('multiexport', 'dataform')) : $buttonval;
-            case '##multiexport:csv##':
-                $format = !isset($format) ? 'spreadsheet' : $format;
-                $buttonval = !isset($buttonval) ? $OUTPUT->pix_icon('f/ods', get_string('multiexport', 'dataform')) : $buttonval;
 
                 if (!empty($CFG->enableportfolios)) {
                     if (!empty($format)) {
@@ -445,6 +452,7 @@ class mod_dataform_view_patterns {
             '##addnewentries##' => array(true, $cat),
             '##selectallnone##' => array(true, $cat),
             '##multiduplicate##' => array(true, $cat),
+            '##multiduplicate:icon##' => array(true, $cat),
             '##multiedit##' => array(true, $cat),
             '##multiedit:icon##' => array(true, $cat),
             '##multidelete##' => array(true, $cat),
@@ -453,7 +461,6 @@ class mod_dataform_view_patterns {
             '##multiapprove:icon##' => array(true, $cat),
             '##multiexport##' => array(true, $cat),
             '##multiexport:icon##' => array(true, $cat),
-            '##multiexport:csv##' => array(true, $cat),
             '##multiimport##' => array(true, $cat),
             '##multiimporty:icon##' => array(true, $cat),
         );

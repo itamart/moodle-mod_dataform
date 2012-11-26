@@ -37,6 +37,7 @@ class dataform_view_tabular extends dataform_view_base {
 
     protected $type = 'tabular';    
     protected $_editors = array('section', 'param2');
+    protected $_vieweditors = array('section', 'param2');
     
     /**
      * 
@@ -132,17 +133,6 @@ class dataform_view_tabular extends dataform_view_base {
 
     }
     
-    /**
-     *
-     */
-    public function set_view_tags($options){
-        $tags = $this->_tags['view'];
-        $replacements = $this->patterns()->get_replacements($tags, null, $options);
-        
-        $this->view->esection = str_replace($tags, $replacements, $this->view->esection);
-        $this->view->eparam2 = str_replace($tags, $replacements, $this->view->eparam2);
-    }
-
     /**
      *
      */

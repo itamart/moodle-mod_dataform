@@ -42,7 +42,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);
 
-        foreach ($tags as $cleantag => $tag) {
+        foreach ($tags as $tag => $cleantag) {
             if ($edit) {
                 if ($cleantag == "[[$fieldname]]") {
                     $required = $this->is_required($tag);

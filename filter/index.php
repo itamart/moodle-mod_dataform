@@ -76,7 +76,7 @@ if ($urlparams->update and confirm_sesskey()) {  // Add/update a new filter
     }
 }
 
-//  edit a new filter
+//  Edit a new filter
 if ($urlparams->new and confirm_sesskey()) {    
     $filter = $fm->get_filter_from_id($fm::BLANK_FILTER);
     $filterform = $fm->get_filter_form($filter);
@@ -90,18 +90,18 @@ if ($urlparams->new and confirm_sesskey()) {
 
 // (or) display the filters list
 } else {    
-    // any notifications?
+    // Any notifications?
     if (!$filters = $fm->get_filters(null, false, true)) {
         $df->notifications['bad'][] = get_string('filtersnoneindataform','dataform');  // nothing in dataform
     }
 
-    // print header
+    // Print header
     $df->print_header(array('tab' => 'filters', 'urlparams' => $urlparams));
 
-    // print the filter add link
+    // Print the filter add link
     $fm->print_add_filter();
 
-    // if there are filters print admin style list of them
+    // If there are filters print admin style list of them
     if ($filters) {
         $fm->print_filter_list();
     }

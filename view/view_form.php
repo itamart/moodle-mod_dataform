@@ -161,7 +161,6 @@ class mod_dataform_view_base_form extends moodleform {
     function add_tags_selector($editorname, $tagstype){
         $view = $this->_customdata['view'];
         $mform = &$this->_form;
-
         switch ($tagstype) {
             case 'general':
                 $tags = $view->patterns()->get_menu();

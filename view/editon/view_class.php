@@ -135,9 +135,10 @@ class dataform_view_editon extends dataform_view_grid {
      * new entry.
      * @param array $entriesset entryid => array(entry, edit, editable)
      */
-    public function get_entries_definition($display_definition) {       
+    public function get_entries_definition() {       
         $elements = array();
 
+        $display_definition = $this->_display_definition;
         foreach ($display_definition as $name => $entriesset) {
             if ($name != 'newentry') {
                 continue;

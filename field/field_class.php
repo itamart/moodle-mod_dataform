@@ -37,7 +37,8 @@ abstract class dataform_field_base {
     public $field = null;      // The field object itself, if we know it
 
     protected $_patterns = null;
-
+    protected $_distinctvalues = null;
+    
     /**
      * Class constructor
      *
@@ -405,9 +406,8 @@ abstract class dataform_field_base {
     public function get_distinct_content($sortdir = 0) {
         global $DB;
 
-        static $distinctvalues = null;
-
-        if (is_null($distinctvalues)) {
+        if (is_null($this->_distinctvalues)) {
+            $this->_distinctvalues = array();
             $fieldid = $this->field->id;
             $sortdir = $sortdir ? 'DESC' : 'ASC';
             $contentname = $this->get_sort_sql();
@@ -416,18 +416,17 @@ abstract class dataform_field_base {
                         WHERE c$fieldid.fieldid = $fieldid AND $contentname IS NOT NULL
                         ORDER BY $contentname $sortdir";
 
-            $distinctvalues = array();
             if ($options = $DB->get_records_sql($sql)) {
                 foreach ($options as $data) {
                     $value = $data->content;
                     if ($value === '') {
                         continue;
                     }
-                    $distinctvalues[] = $value;
+                    $this->_distinctvalues[] = $value;
                 }
             }
         }
-        return $distinctvalues;
+        return $this->_distinctvalues;
     }
 
     /**
@@ -603,7 +602,7 @@ abstract class dataform_field_base {
      * Validate form data in entries form
      */
     public function validate($eid, $patterns, $formdata) {
-        return $this->_patterns->validate_data($eid, $patterns, $formdata);
+        return $this->patterns()->validate_data($eid, $patterns, $formdata);
     }
 
     /**

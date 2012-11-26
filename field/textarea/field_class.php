@@ -87,7 +87,7 @@ class dataform_field_textarea extends dataform_field_base {
         }        
 
         // Editor content
-        if ($this->is_editor()) {
+        if ($this->is_editor() and can_use_html_editor()) {
             $data = (object) $values;
             $data->{'editor_editor'} = $data->editor;
 
@@ -126,15 +126,18 @@ class dataform_field_textarea extends dataform_field_base {
         $fieldid = $this->field->id;
    
         parent::prepare_import_content($data, $importsettings, $csvrecord, $entryid);
-         
-        if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
-            $valuearr = explode('##', $data->{"field_{$fieldid}_{$entryid}"});
-            $content = array();
-            $content['text'] = !empty($valuearr[0]) ? $valuearr[0] : null;
-            $content['format'] = !empty($valuearr[1]) ? $valuearr[1] : FORMAT_MOODLE;
-            $content['trust'] = !empty($valuearr[2]) ? $valuearr[2] : $this->editoroptions['trusttext'];
-            $data->{"field_{$fieldid}_{$entryid}_editor"} = $content;
-            unset($data->{"field_{$fieldid}_{$entryid}"});
+
+        // For editors reformat in editor structure
+        if ($this->is_editor()) {
+            if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
+                $valuearr = explode('##', $data->{"field_{$fieldid}_{$entryid}"});
+                $content = array();
+                $content['text'] = !empty($valuearr[0]) ? $valuearr[0] : null;
+                $content['format'] = !empty($valuearr[1]) ? $valuearr[1] : FORMAT_MOODLE;
+                $content['trust'] = !empty($valuearr[2]) ? $valuearr[2] : $this->editoroptions['trusttext'];
+                $data->{"field_{$fieldid}_{$entryid}_editor"} = $content;
+                unset($data->{"field_{$fieldid}_{$entryid}"});
+            }
         }
         
         return true;
@@ -144,7 +147,7 @@ class dataform_field_textarea extends dataform_field_base {
      *
      */
     protected function content_names() {
-        if ($this->is_editor()) {
+        if ($this->is_editor() and can_use_html_editor()) {
             return array('editor');
         } else {
             return array('');

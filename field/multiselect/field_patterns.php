@@ -37,33 +37,23 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
         $fieldname = $field->name();
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        // there is only one possible tag here so no check
-        $replacements = array();
+        $replacements = array_fill_keys($tags, '');
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);        
 
-        foreach ($tags as $cleantag => $tag) {
+        foreach ($tags as $tag => $cleantag) {
             if ($edit) {
                 $params = array('required' => $this->is_required($tag));
-                $displayedit = array($this ,'display_edit');
-                switch ($cleantag) {
-                    case "[[$fieldname]]":
-                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
-                        break;
-                    case "[[$fieldname:addnew]]":
-                        $params['addnew'] = true;
-                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
-                        break;
-                    default:
-                        $replacements[$tag] = null;
+                if ($cleantag == "[[$fieldname:addnew]]") {
+                    $params['addnew'] = true;
                 }
+                $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry, $params)));
+                break;
             } else {
-                switch ($cleantag) {
-                    case "[[$fieldname]]":
-                        $replacements[$tag] = array('html', $this->display_browse($entry));
-                        break;
-                    default:
-                        $replacements[$tag] = null;
+                if ($cleantag == "[[$fieldname:options]]") {
+                    $replacements[$tag] = array('html', $this->display_browse($entry, array('options' => true)));
+                } else {
+                    $replacements[$tag] = array('html', $this->display_browse($entry));
                 }
             }
         }
@@ -118,19 +108,21 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
 
             $options = $field->options_menu();
             $optionscount = count($options);
+            $showalloptions = !empty($params['options']);
 
             $contents = explode('#', $content);
 
             $str = array();           
-            foreach ($contents as $cont) {
-                if (!$cont = (int) $cont or $cont > $optionscount) {
-                    // somebody edited the field definition
-                    continue;
+            foreach ($options as $key => $option) {
+                $selected = (int) in_array($key, $contents);
+                if ($showalloptions) {
+                    $str[] = "$selected $option";
+                } else if ($selected) {
+                    $str[] = $option;
                 }
-                $str[] = $options[$cont];
             }
-
-            $str = implode($field->separators[(int) $field->get('param3')]['chr'], $str);;
+            $separator = $showalloptions ? ',' : $field->separators[(int) $field->get('param3')]['chr'];
+            $str = implode($separator, $str);
         } else {
             $str = '';
         }
@@ -200,6 +192,7 @@ class mod_dataform_field_multiselect_patterns extends mod_dataform_field_pattern
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
         $patterns["[[$fieldname:addnew]]"] = array(false);
+        $patterns["[[$fieldname:options]]"] = array(false);
 
         return $patterns; 
     }

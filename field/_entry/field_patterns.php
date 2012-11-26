@@ -47,15 +47,17 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
             } else {                 
                 switch ($tag) {
                     // reference
-                    case '##more##':    $str = $this->display_more($entry); break;
-                    case '##moreurl##': $str = $this->display_more($entry, true); break;
-                    case '##anchor##':  $str = html_writer::tag('a', '', array('name' => $entry->id)); break;    
-                    case '##select##':  $str = html_writer::checkbox('entryselector', $entry->id, false); break;                        
-                    case '##edit##':    $str = $managable ? $this->display_edit($entry) : ''; break;
-                    case '##delete##':  $str = $managable ? $this->display_delete($entry): ''; break;
-                    case '##export##':  $str = $this->display_export($entry); break;
                     case '##entryid##': $str = $entry->id; break;
-                    default:            $str = $entry->id;
+                    case '##more##': $str = $this->display_more($entry); break;
+                    case '##moreurl##': $str = $this->display_more($entry, true); break;
+                    case '##anchor##': $str = html_writer::tag('a', '', array('name' => $entry->id)); break;    
+                    // Actions
+                    case '##select##': $str = html_writer::checkbox('entryselector', $entry->id, false); break;                        
+                    case '##edit##': $str = $managable ? $this->display_edit($entry) : ''; break;
+                    case '##delete##': $str = $managable ? $this->display_delete($entry): ''; break;
+                    case '##export##': $str = $this->display_export($entry); break;
+                    case '##duplicate##': $str = $this->display_duplicate($entry); break;
+                    default: $str = $entry->id;
                 }
                 $replacements[$tag] = array('html', $str);
             } 
@@ -109,6 +111,25 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
     /**
      *
      */
+    protected function display_duplicate($entry) {
+        global $OUTPUT;
+
+        $field = $this->_field;
+        $params = array(
+            'duplicate' => $entry->id,
+            'sesskey' => sesskey()
+        );       
+        $url = new moodle_url($entry->baseurl, $params);         
+        if ($field->df()->data->singleedit) {
+            $url->param('view', $field->df()->data->singleedit);
+        }
+        $str = get_string('copy');
+        return html_writer::link($url->out(false), $OUTPUT->pix_icon('t/copy', $str));
+    }
+
+    /**
+     *
+     */
     protected function display_delete($entry) {
         global $OUTPUT;
 
@@ -156,6 +177,7 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
         $patterns["##delete##"] = array(true, $actions);
         $patterns["##select##"] = array(true, $actions);
         $patterns["##export##"] = array(true, $actions);
+        $patterns["##duplicate##"] = array(true, $actions);
         
         // reference
         $reference = get_string('reference', 'dataform');

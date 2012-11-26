@@ -43,7 +43,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
 
         $replacements = array_fill_keys($tags, '');
         if ($edit) {
-            foreach ($tags as $cleantag => $tag) {
+            foreach ($tags as $tag => $cleantag) {
                 $params = null;
                 $required = $this->is_required($tag);
                 if ($cleantag == "[[{$fieldname}:wordcount]]") {
@@ -55,7 +55,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
             }
 
         } else {
-            foreach ($tags as $cleantag => $tag) {
+            foreach ($tags as $tag => $cleantag) {
                 switch ($cleantag) {
                     case "[[$fieldname]]":
                         $replacements[$tag] = array('html', $this->display_browse($entry));
@@ -77,7 +77,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
                 }
             }
         }
-        
+
         return $replacements;
     }
 
@@ -105,19 +105,19 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
         }
 
         foreach ($editabletags as $cleantag) {
-           if (array_key_exists($cleantag, $tags)) {
-                if ($this->is_required($tags[$cleantag])) {
-                    if (empty($data->$formfieldname)) {
+            $tag = array_search($cleantag, $tags);
+            if ($tag !== false and $this->is_required($tag)) {
+                if (empty($data->$formfieldname)) {
+                    return array($formfieldname, get_string('fieldrequired', 'dataform'));
+                }
+                if (!$field->is_editor() or !can_use_html_editor()) {
+                    if (!$content = clean_param($data->$formfieldname, $cleanformat)) {
                         return array($formfieldname, get_string('fieldrequired', 'dataform'));
                     }
-                    if (!$field->is_editor() or !can_use_html_editor()) {
-                        if (!$content = clean_param($data->$formfieldname, $cleanformat)) {
-                            return array($formfieldname, get_string('fieldrequired', 'dataform'));
-                        }
-                    } else {
-                        if (!$content = clean_param($data->$formfieldname['text'], $cleanformat)) {
-                            return array($formfieldname, get_string('fieldrequired', 'dataform'));
-                        }
+                } else {
+                    $editorobj = $data->$formfieldname;
+                    if (!$content = clean_param($editorobj['text'], $cleanformat)) {
+                        return array($formfieldname, get_string('fieldrequired', 'dataform'));
                     }
                 }
             }
@@ -197,13 +197,10 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
             $text = $entry->{"c{$fieldid}_content"};
             $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_PLAIN;
 
-//            if ($field->is_editor()) {
-                $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php', $field->df()->context->id, 'mod_dataform', 'content', $contentid);
-//            }
+            $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php', $field->df()->context->id, 'mod_dataform', 'content', $contentid);
 
             $options = new object();
             $options->para = false;
-            $options->overflowdiv = true;
             $str = format_text($text, $format, $options);
             return $str;
         } else {

@@ -39,35 +39,25 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
         $fieldname = $field->name();
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        $replacements = array();
+        $replacements = array_fill_keys($tags, '');
         // rules support
         $tags = $this->add_clean_pattern_keys($tags);        
 
-        foreach ($tags as $cleantag => $tag) {
+        foreach ($tags as $tag => $cleantag) {
             if ($edit) {
                 $params = array('required' => $this->is_required($tag));
-                $displayedit = array($this ,'display_edit');
-                switch ($cleantag) {
-                    case "[[$fieldname]]":
-                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
-                        break;
-                    case "[[$fieldname:addnew]]":
-                        $params['addnew'] = true;
-                        $replacements[$tag] = array('', array($displayedit, array($entry, $params)));
-                        break;
-                    default:
-                        $replacements[$tag] = null;
+                if ($cleantag == "[[$fieldname:addnew]]") {
+                    $params['addnew'] = true;
                 }
+                $replacements[$tag] = array('', array(array($this ,'display_edit'), array($entry, $params)));
+                break;
             } else {
-                switch ($cleantag) {
-                    case "[[$fieldname]]":
-                        $replacements[$tag] = array('html', $this->display_browse($entry));
-                        break;
-                    case "[[$fieldname:cat]]":
-                        $replacements[$tag] = array('html', $this->display_category($entry));
-                        break;
-                    default:
-                        $replacements[$tag] = null;
+                if ($cleantag == "[[$fieldname:options]]") {
+                    $replacements[$tag] = array('html', $this->display_browse($entry, array('options' => true)));
+                } else if ($cleantag == "[[$fieldname:cat]]") {
+                    $replacements[$tag] = array('html', $this->display_category($entry));
+                } else {
+                    $replacements[$tag] = array('html', $this->display_browse($entry));
                 }
             }
         }
@@ -118,9 +108,18 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
 
         if (isset($entry->{"c{$fieldid}_content"})) {
             $selected = (int) $entry->{"c{$fieldid}_content"};
-
             $options = $field->options_menu();
-            if ($selected and $selected <= count($options)) {
+
+            $showalloptions = !empty($params['options']);
+            if ($showalloptions) {
+                $str = array();           
+                foreach ($options as $key => $option) {
+                    $isselected = (int) ($key == $selected);
+                    $str[] = "$isselected $option";
+                }
+                $str = implode(',', $str);
+
+            } else if ($selected and $selected <= count($options)) {
                 $str = $options[$selected];
             }
         }
@@ -201,7 +200,8 @@ class mod_dataform_field_select_patterns extends mod_dataform_field_patterns {
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true);
-        $patterns["[[$fieldname:newvalue]]"] = array(false);
+        $patterns["[[$fieldname:addnew]]"] = array(false);
+        $patterns["[[$fieldname:options]]"] = array(false);
         $patterns["[[$fieldname:cat]]"] = array(false);
 
         return $patterns; 

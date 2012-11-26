@@ -154,15 +154,15 @@ class dataform_view_grid extends dataform_view_base {
             }                
         }
 
-        // if this group is named wrap it with entriesview class
-        // this is actually meant as a way to omit the wrapper in csv export
-        // but may not be the best way to achieve that so TODO
+        // Add group heading 
+        $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
         if ($name) {
-            $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
             array_unshift($elements, array('html', $OUTPUT->heading($name, 3, 'main')));
-            array_unshift($elements, array('html', html_writer::start_tag('div', array('class' => 'entriesview'))));
-            array_push($elements, array('html', html_writer::end_tag('div')));
         }
+        // Wrap with entriesview
+        array_unshift($elements, array('html', html_writer::start_tag('div', array('class' => 'entriesview'))));
+        array_push($elements, array('html', html_writer::end_tag('div')));
+
         return $elements;
     }
 

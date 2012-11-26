@@ -26,6 +26,21 @@ require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 class dataform_field_select extends dataform_field_base {
 
     public $type = 'select';
+    
+    protected $_options = array();
+
+    /**
+     * Class constructor
+     *
+     * @param var $df       dataform id or class object
+     * @param var $field    field id or DB record
+     */
+    public function __construct($df = 0, $field = 0) {
+        parent::__construct($df, $field);
+        
+        // Set the options
+        $this->options_menu();
+    }
 
     /**
      * Update a field in the database
@@ -40,7 +55,8 @@ class dataform_field_select extends dataform_field_base {
 
         // adjust content if necessary
         $adjustments = array();
-        $newoptions = $this->options_menu();
+        // Get updated options
+        $newoptions = $this->options_menu(true);
         foreach ($newoptions as $newkey => $value) {
             if (!isset($oldoptions[$newkey]) or $value != $oldoptions[$newkey]) {
                 if ($key = array_search($value, $oldoptions) or $key !== false) {
@@ -88,7 +104,6 @@ class dataform_field_select extends dataform_field_base {
         return array('selected', 'newvalue');
     }
     
-
     /**
      *
      */
@@ -131,7 +146,7 @@ class dataform_field_select extends dataform_field_base {
     /**
      * 
      */
-    function get_sql_compare_text() {
+    protected function get_sql_compare_text() {
         global $DB;
         return $DB->sql_compare_text("c{$this->field->id}.content", 255);
     }
@@ -139,18 +154,19 @@ class dataform_field_select extends dataform_field_base {
     /**
      * 
      */
-    public function options_menu() {
-        $rawoptions = explode("\n",$this->field->param1);
-        $options = array();
-        $key = 1;
-        foreach ($rawoptions as $option) {
-            $option = trim($option);
-            if ($option != '') {
-                $options[$key] = $option;
-                $key++;
+    public function options_menu($forceget = false) {
+        if (!$this->_options or $forceget) {
+            if (!empty($this->field->param1)) {
+                $rawoptions = explode("\n",$this->field->param1);
+                foreach ($rawoptions as $key => $option) {
+                    $option = trim($option);
+                    if ($option != '') {
+                        $this->_options[$key + 1] = $option;
+                    }
+                }
             }
         }
-        return $options;
+        return $this->_options;
     }
 
     /**

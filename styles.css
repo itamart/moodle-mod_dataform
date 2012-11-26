@@ -68,17 +68,19 @@
 
 #page-mod-dataform-embed .mform .fitem .fitemtitle,
 #page-mod-dataform-embed .mform .entriesview .fitem .fitemtitle,
-#page-mod-dataform-view .mform .fitem .fitemtitle,
+/*#page-mod-dataform-view .mform .fitem .fitemtitle,*/
 #page-mod-dataform-view .mform .entriesview .fitem .fitemtitle {
-  float: none;
+  float: left;
   text-align: left;
-  width: 100%;
+  width: auto;
 }
 
 #page-mod-dataform-embed .mform .fitem .felement,
 #page-mod-dataform-embed .mform .entriesview .fitem .felement,
-#page-mod-dataform-view .mform .fitem .felement,
-#page-mod-dataform-view .mform .entriesview .fitem .felement {
+#page-mod-dataform-embed .mform .entriesview .fitem .feditor,
+/*#page-mod-dataform-view .mform .fitem .felement,*/
+#page-mod-dataform-view .mform .entriesview .fitem .felement,
+#page-mod-dataform-view .mform .entriesview .fitem .feditor {
   margin-left: 0;
   width: 100%;
 }

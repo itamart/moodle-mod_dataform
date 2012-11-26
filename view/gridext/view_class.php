@@ -26,6 +26,7 @@ class dataform_view_gridext extends dataform_view_grid {
 
     protected $type = 'gridext';
     protected $_editors = array('section', 'param2', 'param4', 'param5');
+    protected $_vieweditors = array('section', 'param4', 'param5');
     
     /**
      * Returns a fieldset of view options
@@ -35,18 +36,6 @@ class dataform_view_gridext extends dataform_view_grid {
         
         $this->view->eparam4 = '';
         $this->view->eparam5 = '';
-    }
-
-    /**
-     *
-     */
-    public function set_view_tags($options){
-        $tags = $this->_tags['view'];
-        $replacements = $this->patterns()->get_replacements($tags, null, $options);
-        
-        $this->view->esection = str_replace($tags, $replacements, $this->view->esection);
-        $this->view->eparam4 = str_replace($tags, $replacements, $this->view->eparam4);
-        $this->view->eparam5 = str_replace($tags, $replacements, $this->view->eparam5);
     }
 
     /**
@@ -68,15 +57,15 @@ class dataform_view_gridext extends dataform_view_grid {
 
         $elements[] = array('html', $listfooter);
 
-        // if this group is named wrap it with entriesview class
-        // this is actually meant as a way to omit the wrapper in csv export
-        // but may not be the best way to achieve that so TODO
+        // Add group heading 
+        $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
         if ($name) {
-            $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
             array_unshift($elements, array('html', $OUTPUT->heading($name, 3, 'main')));
-            array_unshift($elements, array('html', html_writer::start_tag('div', array('class' => 'entriesview'))));
-            array_push($elements, array('html', html_writer::end_tag('div')));
         }
+        // Wrap with entriesview
+        array_unshift($elements, array('html', html_writer::start_tag('div', array('class' => 'entriesview'))));
+        array_push($elements, array('html', html_writer::end_tag('div')));
+
         return $elements;
     }
 

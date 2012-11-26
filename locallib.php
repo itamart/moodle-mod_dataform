@@ -125,7 +125,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         // set the exported view content
         $df = new dataform(null, $this->id);
         $view = $df->get_view_from_id($this->vid);
-        $view->set_filter($this->fid, $this->eids);
+        $view->set_filter(array('filterid' => $this->fid, 'eids' => $this->eids));
         $view->set_content();
 
         // export to spreadsheet
@@ -233,12 +233,10 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     public function get_return_url() {
         global $CFG;
         
-        $returnurl = "$CFG->wwwroot/mod/dataform/view.php?id={$this->id}&view={$this->vid}&filter={$this->fid}";
-        return $returnurl;                                                        
-    }
-    
+        $returnurl = new moodle_url('/mod/dataform/view.php', array('id' =>$this->id, 'view' => $this->vid, 'filter' => $this->fid));;
+        return $returnurl->out(false);                                                        
+    }   
 }
-
 
 /**
  * Class representing the virtual node with all itemids in the file browser
@@ -363,6 +361,13 @@ class dataform_notification_handler {
      *
      */
     public static function notify_entry($data) {
+        // Create links to entries and store in data->entrylinks
+        $entrylinks = array();
+        $baseurl = $data->view->get_baseurl();
+        foreach ($data->items as $entryid => $entry) {
+            $entrylinks[] = html_writer::link(new moodle_url($baseurl, array('eids' => $entryid)), $entryid);
+        }
+        $data->entrylinks = implode(',', $entrylinks);
         self::notify($data);
     }
     
@@ -391,7 +396,7 @@ class dataform_notification_handler {
      *
      */
     protected static function notify($data) {
-        global $SITE, $USER;
+        global $SITE, $CFG;
 
 		if (empty($data->users) or empty($data->event)) {
             return true;
@@ -403,12 +408,14 @@ class dataform_notification_handler {
         // Prepare message
 		$strdataform = get_string('pluginname', 'dataform');
         $sitename = format_string($SITE->fullname);
-        $coursename = !empty($data->coursename) ? $data->coursename : 'Unspecified course';
-        $dataformname = !empty($data->dataformname) ? $data->dataformname : 'Unspecified dataform';
+        $data->siteurl = $CFG->wwwroot;
+        $data->coursename = !empty($data->coursename) ? $data->coursename : 'Unspecified course';
+        $data->dataformname = !empty($data->dataformname) ? $data->dataformname : 'Unspecified dataform';
+        $data->dataformurl = !empty($data->dataformurl) ? $data->dataformurl : '';
         $notename = get_string("messageprovider:dataform_$event", 'dataform');
         $notedetails = get_string("message_$event", 'dataform', $data);
         
-		$subject = "$sitename -> $coursename -> $strdataform $dataformname:  $notename";
+		$subject = "$sitename -> $data->coursename -> $strdataform $data->dataformname:  $notename";
 		$content = $notedetails;
 		$contenthtml = text_to_html($content, false, false, true);
 		
@@ -418,12 +425,15 @@ class dataform_notification_handler {
         $message->component       = 'mod_dataform';
         $message->name            = "dataform_$event";
         $message->context         = $data->context;
-        $message->userfrom        = $USER;
+        $message->userfrom        = $data->sender;
         $message->subject         = $subject;
         $message->fullmessage     = $content;
         $message->fullmessageformat = FORMAT_HTML;
         $message->fullmessagehtml = $contenthtml;
         $message->smallmessage    = '';
+        if (!empty($data->notification)) {
+            $message->notification = 1;
+        }           
 
         foreach ($users as $user) {
             $message->userto = $user;

@@ -59,10 +59,9 @@ class mod_dataform_field_checkbox_patterns extends mod_dataform_field_multiselec
         $fieldname = $field->name();
 
         $formfieldname = "field_{$fieldid}_{$entryid}_selected";
-        $tags = $this->add_clean_pattern_keys($tags);
 
         // only [[$fieldname]] is editable so check it if exists
-        if (array_key_exists("[[$fieldname]]", $tags) and $this->is_required($tags["[[$fieldname]]"])) {
+        if (array_key_exists("[[*$fieldname]]", $tags)) {
             $emptyfield  = true;
             foreach ($field->options_menu() as $key => $unused) {
                 $formelementname = "{$formfieldname}_$key";
