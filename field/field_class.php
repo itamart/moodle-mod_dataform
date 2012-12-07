@@ -500,11 +500,22 @@ abstract class dataform_field_base {
     /**
      *
      */
+    public function get_content_parts() {
+        return array('content');
+    }
+
+    /**
+     *
+     */
     public function get_select_sql() {
         if ($this->field->id > 0) {
-            $id = " c{$this->field->id}.id AS c{$this->field->id}_id ";
-            $content = $this->get_sql_compare_text(). " AS c{$this->field->id}_content";
-            return " $id , $content ";
+            $arr = array();
+            $arr[] = " c{$this->field->id}.id AS c{$this->field->id}_id ";
+            foreach ($this->get_content_parts() as $part) {
+                $arr[] = $this->get_sql_compare_text($part). " AS c{$this->field->id}_$part";
+            }
+            $selectsql = implode(',', $arr);
+            return " $selectsql ";
         } else {
             return '';
         }
@@ -608,10 +619,17 @@ abstract class dataform_field_base {
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
 
-        return $DB->sql_compare_text("c{$this->field->id}.content");
+        return $DB->sql_compare_text("c{$this->field->id}.$column");
+    }
+
+    /**
+     *
+     */
+    public function is_dataform_content() {
+        return true;
     }
 
     /**
@@ -661,6 +679,14 @@ abstract class dataform_field_no_content extends dataform_field_base {
         return '';
     }
 
+    /**
+     *
+     */
+    public function is_dataform_content() {
+        return false;
+    }
+
+    
 //    public function get_search_sql($search) {
 //        return array(' ', array());
 //    }

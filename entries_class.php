@@ -101,7 +101,8 @@ class dataform_entries {
             $wheresearch,
             $sortorder,
             $whatcontent,
-            $filterparams) = $filter->get_sql($fields);
+            $filterparams,
+            $dataformcontent) = $filter->get_sql($fields);
 
         // named params array for the sql
         $params = array();        
@@ -261,6 +262,26 @@ class dataform_entries {
             // get everything
             } else {
                 $entries->entries = $DB->get_records_sql($sqlselect, $allparams);
+            }
+            // Now get the contents if required and add it to the entry objects
+            if ($dataformcontent) {
+                //get the node content of the requested entries
+                list($fids, $fparams) = $DB->get_in_or_equal($dataformcontent, SQL_PARAMS_NAMED);
+                list($eids, $eparams) = $DB->get_in_or_equal(array_keys($entries->entries), SQL_PARAMS_NAMED);
+                $params = array_merge($eparams, $fparams);
+                $contents = $DB->get_records_select('dataform_contents', "entryid {$eids} AND fieldid {$fids}", $params);
+
+                foreach ($contents as $contentid => $content) {
+                    $entry = $entries->entries[$content->entryid];
+                    $fieldid = $content->fieldid;
+                    $varcontentid = "c{$fieldid}_id";
+                    $entry->$varcontentid = $contentid;
+                    foreach ($fields[$fieldid]->get_content_parts() as $part) {
+                        $varpart = "c{$fieldid}_$part";
+                        $entry->$varpart = $content->$part;
+                    }
+                    $entries->entries[$content->entryid] = $entry;
+                }
             }
         }
 
@@ -592,7 +613,7 @@ class dataform_entries {
                         $siblingid = optional_param('sibling', 0, PARAM_INT);
 
                         //get the node content of the requested entries
-                        list($eids, $params) = $DB->get_in_or_equal(array_keys($entries), SQL_PARAM_NAMED);
+                        list($eids, $params) = $DB->get_in_or_equal(array_keys($entries), SQL_PARAMS_NAMED);
                         $params['fieldid'] = $nodeid;
                         $contents = $DB->get_records_select('dataform_contents', "fieldid = :fieldid AND entryid {$eids}", $params);
                         //update node content of the entries

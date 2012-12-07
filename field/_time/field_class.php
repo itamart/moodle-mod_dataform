@@ -91,7 +91,7 @@ class dataform_field__time extends dataform_field_no_content {
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
         
         return $DB->sql_compare_text("e.{$this->field->internalname}");    

@@ -73,3 +73,15 @@ $string['perm_extract'] = 'Extract content';
 $string['perm_assemble'] = 'Assemble';
 $string['perm_print-high'] = 'Print high level';
 $string['perm_owner'] = 'Manage protection (inverted logic - only for public-key)';
+$string['pdfheader'] = 'PDF Header';
+$string['pdffooter'] = 'PDF Footer';
+
+$string['enabled'] = 'Enabled';
+$string['headercontent'] = 'Content';
+$string['margin'] = 'Margin';
+$string['pdfmargins'] = 'PDF Margins and paging';
+$string['marginleft'] = 'Left';
+$string['margintop'] = 'Top';
+$string['marginright'] = 'Right';
+$string['marginkeep'] = 'Keep';
+$string['pagebreak'] = 'Page break';

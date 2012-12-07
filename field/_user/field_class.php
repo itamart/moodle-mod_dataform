@@ -30,7 +30,7 @@ class dataform_field__user extends dataform_field_no_content {
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
         // the sort sql here returns the field's sql name       
         return $DB->sql_compare_text($this->get_sort_sql());    

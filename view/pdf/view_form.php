@@ -46,6 +46,51 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         $this->add_tags_selector('eparam2_editor', 'field');
         $this->add_tags_selector('eparam2_editor', 'character');        
 
+        // PDF Header
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', '', get_string('pdfheader', 'dataformview_pdf'));
+        
+        // Header enbabled
+        $mform->addElement('selectyesno', 'headerenabled', get_string('enabled', 'dataformview_pdf'));
+
+        // Header content (param3)
+        $mform->addElement('editor', 'eparam3_editor', get_string('headercontent', 'dataformview_pdf'), $editorattr, $editoroptions['param3']);
+        $mform->setDefault("eparam3_editor[format]", FORMAT_PLAIN);
+        
+        // Header margins
+        $mform->addElement('text', 'headermargintop', get_string('margin', 'dataformview_pdf'). ' '. get_string('margintop', 'dataformview_pdf'));
+        $mform->addRule('headermargintop', null, 'numeric', null, 'client');
+        $mform->disabledIf('headermargintop', 'headerenabled', 'eq', 0);
+
+        $mform->addElement('text', 'headermarginleft', get_string('margin', 'dataformview_pdf'). ' '. get_string('marginleft', 'dataformview_pdf'));
+        $mform->addRule('headermarginleft', null, 'numeric', null, 'client');
+        $mform->disabledIf('headermarginleft', 'headerenabled', 'eq', 0);
+
+        // PDF Footer
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', '', get_string('pdffooter', 'dataformview_pdf'));
+        
+        // Footer enbabled
+        $mform->addElement('selectyesno', 'footerenabled', get_string('enabled', 'dataformview_pdf'));
+
+        // Footer margin
+        $options = array_combine(range(1,30),range(1,30)); 
+        $mform->addElement('select', 'footermargin', get_string('margin', 'dataformview_pdf'), $options);
+        $mform->disabledIf('footermargin', 'footerenabled', 'eq', 0);
+
+        // PDF margins and paging
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', '', get_string('pdfmargins', 'dataformview_pdf'));
+
+        $mform->addElement('text', 'marginleft', get_string('marginleft', 'dataformview_pdf'));
+        $mform->addElement('text', 'margintop', get_string('margintop', 'dataformview_pdf'));
+        $mform->addElement('text', 'marginright', get_string('marginright', 'dataformview_pdf'));
+        $mform->addElement('selectyesno', 'marginkeep', get_string('marginkeep', 'dataformview_pdf'));
+
+        // Page break
+        $options = array('' => get_string('none'), 'auto' => get_string('auto', 'dataformview_pdf'), 'entry' => get_string('entry', 'dataform')); 
+        $mform->addElement('select', 'pagebreak', get_string('pagebreak', 'dataformview_pdf'), $options);
+
         // PDF settings (param1)
         //-------------------------------------------------------------------------------
         $mform->addElement('header', '', get_string('pdfsettings', 'dataformview_pdf'));
@@ -97,7 +142,7 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         $options = array_combine($transunits, $transunits);
         $mform->addElement('select', 'transparency', get_string('transparency', 'dataformview_pdf'), $options);
         
-        // Digital Signature (param3)
+        // Protection
         //-------------------------------------------------------------------------------
         $mform->addElement('header', '', get_string('pdfprotection', 'dataformview_pdf'));
 
@@ -127,7 +172,7 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         // Pub keys
         // ...
 
-        // Digital Signature (param3)
+        // Digital Signature
         //-------------------------------------------------------------------------------
         $mform->addElement('header', '', get_string('pdfsignature', 'dataformview_pdf'));
 
@@ -150,7 +195,6 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         $mform->addElement('text', 'certinforeason', get_string('certinforeason', 'dataformview_pdf'));
         $mform->addElement('text', 'certinfocontact', get_string('certinfocontact', 'dataformview_pdf'));
 
-
     }
 
 
@@ -163,29 +207,24 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         $view = $this->_customdata['view'];
 
         // Pdf settings
-        if ($settings = $view->get_pdf_settings()) {
+        if ($settings = $view->get_pdf_settings()) {            
             foreach ($settings as $name => $value) {
-                if ($name == 'protection') {
-                    $protection = $value;
-                    $perms = $view::get_permission_options();
-                    foreach ($perms as $perm => $unused) {
-                        if (in_array($perm, $protection->permissions)) {
-                            $var = "perm_$perm";
-                            $data->$var = $perm;
-                        }
-                    }
-                    $data->protuserpass = $protection->user_pass;
-                    $data->protownerpass = $protection->owner_pass;
-                    $data->protmode = $protection->mode;
-                    //$data->pubkeys = $protection->pubkeys;
+                if ($name == 'header') {
+                    $data->headerenabled = $settings->header->enabled;
+                    $data->headermargintop = $settings->header->margintop;
+                    $data->headermarginleft = $settings->header->marginleft;
+                } else if ($name == 'footer') {
+                    $data->footerenabled = $settings->footer->enabled;
+                    $data->footermargin = $settings->footer->margin;
+                } else if ($name == 'margins') {
+                    $data->marginleft = $settings->margins->left;
+                    $data->margintop = $settings->margins->top;
+                    $data->marginright = $settings->margins->right; 
+                    $data->marginkeep = $settings->margins->keep;
+                } else if ($name == 'protection') {
+                    $this->data_preprocess_protection($data, $value);
                 } else if ($name == 'signature') {
-                    $signsettings = $value;
-                    $data->certpassword = $signsettings->password;
-                    $data->certtype = $signsettings->type;
-                    $data->certinfoname = $signsettings->info['Name'];
-                    $data->certinfoloc = $signsettings->info['Location'];
-                    $data->certinforeason = $signsettings->info['Reason'];
-                    $data->certinfocontact = $signsettings->info['ContactInfo'];
+                    $this->data_preprocess_signature($data, $value);
                 } else {
                     $data->$name = $value;
                 }
@@ -196,7 +235,36 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
     /**
      *
      */
-    function set_data($data) {
+    protected function data_preprocess_protection(&$data, $protection){
+        $view = $this->_customdata['view'];
+        $perms = $view::get_permission_options();
+        foreach ($perms as $perm => $unused) {
+            if (in_array($perm, $protection->permissions)) {
+                $var = "perm_$perm";
+                $data->$var = $perm;
+            }
+        }
+        $data->protuserpass = $protection->user_pass;
+        $data->protownerpass = $protection->owner_pass;
+        $data->protmode = $protection->mode;
+    }
+
+    /**
+     *
+     */
+    protected function data_preprocess_signature(&$data, $signsettings){
+        $data->certpassword = $signsettings->password;
+        $data->certtype = $signsettings->type;
+        $data->certinfoname = $signsettings->info['Name'];
+        $data->certinfoloc = $signsettings->info['Location'];
+        $data->certinforeason = $signsettings->info['Reason'];
+        $data->certinfocontact = $signsettings->info['ContactInfo'];
+    }
+
+    /**
+     *
+     */
+    public function set_data($data) {
         $this->data_preprocessing($data);
         parent::set_data($data);
     }
@@ -204,51 +272,82 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
     /**
      *
      */
-    function get_data($slashed = true) {
-        if ($data = parent::get_data($slashed)) {
-            $view = $this->_customdata['view'];
-
-            // Pdf settings
-            if ($settings = $view->get_pdf_settings()) {
-
-                foreach ($settings as $name => $value) {
-                    if ($name == 'protection') {
-                        $protection = $value;
-                        $protection->permissions = array();
-                        $perms = $view::get_permission_options();
-                        foreach ($perms as $perm => $unused) {
-                            $var = "perm_$perm";
-                            if (!empty($data->$var)) {
-                                $protection->permissions[] = $perm;
-                            }
-                        }
-                        $protection->user_pass = $data->protuserpass;
-                        $protection->owner_pass = $data->protownerpass;
-                        $protection->mode = $data->protmode;
-                        //$data->pubkeys = $protection->pubkeys;
-                        
-                        $settings->protection = $protection;
-                    } else if ($name == 'signature') {
-                        $signsettings = $value;
-                        $signsettings->password = $data->certpassword;
-                        $signsettings->type = $data->certtype;
-                        $signsettings->info['Name'] = $data->certinfoname;
-                        $signsettings->info['Location'] = $data->certinfoloc;
-                        $signsettings->info['Reason'] = $data->certinforeason;
-                        $signsettings->info['ContactInfo'] = $data->certinfocontact;
-
-                        $settings->signature = $signsettings;
-                    } else if (isset($data->$name)) {
-                        $settings->$name = $data->$name;
-                    }
-                }
-
-                $data->param1 = serialize($settings);
-            }
-            
-            return $data;
+    public function get_data($slashed = true) {
+        if (!$data = parent::get_data($slashed)) {
+            return null;
         }
+        
+        // Pdf settings
+        $view = $this->_customdata['view'];
+        if ($settings = $view->get_pdf_settings()) {
+            foreach ($settings as $name => $value) {
+                if ($name == 'header') {
+                    $settings->header->enabled = $data->headerenabled;
+                    if ($data->headerenabled) {
+                        $settings->header->margintop = $data->headermargintop;
+                        $settings->header->marginleft = $data->headermarginleft;
+                    }
+                } else if ($name == 'footer') {
+                    $settings->footer->enabled = $data->footerenabled;
+                    if ($data->footerenabled) {
+                        $settings->footer->margin = $data->footermargin;
+                    }
+                } else if ($name == 'margins') {
+                    $settings->margins->left = $data->marginleft;
+                    $settings->margins->top = $data->margintop;
+                    $settings->margins->right = $data->marginright; 
+                    $settings->margins->keep = $data->marginkeep;
+                } else if ($name == 'protection') {
+                    $this->data_postprocess_protection($settings, $data);
+                } else if ($name == 'signature') {
+                    $this->data_postprocess_signature($settings, $data);
+                } else if (isset($data->$name)) {
+                    $settings->$name = $data->$name;
+                }
+            }
+
+            $data->param1 = serialize($settings);
+        }
+        
+        return $data;
     }
 
+    /**
+     *
+     */
+    protected function data_postprocess_protection(&$settings, $data) {
+        $view = $this->_customdata['view'];
+
+        $protection = $settings->protection;
+        $protection->permissions = array();
+        $perms = $view::get_permission_options();
+        foreach ($perms as $perm => $unused) {
+            $var = "perm_$perm";
+            if (!empty($data->$var)) {
+                $protection->permissions[] = $perm;
+            }
+        }
+        $protection->user_pass = $data->protuserpass;
+        $protection->owner_pass = $data->protownerpass;
+        $protection->mode = $data->protmode;
+        //$data->pubkeys = $protection->pubkeys;
+        
+        $settings->protection = $protection;
+    }
+
+    /**
+     *
+     */
+    protected function data_postprocess_signature(&$settings, $data){
+        $signsettings = $settings->signature;
+        $signsettings->password = $data->certpassword;
+        $signsettings->type = $data->certtype;
+        $signsettings->info['Name'] = $data->certinfoname;
+        $signsettings->info['Location'] = $data->certinfoloc;
+        $signsettings->info['Reason'] = $data->certinforeason;
+        $signsettings->info['ContactInfo'] = $data->certinfocontact;
+
+        $settings->signature = $signsettings;
+    }    
     
 }

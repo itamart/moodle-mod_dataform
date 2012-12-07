@@ -73,18 +73,18 @@ class dataform_field_userinfo extends dataform_field_base {
      */
     public function get_select_sql() {
         $id = " c{$this->field->id}.id AS c{$this->field->id}_id ";
-        $content = $this->get_sql_compare_text(). " AS c{$this->field->id}_content";
-        $content1 = " c{$this->field->id}.dataformat AS c{$this->field->id}_content1";
+        $content = $this->get_sql_compare_text('data'). " AS c{$this->field->id}_content";
+        $content1 = $this->get_sql_compare_text('dataformat'). " AS c{$this->field->id}_content1";
         return " $id , $content , $content1 ";
     }
 
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
 
-        return $DB->sql_compare_text("c{$this->field->id}.data");
+        return $DB->sql_compare_text("c{$this->field->id}.$column");
     }
 
     /**
@@ -112,6 +112,14 @@ class dataform_field_userinfo extends dataform_field_base {
             return '';
         }
     }
+    
+    /**
+     *
+     */
+    public function is_dataform_content() {
+        return false;
+    }
+
 
 }
 

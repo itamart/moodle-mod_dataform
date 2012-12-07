@@ -123,11 +123,8 @@ class dataform_field_coursegroup extends dataform_field_base {
     /**
      *
      */
-    public function get_select_sql() {
-        $id = " c{$this->field->id}.id AS c{$this->field->id}_id ";
-        $content = " c{$this->field->id}.content AS c{$this->field->id}_content";
-        $content1 = " c{$this->field->id}.content1 AS c{$this->field->id}_content1";
-        return " $id , $content , $content1 ";
+    public function get_content_parts() {
+        return array('content', 'content1');
     }
 
     /**
@@ -189,7 +186,7 @@ class dataform_field_coursegroup extends dataform_field_base {
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
         
         $comparetext = $this->_comparetext;

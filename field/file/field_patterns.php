@@ -235,7 +235,7 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
                 $strfiles[] = $this->display_file($file, $path, $altname, $params);
             }
         }
-        return implode('', $strfiles);
+        return implode("<br />\n", $strfiles);
     }
                 
     /**
@@ -262,10 +262,6 @@ class mod_dataform_field_file_patterns extends mod_dataform_field_patterns {
         } else if (!empty($params['content'])) {
             return $file->get_content();
         
-        } else if ($file->is_valid_image()) {
-            return html_writer::empty_tag('img', array('src' => moodle_url::make_file_url($pluginfileurl, "$path/$filename"),
-                                                        'alt' => $altname,
-                                                        'title' => $altname));
         } else {
             return $this->display_link($file, $path, $altname, $params);
         }

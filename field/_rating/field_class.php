@@ -45,7 +45,7 @@ class dataform_field__rating extends dataform_field_no_content {
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         return $this->get_sort_sql();
     }
 

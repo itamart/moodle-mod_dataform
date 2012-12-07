@@ -83,11 +83,8 @@ class dataform_field_url extends dataform_field_base {
     /**
      *
      */
-    public function get_select_sql() {
-        $id = " c{$this->field->id}.id AS c{$this->field->id}_id ";
-        $content = $this->get_sql_compare_text(). " AS c{$this->field->id}_content";
-        $content1 = " c{$this->field->id}.content1 AS c{$this->field->id}_content1";
-        return " $id , $content , $content1 ";
+    public function get_content_parts() {
+        return array('content', 'content1');
     }
 
     /**

@@ -74,7 +74,7 @@ class dataform_field_gradeitem extends dataform_field_base {
     /**
      *
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
 
         return $DB->sql_compare_text("c{$this->field->id}.finalgrade");
@@ -105,5 +105,13 @@ class dataform_field_gradeitem extends dataform_field_base {
         }
     }
 
+    /**
+     *
+     */
+    public function is_dataform_content() {
+        return false;
+    }
+
+    
 }
 

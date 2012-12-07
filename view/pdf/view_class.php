@@ -22,6 +22,7 @@
  */
 
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
+require_once("$CFG->libdir/pdflib.php");
 
 class dataform_view_pdf extends dataform_view_base {
 
@@ -29,8 +30,9 @@ class dataform_view_pdf extends dataform_view_base {
     const EXPORT_PAGE = 'page';
 
     protected $type = 'pdf';
-    protected $_editors = array('section', 'param2');
+    protected $_editors = array('section', 'param2', 'param3');
     protected $_settings = null;
+    protected $_tmpfiles = null;
 
     /**
      *
@@ -46,6 +48,22 @@ class dataform_view_pdf extends dataform_view_base {
                 'format' => 'LETTER',
                 'destination' => 'I',
                 'transparency' => 0.5,
+                'header' => (object) array(
+                    'enabled' => false,
+                    'margintop' => 0,
+                    'marginleft' => 10,
+                ),
+                'footer' => (object) array(
+                    'enabled' => false,
+                    'margin' => 10,
+                ),
+                'margins' => (object) array(
+                    'left' => 15,
+                    'top' => 27,
+                    'right' => -1,
+                    'keep' => false,
+                ),
+                'pagebreak' => 'auto',
                 'protection' => (object) array(
                     'permissions' => array('print', 'copy'),
                     'user_pass' => '',
@@ -87,28 +105,30 @@ class dataform_view_pdf extends dataform_view_base {
      */
     public function process_export($range = self::EXPORT_PAGE) {
         global $CFG;
+      
+        $settings = $this->_settings;
+        $this->_tmpfiles = array();
 
-        require_once("$CFG->libdir/pdflib.php");
-        
-        $settings = $this->_settings; 
 
-        // Get the view content
-        $this->set_content();
-        $content = $this->display(array('tohtml' => true, 'controls' => false));            
-        $replacements = array();
-        
         // Generate the pdf
-        $pdf = new pdf($settings->orientation, $settings->unit, $settings->format);
+        $pdf = new dfpdf($settings);
         
-        // Omit header and footer
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);        
+        // Set margins
+        $pdf->SetMargins($settings->margins->left, $settings->margins->top, $settings->margins->right);
         
-        // Paging
-        $pdf->SetAutoPageBreak(false, 0);
-        
-        // Margins
-        //$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        // Set header
+        if (!empty($settings->header->enabled)) {
+            $pdf->setHeaderMargin($settings->header->margintop);
+            $this->set_header($pdf);
+        } else {
+            $pdf->setPrintHeader(false);
+        }
+        // Set footer
+        if (!empty($settings->footer->enabled)) {
+            $pdf->setFooterMargin($settings->footer->margin);
+        } else {
+            $pdf->setPrintFooter(false);
+        }
         
         //Protection
         $protection = $settings->protection;
@@ -120,47 +140,77 @@ class dataform_view_pdf extends dataform_view_base {
             //$protection->pubkeys
         ); 
 
-        $pdf->AddPage();
-
-        // Set frame
-        $this->set_frame($pdf);
-        
-        // Set watermark
-        $this->set_watermark($pdf);
-        
         // Set document signature
         $this->set_signature($pdf);
-        
-        // Get reference to images and get the images
-        if (preg_match_all("%$CFG->wwwroot/pluginfile.php(/[^.]+.jpg)%", $content, $matches)) {
-            $fs = get_file_storage();
-            $tmpdir = make_temp_directory('');
-            foreach ($matches[1] as $imagepath) {
-                if (!$file = $fs->get_file_by_hash(sha1($imagepath)) or $file->is_directory()) {
-                    continue;
-                }
-                //$filecontent = $file->get_content();
-                $tmpdir = make_temp_directory('');
-                $filename = $file->get_filename();
-                $filepath = $tmpdir. "files/$filename";
-                if ($file->copy_content_to($filepath)) {
-                    $replacements["$CFG->wwwroot/pluginfile.php$imagepath"] = $filepath;//. $filecontent;
-                }
+            
+        // Paging
+        if (empty($settings->pagebreak)) {
+            $pdf->SetAutoPageBreak(false, 0);
+        }
+/*        
+        // Set the content
+        if ($range == self::EXPORT_ALL) {
+            $entries = new dataform_entries($this->_df, $this);
+            $options = array();
+            // Set a filter to take it all
+            $filter = $this->get_filter();
+            $filter->perpage = 0;
+            $options['filter'] = $filter;
+            // do we need ratings?
+            if ($ratingoptions = $this->is_rating()) {
+                $options['ratings'] = $ratingoptions;
             }
-            // Replace content
-            $content = str_replace(array_keys($replacements), $replacements, $content);
+            // do we need comments?
+            
+            // Get the entries
+            $entries->set_content($options);
+            $this->_entries->set_content(array('entriesset' => $entries));
+        } else {
+            $this->set_content();
+        }
+*/
+        $this->set_content();
+        
+        $content = array();
+        if ($settings->pagebreak == 'entry') {
+            $entries = $this->_entries->entries();
+            foreach ($entries as $eid => $entry) {
+                $entriesset = new object;
+                $entriesset->max = 1;
+                $entriesset->found = 1;
+                $entriesset->entries = array($eid => $entry);
+                $this->_entries->set_content(array('entriesset' => $entriesset));
+                $content[] = $this->display(array('tohtml' => true, 'controls' => false));
+            }
+        } else {
+            $content[] = $this->display(array('tohtml' => true, 'controls' => false));
         }
 
-        $pdf->writeHTML($content, false, false, false, '');
+
+        foreach ($content as $pagecontent) {
+        
+            $pdf->AddPage();
+
+            // Set frame
+            $this->set_frame($pdf);
+            
+            // Set watermark
+            $this->set_watermark($pdf);
+            
+            $pagecontent = $this->process_content_images($pagecontent);        
+            $pdf->writeHTML($pagecontent);
+        }
+       
+        // Send the pdf
+        $pdf->Output('doc.pdf', $settings->destination);
 
         // Clean up temp files
-        if ($replacements) {
-            foreach ($replacements as $filepath) {
+        if ($this->_tmpfiles) {
+            foreach ($this->_tmpfiles as $filepath) {
                 unlink($filepath);
             }
         }
 
-        $pdf->Output('doc.pdf', $settings->destination);
         exit;
     }
 
@@ -483,4 +533,85 @@ class dataform_view_pdf extends dataform_view_base {
         }
     }
     
+    /**
+     *
+     */
+    protected function set_header($pdf) {
+        if (empty($this->view->eparam3)) {
+            return;
+        }
+        
+        // Rewrite plugin file urls
+        $content = file_rewrite_pluginfile_urls(
+            $this->view->eparam3,
+            'pluginfile.php',
+            $this->_df->context->id,
+            'mod_dataform',
+            "viewparam3",
+            $this->id()
+        );
+
+        $content = $this->process_content_images($content);
+        $pdf->SetHeaderData('', 0, '', $content); //, array(0,64,255), array(0,64,128));                
+    }
+
+    /**
+     *
+     */
+    protected function process_content_images($content) {
+        global $CFG;
+        
+        if (preg_match_all("%$CFG->wwwroot/pluginfile.php(/[^.]+.jpg)%", $content, $matches)) {
+
+            $fs = get_file_storage();
+            $tmpdir = make_temp_directory('');
+            foreach ($matches[1] as $imagepath) {
+                if (!$file = $fs->get_file_by_hash(sha1($imagepath)) or $file->is_directory()) {
+                    continue;
+                }
+                //$filecontent = $file->get_content();
+                $tmpdir = make_temp_directory('');
+                $filename = $file->get_filename();
+                $filepath = $tmpdir. "files/$filename";
+                if ($file->copy_content_to($filepath)) {
+                    $replacements["$CFG->wwwroot/pluginfile.php$imagepath"] = $filepath;//. $filecontent;
+                    $this->_tmpfiles[] = $filepath;
+                }
+            }
+            // Replace content
+            $content = str_replace(array_keys($replacements), $replacements, $content);
+        }
+        return $content;
+    }
+}
+
+// Extend the TCPDF class to create custom Header and Footer
+class dfpdf extends pdf {
+    
+    protected $_dfsettings;
+
+    public function __construct($settings) {
+        parent::__construct($settings->orientation, $settings->unit, $settings->format);
+        $this->_dfsettings = $settings;
+    }
+    
+    //Page header
+    public function Header() {
+        // Adjust X to override left margin
+        $x = $this->GetX();
+        $this->SetX($this->_dfsettings->header->marginleft);
+        $this->writeHtml($this->header_string);
+        // Reset X to original
+        $this->SetX($x);
+    }
+
+    // Page footer
+    public function Footer() {
+        // Position at 15 mm from bottom
+        $this->SetY(-15);
+        // Set font
+        $this->SetFont('helvetica', 'I', 8);
+        // Page number
+        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+    }
 }

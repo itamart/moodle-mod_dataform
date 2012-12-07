@@ -81,8 +81,8 @@ class dataform_filter {
         list($searchtables, $wheresearch, $searchparams) = $this->get_search_sql($fields);
         // SORT sql
         list($sorttables, $sortorder, $sortparams) = $this->get_sort_sql($fields);
-        // CONTENT sql
-        list($whatcontent, $contenttables, $contentparams) = $this->get_content_sql($fields);
+        // CONTENT sql ($dataformcontent is an array of fieldid whose content needs to be fetched)
+        list($dataformcontent, $whatcontent, $contenttables, $contentparams) = $this->get_content_sql($fields);
     
         // Add rating tables and content if needed
         if ($this->filter_on_rating()) {
@@ -98,7 +98,8 @@ class dataform_filter {
             $wheresearch,
             $sortorder,
             $whatcontent,
-            array_merge($searchparams, $sortparams, $contentparams)
+            array_merge($searchparams, $sortparams, $contentparams),
+            $dataformcontent
         );
     }
 
@@ -281,18 +282,29 @@ class dataform_filter {
         $contenttables = ' ';
         
         if ($contentfields) {
+            $dataformcontent = array();
             $whatcontent = array();
             $contentfrom = array();
             $paramcount = 0;
             foreach ($contentfields as $fieldid) {
                 // User fields
-                if ($fieldid > 0 and isset($fields[$fieldid]) and $fieldselect = $fields[$fieldid]->get_select_sql()) {
-                    $whatcontent[] = $fieldselect;
-                    // add content table only if not already added
-                    if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
+                if ($fieldid < 0 or !isset($fields[$fieldid]) or !$selectsql = $fields[$fieldid]->get_select_sql()) {
+                    continue;
+                }
+                
+                // add content table only if not already added
+                if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
+                    $field = $fields[$fieldid];
+
+                    // Separate dataform_content content b/c of limit on joins
+                    // This content would be fetched after the entries and added to the entries
+                    if ($field->is_dataform_content()) {
+                        $dataformcontent[] = $fieldid;
+                    } else {                    
+                        $whatcontent[] = $selectsql;
                         $this->_filteredtables[] = $fieldid; 
                         list($contentfrom[$fieldid], $params["contentie$paramcount"]) = 
-                                $fields[$fieldid]->get_sort_from_sql('contentie', $paramcount);
+                                $field->get_sort_from_sql('contentie', $paramcount);
                         $paramcount++;
                     }
                 }
@@ -300,7 +312,7 @@ class dataform_filter {
             $whatcontent = !empty($whatcontent) ? ', '. implode(', ', $whatcontent) : ' ';
             $contenttables = ' '. implode(' ', $contentfrom);
         }
-        return array($whatcontent, $contenttables, $params);
+        return array($dataformcontent, $whatcontent, $contenttables, $params);
     }
 
     // Append sort option
