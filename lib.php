@@ -865,8 +865,9 @@ function dataform_rating_permissions($contextid, $component, $ratingarea) {
  */
 function dataform_rating_validate($params) {
     require_once("mod_class.php");
+    require_once("field/_rating/field_class.php");
     $df = new dataform(null, $params['context']->instanceid);
-    $rating = $df->get_field_from_id(dataform::_RATING);
+    $rating = $df->get_field_from_id(dataform_field__rating::_RATING);
     return $rating->validation($params);
 }
 

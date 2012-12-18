@@ -82,7 +82,7 @@ class mod_dataform_view_base_form extends moodleform {
         $mform->setDefault('filter', 0);
 
         // group by
-        if (!$fieldsmenu = $view->get_df()->get_fields(array(-1), true)) {
+        if (!$fieldsmenu = $view->get_df()->get_fields(array('entry'), true)) {
             $fieldsmenu = array(0 => get_string('fieldsnonedefined', 'dataform'));
         } else {
            $fieldsmenu = array(0 => get_string('choose')) + $fieldsmenu;

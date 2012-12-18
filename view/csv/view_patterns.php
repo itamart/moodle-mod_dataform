@@ -47,13 +47,13 @@ class mod_dataform_view_csv_patterns extends mod_dataform_view_patterns{
             switch ($tag) {
                 case '##export:all##':
                     $actionurl = new moodle_url($baseurl, array('exportcsv' => $view::EXPORT_ALL));
-                    $label = html_writer::tag('span', get_string('export', 'dataform'). ' All');
+                    $label = html_writer::tag('span', get_string('exportall', 'dataform'));
                     $replacements[$tag] = html_writer::link($actionurl, $label, array('class' => 'actionlink exportall'));
 
                     break;
                 case '##export:page##':
                     $actionurl = new moodle_url($baseurl, array('exportcsv' => $view::EXPORT_PAGE));
-                    $label = html_writer::tag('span', get_string('export', 'dataform'). ' Page');
+                    $label = html_writer::tag('span', get_string('exportpage', 'dataform'));
                     $replacements[$tag] = html_writer::link($actionurl, $label, array('class' => 'actionlink exportpage'));
 
                     break;

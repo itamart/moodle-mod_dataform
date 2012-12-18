@@ -119,7 +119,7 @@ class dataform_field_time extends dataform_field_base {
         } else {
             $params[$namefrom] = $from;
             $params[$nameto] = $to;
-            return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent <= :$nameto) ", $params);
+            return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent < :$nameto) ", $params);
         }
     }
 
@@ -155,9 +155,9 @@ class dataform_field_time extends dataform_field_base {
     /**
      * 
      */
-    public function get_sort_sql() {
+    public function get_sql_compare_text($column = 'content') {
         global $DB;
-        return $DB->sql_cast_char2int("c{$this->field->id}.content", true);
+        return $DB->sql_cast_char2int("c{$this->field->id}.$column", true);
     }
 
 }

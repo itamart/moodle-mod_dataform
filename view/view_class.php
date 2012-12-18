@@ -415,33 +415,34 @@ class dataform_view_base {
     /**
      *
      */
-    public function display(array $params = null) {
+    public function display(array $options = null) {
         global $OUTPUT;
 
-        // set display params
-        $displayentries = isset($params['entries']) ? $params['entries'] : true;
-        $displaycontrols = isset($params['controls']) ? $params['controls'] : true;
-        $notify = isset($params['notify']) ? $params['notify'] : true;
-        $tohtml = isset($params['tohtml']) ? $params['tohtml'] : false;
-        $pluginfileurl = isset($params['pluginfileurl']) ? $params['pluginfileurl'] : null;      
+        // set display options
+        $displayentries = isset($options['entries']) ? $options['entries'] : true;
+        $displaycontrols = isset($options['controls']) ? $options['controls'] : true;
+        $showentryactions = isset($options['entryactions']) ? $options['entryactions'] : true;
+        $notify = isset($options['notify']) ? $options['notify'] : true;
+        $tohtml = isset($options['tohtml']) ? $options['tohtml'] : false;
+        $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;      
 
         // build entries display definition
-        $requiresmanageentries = $this->set__display_definition();
+        $requiresmanageentries = $this->set__display_definition($options);
 
         // set view specific tags
-        $options = array();
-        $options['pluginfileurl'] = $pluginfileurl;      
-        $options['entriescount'] = $this->_entries->get_count();
-        $options['entriesfiltercount'] = $this->_entries->get_count(true);
+        $viewoptions = array();
+        $viewoptions['pluginfileurl'] = $pluginfileurl;      
+        $viewoptions['entriescount'] = $this->_entries->get_count();
+        $viewoptions['entriesfiltercount'] = $this->_entries->get_count(true);
         // adding one or more new entries
         if ($this->user_is_editing()) {
-            $options['hidenewentry'] = 1;
+            $viewoptions['hidenewentry'] = 1;
         }
         // editing one or more new entries
-        if ($requiresmanageentries) {
-            $options['showentryactions'] = 1;
+        if ($requiresmanageentries and $showentryactions) {
+            $viewoptions['showentryactions'] = 1;
         }
-        $this->set_view_tags($options);
+        $this->set_view_tags($viewoptions);
 
         // print notifications
         $notifications = '';
@@ -460,7 +461,7 @@ class dataform_view_base {
             $html = $notifications;
             $html .= $displaycontrols ? $this->print_before() : '';
             if ($displayentries) {
-                $html .= $this->display_entries($params);
+                $html .= $this->display_entries($options);
             }
             $html .= $displaycontrols ? $this->print_after() : '';
             return html_writer::tag('div', $html, array('class' => $viewname));
@@ -469,7 +470,7 @@ class dataform_view_base {
             echo $notifications;
             echo ($displaycontrols ? $this->print_before() : '');
             if ($displayentries) {
-                $this->display_entries($params);
+                $this->display_entries($options);
             }
             echo ($displaycontrols ? $this->print_after() : '');
             echo html_writer::end_tag('div');
@@ -1132,18 +1133,20 @@ class dataform_view_base {
      *
      */
     protected function is_rating() {
-        global $USER;
+        global $USER, $CFG;
 
-        if (!$this->_df->data->rating or empty($this->_tags['field'][dataform::_RATING])) {
+        require_once("$CFG->dirroot/mod/dataform/field/_rating/field_class.php");
+        
+        if (!$this->_df->data->rating or empty($this->_tags['field'][dataform_field__rating::_RATING])) {
             return null;
         }
         
-        $ratingfield = $this->_df->get_field_from_id(dataform::_RATING);
+        $ratingfield = $this->_df->get_field_from_id(dataform_field__rating::_RATING);
         $ratingoptions = new object;
         $ratingoptions->context = $this->_df->context;
         $ratingoptions->component = 'mod_dataform';
         $ratingoptions->ratingarea = 'entry';
-        $ratingoptions->aggregate = $ratingfield->patterns()->get_aggregations($this->_tags['field'][dataform::_RATING]);
+        $ratingoptions->aggregate = $ratingfield->patterns()->get_aggregations($this->_tags['field'][dataform_field__rating::_RATING]);
         $ratingoptions->scaleid = $ratingfield->get_scaleid('entry');
         $ratingoptions->userid = $USER->id;
 
@@ -1192,13 +1195,13 @@ class dataform_view_base {
     /**
      *
      */
-    public function display_entries(array $params = null) {
+    public function display_entries(array $options = null) {
         global $CFG, $OUTPUT;
         
-        // set display params
-        $displaycontrols = isset($params['controls']) ? $params['controls'] : true;
-        $tohtml = isset($params['tohtml']) ? $params['tohtml'] : false;
-        $pluginfileurl = isset($params['pluginfileurl']) ? $params['pluginfileurl'] : null;
+        // set display options
+        $displaycontrols = isset($options['controls']) ? $options['controls'] : true;
+        $tohtml = isset($options['tohtml']) ? $options['tohtml'] : false;
+        $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
 
         $html = '';
 
@@ -1215,13 +1218,28 @@ class dataform_view_base {
             }                    
 
         } else {
-            // prepare params for form
+            // prepare options for form
             $entriesform = $this->get_entries_form();
             $html = $entriesform->html();
         }
         
         // Process calculations if any
-        if (preg_match_all("/%%F\d*:=[^%]+%%/", $html, $matches)) {
+        $html = $this->process_calculations($html);
+        
+        if ($tohtml) {
+            return $html;
+        } else {
+            echo $html;
+        }
+    }
+
+    /**
+     *
+     */
+    protected function process_calculations($text) {
+        global $CFG;
+        
+        if (preg_match_all("/%%F\d*:=[^%]+%%/", $text, $matches)) {
             require_once("$CFG->libdir/mathslib.php");
             sort($matches[0]);
             $replacements = array();
@@ -1229,6 +1247,7 @@ class dataform_view_base {
             foreach ($matches[0] as $pattern) {
                 $cleanpattern = trim($pattern, '%');
                 list($fid, $formula) = explode(':=', $cleanpattern, 2);
+                // Process group formulas (e.g. _F1_)
                 if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
                     foreach ($frefs[0] as $fref) {
                         $fref = trim($fref, '_');
@@ -1238,7 +1257,8 @@ class dataform_view_base {
                     }
                 }
                 isset($formulas[$fid]) or $formulas[$fid] = array();
-                $formulas[$fid][] = $formula;
+                // Enclose formula in brackets to preserve precedence
+                $formulas[$fid][] = "($formula)";
                 $replacements[$pattern] = $formula;
             }
 
@@ -1253,16 +1273,11 @@ class dataform_view_base {
                     $replacements[$pattern] = $result;
                 }
             }
-            $html = str_replace(array_keys($replacements), $replacements, $html);
+            $text = str_replace(array_keys($replacements), $replacements, $text);
         }
-            
-        if ($tohtml) {
-            return $html;
-        } else {
-            echo $html;
-        }
+        return $text;
     }
-
+            
     /**
      *
      */
@@ -1287,7 +1302,6 @@ class dataform_view_base {
     public function definition_to_html() {
         $html = '';
         $elements = $this->get_entries_definition();
-        // if $mform is null, simply echo/return html string
         foreach ($elements as $element) {
             list(, $content) = $element;
             $html .= $content;
@@ -1446,10 +1460,10 @@ class dataform_view_base {
     /**
      *
      */
-    protected function set__display_definition() {
+    protected function set__display_definition(array $options = null) {
 
         $this->_display_definition = array();
-        // Indicate if there managable entries in the display for the current user
+        // Indicate if there are managable entries in the display for the current user
         // in which case edit/delete action 
         $requiresmanageentries = false;
 
@@ -1473,12 +1487,18 @@ class dataform_view_base {
             $groupname = '';
             $groupdefinition = array();
 
+            // If action buttons should be hidden entries should unmanageable
+            $displayactions = isset($options['entryactions']) ? $options['entryactions'] : true;
             foreach ($entries as $entryid => $entry) {
                $editthisone = false;
-               if ($managable = $this->_df->user_can_manage_entry($entry)) {
-                    if ($editentries) {
-                        $requiresmanageentries = true;
-                        $editthisone = in_array($entryid, $editentries);
+               $managable = false;
+               // Calculate manageability only if action buttons can be displayed
+               if ($displayactions) {
+                    if ($managable = $this->_df->user_can_manage_entry($entry)) {
+                        if ($editentries) {
+                            $requiresmanageentries = true;
+                            $editthisone = in_array($entryid, $editentries);
+                        }
                     }
                 }
 

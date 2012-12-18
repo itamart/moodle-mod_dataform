@@ -36,26 +36,6 @@ class dataform {
     const NOTIFICATION_ENTRY_DELETED = 4;
     const NOTIFICATION_COMMENT_ADDED = 8;
 
-    const _ENTRY = -1;
-    const _TIMECREATED = -2;
-    const _TIMEMODIFIED = -3;
-    const _APPROVED = -4;
-    const _GROUP = -5;
-    const _USERID = -6;
-    const _USERNAME = -7;
-    const _USERFIRSTNAME = -8;
-    const _USERLASTNAME = -9;
-    const _USERUSERNAME = -10;
-    const _USERIDNUMBER = -11;
-    const _USERPICTURE = -12;
-    const _COMMENT = -13;
-    const _RATING = -14;
-    const _RATINGAVG = -141;
-    const _RATINGCOUNT = -142;
-    const _RATINGMAX = -143;
-    const _RATINGMIN = -144;
-    const _RATINGSUM = -145;
-
     const COUNT_ALL = 0;
     const COUNT_APPROVED = 1;
     const COUNT_UNAPPROVED = 2;
@@ -687,66 +667,24 @@ class dataform {
      * initialize the internal fields
      */
     protected function get_internal_fields() {
+        global $CFG;
+        
         if (!$this->internalfields) {
-            $dataid = $this->data->id;
-            
-            $field = (object) array('id' => self::_ENTRY, 'dataid' => $dataid, 'type' => '_entry', 'name' => get_string('entry', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => '');
-            $this->internalfields[self::_ENTRY] = $this->get_field($field);
-            
-            $field = (object) array('id' => self::_TIMECREATED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timecreated', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'timecreated');
-            $this->internalfields[self::_TIMECREATED] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_TIMEMODIFIED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timemodified', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'timemodified');
-            $this->internalfields[self::_TIMEMODIFIED] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_APPROVED, 'dataid' => $dataid, 'type' => '_approve', 'name' => get_string('approved', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'approved');
-            $this->internalfields[self::_APPROVED] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_GROUP, 'dataid' => $dataid, 'type' => '_group', 'name' => get_string('group', 'dataformfield__group'), 'description' => '', 'visible' => 2, 'internalname' => 'groupid');
-            $this->internalfields[self::_GROUP] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERID, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userid', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'id');
-            $this->internalfields[self::_USERID] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('username', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'name');
-            $this->internalfields[self::_USERNAME] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERFIRSTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userfirstname', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'firstname');
-            $this->internalfields[self::_USERFIRSTNAME] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERLASTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userlastname', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'lastname');
-            $this->internalfields[self::_USERLASTNAME] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERUSERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userusername', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'username');
-            $this->internalfields[self::_USERUSERNAME] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERIDNUMBER, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('useridnumber', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'idnumber');
-            $this->internalfields[self::_USERIDNUMBER] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_USERPICTURE, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userpicture', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'picture');
-            $this->internalfields[self::_USERPICTURE] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_COMMENT, 'dataid' => $dataid, 'type' => '_comment', 'name' => get_string('comments', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'comments');
-            $this->internalfields[self::_COMMENT] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_RATING, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratings', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'ratings');
-            $this->internalfields[self::_RATING] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_RATINGAVG, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingsavg', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'avgratings');
-            $this->internalfields[self::_RATINGAVG] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_RATINGCOUNT, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingscount', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'countratings');
-            $this->internalfields[self::_RATINGCOUNT] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_RATINGMAX, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingsmax', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'maxratings');
-            $this->internalfields[self::_RATINGMAX] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_RATINGMIN, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingsmin', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'minratings');
-            $this->internalfields[self::_RATINGMIN] = $this->get_field($field);
-
-            $field = (object) array('id' => self::_RATINGSUM, 'dataid' => $dataid, 'type' => '_rating', 'name' => get_string('ratingssum', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'sumratings');
-            $this->internalfields[self::_RATINGSUM] = $this->get_field($field);
+            $fieldplugins = get_list_of_plugins('mod/dataform/field/');
+            foreach ($fieldplugins as $fieldname) {
+                // Internal should start with _
+                if (strpos($fieldname, '_') !== 0) {
+                    continue;
+                }
+                require_once("$CFG->dirroot/mod/dataform/field/$fieldname/field_class.php");
+                $fieldclass = "dataform_field_$fieldname";
+                $internalfields = $fieldclass::get_field_objects($this->data->id);
+                foreach ($internalfields as $fid => $field) {
+                    $this->internalfields[$fid] = $this->get_field($field);
+                }
+            }
         }
+        
         return $this->internalfields;
     }
 

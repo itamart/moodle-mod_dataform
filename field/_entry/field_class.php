@@ -24,5 +24,16 @@
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
 class dataform_field__entry extends dataform_field_no_content {
-    public $type = '_entry';  
+    public $type = '_entry';
+
+    const _ENTRY = 'entry';
+
+    public static function get_field_objects($dataid) {
+        $fieldobjects = array();
+        
+        $fieldobjects[self::_ENTRY] = (object) array('id' => self::_ENTRY, 'dataid' => $dataid, 'type' => '_entry', 'name' => get_string('entry', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => '');
+        
+        return $fieldobjects;
+    }
+    
 }

@@ -54,7 +54,7 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         $mform->addElement('selectyesno', 'headerenabled', get_string('enabled', 'dataformview_pdf'));
 
         // Header content (param3)
-        $mform->addElement('editor', 'eparam3_editor', get_string('headercontent', 'dataformview_pdf'), $editorattr, $editoroptions['param3']);
+        $mform->addElement('editor', 'eparam3_editor', get_string('content'), $editorattr, $editoroptions['param3']);
         $mform->setDefault("eparam3_editor[format]", FORMAT_PLAIN);
         
         // Header margins
@@ -73,6 +73,10 @@ class mod_dataform_view_pdf_form extends mod_dataform_view_base_form {
         // Footer enbabled
         $mform->addElement('selectyesno', 'footerenabled', get_string('enabled', 'dataformview_pdf'));
 
+        // Footer content (param4)
+        $mform->addElement('editor', 'eparam4_editor', get_string('content'), $editorattr, $editoroptions['param4']);
+        $mform->setDefault("eparam4_editor[format]", FORMAT_PLAIN);
+        
         // Footer margin
         $options = array_combine(range(1,30),range(1,30)); 
         $mform->addElement('select', 'footermargin', get_string('margin', 'dataformview_pdf'), $options);

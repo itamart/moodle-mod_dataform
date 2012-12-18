@@ -27,6 +27,16 @@ class dataform_field__group extends dataform_field_no_content {
 
     public $type = '_group';
 
+    const _GROUP = 'group';
+
+    public static function get_field_objects($dataid) {
+        $fieldobjects = array();
+        
+        $fieldobjects[self::_GROUP] = (object) array('id' => self::_GROUP, 'dataid' => $dataid, 'type' => '_group', 'name' => get_string('group', 'dataformfield__group'), 'description' => '', 'visible' => 2, 'internalname' => 'groupid');
+
+        return $fieldobjects;
+    }
+
     /**
      * 
      */

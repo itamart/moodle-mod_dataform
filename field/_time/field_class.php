@@ -26,6 +26,19 @@ require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 class dataform_field__time extends dataform_field_no_content {
     public $type = '_time';
 
+    const _TIMECREATED = 'timecreated';
+    const _TIMEMODIFIED = 'timemodified';
+
+    public static function get_field_objects($dataid) {
+        $fieldobjects = array();
+        
+        $fieldobjects[self::_TIMECREATED] = (object) array('id' => self::_TIMECREATED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timecreated', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'timecreated');
+
+        $fieldobjects[self::_TIMEMODIFIED] = (object) array('id' => self::_TIMEMODIFIED, 'dataid' => $dataid, 'type' => '_time', 'name' => get_string('timemodified', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'timemodified');
+
+        return $fieldobjects;
+    }
+
     /**
      * 
      */

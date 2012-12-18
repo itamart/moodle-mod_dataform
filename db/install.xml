@@ -83,7 +83,7 @@
         <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="visible"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="description" NEXT="perpage"/>
         <FIELD NAME="perpage" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="visible" NEXT="groupby"/>
-        <FIELD NAME="groupby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="perpage" NEXT="filter"/>
+        <FIELD NAME="groupby" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" PREVIOUS="perpage" NEXT="filter"/>
         <FIELD NAME="filter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupby" NEXT="patterns"/>
         <FIELD NAME="patterns" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="filter" NEXT="section"/>
         <FIELD NAME="section" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="patterns" NEXT="sectionpos"/>
@@ -116,7 +116,7 @@
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="description" NEXT="perpage"/>
         <FIELD NAME="perpage" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="10" SEQUENCE="false" PREVIOUS="visible" NEXT="selection"/>
         <FIELD NAME="selection" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="perpage" NEXT="groupby"/>
-        <FIELD NAME="groupby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="selection" NEXT="search"/>
+        <FIELD NAME="groupby" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" PREVIOUS="selection" NEXT="search"/>
         <FIELD NAME="search" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="groupby" NEXT="customsort"/>
         <FIELD NAME="customsort" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="search" NEXT="customsearch"/>
         <FIELD NAME="customsearch" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="customsort"/>

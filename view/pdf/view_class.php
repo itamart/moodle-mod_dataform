@@ -28,9 +28,11 @@ class dataform_view_pdf extends dataform_view_base {
 
     const EXPORT_ALL = 'all';
     const EXPORT_PAGE = 'page';
+    const PAGE_BREAK = '<div class="pdfpagebreak"></div>';
 
     protected $type = 'pdf';
-    protected $_editors = array('section', 'param2', 'param3');
+    protected $_editors = array('section', 'param2', 'param3', 'param4');
+    protected $_vieweditors = array('section', 'param2');
     protected $_settings = null;
     protected $_tmpfiles = null;
 
@@ -109,7 +111,6 @@ class dataform_view_pdf extends dataform_view_base {
         $settings = $this->_settings;
         $this->_tmpfiles = array();
 
-
         // Generate the pdf
         $pdf = new dfpdf($settings);
         
@@ -126,6 +127,7 @@ class dataform_view_pdf extends dataform_view_base {
         // Set footer
         if (!empty($settings->footer->enabled)) {
             $pdf->setFooterMargin($settings->footer->margin);
+            //$this->set_footer($pdf);
         } else {
             $pdf->setPrintFooter(false);
         }
@@ -180,10 +182,11 @@ class dataform_view_pdf extends dataform_view_base {
                 $entriesset->found = 1;
                 $entriesset->entries = array($eid => $entry);
                 $this->_entries->set_content(array('entriesset' => $entriesset));
-                $content[] = $this->display(array('tohtml' => true, 'controls' => false));
+                $pages = explode(self::PAGEBREAK, $this->display(array('tohtml' => true, 'controls' => false, 'entryactions' => false)));
+                $content += $pages;
             }
         } else {
-            $content[] = $this->display(array('tohtml' => true, 'controls' => false));
+            $content = explode(self::PAGE_BREAK, $this->display(array('tohtml' => true, 'controls' => false, 'entryactions' => false)));
         }
 
 
@@ -552,7 +555,29 @@ class dataform_view_pdf extends dataform_view_base {
         );
 
         $content = $this->process_content_images($content);
-        $pdf->SetHeaderData('', 0, '', $content); //, array(0,64,255), array(0,64,128));                
+        $pdf->SetHeaderData('', 0, '', $content);              
+    }
+
+    /**
+     *
+     */
+    protected function set_footer($pdf) {
+        if (empty($this->view->eparam4)) {
+            return;
+        }
+        
+        // Rewrite plugin file urls
+        $content = file_rewrite_pluginfile_urls(
+            $this->view->eparam4,
+            'pluginfile.php',
+            $this->_df->context->id,
+            'mod_dataform',
+            "viewparam4",
+            $this->id()
+        );
+
+        $content = $this->process_content_images($content);
+        //$pdf->SetFooterData('', 0, '', $content);               
     }
 
     /**

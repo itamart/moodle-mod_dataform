@@ -217,6 +217,19 @@ class mod_dataform_field__user_patterns extends mod_dataform_field_patterns {
     }
 
     /**
+     * 
+     */
+    public function display_email($entry) {
+        global $USER;
+        
+        if ($entry->id < 0) { // new entry
+            return $USER->email;
+        } else {
+            return $entry->email;
+        }
+    }
+
+    /**
      * Array of patterns this field supports 
      */
     protected function patterns() {

@@ -87,8 +87,8 @@ class dataform_filter {
         // Add rating tables and content if needed
         if ($this->filter_on_rating()) {
             $whatcontent .= $whatcontent ? ', ' : '';
-            $whatcontent .= $fields[dataform::_RATING]->get_select_sql();
-            list($sqlfrom, $ratingparams) = $fields[dataform::_RATING]->get_join_sql();
+            $whatcontent .= $fields[dataform_field__rating::_RATING]->get_select_sql();
+            list($sqlfrom, $ratingparams) = $fields[dataform_field__rating::_RATING]->get_join_sql();
             $contenttables .= " $sqlfrom ";
             $contentparams = array_merge($contentparams, $ratingparams);
         }
@@ -117,12 +117,12 @@ class dataform_filter {
      */
     protected function filter_on_rating() {
         $ratingfieldids = array(
-            dataform::_RATING,
-            dataform::_RATINGAVG,
-            dataform::_RATINGCOUNT,
-            dataform::_RATINGMAX,
-            dataform::_RATINGMIN,
-            dataform::_RATINGSUM,
+            dataform_field__rating::_RATING,
+            dataform_field__rating::_RATINGAVG,
+            dataform_field__rating::_RATINGCOUNT,
+            dataform_field__rating::_RATINGMAX,
+            dataform_field__rating::_RATINGMIN,
+            dataform_field__rating::_RATINGSUM,
         );
         foreach ($ratingfieldids as $fieldid) {
             if (array_key_exists($fieldid, $this->_searchfields)
@@ -292,12 +292,14 @@ class dataform_filter {
                     continue;
                 }
                 
-                // add content table only if not already added
-                if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
-                    $field = $fields[$fieldid];
-
-                    // Separate dataform_content content b/c of limit on joins
-                    // This content would be fetched after the entries and added to the entries
+                $field = $fields[$fieldid];
+                // Add what content if already added for sort or search
+                if (in_array($fieldid, $this->_filteredtables)) {
+                    $whatcontent[] = $selectsql;
+                
+                // If not in sort or search separate dataform_content content b/c of limit on joins
+                // This content would be fetched after the entries and added to the entries
+                } else { 
                     if ($field->is_dataform_content()) {
                         $dataformcontent[] = $fieldid;
                     } else {                    

@@ -458,13 +458,13 @@ class dataform_entries {
                             $contents = array_fill_keys(array_keys($entries), array('info' => array(), 'fields' => array()));
                             $calculations = array();
                             $entryinfo = array(
-                                dataform::_ENTRY,
-                                dataform::_TIMECREATED,
-                                dataform::_TIMEMODIFIED,
-                                dataform::_APPROVED,
-                                dataform::_USERID,
-                                dataform::_USERNAME,
-                                dataform::_GROUP
+                                dataform_field__entry::_ENTRY,
+                                dataform_field__time::_TIMECREATED,
+                                dataform_field__time::_TIMEMODIFIED,
+                                dataform_field__approve::_APPROVED,
+                                dataform_field__user::_USERID,
+                                dataform_field__user::_USERNAME,
+                                dataform_field__group::_GROUP
                             );
 
                             // Iterate the data and extract entry and fields content
@@ -481,7 +481,7 @@ class dataform_entries {
                                     // Entry info
                                     if (in_array($fieldid, $entryinfo)) {
                                         // TODO
-                                        if ($fieldid == dataform::_USERID or $fieldid == dataform::_USERNAME) {
+                                        if ($fieldid == dataform_field__user::_USERID or $fieldid == dataform_field__user::_USERNAME) {
                                             $entryvar = 'userid';
                                         } else {
                                             $entryvar = $field->get_internalname();

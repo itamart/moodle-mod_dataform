@@ -22,4 +22,11 @@
  */
 
 $string['pluginname'] = 'Internal';
-
+$string['useremail'] = 'User email';
+$string['userfirstname'] = 'User first name';
+$string['userid'] = 'User id';
+$string['useridnumber'] = 'User id number';
+$string['userlastname'] = 'User last name';
+$string['username'] = 'User name';
+$string['userpicture'] = 'User picture';
+$string['userusername'] = 'User username';

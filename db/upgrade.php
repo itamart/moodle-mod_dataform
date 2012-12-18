@@ -343,5 +343,95 @@ function xmldb_dataform_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2012092207, 'dataform');
     }
 
+    if ($oldversion < 2012121600) {
+        // Convert internal field ids whereever they are cached or referenced
+        $newfieldids = array(
+            -1 => 'entry',
+            -2 => 'timecreated',
+            -3 => 'timemodified',
+            -4 => 'approve',
+            -5 => 'group',
+            -6 => 'userid',
+            -7 => 'username',
+            -8 => 'userfirstname',
+            -9 => 'userlastname',
+            -10 => 'userusername',
+            -11 => 'useridnumber',
+            -12 => 'userpicture',
+            -13 => 'comment',
+            -14 => 'rating',
+            -141 => 'ratingavg',
+            -142 => 'ratingcount',
+            -143 => 'ratingmax',
+            -144 => 'ratingmin',
+            -145 => 'ratingsum',
+        );
+        
+        // View patterns
+        if ($views = $DB->get_records('dataform_views')) {
+            foreach ($views as $view) {
+                $update = false;
+                if ($view->patterns) {
+                    $patterns = unserialize($view->patterns);
+                    $newpatterns = array('view' => $patterns['view'], 'field' => array());
+                    foreach ($patterns['field'] as $fieldid => $tags) {
+                        if ($fieldid < 0 and !empty($newfieldids[$fieldid])) {
+                            $newpatterns['field'][$newfieldids[$fieldid]] = $tags;
+                            $update = true;
+                        } else {
+                            $newpatterns['field'][$fieldid] = $tags;
+                        }
+                    }
+                    $view->patterns = serialize($newpatterns);
+                }
+                if ($update) {
+                    $DB->update_record('dataform_views', $view);
+                }
+            }
+        }
+        // Filter customsort and customsearch
+        if ($filters = $DB->get_records('dataform_filters')) {
+            foreach ($filters as $filter) {
+                $update = false;
+
+                // adjust customsort field ids
+                if ($filter->customsort) {
+                    $customsort = unserialize($filter->customsort);
+                    $sortfields = array();
+                    foreach ($customsort as $fieldid => $sortdir) {
+                        if ($fieldid < 0 and !empty($newfieldids[$fieldid])) {
+                            $sortfields[$newfieldids[$fieldid]] = $sortdir;
+                            $update = true;
+                        } else {
+                            $sortfields[$fieldid] = $sortdir;
+                        }
+                    }
+                    $filter->customsort = serialize($sortfields);
+                }
+                                
+                // adjust customsearch field ids
+                if ($filter->customsearch) {
+                    $customsearch = unserialize($filter->customsearch);
+                    $searchfields = array();
+                    foreach ($customsearch as $fieldid => $options) {
+                        if ($fieldid < 0 and !empty($newfieldids[$fieldid])) {
+                            $searchfields[$newfieldids[$fieldid]] = $options;
+                            $update = true;
+                        } else {
+                            $searchfields[$fieldid] = $options;
+                        }
+                    }
+                    $filter->customsearch = serialize($searchfields);
+                }
+                if ($update) {
+                    $DB->update_record('dataform_filters', $filter);
+                }
+            }
+        }        
+        
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012121600, 'dataform');
+    }
+
     return true;
 }

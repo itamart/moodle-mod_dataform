@@ -30,9 +30,9 @@ class dataform_field_number extends dataform_field_text {
      * TODO This casting seems to omit decimals from the value stored in DB
      * ie it returns 11.95 as 12 
      */
-    //protected function get_sql_compare_text() {
+    //protected function get_sql_compare_text($column = 'content') {
     //    global $DB;    
-    //    return $DB->sql_cast_char2real("c{$this->field->id}.content", true);
+    //    return $DB->sql_cast_char2real("c{$this->field->id}.$column", true);
     //}
 
 }

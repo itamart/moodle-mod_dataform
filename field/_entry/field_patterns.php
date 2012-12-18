@@ -35,6 +35,7 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
     public function get_replacements($tags = null, $entry = null, array $options = null) {
 
         $managable = !empty($options['managable']) ? $options['managable'] : false;
+        $edit = !empty($options['edit']) ? $options['edit'] : false;
         // no edit mode
         $replacements = array();
         foreach ($tags as $tag) {
@@ -44,7 +45,7 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
                 $replacements[$tag] = '';                    
             
             // no edit mode for this field so just return html
-            } else {                 
+            } else {
                 switch ($tag) {
                     // reference
                     case '##entryid##': $str = $entry->id; break;
@@ -53,10 +54,10 @@ class mod_dataform_field__entry_patterns extends mod_dataform_field_patterns {
                     case '##anchor##': $str = html_writer::tag('a', '', array('name' => $entry->id)); break;    
                     // Actions
                     case '##select##': $str = html_writer::checkbox('entryselector', $entry->id, false); break;                        
-                    case '##edit##': $str = $managable ? $this->display_edit($entry) : ''; break;
+                    case '##edit##': $str = ($managable and !$edit) ? $this->display_edit($entry) : ''; break;
                     case '##delete##': $str = $managable ? $this->display_delete($entry): ''; break;
                     case '##export##': $str = $this->display_export($entry); break;
-                    case '##duplicate##': $str = $this->display_duplicate($entry); break;
+                    case '##duplicate##': $str = $managable ? $this->display_duplicate($entry) : ''; break;
                     default: $str = $entry->id;
                 }
                 $replacements[$tag] = array('html', $str);

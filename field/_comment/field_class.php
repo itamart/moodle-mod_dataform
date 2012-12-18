@@ -27,6 +27,16 @@ class dataform_field__comment extends dataform_field_no_content {
 
     public $type = '_comment';
 
+    const _COMMENT = 'comment';
+
+    public static function get_field_objects($dataid) {
+        $fieldobjects = array();
+        
+        $fieldobjects[self::_COMMENT] = (object) array('id' => self::_COMMENT, 'dataid' => $dataid, 'type' => '_comment', 'name' => get_string('comments', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'comments');
+
+        return $fieldobjects;
+    }
+
     /**
      * TODO: use join?
      */

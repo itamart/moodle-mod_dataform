@@ -77,7 +77,6 @@ $string['pdfheader'] = 'PDF Header';
 $string['pdffooter'] = 'PDF Footer';
 
 $string['enabled'] = 'Enabled';
-$string['headercontent'] = 'Content';
 $string['margin'] = 'Margin';
 $string['pdfmargins'] = 'PDF Margins and paging';
 $string['marginleft'] = 'Left';

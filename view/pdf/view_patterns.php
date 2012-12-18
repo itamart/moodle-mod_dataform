@@ -48,15 +48,19 @@ class mod_dataform_view_pdf_patterns extends mod_dataform_view_patterns{
                 case '##export:all##':
                     $actionurl = new moodle_url($baseurl, array('exportpdf' => $view::EXPORT_ALL));
                     //$label = $OUTPUT->pix_icon('f/pdf', get_string('multiexport', 'dataform'));
-                    $label = html_writer::tag('span', get_string('export', 'dataform'). ' All');
+                    $label = html_writer::tag('span', get_string('exportall', 'dataform'));
                     $replacements[$tag] = html_writer::link($actionurl, $label, array('class' => 'actionlink exportall'));
 
                     break;
                 case '##export:page##':
                     $actionurl = new moodle_url($baseurl, array('exportPDF' => $view::EXPORT_PAGE));
                     //$label = $OUTPUT->pix_icon('f/pdf', get_string('multiexport', 'dataform'));
-                    $label = html_writer::tag('span', get_string('export', 'dataform'). ' Page');
+                    $label = html_writer::tag('span', get_string('exportpage', 'dataform'));
                     $replacements[$tag] = html_writer::link($actionurl, $label, array('class' => 'actionlink exportpage'));
+
+                    break;
+                case '##pagebreak##':
+                    $replacements[$tag] = $view::PAGE_BREAK;
 
                     break;
             }
@@ -73,6 +77,7 @@ class mod_dataform_view_pdf_patterns extends mod_dataform_view_patterns{
         $cat = get_string('pluginname', 'dataformview_pdf');
         $patterns['##export:all##'] = array(true, $cat);
         $patterns['##export:page##'] =  array(true, $cat);
+        $patterns['##pagebreak##'] =  array(true, $cat);
 
         return $patterns;
     }

@@ -257,7 +257,14 @@ abstract class dataform_field_base {
      *
      */
     public function get_definitions($patterns, $entry, $options = array()) {
-        $userid = !empty($entry->userid) ? $entry->userid : 0;
+        global $USER;
+
+        $userid = 0;
+        if (!empty($entry->userid)) {
+            $userid = $entry->userid;
+        } else if ($entry->id < 0) {
+            $userid = $USER->id;
+        }
         
         if (!$this->is_visible($userid)) {
             return array_fill_keys($patterns, '');
@@ -685,19 +692,6 @@ abstract class dataform_field_no_content extends dataform_field_base {
     public function is_dataform_content() {
         return false;
     }
-
-    
-//    public function get_search_sql($search) {
-//        return array(' ', array());
-//    }
-
-//    public function parse_search($formdata, $i) {
-//        return false;
-//    }
-
-//    public function format_search_value($searchparams) {
-//        return '';
-//    }
 
     /**
      * TODO

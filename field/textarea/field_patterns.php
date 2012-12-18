@@ -63,7 +63,7 @@ class mod_dataform_field_textarea_patterns extends mod_dataform_field_patterns {
 
                     // plain text, no links
                     case "[[$fieldname:text]]":
-                        $replacements[$tag] = array('html', $this->display_browse($entry, array('text' => true)));
+                        $replacements[$tag] = array('html', html_to_text($this->display_browse($entry, array('text' => true))));
                         break;
 
                     // plain text, with links

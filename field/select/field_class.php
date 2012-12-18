@@ -146,9 +146,9 @@ class dataform_field_select extends dataform_field_base {
     /**
      * 
      */
-    protected function get_sql_compare_text() {
+    protected function get_sql_compare_text($column = 'content') {
         global $DB;
-        return $DB->sql_compare_text("c{$this->field->id}.content", 255);
+        return $DB->sql_compare_text("c{$this->field->id}.$column", 255);
     }
 
     /**

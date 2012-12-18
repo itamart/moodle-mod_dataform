@@ -32,7 +32,7 @@ class mod_dataform_filter_form extends moodleform {
         $description = empty($filter->description) ? '' : $filter->description;
         $visible = !isset($filter->visible) ? 1 : $filter->visible;
         $fields = $df->get_fields();
-        $fieldsoptions = array(0 => get_string('choose')) + $df->get_fields(array(-1), true);
+        $fieldsoptions = array(0 => get_string('choose')) + $df->get_fields(array('entry'), true);
 
         $mform =& $this->_form;
 
@@ -195,7 +195,7 @@ class mod_dataform_filter_form extends moodleform {
                 $mform->setDefault('searchnot'. $count, $not);
                 $mform->setDefault('searchoperator'. $count, $operator);
 
-                $mform->addElement('html', '</td><td valign="top" nowrap="nowrap" style="width:10px;">');
+                $mform->addElement('html', '</td><td valign="top" nowrap="nowrap">');
                 // field search elements
                 $fields[$fieldid]->patterns()->display_search($mform, $count, $value);
                 $mform->addElement('html', '</td></tr>');

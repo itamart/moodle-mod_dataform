@@ -27,6 +27,37 @@ class dataform_field__user extends dataform_field_no_content {
 
     public $type = '_user';
 
+    const _USERID = 'userid';
+    const _USERNAME = 'username';
+    const _USERFIRSTNAME = 'userfirstname';
+    const _USERLASTNAME = 'userlastname';
+    const _USERUSERNAME = 'userusername';
+    const _USERIDNUMBER = 'useridnumber';
+    const _USERPICTURE = 'userpicture';
+    const _USEREMAIL = 'useremail';
+
+    public static function get_field_objects($dataid) {
+        $fieldobjects = array();
+        
+        $fieldobjects[self::_USERID] = (object) array('id' => self::_USERID, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userid', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'id');
+
+        $fieldobjects[self::_USERNAME] = (object) array('id' => self::_USERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('username', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'name');
+
+        $fieldobjects[self::_USERFIRSTNAME] = (object) array('id' => self::_USERFIRSTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userfirstname', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'firstname');
+
+        $fieldobjects[self::_USERLASTNAME] = (object) array('id' => self::_USERLASTNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userlastname', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'lastname');
+
+        $fieldobjects[self::_USERUSERNAME] = (object) array('id' => self::_USERUSERNAME, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userusername', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'username');
+
+        $fieldobjects[self::_USERIDNUMBER] = (object) array('id' => self::_USERIDNUMBER, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('useridnumber', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'idnumber');
+
+        $fieldobjects[self::_USERPICTURE] = (object) array('id' => self::_USERPICTURE, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('userpicture', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'picture');
+
+        $fieldobjects[self::_USEREMAIL] = (object) array('id' => self::_USEREMAIL, 'dataid' => $dataid, 'type' => '_user', 'name' => get_string('useremail', 'dataformfield__user'), 'description' => '', 'visible' => 2, 'internalname' => 'email');
+
+        return $fieldobjects;
+    }
+
     /**
      *
      */

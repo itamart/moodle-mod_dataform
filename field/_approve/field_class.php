@@ -27,6 +27,19 @@ class dataform_field__approve extends dataform_field_no_content {
 
     public $type = '_approve';
 
+    const _APPROVED = 'approved';
+
+    /**
+     * 
+     */
+    public static function get_field_objects($dataid) {
+        $fieldobjects = array();
+
+        $fieldobjects[self::_APPROVED] = (object) array('id' => self::_APPROVED, 'dataid' => $dataid, 'type' => '_approve', 'name' => get_string('approved', 'dataform'), 'description' => '', 'visible' => 2, 'internalname' => 'approved');
+
+        return $fieldobjects;
+    }
+
     /**
      * 
      */
