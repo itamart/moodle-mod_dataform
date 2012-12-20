@@ -45,12 +45,16 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
         foreach ($tags as $tag => $cleantag) {
             if ($edit) {
                 $required = $this->is_required($tag);
-                $date = ($cleantag == "[[$fieldname:date]]" ? true : false);
+                // Determine whether date only selector
+                $date = (($cleantag == "[[$fieldname:date]]") or $field->date_only);
                 $options = array('required' => $required, 'date' => $date);
                 $replacements[$tag] = array('', array(array($this,'display_edit'), array($entry, $options)));
                 break;
             } else {
-                $format = (strpos($tag, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($tag, '[]')) : '');
+                // Determine display format
+                $format = (strpos($tag, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($tag, '[]')) : $field->display_format);
+
+                // For specialized tags convert format to the userdate format string
                 switch ($format) {            
                     case 'date': $format = get_string('strftimedate'); break; 
                     case 'minute': $format = '%M'; break; 
@@ -71,21 +75,31 @@ class mod_dataform_field_time_patterns extends mod_dataform_field_patterns {
      * 
      */
     public function display_edit(&$mform, $entry, array $options = null) {
-        $fieldid = $this->_field->id();
+        $field = $this->_field;
+        $fieldid = $field->id();
         $entryid = $entry->id;
-        
+        $fieldname = "field_{$fieldid}_{$entryid}";
+       
         if ($entryid > 0){
             $content = $entry->{"c{$fieldid}_content"};
         } else {
             $content = 0;
         }
 
-        // With the date pattern don't add time to selector
+        // If date only don't add time to selector
         $time = (empty($options['date']) ? 'time_' : '');      
-        $fieldname = "field_{$fieldid}_{$entryid}";
-        $optional = (!empty($options['required']) ? false : true);
-
-        $mform->addElement("date_{$time}selector", $fieldname, null, array('optional' => $optional));
+         $options = array();
+        // Optional
+        $options['optional'] = (!empty($options['required']) ? false : true);
+        // Start year
+        if ($field->start_year) {
+            $options['startyear'] = $field->start_year;
+        }
+        // End year
+        if ($field->start_year) {
+            $options['stopyear'] = $field->stop_year;
+        }
+        $mform->addElement("date_{$time}selector", $fieldname, null, $options);
         $mform->setDefault($fieldname, $content);
     }
     

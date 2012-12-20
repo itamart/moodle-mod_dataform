@@ -83,9 +83,9 @@ class mod_dataform_view_base_form extends moodleform {
 
         // group by
         if (!$fieldsmenu = $view->get_df()->get_fields(array('entry'), true)) {
-            $fieldsmenu = array(0 => get_string('fieldsnonedefined', 'dataform'));
+            $fieldsmenu = array('' => get_string('fieldsnonedefined', 'dataform'));
         } else {
-           $fieldsmenu = array(0 => get_string('choose')) + $fieldsmenu;
+           $fieldsmenu = array('' => get_string('choose')) + $fieldsmenu;
         }        
         $mform->addElement('select', 'groupby', get_string('viewgroupby', 'dataform'), $fieldsmenu);
 

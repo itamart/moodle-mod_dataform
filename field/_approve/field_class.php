@@ -27,7 +27,7 @@ class dataform_field__approve extends dataform_field_no_content {
 
     public $type = '_approve';
 
-    const _APPROVED = 'approved';
+    const _APPROVED = 'approve';
 
     /**
      * 

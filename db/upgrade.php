@@ -433,5 +433,14 @@ function xmldb_dataform_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2012121600, 'dataform');
     }
 
+    if ($oldversion < 2012121900) {
+
+        // Change groupby 0 to null in views and filters
+        $DB->set_field('dataform_views', 'groupby', null, array('groupby' => 0));
+        $DB->set_field('dataform_filters', 'groupby', null, array('groupby' => 0));
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2012121900, 'dataform');
+    }
+
     return true;
 }

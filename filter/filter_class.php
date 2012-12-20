@@ -60,7 +60,7 @@ class dataform_filter {
 
         $this->perpage = empty($filterdata->perpage) ? 0 : $filterdata->perpage;
         $this->selection = empty($filterdata->selection) ? 0 : $filterdata->selection;
-        $this->groupby = empty($filterdata->groupby) ? 0 : $filterdata->groupby;
+        $this->groupby = empty($filterdata->groupby) ? '' : $filterdata->groupby;
         $this->customsort = empty($filterdata->customsort) ? '' : $filterdata->customsort;
         $this->customsearch = empty($filterdata->customsearch) ? '' : $filterdata->customsearch;
         $this->search = empty($filterdata->search) ? '' : $filterdata->search;
@@ -370,7 +370,7 @@ class dataform_filter_manager {
         if ($filterid == self::USER_FILTER_SET) {
             set_user_preference('dataform_'. $df->id(). '_perpage', optional_param('userperpage', get_user_preferences('dataform_'. $df->id(). '_perpage', 0), PARAM_INT));
             set_user_preference('dataform_'. $df->id(). '_selection', optional_param('userselection', get_user_preferences('dataform_'. $df->id(). '_selection', 0), PARAM_INT));
-            set_user_preference('dataform_'. $df->id(). '_groupby', optional_param('usergroupby', get_user_preferences('dataform_'. $df->id(). '_groupby', 0), PARAM_INT));
+            set_user_preference('dataform_'. $df->id(). '_groupby', optional_param('usergroupby', get_user_preferences('dataform_'. $df->id(). '_groupby', ''), PARAM_INT));
             set_user_preference('dataform_'. $df->id(). '_search', optional_param('usersearch', get_user_preferences('dataform_'. $df->id(). '_search', ''), PARAM_NOTAGS));
             set_user_preference('dataform_'. $df->id(). '_customsort', optional_param('usercustomsort', get_user_preferences('dataform_'. $df->id(). '_customsort', ''), PARAM_NOTAGS));
             set_user_preference('dataform_'. $df->id(). '_customsearch', optional_param('usercustomsearch', get_user_preferences('dataform_'. $df->id(). '_customsearch', ''), PARAM_NOTAGS));
@@ -393,7 +393,7 @@ class dataform_filter_manager {
             $filter->dataid = $df->id();
             $filter->perpage = get_user_preferences('dataform_'. $df->id(). '_perpage', 0);
             $filter->selection = get_user_preferences('dataform_'. $df->id(). '_selection', 0);
-            $filter->groupby = get_user_preferences('dataform_'. $df->id(). '_groupby', 0);
+            $filter->groupby = get_user_preferences('dataform_'. $df->id(). '_groupby', '');
             $filter->search = trim(get_user_preferences('dataform_'. $df->id(). '_search', ''));
             $filter->customsort = trim(get_user_preferences('dataform_'. $df->id(). '_customsort', ''));
             $filter->customsearch = trim(get_user_preferences('dataform_'. $df->id(). '_customsearch', ''));

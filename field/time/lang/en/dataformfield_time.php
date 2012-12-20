@@ -17,10 +17,13 @@
 /**
  * @package dataformfield
  * @subpackage time
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['dateonly'] = 'Date only';
+$string['displayformat'] = 'Display format';
+$string['stopyear'] = 'Stop year';
 $string['fromtimestamp'] = 'From timestamp: ';
 $string['pluginname'] = 'Time';
-
+$string['startyear'] = 'Start year';

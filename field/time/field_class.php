@@ -26,6 +26,19 @@ require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 class dataform_field_time extends dataform_field_base {
 
     public $type = 'time';
+    
+    public $date_only;
+    public $start_year;
+    public $stop_year;
+    public $display_format;
+
+    public function __construct($df = 0, $field = 0) {       
+        parent::__construct($df, $field);
+        $this->date_only = $this->field->param1;
+        $this->start_year = $this->field->param2;
+        $this->stop_year = $this->field->param3;
+        $this->display_format = $this->field->param4;
+    }
 
     /**
      *

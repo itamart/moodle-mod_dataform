@@ -89,7 +89,7 @@ class dataform_view_base {
             $this->view->visible = 2;
             $this->view->filter = 0;
             $this->view->perpage = 0;
-            $this->view->groupby = 0;
+            $this->view->groupby = '';
         }
 
         // set editors and patterns
@@ -141,7 +141,7 @@ class dataform_view_base {
 
         $this->view->visible = !empty($data->visible) ? $data->visible : 0;
         $this->view->perpage = !empty($data->perpage) ? $data->perpage : 0;
-        $this->view->groupby = !empty($data->groupby) ? $data->groupby : 0;
+        $this->view->groupby = !empty($data->groupby) ? $data->groupby : '';
         $this->view->filter = !empty($data->filter) ? $data->filter : 0;
         $this->view->sectionpos = !empty($data->sectionpos) ? $data->sectionpos : 0;
 
@@ -1012,6 +1012,7 @@ class dataform_view_base {
             // first pattern
             $pattern = reset($this->_tags['field'][$fieldid]);
             $field = $fields[$fieldid];
+            /// TODO
             if ($definition = $field->get_definitions(array($pattern), $entry)) {
                $groupbyvalue = $definition[$pattern][1];
             }
@@ -1490,16 +1491,14 @@ class dataform_view_base {
             // If action buttons should be hidden entries should unmanageable
             $displayactions = isset($options['entryactions']) ? $options['entryactions'] : true;
             foreach ($entries as $entryid => $entry) {
-               $editthisone = false;
+               // Is this entry edited
+               $editthisone = $editentries ? in_array($entryid, $editentries) : false;
+               // Set a flag if we are editing any entries
+               $requiresmanageentries = $editthisone ? true : $requiresmanageentries;
+               // Calculate manageability for this entry only if action buttons can be displayed and we're not already editing it
                $managable = false;
-               // Calculate manageability only if action buttons can be displayed
-               if ($displayactions) {
-                    if ($managable = $this->_df->user_can_manage_entry($entry)) {
-                        if ($editentries) {
-                            $requiresmanageentries = true;
-                            $editthisone = in_array($entryid, $editentries);
-                        }
-                    }
+               if ($displayactions and !$editthisone) {
+                    $managable = $this->_df->user_can_manage_entry($entry);
                 }
 
                 // Are we grouping?
