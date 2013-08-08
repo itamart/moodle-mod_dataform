@@ -15,26 +15,232 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * @package mod-dataform
- * @copyright 2012 Itamar Tzadok
+ * @package mod
+ * @subpackage dataform
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') or die;
+ 
 require_once ("$CFG->libdir/formslib.php");
 
-class mod_dataform_filter_form extends moodleform {
+/*
+ *
+ */
+abstract class mod_dataform_filter_base_form extends moodleform {
+    protected $_filter = null;
+    protected $_df = null;
 
+    /*
+     *
+     */
+    public function __construct($df, $filter, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->_filter = $filter;
+        $this->_df = $df;
+        
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
+    }
+    
+
+    /*
+     *
+     */
+    public function custom_sort_definition($customsort, $fields, $fieldoptions, $showlabel = false) {
+        $mform = &$this->_form;
+        $df = $this->_df;
+
+        $diroptions = array(0 => get_string('ascending', 'dataform'),
+                            1 => get_string('descending', 'dataform'));
+
+        $fieldlabel = get_string('filtersortfieldlabel', 'dataform');
+        $count = 0;
+
+
+        // add current options
+        if ($customsort) {
+        
+            $sortfields = unserialize($customsort);
+
+            foreach ($sortfields as $fieldid => $sortdir) {
+                if (empty($fields[$fieldid])) {
+                    continue;
+                }
+
+                $i = $count + 1;
+                $label = $showlabel ? "$fieldlabel$i" : '';
+                
+                $optionsarr = array();
+                $optionsarr[] = &$mform->createElement('select', 'sortfield'. $count, '', $fieldoptions);
+                $optionsarr[] = &$mform->createElement('select', 'sortdir'. $count, '', $diroptions);
+                $mform->addGroup($optionsarr, 'sortoptionarr'. $count, $label, ' ', false);
+                $mform->setDefault('sortfield'. $count, $fieldid);
+                $mform->setDefault('sortdir'. $count, $sortdir);
+                $count++;
+            }
+        }
+
+        // add 3 more options
+        for ($prevcount = $count; $count < ($prevcount + 3); $count++) {
+
+            $i = $count + 1;
+            $label = $showlabel ? "$fieldlabel$i" : '';
+
+            $optionsarr = array();
+            $optionsarr[] = &$mform->createElement('select', 'sortfield'. $count, '', $fieldoptions);
+            $optionsarr[] = &$mform->createElement('select', 'sortdir'. $count, '', $diroptions);
+            $mform->addGroup($optionsarr, 'sortoptionarr'. $count, $label, ' ', false);
+            $mform->disabledIf('sortdir'. $count, 'sortfield'. $count, 'eq', 0);
+            if ($count > $prevcount) {
+                $mform->disabledIf('sortoptionarr'. $count, 'sortfield'. ($count-1), 'eq', 0);
+            }
+        }
+    }
+
+    /*
+     *
+     */
+    public function custom_search_definition($customsearch, $fields, $fieldoptions, $showlabel = false) {
+        $mform = &$this->_form;
+        $df = $this->_df;
+
+        $andoroptions = array(
+            0 => get_string('andor', 'dataform'),
+            'AND' => get_string('and', 'dataform'),
+            'OR' => get_string('or', 'dataform'),
+        );
+        $isnotoptions = array(
+            '' => get_string('is', 'dataform'),
+            'NOT' => get_string('not', 'dataform'),
+        );
+        $operatoroptions = array(
+            '' => get_string('empty', 'dataform'),
+            '=' => get_string('equal', 'dataform'),
+            '>' => get_string('greaterthan', 'dataform'),
+            '<' => get_string('lessthan', 'dataform'),
+            '>=' => get_string('greaterorequal', 'dataform'),
+            '<=' => get_string('lessorequal', 'dataform'),
+            'BETWEEN' => get_string('between', 'dataform'),
+            'LIKE' => get_string('contains', 'dataform'),
+            'IN' => get_string('in', 'dataform'),
+        );
+
+        $fieldlabel = get_string('filtersearchfieldlabel', 'dataform');
+        $count = 0;
+
+        // add current options
+        if ($customsearch) {
+
+            $searchfields = unserialize($customsearch);
+            // If not from form then the searchfields is aggregated and we need
+            // to flatten them. An aggregated array should have a non-zero key 
+            // (fieldid) in the first element.
+            if (key($searchfields)) {
+                $searcharr = array();
+                foreach ($searchfields as $fieldid => $searchfield) {
+                    if (empty($fields[$fieldid])) {
+                        continue;
+                    }
+
+                    foreach ($searchfield as $andor => $searchoptions) {
+                        foreach ($searchoptions as $searchoption) {
+                            if ($searchoption) {
+                                list($not, $operator, $value) = $searchoption;
+                            } else {
+                                list($not, $operator, $value) = array('', '', '');
+                            }
+                            $searcharr[] = array($fieldid, $andor, $not, $operator, $value);
+                        }
+                    }
+                }
+                $searchfields = $searcharr;
+            }
+
+            foreach ($searchfields as $searchcriterion) {
+                if (count($searchcriterion) != 5) {
+                    continue;
+                }
+
+                $i = $count + 1;
+                $label = $showlabel ? "$fieldlabel$i" : '';
+                
+
+                list($fieldid, $andor, $not, $operator, $value) = $searchcriterion;
+
+                $arr = array();
+                // and/or option
+                $arr[] = &$mform->createElement('select', 'searchandor'. $count, '', $andoroptions);
+                $mform->setDefault('searchandor'. $count, $andor);
+                // search field
+                $arr[] = &$mform->createElement('select', 'searchfield'. $count, '', $fieldoptions);
+                $mform->setDefault('searchfield'. $count, $fieldid);
+                // not option
+                $arr[] = &$mform->createElement('select', 'searchnot'. $count, null, $isnotoptions);
+                $mform->setDefault('searchnot'. $count, $not);
+                // search operator
+                $arr[] = &$mform->createElement('select', 'searchoperator'. $count, '', $operatoroptions);
+                $mform->setDefault('searchoperator'. $count, $operator);
+                // field search elements
+                list($elems, $separators) = $fields[$fieldid]->renderer()->display_search($mform, $count, $value);
+                
+                $arr = array_merge($arr, $elems);
+                if ($separators) {
+                    $sep = array_merge(array(' ', ' ', ' '), $separators);
+                } else {
+                    $sep = ' ';
+                }
+                $mform->addGroup($arr, "customsearcharr$count", $label, $sep, false);
+
+                $count++;
+            }
+        }
+
+        // add 3 more options
+        for ($prevcount = $count; $count < ($prevcount + 3); $count++) {
+            $i = $count + 1;
+            $label = $showlabel ? "$fieldlabel$i" : '';
+
+            $arr = array();
+            $arr[] = &$mform->createElement('select', "searchandor$count", '', $andoroptions);
+            $arr[] = &$mform->createElement('select', "searchfield$count", '', $fieldoptions);
+            $mform->addGroup($arr, "customsearcharr$count", $label, ' ', false);
+            $mform->disabledIf('searchfield'. $count, 'searchandor'. $count, 'eq', 0);
+            if ($count > $prevcount) {
+                $mform->disabledIf("searchoption$count", 'searchandor'. ($count-1), 'eq', 0);
+            }
+        }
+
+        $mform->registerNoSubmitButton('addsearchsettings');
+        $mform->addElement('submit', 'addsearchsettings', get_string('reload'));
+    }
+
+    /**
+     *
+     */
+    public function html() {
+        return $this->_form->toHtml();
+    }    
+}
+
+/*
+ *
+ */
+class mod_dataform_filter_form extends mod_dataform_filter_base_form {
+
+    /*
+     *
+     */
     function definition() {
     
-        $df = $this->_customdata['df'];
-        $filter = $this->_customdata['filter'];
+        $df = $this->_df;
+        $filter = $this->_filter;
         $name = empty($filter->name) ? get_string('filternew', 'dataform') : $filter->name;
         $description = empty($filter->description) ? '' : $filter->description;
         $visible = !isset($filter->visible) ? 1 : $filter->visible;
         $fields = $df->get_fields();
-        $fieldsoptions = array(0 => get_string('choose')) + $df->get_fields(array('entry'), true);
+        $fieldoptions = array(0 => get_string('choose')) + $df->get_fields(array('entry'), true);
 
-        $mform =& $this->_form;
+        $mform = &$this->_form;
 
         // buttons
         //-------------------------------------------------------------------------------
@@ -58,6 +264,7 @@ class mod_dataform_filter_form extends moodleform {
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'filterhdr', get_string('viewfilter', 'dataform'));
+        $mform->setExpanded('filterhdr');
 
         // entries per page
         $options = array(0=>get_string('choose'),1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,
@@ -72,167 +279,41 @@ class mod_dataform_filter_form extends moodleform {
         $mform->disabledIf('selection', 'perpage', 'eq', '0');
 
         // group by
-        $mform->addElement('select', 'groupby', get_string('filtergroupby', 'dataform'), $fieldsoptions);
+        $mform->addElement('select', 'groupby', get_string('filtergroupby', 'dataform'), $fieldoptions);
         $mform->setDefault('groupby', $filter->groupby);
 
         // search
         $mform->addElement('text', 'search', get_string('search'));
+        $mform->setType('search', PARAM_TEXT);
         $mform->setDefault('search', $filter->search);
 
         // custom sort
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'customsorthdr', get_string('filtercustomsort', 'dataform'));
-
-        // field sort
-        $diroptions = array(0 => get_string('ascending', 'dataform'),
-                            1 => get_string('descending', 'dataform'));
-
-        $count = 0;
-        // add current options
-        if ($filter->customsort) {
-            $sortfields = unserialize($filter->customsort);
-
-            foreach ($sortfields as $fieldid => $sortdir) {
-                if (empty($fields[$fieldid])) {
-                    continue;
-                }
-
-                $optionsarr = array();
-                $optionsarr[] = &$mform->createElement('select', 'sortfield'. $count, '', $fieldsoptions);
-                $optionsarr[] = &$mform->createElement('select', 'sortdir'. $count, '', $diroptions);
-                $mform->addGroup($optionsarr, 'sortoptionarr'. $count, null, ' ', false);
-                $mform->setDefault('sortfield'. $count, $fieldid);
-                $mform->setDefault('sortdir'. $count, $sortdir);
-                $count++;
-            }
-        }
-
-        // add 3 more options
-        for ($prevcount = $count; $count < ($prevcount + 3); $count++) {
-            $optionsarr = array();
-            $optionsarr[] = &$mform->createElement('select', 'sortfield'. $count, '', $fieldsoptions);
-            $optionsarr[] = &$mform->createElement('select', 'sortdir'. $count, '', $diroptions);
-            $mform->addGroup($optionsarr, 'sortoptionarr'. $count, null, ' ', false);
-            $mform->disabledIf('sortdir'. $count, 'sortfield'. $count, 'eq', 0);
-            if ($count > $prevcount) {
-                $mform->disabledIf('sortoptionarr'. $count, 'sortfield'. ($count-1), 'eq', 0);
-            }
-        }
-
+        $mform->setExpanded('customsorthdr');
+        
+        $this->custom_sort_definition($filter->customsort, $fields, $fieldoptions, true);
+        
         // custom search
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'customsearchhdr', get_string('filtercustomsearch', 'dataform'));
+        $mform->setExpanded('customsearchhdr');
 
-        $andoroptions = array(0 => ' and/or ', 'AND' => 'AND', 'OR' => 'OR');
-        $operatoroptions = array(
-                        '=' => 'Equal',
-                        //'<>' => 'Not equal',
-                        '>' => 'Greater than',
-                        '<' => 'Less than',
-                        '>=' => 'Greater than or equal',
-                        '<=' => 'Less than or equal',
-                        'BETWEEN' => 'BETWEEN',
-                        'LIKE' => 'LIKE',
-                        'IN' => 'IN'
-        );
-
-        $count = 0;
-
-        $mform->addElement('html', '<table>');
-
-        // add current options
-        if ($filter->customsearch) {
-
-            $searchfields = unserialize($filter->customsearch);
-            // If not from form then the searchfields is aggregated and we need
-            // to flatten them. An aggregated array should have a non-zero key 
-            // (fieldid) in the first element.
-            if (key($searchfields)) {
-                $searcharr = array();
-                foreach ($searchfields as $fieldid => $searchfield) {
-                    if (empty($fields[$fieldid])) {
-                        continue;
-                    }
-
-                    foreach ($searchfield as $andor => $searchoptions) {
-                        foreach ($searchoptions as $searchoption) {
-                            if ($searchoption) {
-                                list($not, $operator, $value) = $searchoption;
-                            } else {
-                                list($not, $operator, $value) = array('', '=', '');
-                            }
-                            $searcharr[] = array($fieldid, $andor, $not, $operator, $value);
-                        }
-                    }
-                }
-                $searchfields = $searcharr;
-            }
-
-            foreach ($searchfields as $searchcriterion) {
-                if (count($searchcriterion) != 5) {
-                    continue;
-                }
-
-                list($fieldid, $andor, $not, $operator, $value) = $searchcriterion;
-                $mform->addElement('html', '<tr style="border-bottom:1px solid #dddddd;"><td valign="top" nowrap="nowrap">');
-
-                $optionsarr = array();
-                // and/or option
-                $optionsarr[] = &$mform->createElement('select', 'searchandor'. $count, '', $andoroptions);
-                // search field
-                $optionsarr[] = &$mform->createElement('select', 'searchfield'. $count, '', $fieldsoptions);
-                $mform->addGroup($optionsarr, 'searchoption'. $count, null, ' ', false);
-                $mform->setDefault('searchandor'. $count, $andor);
-                $mform->setDefault('searchfield'. $count, $fieldid);
-
-                $mform->addElement('html', '</td><td valign="top" nowrap="nowrap">');
-                $operatorarr = array();
-                // not option
-                $operatorarr[] = &$mform->createElement('checkbox', 'searchnot'. $count, null, 'NOT');
-                // search operator
-                $operatorarr[] = &$mform->createElement('select', 'searchoperator'. $count, '', $operatoroptions);
-                $mform->addGroup($operatorarr, 'searchoperatorarr'. $count, null, ' ', false);
-                $mform->setDefault('searchnot'. $count, $not);
-                $mform->setDefault('searchoperator'. $count, $operator);
-
-                $mform->addElement('html', '</td><td valign="top" nowrap="nowrap">');
-                // field search elements
-                $fields[$fieldid]->patterns()->display_search($mform, $count, $value);
-                $mform->addElement('html', '</td></tr>');
-
-                $count++;
-            }
-        }
-
-        // add 3 more options
-        for ($prevcount = $count; $count < ($prevcount + 3); $count++) {
-            $mform->addElement('html', '<tr style="border-bottom:1px solid #dddddd;"><td valign="top" nowrap="nowrap">');
-
-            $optionsarr = array();
-            $optionsarr[] = &$mform->createElement('select', "searchandor$count", '', $andoroptions);
-            $optionsarr[] = &$mform->createElement('select', "searchfield$count", '', $fieldsoptions);
-            $mform->addGroup($optionsarr, "searchoption$count", null, ' ', false);
-            $mform->disabledIf('searchfield'. $count, 'searchandor'. $count, 'eq', 0);
-            if ($count > $prevcount) {
-                $mform->disabledIf("searchoption$count", 'searchandor'. ($count-1), 'eq', 0);
-            }
-            $mform->addElement('html', '</td><td valign="top" nowrap="nowrap"></td></tr>');
-        }
-
-        $mform->addElement('html', '</table>');
-        $mform->registerNoSubmitButton('addsearchsettings');
-        $mform->addElement('submit', 'addsearchsettings', get_string('reload'));
+        $this->custom_search_definition($filter->customsearch, $fields, $fieldoptions, true);
 
         // buttons
         //-------------------------------------------------------------------------------
         $this->add_action_buttons(true);
     }
 
+    /*
+     *
+     */
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        $df = $this->_customdata['df'];
-        $filter = $this->_customdata['filter'];
+        $df = $this->_df;
+        $filter = $this->_filter;
 
         // validate unique name
         if (empty($data['name']) or $df->name_exists('filters', $data['name'], $filter->id)) {
@@ -241,5 +322,69 @@ class mod_dataform_filter_form extends moodleform {
 
         return $errors;
     }
+}
+
+/*
+ *
+ */
+class mod_dataform_advanced_filter_form extends mod_dataform_filter_base_form {
+    /*
+     *
+     */
+    function definition() {
+    
+        $df = $this->_df;
+        $filter = $this->_filter;
+        $view = $this->_customdata['view'];
+        
+        $name = empty($filter->name) ? get_string('filternew', 'dataform') : $filter->name;
+
+        $fields = $view->get_view_fields();
+        $fieldoptions = array(0 => get_string('choose'));
+        foreach ($fields as $fieldid => $field) {
+            $fieldoptions[$fieldid] = $field->name();
+        }
+
+        $mform = &$this->_form;
+
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', 'advancedfilterhdr', get_string('filteradvanced', 'dataform'));
+        $mform->setExpanded('advancedfilterhdr', false);
+        
+        // name and description
+        $mform->addElement('text', 'name', get_string('name'));
+        $mform->setType('name', PARAM_TEXT);
+        $mform->setDefault('name', $name);
+
+        // entries per page
+        $options = array(0=>get_string('choose'),1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,
+                            20=>20,30=>30,40=>40,50=>50,100=>100,200=>200,300=>300,400=>400,500=>500,1000=>1000);
+        $mform->addElement('select', 'perpage', get_string('viewperpage', 'dataform'), $options);
+        $mform->setDefault('perpage', $filter->perpage);
+
+        // selection method
+        //$options = array(0 => get_string('filterbypage', 'dataform'), 1 => get_string('random', 'dataform'));
+        //$mform->addElement('select', 'selection', get_string('filterselection', 'dataform'), $options);
+        //$mform->setDefault('selection', $filter->selection);
+        //$mform->disabledIf('selection', 'perpage', 'eq', '0');
+
+        // search
+        $mform->addElement('text', 'search', get_string('search'));
+        $mform->setType('search', PARAM_TEXT);
+        $mform->setDefault('search', $filter->search);
+
+        // custom sort        
+        $this->custom_sort_definition($filter->customsort, $fields, $fieldoptions, true);
+        
+        // custom search
+        $this->custom_search_definition($filter->customsearch, $fields, $fieldoptions, true);
+
+        // Save button
+        $grp = array();
+        $grp[] = $mform->createElement('submit', 'savebutton', get_string('savechanges'));       
+        $grp[] = $mform->createElement('submit', 'newbutton', get_string('newfilter', 'filters'));
+        $mform->addGroup($grp, "afiltersubmit_grp", null, ' ', false);
+    }
+
 
 }

@@ -25,22 +25,22 @@
 
 require_once("$CFG->dirroot/mod/dataform/view/view_form.php");
 
-class mod_dataform_view_tabular_form extends mod_dataform_view_base_form {
+class dataformview_tabular_form extends dataformview_base_form {
 
     /**
      *
      */
     function view_definition_after_gps() {
 
-        $view = $this->_customdata['view'];
+        $view = $this->_view;
         $editoroptions = $view->editors();
         $editorattr = array('cols' => 40, 'rows' => 12);
 
-        $mform =& $this->_form;
+        $mform = &$this->_form;
 
         // content
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'entriessectionhdr', get_string('viewlistbody', 'dataform'));
+        $mform->addElement('header', 'entrytemplatehdr', get_string('entrytemplate', 'dataform'));
 
         $mform->addElement('selectyesno', 'param3', get_string('headerrow', 'dataformview_tabular'));
         $mform->setDefault('param3', 1);

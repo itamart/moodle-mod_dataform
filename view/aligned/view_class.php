@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 
-class dataform_view_aligned extends dataform_view_base {
+class dataformview_aligned extends dataformview_base {
 
     protected $type = 'aligned';
     protected $_editors = array('section');
@@ -101,16 +101,18 @@ class dataform_view_aligned extends dataform_view_base {
         if ($this->has_headers()) {
             $columns = $this->get_columns();
             foreach ($columns as $column) {
-                list(,$header,) = $column;
-                $tableheader .= html_writer::tag('th', $header);
+                list(,$header,$class) = $column;
+                $tableheader .= html_writer::tag('th', $header, array('class' => $class));
             }
+            $tableheader = html_writer::tag('thead', html_writer::tag('tr', $tableheader));
+
             // Set view tags in header row
             $tags = $this->_tags['view'];
             $replacements = $this->patterns()->get_replacements($tags);
             $tableheader = str_replace($tags, $replacements, $tableheader);
         }
         // Open table and wrap header with thead
-        $elements[] = array('html', html_writer::start_tag('table', array('class' => 'generaltable')). html_writer::tag('thead', $tableheader));
+        $elements[] = array('html', html_writer::start_tag('table', array('class' => 'generaltable')). $tableheader);
 
         // flatten the set to a list of elements, wrap with tbody and close table
         $elements[] = array('html', html_writer::start_tag('tbody'));
@@ -250,11 +252,15 @@ class dataform_view_aligned extends dataform_view_base {
         // get patterns from param2
         if ($data) {
             $text = !empty($data->param2) ? ' '. $data->param2 : '';
-
             if (trim($text)) {
+                // This view patterns
+                if ($patterns = $this->patterns()->search($text)) {
+                    $this->_tags['view'] = array_merge($this->_tags['view'], $patterns);
+                }
+                // Field patterns
                 if ($fields = $this->_df->get_fields()) {
                     foreach ($fields as $fieldid => $field) {
-                        if ($patterns = $field->patterns()->search($text)) {
+                        if ($patterns = $field->renderer()->search($text)) {
                             $this->_tags['field'][$fieldid] = $patterns;
                         }
                     }

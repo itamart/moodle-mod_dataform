@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->dirroot/mod/dataform/view/grid/view_class.php");
+require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 
 /**
  * A dataform view class that displays one new entry for adding.
@@ -29,7 +29,7 @@ require_once("$CFG->dirroot/mod/dataform/view/grid/view_class.php");
  * users can post messages to site admin but not see any posted messages.
  * TODO Implement return to caller view
  */
-class dataform_view_editon extends dataform_view_grid {
+class dataformview_editon extends dataformview_base {
 
     protected $type = 'editon';
     protected $_editors = array('section', 'param2', 'param7');
@@ -42,30 +42,31 @@ class dataform_view_editon extends dataform_view_grid {
      * Overriding parent method to always redirect to adding new  entry
      */
     public function process_data() {
-        // If cancelled redirect
-        if ($cancel = optional_param('cancel', 0, PARAM_BOOL)) {
-            // Redirect if needed (to new form or to caller view)
-            if ($redirecturl = $this->get_return_url()) {
+        $redirecturl = $this->get_return_url();
+        
+        $new = optional_param('new', 0, PARAM_BOOL);
+        $eid = optional_param('eids', 0, PARAM_INT);
+        $update = optional_param('update', 0, PARAM_INT);
+        $cancel = optional_param('cancel', 0, PARAM_BOOL);
+        // If not editing or viewing anything, go by action after submission
+        if ((!$this->_editentries and !$eid and !$update and !$new) or $cancel) {
+            if ($redirecturl) {
                 redirect($redirecturl);
             }
         }
 
         // Process entry
-        $processed = $this->process_entries_data();
+        $processed = parent::process_data();
 
-        // Proceed to redirect
-        if ($this->_editentries and !($this->_editentries < 0)) {
-            // New entries return the new entry id in _editentries so that we know they are new
-            // So _editentries must be emptied
-            $this->_editentries = '';
+        if ($update) {
             $response = '';
             $timeout = -1;
-    
+
             list($strnotify, $processedeids) = $processed;       
             if ($entriesprocessed = ($processedeids ? count($processedeids) : 0)) {
                $response = $this->get_response_for_submission(); 
             } else {
-               $response = get_string('submitfailure', 'dataformview_editon');
+               $response = get_string('submitfailure', 'dataformview_single');
             }
             $timeout = $this->get_response_timeout();
             
@@ -73,14 +74,9 @@ class dataform_view_editon extends dataform_view_grid {
             if ($redirecturl = $this->get_return_url()) {
                 redirect($redirecturl, $response, $timeout);
             }
-                        
-            // otherwise proceed to show response to submission and 'add new' link 
         }
         
-        // Proceed to form (new or current)
-        if ($this->view->param6 == self::RETURN_NEW) {
-            $this->_editentries = -1;
-        }
+        return $processed;
     }
 
     /**
@@ -92,7 +88,7 @@ class dataform_view_editon extends dataform_view_grid {
     /**
      *
      */
-    public function display(array $params = null) {
+    public function display(array $params = array()) {
         // set display params
         $params['notify'] = false;
         if ($this->user_is_editing()) {
@@ -161,23 +157,34 @@ class dataform_view_editon extends dataform_view_grid {
         return array();
     }
     
+    
+    
+    /**
+     *
+     */
+    protected function get_return_type() {
+        if (empty($this->view->param6)) {
+            return self::RETURN_SELF;
+        }
+        return $this->view->param6;
+    }
+    
     /**
      *
      */
     protected function get_return_url() {
+        $redirecttype = $this->get_return_type();
         $redirecturl = null;
         
-        if (!empty($this->view->param6)) {
-            if ($this->view->param6 == self::RETURN_NEW) {
-                $redirecturl = new moodle_url($this->_baseurl, array('sesskey' => sesskey(), 'new' => 1));
-            } else if ($this->view->param6 == self::RETURN_CALLER) {
-                $params = array('d' => $this->_df->id());
-                if ($ret = optional_param('ret', '', PARAM_SEQUENCE)) {
-                    list($params['view'], $params['filter']) = explode(',', $ret);
-                }   
-                $redirecturl = new moodle_url("/mod/dataform/{$this->_df->pagefile()}.php", $params);
+        if ($redirecttype == self::RETURN_NEW) {
+            $redirecturl = new moodle_url($this->_baseurl, array('sesskey' => sesskey(), 'new' => 1));
+        } else if ($redirecttype == self::RETURN_CALLER) {
+            $params = array('d' => $this->_df->id());
+            if ($ret = optional_param('ret', '', PARAM_URL)) {
+                $redirecturl = new moodle_url($ret);
             }
         }
+
         return $redirecturl;
     }
     
@@ -192,7 +199,7 @@ class dataform_view_editon extends dataform_view_grid {
                                                 'view',
                                                 $this->id(). '2');
         if (!$response) {
-            $response = get_string('responsedefault', 'dataformview_editon');
+            $response = get_string('responsedefault', 'dataformview_single');
         }
         return $response;
     }

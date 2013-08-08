@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_time_form extends mod_dataform_field_form {
+class dataformfield_time_form extends dataformfield_form {
 
     /**
      *
@@ -36,19 +36,30 @@ class mod_dataform_field_time_form extends mod_dataform_field_form {
         
         // Date
         $mform->addElement('checkbox', 'param1', get_string('dateonly', 'dataformfield_time'));
+        $mform->addHelpButton('param1', 'dateonly', 'dataformfield_time');
 
+        // Masked
+        $mform->addElement('checkbox', 'param5', get_string('masked', 'dataformfield_time'));
+        $mform->addHelpButton('param5', 'masked', 'dataformfield_time');
+        
         // Start year
         $mform->addElement('text', 'param2', get_string('startyear', 'dataformfield_time'));
+        $mform->setType('param2', PARAM_INT);
         $mform->addRule('param2', null, 'numeric', null, 'client');
         $mform->addRule('param2', null, 'maxlength', 4, 'client');
+        $mform->addHelpButton('param2', 'startyear', 'dataformfield_time');
 
         // End year
         $mform->addElement('text', 'param3', get_string('stopyear', 'dataformfield_time'));
+        $mform->setType('param3', PARAM_INT);
         $mform->addRule('param3', null, 'numeric', null, 'client');
         $mform->addRule('param3', null, 'maxlength', 4, 'client');
+        $mform->addHelpButton('param3', 'stopyear', 'dataformfield_time');
 
-        // Time format
+        // Display format
         $mform->addElement('text', 'param4', get_string('displayformat', 'dataformfield_time'));
+        $mform->setType('param4', PARAM_TEXT);
+        $mform->addHelpButton('param4', 'displayformat', 'dataformfield_time');
     }
 
 }

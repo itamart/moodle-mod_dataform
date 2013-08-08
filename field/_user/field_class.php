@@ -23,7 +23,7 @@
 
 require_once($CFG->dirroot.'/mod/dataform/field/field_class.php');
 
-class dataform_field__user extends dataform_field_no_content {
+class dataformfield__user extends dataformfield_no_content {
 
     public $type = '_user';
 
@@ -36,6 +36,16 @@ class dataform_field__user extends dataform_field_no_content {
     const _USERPICTURE = 'userpicture';
     const _USEREMAIL = 'useremail';
 
+    /**
+     *
+     */
+    public static function is_internal() {
+        true;
+    }
+    
+    /**
+     *
+     */
     public static function get_field_objects($dataid) {
         $fieldobjects = array();
         

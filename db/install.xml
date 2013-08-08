@@ -20,8 +20,9 @@
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowlate" NEXT="grademethod"/>
         <FIELD NAME="grademethod" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="grade" NEXT="anonymous"/>        
         <FIELD NAME="anonymous" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="grademethod" NEXT="notification"/>
-        <FIELD NAME="notification" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="" PREVIOUS="anonymous" NEXT="entriesrequired"/>
-        <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="notification" NEXT="entriestoview"/>
+        <FIELD NAME="notification" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="" PREVIOUS="anonymous" NEXT="notificationformat"/>
+        <FIELD NAME="notificationformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="" PREVIOUS="notification" NEXT="entriesrequired"/>
+        <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="notificationformat" NEXT="entriestoview"/>
         <FIELD NAME="entriestoview" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="entriesrequired" NEXT="maxentries"/>
         <FIELD NAME="maxentries" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="entriestoview" NEXT="timelimit"/>
         <FIELD NAME="timelimit" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" PREVIOUS="maxentries" NEXT="approval"/>
@@ -54,8 +55,9 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="type" NEXT="description"/>
         <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="visible"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="2" SEQUENCE="false" PREVIOUS="description" NEXT="edits"/>
-        <FIELD NAME="edits" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" PREVIOUS="visible" NEXT="param1"/>
-        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="edits" NEXT="param2"/>
+        <FIELD NAME="edits" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" PREVIOUS="visible" NEXT="label"/>
+        <FIELD NAME="label" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="edits" NEXT="param1"/>
+        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="label" NEXT="param2"/>
         <FIELD NAME="param2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param1" NEXT="param3"/>
         <FIELD NAME="param3" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param2" NEXT="param4"/>
         <FIELD NAME="param4" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="param3" NEXT="param5"/>

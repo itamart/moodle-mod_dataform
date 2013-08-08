@@ -24,7 +24,7 @@
  * A base class for dataform views
  * (see view/<view type>/view_class.php)
  */
-class dataform_view_base {
+class dataformview_base {
 
     const VISIBLE = 2;      // the view can be seen and used by everyone
     const HIDDEN = 1;       // the view can be used by everyone but seen only by managers
@@ -55,10 +55,28 @@ class dataform_view_base {
     protected $_returntoentriesform = false;
 
     /**
+     * 
+     */
+    public static function get_filter_options_from_url() {
+        $options = array();
+        
+        $options['filterid'] = optional_param('filter', 0, PARAM_INT);
+        $options['afilter'] = optional_param('afilter', 0, PARAM_INT);
+        $options['eids'] = optional_param('eids', 0, PARAM_INT);
+        $options['page'] = optional_param('page', 0, PARAM_INT);
+        $options['usort'] = optional_param('usort', '', PARAM_RAW);
+        $options['usearch'] = optional_param('usearch', '', PARAM_RAW);
+        $options['users'] = optional_param('users', '', PARAM_SEQUENCE);
+        $options['groups'] = optional_param('groups', '', PARAM_SEQUENCE);
+        
+        return $options;
+    }
+    
+    /**
      * Constructor
      * View or dataform or both, each can be id or object
      */
-    public function __construct($df = 0, $view = 0) {
+    public function __construct($df = 0, $view = 0, $filteroptions = true) {
         global $DB, $CFG;
 
         if (empty($df)) {
@@ -97,14 +115,7 @@ class dataform_view_base {
         $this->set__patterns();
 
         // filter
-        $options = array(
-            'filterid' => optional_param('filter', 0, PARAM_INT),
-            'eids' => optional_param('eids', 0, PARAM_INT),
-            'page' => optional_param('page', 0, PARAM_INT),
-            'usort' => optional_param('usort', '', PARAM_RAW),
-            'usearch' => optional_param('usearch', '', PARAM_RAW)
-        );
-
+        $options = $filteroptions ? self::get_filter_options_from_url() : array();
         $this->set_filter($options);
 
         // base url params
@@ -157,9 +168,170 @@ class dataform_view_base {
         return true;
     }
 
-////////////////////////////////////
-// VIEW TYPE
-////////////////////////////////////
+    /**
+     *
+     */
+    protected function set__editors($data = null) {
+        foreach ($this->_editors as $editor) {
+            // new view or from DB so add editor fields
+            if (is_null($data)) {
+                if (!empty($this->view->{$editor})) {
+                    $editordata = $this->view->{$editor};
+                    if (strpos($editordata, 'ft:') === 0
+                                and strpos($editordata, 'tr:') === 4
+                                and strpos($editordata, 'ct:') === 8) {
+                        $format = substr($editordata, 3, 1);
+                        $trust = substr($editordata, 7, 1);
+                        $text = substr($editordata, 11);
+                    } else {
+                        list($format, $trust, $text) = array(FORMAT_HTML, 1, $editordata);
+                    }
+                } else {
+                    list($format, $trust, $text) = array(FORMAT_HTML, 1, '');
+                }
+                $this->view->{"e$editor".'format'} = $format;
+                $this->view->{"e$editor".'trust'} = $trust;
+                $this->view->{"e$editor"} = $text;                    
+
+            // view from form or editor areas updated
+            } else {
+                $format = !empty($data->{"e$editor".'format'}) ? $data->{"e$editor".'format'} : FORMAT_HTML;
+                $trust = !empty($data->{"e$editor".'trust'}) ? $data->{"e$editor".'trust'} : 1;
+                $text = !empty($data->{"e$editor"}) ? $data->{"e$editor"} : '';
+
+                // replace \n in non text format
+                if ($format != FORMAT_PLAIN) {
+                    $text = str_replace("\n","",$text);
+                }
+
+                if (!empty($text)) {
+                    $this->view->$editor = "ft:{$format}tr:{$trust}ct:$text";
+                } else {
+                    $this->view->$editor = null;
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    protected function set__patterns($data = null) {
+        // new view or from DB so set the _patterns property
+        if (is_null($data)) {
+            if (!empty($this->view->patterns)) {
+                $this->_tags = unserialize($this->view->patterns);
+            } else {
+                $this->_tags = array('view' => array(), 'field' => array());
+            }
+
+        // view from form or editor areas updated
+        } else {
+            $this->_tags = array('view' => array(), 'field' => array());
+            $text = '';
+            foreach ($this->_editors as $editor) {
+                $text .= !empty($data->{"e$editor"}) ? ' '. $data->{"e$editor"} : '';
+            }
+
+            if (trim($text)) {
+                // Dataform View links/content
+
+                // TODO filter links ???
+                
+                // This view patterns
+                if ($patterns = $this->patterns()->search($text)) {
+                    $this->_tags['view'] = $patterns;
+                }
+                // Field patterns
+                if ($fields = $this->_df->get_fields()) {
+                    foreach ($fields as $fieldid => $field) {
+                        if ($patterns = $field->renderer()->search($text)) {
+                            $this->_tags['field'][$fieldid] = $patterns;
+                        }
+                    }
+                }
+
+            }
+            $this->view->patterns = serialize($this->_tags);
+        }
+    }
+
+    /**
+     *
+     */
+    public function set_filter($options) {
+        $fm = $this->_df->get_filter_manager($this);
+
+        $fid = !empty($options['filterid']) ? $options['filterid'] : 0;
+        $afilter = !empty($options['afilter']) ? $options['afilter'] : 0;
+        $eids = !empty($options['eids']) ? $options['eids'] : null;
+        $users = !empty($options['users']) ? $options['users'] : null;
+        $groups = !empty($options['groups']) ? $options['groups'] : null;
+        $page = !empty($options['page']) ? $options['page'] : 0;
+        $usort = !empty($options['usort']) ? $options['usort'] : null;
+        $usearch = !empty($options['usearch']) ? $options['usearch'] : null;
+        $csort = !empty($options['csort']) ? $options['csort'] : null;
+        $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
+
+        // set filter
+        $filter = $this->filter_options();
+        if (!$filterid = $filter['filterid']) {
+            $filterid = $fid;
+        }
+        $this->_filter = $fm->get_filter_from_id($filterid, array('view' => $this, 'advanced' => $afilter));
+        
+        // set specific entry id
+        $this->_filter->eids = $eids;
+        // set specific user id
+        if ($users) {
+            $this->_filter->users = is_array($users) ? $users : explode(',', $users);
+        }
+        // set specific entry id, if requested
+        if ($groups) {
+            $this->_filter->groups = is_array($groups) ? $groups : explode(',', $groups);
+        }
+        // add view specific perpage
+        if ($filter['perpage']) {
+            $this->_filter->perpage = $filter['perpage'];
+        }
+        // add view specific groupby
+        if ($filter['groupby']) {
+            $this->_filter->groupby = $filter['groupby'];
+        }
+        // add page
+        $this->_filter->page = !empty($filter['page']) ? $filter['page'] : $page;
+        // content fields
+        $this->_filter->contentfields = array_keys($this->get__patterns('field'));
+        // Append url sort options
+        if ($usort) {
+            $usort = urldecode($usort);
+            $usort = array_map(function($a) {return explode(' ', $a);}, explode(',', $usort));
+            $this->_filter->append_sort_options($usort);
+        }
+        // Append url search options
+        if ($usearch) {
+            $usearch = urldecode($usearch);
+            $soptions = array();
+            $searchies = explode('@', $usearch);
+            foreach ($searchies as $key => $searchy) {
+                list($fieldid, $andor, $options) = explode(':', $searchy);
+                $soptions[$fieldid] = array($andor => array_map(function($a) {return explode(',', $a);}, explode('#', $options)));
+            }
+            $this->_filter->append_search_options($soptions);
+        }
+        // Append custom sort options
+        if ($csort) {
+            $this->_filter->append_sort_options($csort);
+        }
+        // Append custom search options
+        if ($csearch) {
+            $this->_filter->append_search_options($csearch);
+        }
+    }
+
+    ////////////////////////////////////
+    // VIEW TYPE
+    ////////////////////////////////////
 
     /**
      * Insert a new view into the database
@@ -201,7 +373,6 @@ class dataform_view_base {
         if ($data) {
             $this->set_view($data);
         }
-
         if (!$DB->update_record('dataform_views', $this->view)) {
             echo $OUTPUT->notification('updating view failed!');
             return false;
@@ -237,24 +408,43 @@ class dataform_view_base {
     public function get_form() {
         global $CFG;
 
-        $formclass = 'mod_dataform_view_'. $this->type. '_form';
+        $formclass = 'dataformview_'. $this->type. '_form';
         $formparams = array(
             'd' => $this->_df->id(),
             'vedit' => $this->id(),
             'type' => $this->type
         );
         $actionurl = new moodle_url('/mod/dataform/view/view_edit.php', $formparams);
-        $custom_data = array('view' => $this, 'df' => $this->_df);
                                     
         require_once($CFG->dirroot. '/mod/dataform/view/'. $this->type. '/view_form.php');
-        return new $formclass($actionurl, $custom_data);
+        return new $formclass($this, $actionurl);
     }
 
     /**
      * prepare view data for form
      */
-    public function to_form() {
-        $data = $this->view;
+    public function to_form($data = null) {
+        $data = $data ? $data : $this->view;
+        
+        // Prepare view editors
+        $data = $this->prepare_view_editors($data);
+
+        return $data;
+    }
+
+    /**
+     * prepare view data for form
+     */
+    public function from_form($data) {
+        $data = $this->update_view_editors($data);
+
+        return $data;
+    }
+
+    /**
+     * Prepare view editors for form
+     */
+    public function prepare_view_editors($data) {
         $editors = $this->editors();
 
         foreach ($editors as $editorname => $options) {
@@ -266,15 +456,16 @@ class dataform_view_base {
                                                 "view$editorname",
                                                 $this->view->id);
         }
-
         return $data;
     }
 
     /**
-     * prepare view data for form
+     * Update view editors from form
      */
-    public function from_form($data) {
-        $editors = $this->editors();
+    public function update_view_editors($data) {
+        if (!$editors = $this->editors()) {
+            return $data;
+        }
 
         foreach ($editors as $editorname => $options) {
             $data = file_postupdate_standard_editor($data,
@@ -284,8 +475,8 @@ class dataform_view_base {
                                                     'mod_dataform',
                                                     "view$editorname",
                                                     $this->view->id);
-        }
-
+        } 
+        
         return $data;
     }
 
@@ -313,6 +504,9 @@ class dataform_view_base {
         return $this->_df->name_exists('views', $name, $viewid);
     }
 
+    ////////////////////////////////////
+    // VIEW DISPLAY
+    ////////////////////////////////////
     /**
      *
      */
@@ -415,7 +609,7 @@ class dataform_view_base {
     /**
      *
      */
-    public function display(array $options = null) {
+    public function display(array $options = array()) {
         global $OUTPUT;
 
         // set display options
@@ -457,76 +651,79 @@ class dataform_view_base {
 
         // print view
         $viewname = 'dataformview-'. str_replace(' ', '_', $this->name());
+        if (strpos($this->view->esection, '##entries##') !== false) {
+            list($print_before, $print_after) = explode('##entries##', $this->view->esection, 2);
+        } else {
+            $print_before = $displaycontrols ? $this->process_calculations($this->print_before()) : '';
+            $print_after = $displaycontrols ? $this->process_calculations($this->print_after()) : '';
+        }
         if ($tohtml) {
             $html = $notifications;
-            $html .= $displaycontrols ? $this->print_before() : '';
+            $html .= $print_before;
             if ($displayentries) {
                 $html .= $this->display_entries($options);
             }
-            $html .= $displaycontrols ? $this->print_after() : '';
+            $html .= $print_after;
             return html_writer::tag('div', $html, array('class' => $viewname));
         } else {
             echo html_writer::start_tag('div', array('class' => $viewname));
             echo $notifications;
-            echo ($displaycontrols ? $this->print_before() : '');
+            echo $print_before;
             if ($displayentries) {
                 $this->display_entries($options);
             }
-            echo ($displaycontrols ? $this->print_after() : '');
+            echo $print_after;
             echo html_writer::end_tag('div');
         }
     }
 
     /**
-     * TODO
+     * Just in case a view needs to print something before the whole form
      */
-    public function get_view_fields() {
-        $viewfields = array();
+    protected function print_before() {
+        $str = '';
+        $float = '';
+        $blockposition = $this->view->sectionpos;
+        // print the general section if not bottom
+        if ($blockposition == 1 or $blockposition == 2) { // not on top
+            $float = ($blockposition == 1 ? ' style="float:left" ' : ' style="float:right" ');
 
-        if (!empty($this->_tags['field'])) {
-            $fields = $this->_df->get_fields();
-            foreach (array_keys($this->_tags['field']) as $fieldid) {
-                if (array_key_exists($fieldid, $fields)) {
-                    $viewfields[$fieldid] = $fields[$fieldid];
-                }
-            }
+            $str .= "<div  $float>";
+            $str .= $this->view->esection;
+            $str .= "</div>";
+            $str .= "<div  $float>";
+
+        } else if (!$blockposition) {
+            $str .= "<div>";
+            $str .= $this->view->esection;
+            $str .= "</div>";
+            $str .= "<div>";
         }
-
-        return $viewfields;
+        return $str;
     }
 
     /**
-     *
+     * Just in case a view needs to print something after the whole form
      */
-    public function get_views($exclude = null, $menu = false) {
-        $views = $this->_df->get_views($exclude);
+    protected function print_after() {
+        $str = '';
+        $float = '';
+        $blockposition = $this->view->sectionpos;
+        // close div
+        $str .= "</div>";
 
-        $visible = array();
-        $halfvisible = array();
-        $hidden = array();
-        if ($menu) {
-            // mark/remove the half and non visible views
-            foreach ($views as $vid => $view){
-                if ($view->view->visible < self::VISIBLE) {
-                    if (has_capability('mod/dataform:managetemplates', $this->_df->context)) {
-                        if ($view->view->visible) {
-                            $halfvisible[$vid] = "({$view->view->name})";
-                        } else {
-                            $hidden[$vid] = "-{$view->view->name}-";
-                        }
-                    }
-                } else {
-                    $visible[$vid] = $view->view->name;
-                }
-            }
-            empty($visible) or asort($visible);
-            empty($halfvisible) or asort($halfvisible);
-            empty($hidden) or asort($hidden);
-            $views = $visible + $halfvisible + $hidden;
+        if ($blockposition == 3) { // bottom
+            $str .= "<div>";
+            $str .= $this->view->esection;
+            $str .= "</div>";
         }
 
-        return $views;
+        return $str;
     }
+
+    ////////////////////////////////////
+    // VIEW ATTRS
+    ////////////////////////////////////
 
     /**
      * Returns the type of the view
@@ -566,47 +763,29 @@ class dataform_view_base {
     /**
      *
      */
-    public function is_caching() {
-        return false;
+    public function get_filter() {
+        return $this->_filter;
     }
 
     /**
      *
      */
-    public function set_filter(array $options) {
+    public function get_baseurl() {
+        return $this->_baseurl;
+    }
 
-        $fid = !empty($options['filterid']) ? $options['filterid'] : 0;
-        $eids = !empty($options['eids']) ? $options['eids'] : null;
-        $page = !empty($options['page']) ? $options['page'] : 0;
-        $usort = !empty($options['usort']) ? $options['usort'] : null;
-        $usearch = !empty($options['usearch']) ? $options['usearch'] : null;
-
-        // set filter
-        $filter = $this->filter_options();
-        if (!$filterid = $filter['filterid']) {
-            $filterid = $fid;
-        }
-        $this->_filter = $this->_df->get_filter_manager()->get_filter_from_id($filterid);
-        // set specific entry id, if requested
-        $this->_filter->eids = $eids;
-        // add view specific perpage
-        if ($filter['perpage']) {
-            $this->_filter->perpage = $filter['perpage'];
-        }
-        // add view specific groupby
-        if ($filter['groupby']) {
-            $this->_filter->groupby = $filter['groupby'];
-        }
-        // add page
-        $this->_filter->page = !empty($filter['page']) ? $filter['page'] : $page;
-        // content fields
-        $this->_filter->contentfields = array_keys($this->get__patterns('field'));
-        // Append url sort options
-        if ($usort) {
-            $usort = urldecode($usort);
-            $usort = array_map(function($a) {return explode(' ', $a);}, explode(',', $usort));
-            $this->_filter->append_sort_options($usort);
-        }
+    /**
+     *
+     */
+    public function is_active() {
+        return (optional_param('view', 0, PARAM_INT) == $this->id());
+    }
+    
+    /**
+     *
+     */
+    public function is_caching() {
+        return false;
     }
 
     /**
@@ -616,18 +795,25 @@ class dataform_view_base {
         return $this->view->filter;
     }
 
+    ////////////////////////////////////
+    // HELPERS
+    ////////////////////////////////////
     /**
-     *
+     * TODO
      */
-    public function get_filter() {
-        return $this->_filter;
-    }
+    public function get_view_fields() {
+        $viewfields = array();
 
-    /**
-     *
-     */
-    public function get_filters($exclude = null, $menu = false, $forceget = false) {
-        return $this->_df->get_filter_manager()->get_filters($exclude, $menu, $forceget);
+        if (!empty($this->_tags['field'])) {
+            $fields = $this->_df->get_fields();
+            foreach (array_keys($this->_tags['field']) as $fieldid) {
+                if (array_key_exists($fieldid, $fields)) {
+                    $viewfields[$fieldid] = $fields[$fieldid];
+                }
+            }
+        }
+
+        return $viewfields;
     }
 
     /**
@@ -644,18 +830,11 @@ class dataform_view_base {
     /**
      *
      */
-    public function get_baseurl() {
-        return $this->_baseurl;
-    }
-
-    /**
-     *
-     */
     public function field_tags() {
         $patterns = array();
         if ($fields = $this->_df->get_fields()) {
             foreach ($fields as $field) {
-                if ($fieldpatterns = $field->patterns()->get_menu()) {
+                if ($fieldpatterns = $field->renderer()->get_menu()) {
                     $patterns = array_merge_recursive($patterns, $fieldpatterns);
                 }
             }
@@ -711,6 +890,7 @@ class dataform_view_base {
                             'noclean' => true,
                             'subdirs' => false,
                             'changeformat' => true,
+                            'collapsed' => true,
                             'maxfiles' => EDITOR_UNLIMITED_FILES,
                             'maxbytes' => $this->_df->course->maxbytes,
                             'context'=> $this->_df->context);
@@ -733,10 +913,10 @@ class dataform_view_base {
             
             if (file_exists("$CFG->dirroot/mod/dataform/view/$viewtype/view_patterns.php")) {
                 require_once("$CFG->dirroot/mod/dataform/view/$viewtype/view_patterns.php");
-                $patternsclass = "mod_dataform_view_{$viewtype}_patterns";
+                $patternsclass = "dataformview_{$viewtype}_patterns";
             } else {
                 require_once("$CFG->dirroot/mod/dataform/view/view_patterns.php");
-                $patternsclass = "mod_dataform_view_patterns";
+                $patternsclass = "dataformview_patterns";
             }
             $this->_patterns = new $patternsclass($this);
         }
@@ -793,6 +973,20 @@ class dataform_view_base {
     /**
      *
      */
+    public function get_pattern_fieldid($pattern) {
+        if (!empty($this->_tags['field'])) {
+            foreach ($this->_tags['field'] as $fieldid => $patterns) {
+                if (in_array($pattern, $patterns)) {
+                    return $fieldid;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     */
     public function get_embedded_files($set = null) {
         $files = array();
         $fs = get_file_storage();
@@ -817,7 +1011,7 @@ class dataform_view_base {
             if (!empty($this->_tags['field'])) {
                 $fields = $this->_df->get_fields();
                 foreach ($this->_tags['field'] as $fieldid => $tags) {
-                    if (array_intersect($tags, $fields[$fieldid]->patterns()->pluginfile_patterns())) {
+                    if (array_intersect($tags, $fields[$fieldid]->renderer()->pluginfile_patterns())) {
                         $fids[] = $fieldid;
                     }
                 }
@@ -905,88 +1099,6 @@ class dataform_view_base {
     }
 
     /**
-     *
-     */
-    protected function set__editors($data = null) {
-        foreach ($this->_editors as $editor) {
-            // new view or from DB so add editor fields
-            if (is_null($data)) {
-                if (!empty($this->view->{$editor})) {
-                    $editordata = $this->view->{$editor};
-                    if (strpos($editordata, 'ft:') === 0
-                                and strpos($editordata, 'tr:') === 4
-                                and strpos($editordata, 'ct:') === 8) {
-                        $format = substr($editordata, 3, 1);
-                        $trust = substr($editordata, 7, 1);
-                        $text = substr($editordata, 11);
-                    } else {
-                        list($format, $trust, $text) = array(FORMAT_HTML, 1, $editordata);
-                    }
-                } else {
-                    list($format, $trust, $text) = array(FORMAT_HTML, 1, '');
-                }
-                $this->view->{"e$editor".'format'} = $format;
-                $this->view->{"e$editor".'trust'} = $trust;
-                $this->view->{"e$editor"} = $text;                    
-
-            // view from form or editor areas updated
-            } else {
-                $format = !empty($data->{"e$editor".'format'}) ? $data->{"e$editor".'format'} : FORMAT_HTML;
-                $trust = !empty($data->{"e$editor".'trust'}) ? $data->{"e$editor".'trust'} : 1;
-                $text = !empty($data->{"e$editor"}) ? $data->{"e$editor"} : '';
-
-                // replace \n in non text format
-                if ($format != FORMAT_PLAIN) {
-                    $text = str_replace("\n","",$text);
-                }
-
-                if (!empty($text)) {
-                    $this->view->{$editor} = "ft:{$format}tr:{$trust}ct:$text";
-                } else {
-                    $this->view->{$editor} = null;
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    protected function set__patterns($data = null) {
-        // new view or from DB so set the _patterns property
-        if (is_null($data)) {
-            if (!empty($this->view->patterns)) {
-                $this->_tags = unserialize($this->view->patterns);
-            } else {
-                $this->_tags = array('view' => array(), 'field' => array());
-            }
-
-        // view from form or editor areas updated
-        } else {
-            $this->_tags = array('view' => array(), 'field' => array());
-            $text = '';
-            foreach ($this->_editors as $editor) {
-                $text .= !empty($data->{"e$editor"}) ? ' '. $data->{"e$editor"} : '';
-            }
-
-            if (trim($text)) {
-                if ($patterns = $this->patterns()->search($text)) {
-                    $this->_tags['view'] = $patterns;
-                }
-                if ($fields = $this->_df->get_fields()) {
-                    foreach ($fields as $fieldid => $field) {
-                        if ($patterns = $field->patterns()->search($text)) {
-                            $this->_tags['field'][$fieldid] = $patterns;
-                        }
-                    }
-                }
-
-            }
-            $this->view->patterns = serialize($this->_tags);
-        }
-    }
-
-    /**
      * @param array $patterns array of arrays of pattern replacement pairs
      */
     protected function split_tags($patterns, $subject) {
@@ -1022,60 +1134,17 @@ class dataform_view_base {
     }
 
     /**
-     * Just in case a view needs to print something before the whole form
-     */
-    protected function print_before() {
-        $str = '';
-        $float = '';
-        $blockposition = $this->view->sectionpos;
-        // print the general section if not bottom
-        if ($blockposition == 1 or $blockposition == 2) { // not on top
-            $float = ($blockposition == 1 ? ' style="float:left" ' : ' style="float:right" ');
-
-            $str .= "<div  $float>";
-            $str .= $this->view->esection;
-            $str .= "</div>";
-            $str .= "<div  $float>";
-
-        } else if (!$blockposition) {
-            $str .= "<div>";
-            $str .= $this->view->esection;
-            $str .= "</div>";
-            $str .= "<div>";
-        }
-        return $str;
-    }
-
-    /**
-     * Just in case a view needs to print something after the whole form
-     */
-    protected function print_after() {
-        $str = '';
-        $float = '';
-        $blockposition = $this->view->sectionpos;
-        // close div
-        $str .= "</div>";
-
-        if ($blockposition == 3) { // bottom
-            $str .= "<div>";
-            $str .= $this->view->esection;
-            $str .= "</div>";
-        }
-
-        return $str;
-    }
-
-    /**
      * Set sort and search criteria for grouping by
      */
     protected function set_groupby_per_page() {
         global $CFG;
 
         // Get the group by fieldid
-        if (!$fieldid = $this->_filter->groupby) {
+        if (empty($this->_filter->groupby)) {
             return;
         }
         
+        $fieldid = $this->_filter->groupby;
         // set sorting to begin with this field
         $insort = false;
         // TODO: asc order is arbitrary here and should be determined differently
@@ -1138,16 +1207,16 @@ class dataform_view_base {
 
         require_once("$CFG->dirroot/mod/dataform/field/_rating/field_class.php");
         
-        if (!$this->_df->data->rating or empty($this->_tags['field'][dataform_field__rating::_RATING])) {
+        if (!$this->_df->data->rating or empty($this->_tags['field'][dataformfield__rating::_RATING])) {
             return null;
         }
         
-        $ratingfield = $this->_df->get_field_from_id(dataform_field__rating::_RATING);
+        $ratingfield = $this->_df->get_field_from_id(dataformfield__rating::_RATING);
         $ratingoptions = new object;
         $ratingoptions->context = $this->_df->context;
         $ratingoptions->component = 'mod_dataform';
         $ratingoptions->ratingarea = 'entry';
-        $ratingoptions->aggregate = $ratingfield->patterns()->get_aggregations($this->_tags['field'][dataform_field__rating::_RATING]);
+        $ratingoptions->aggregate = $ratingfield->renderer()->get_aggregations($this->_tags['field'][dataformfield__rating::_RATING]);
         $ratingoptions->scaleid = $ratingfield->get_scaleid('entry');
         $ratingoptions->userid = $USER->id;
 
@@ -1193,6 +1262,9 @@ class dataform_view_base {
         return $gradingoptions;
     }
 
+    ////////////////////////////////////
+    // VIEW ENTRIES
+    ////////////////////////////////////
     /**
      *
      */
@@ -1264,6 +1336,12 @@ class dataform_view_base {
             }
 
             foreach ($replacements as $pattern => $formula) {
+                // Number of decimals can be set as ;n at the end of the formula
+                $decimals = null;
+                if (strpos($formula, ';')) {
+                    list($formula, $decimals) = explode(';', $formula);
+                }
+            
                 $calc = new calc_formula("=$formula");
                 $result = $calc->evaluate();
                 // false as result indicates some problem
@@ -1271,6 +1349,10 @@ class dataform_view_base {
                     // TODO: add more error hints
                     $replacements[$pattern] = html_writer::tag('span', $formula, array('style' => 'color:red;')); //get_string('errorcalculationunknown', 'grades');
                 } else {
+                    // Set decimals
+                    if (is_numeric($decimals)) {
+                        $result = sprintf("%4.{$decimals}f", $result);
+                    }
                     $replacements[$pattern] = $result;
                 }
             }
@@ -1324,6 +1406,7 @@ class dataform_view_base {
             'filter' => $this->_filter->id,
             'page' => $this->_filter->page,
             'eids' => $this->_filter->eids,
+            'update' => $this->_editentries
         );
         $actionurl = new moodle_url("/mod/dataform/{$this->_df->pagefile()}.php", $actionparams);
         $custom_data = array(
@@ -1334,7 +1417,7 @@ class dataform_view_base {
         $type = $this->get_entries_form_type();
         $classtype = $type ? "_$type" : '';
         $loctype = $type ? "/$type" : '';
-        $formclass = 'mod_dataform_view'. $classtype. '_entries_form';
+        $formclass = 'dataformview'. $classtype. '_entries_form';
         require_once("$CFG->dirroot/mod/dataform/view". $loctype. '/view_entries_form.php');
         return new $formclass($actionurl, $custom_data);
     }
@@ -1352,10 +1435,9 @@ class dataform_view_base {
     public function process_entries_data() {
         global $CFG;
 
-        // check first if returning from form
+        // Check first if returning from form
         $update = optional_param('update', '', PARAM_TAGLIST);
-        $cancel = optional_param('cancel', 0, PARAM_BOOL);
-        if (!$cancel and $update and confirm_sesskey()) {
+        if ($update and confirm_sesskey()) {
 
             // get entries only if updating existing entries
             if ($update != self::ADD_NEW_ENTRY) {
@@ -1368,37 +1450,40 @@ class dataform_view_base {
             $this->set__display_definition();
 
             $entriesform = $this->get_entries_form();
-            // we already know that it isn't cancelled
-            if ($data = $entriesform->get_data()) {
-                // validated successfully so process request
-                $processed = $this->_entries->process_entries('update', $update, $data, true);
+            
+            // Process the form if not cancelled
+            if (!$entriesform->is_cancelled()) {
+                if ($data = $entriesform->get_data()) {
+                    // validated successfully so process request
+                    $processed = $this->_entries->process_entries('update', $update, $data, true);
 
-                if (!empty($data->submitreturnbutton)) {
-                    // If we have just added new entries refresh the content
-                    // This is far from ideal because this new entries may be
-                    // spread out in the form when we return to edit them
-                    if ($this->_editentries < 0) {
-                        $this->_entries->set_content();
-                    }                        
+                    if (!empty($data->submitreturnbutton)) {
+                        // If we have just added new entries refresh the content
+                        // This is far from ideal because this new entries may be
+                        // spread out in the form when we return to edit them
+                        if ($this->_editentries < 0) {
+                            $this->_entries->set_content();
+                        }                        
 
-                    // so that return after adding new entry will return the added entry 
-                    $this->_editentries = implode(',',$processed[1]);
-                    $this->_returntoentriesform = true;
-                    return true;
-                } else {
-                    // So that we can show the new entries if we so wish
-                    if ($this->_editentries < 0) {
+                        // so that return after adding new entry will return the added entry 
                         $this->_editentries = implode(',',$processed[1]);
+                        $this->_returntoentriesform = true;
+                        return true;
                     } else {
-                        $this->_editentries = '';
+                        // So that we can show the new entries if we so wish
+                        if ($this->_editentries < 0) {
+                            $this->_editentries = implode(',',$processed[1]);
+                        } else {
+                            $this->_editentries = '';
+                        }
+                        $this->_returntoentriesform = false;
+                        return $processed;
                     }
-                    $this->_returntoentriesform = false;
-                    return $processed;
+                } else {
+                    // form validation failed so return to form
+                    $this->_returntoentriesform = true;
+                    return false;
                 }
-            } else {
-                // form validation failed so return to form
-                $this->_returntoentriesform = true;
-                return false;
             }
         }
 
@@ -1437,25 +1522,6 @@ class dataform_view_base {
         }
 
         return true;
-    }
-
-    /**
-     *
-     */
-    public function user_is_editing() {
-        $editing = $this->_editentries;
-        //$multiactions = $this->uses_multiactions();
-
-        //if (!$editing and (!$multiactions or ($multiedit and !$this->entriesfiltercount))) {
-        //    return false;
-
-        //} else if ($editing) {
-        //    return $editing;
-
-        //} else {
-        //    return true;
-        //}
-        return $editing;
     }
 
     /**
@@ -1525,5 +1591,24 @@ class dataform_view_base {
             $this->_display_definition[$groupname] = $groupdefinition;
         }
         return $requiresmanageentries;
+    }
+
+    /**
+     *
+     */
+    public function user_is_editing() {
+        $editing = $this->_editentries;
+        //$multiactions = $this->uses_multiactions();
+
+        //if (!$editing and (!$multiactions or ($multiedit and !$this->entriesfiltercount))) {
+        //    return false;
+
+        //} else if ($editing) {
+        //    return $editing;
+
+        //} else {
+        //    return true;
+        //}
+        return $editing;
     }
 }

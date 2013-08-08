@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_text_form extends mod_dataform_field_form {
+class dataformfield_text_form extends dataformfield_form {
 
     /**
      *
@@ -31,7 +31,7 @@ class mod_dataform_field_text_form extends mod_dataform_field_form {
 
         $mform =& $this->_form;
 
-    //-------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
         
         // auto link
@@ -50,8 +50,8 @@ class mod_dataform_field_text_form extends mod_dataform_field_form {
         $mform->setDefault('param3', 'px');
 
         // rules
-    //-------------------------------------------------------------------------------
-        $mform->addElement('header', '', get_string('fieldrules', 'dataform'));
+        //-------------------------------------------------------------------------------
+        $mform->addElement('header', 'fieldruleshdr', get_string('fieldrules', 'dataform'));
 
         // format rules
         $options = array(
@@ -82,6 +82,8 @@ class mod_dataform_field_text_form extends mod_dataform_field_form {
         $mform->disabledIf('param6', 'param5', 'eq', 'maxlength');
         $mform->disabledIf('param7', 'param5', 'eq', '');
         $mform->disabledIf('param7', 'param5', 'eq', 'minlength');
+        $mform->setType('param6', PARAM_INT);
+        $mform->setType('param7', PARAM_INT);
     }
 
 }

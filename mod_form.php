@@ -124,19 +124,26 @@ class mod_dataform_mod_form extends moodleform_mod {
 
         // Notifications
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', '', get_string('notifications'));
+        // Types
+        $mform->addElement('header', 'notificationshdr', get_string('notifications'));
         $grp=array();
         foreach (dataform::get_notification_types() as $type => $key) {
             $grp[] = &$mform->createElement('advcheckbox', $type, null, get_string("messageprovider:dataform_$type", 'dataform'), null, array(0,$key));
         }
         $mform->addGroup($grp, 'notificationgrp', get_string('notificationenable', 'dataform'), html_writer::empty_tag('br'), false);
+        // Format
+        $options = array(
+            FORMAT_HTML => get_string('formathtml'),
+            FORMAT_HTML => get_string('formatplain'),
+        );
+        $mform->addElement('select', 'notificationformat', get_string('format'), $options);
         
         // entry settings
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'entrysettingshdr', get_string('entrysettings', 'dataform'));
 
-        // if there is an admin limit select from dropdown
         if ($CFG->dataform_maxentries > 0) { 
+            // Admin limit, select from dropdown
             $maxoptions = (array_combine(range(0, $CFG->dataform_maxentries),range(0, $CFG->dataform_maxentries)));
 
             // required entries
@@ -147,34 +154,34 @@ class mod_dataform_mod_form extends moodleform_mod {
             $mform->addElement('select', 'maxentries', get_string('entriesmax', 'dataform'), $maxoptions);
             $mform->setDefault('maxentries', $CFG->dataform_maxentries);
         
-        // no admin limit so enter any number
-        } else if ($CFG->dataform_maxentries == -1){ 
+        } else {
+            // No limit or no entries
+            $admindeniesentries = (int) !$CFG->dataform_maxentries; 
+            $mform->addElement('hidden', 'admindeniesentries', $admindeniesentries);
+            $mform->setType('admindeniesentries', PARAM_INT);
+
             // required entries
             $mform->addElement('text', 'entriesrequired', get_string('entriesrequired', 'dataform'));
+            $mform->setDefault('entriesrequired', 0);
             $mform->addRule('entriesrequired', null, 'numeric', null, 'client');
+            $mform->setType('entriesrequired', PARAM_INT);
+            $mform->disabledIf('entriesrequired', 'admindeniesentries', 'eq', 1);
+
             // required entries to view
             $mform->addElement('text', 'entriestoview', get_string('entriestoview', 'dataform'));
+            $mform->setDefault('entriestoview', 0);
             $mform->addRule('entriestoview', null, 'numeric', null, 'client');
+            $mform->setType('entriestoview', PARAM_INT);
+            $mform->disabledIf('entriestoview', 'admindeniesentries', 'eq', 1);
+
             // max entries
             $mform->addElement('text', 'maxentries', get_string('entriesmax', 'dataform'));
             $mform->setDefault('maxentries', -1);
             $mform->addRule('maxentries', null, 'numeric', null, 'client');
-
-        // admin denies non-managers entries
-        } else if ($CFG->dataform_maxentries == 0){ 
-            $mform->addElement('hidden', 'admindeniesentries', 1);
-            // required entries
-            $mform->addElement('text', 'entriesrequired', get_string('entriesrequired', 'dataform'));
-            $mform->disabledIf('entriesrequired', 'admindeniesentries', 'eq', 1);
-            // required entries to view
-            $mform->addElement('text', 'entriestoview', get_string('entriestoview', 'dataform'));
-            $mform->disabledIf('entriestoview', 'admindeniesentries', 'eq', 1);
-            // max entries
-            $mform->addElement('text', 'maxentries', get_string('entriesmax', 'dataform'));
+            $mform->setType('maxentries', PARAM_INT);
             $mform->disabledIf('maxentries', 'admindeniesentries', 'eq', 1);
+
         }
-        $mform->setDefault('entriesrequired', 0);
-        $mform->setDefault('entriestoview', 0);
 
         // anonymous entries
         if ($CFG->dataform_anonymous) { 

@@ -27,7 +27,7 @@ require_once("$CFG->dirroot/mod/dataform/view/view_patterns.php");
 /**
  * Base class for view patterns
  */
-class mod_dataform_view_csv_patterns extends mod_dataform_view_patterns{
+class dataformview_csv_patterns extends dataformview_patterns{
 
     /**
      *

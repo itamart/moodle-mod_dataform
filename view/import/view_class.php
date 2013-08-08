@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 
-class dataform_view_import extends dataform_view_base {
+class dataformview_import extends dataformview_base {
 
     protected $type = 'import';
     protected $_editors = array('section');
@@ -191,17 +191,16 @@ class dataform_view_import extends dataform_view_base {
     public function get_form() {
         global $CFG;
 
-        $custom_data = array('view' => $this, 'df' => $this->_df);
         $returnurl = new moodle_url('/mod/dataform/import.php', array('d' => $this->_df->id()));
 
         require_once($CFG->dirroot. '/mod/dataform/view/'. $this->type. '/view_form.php');
-        $formclass = 'mod_dataform_view_'. $this->type. '_form';
+        $formclass = 'dataformview_'. $this->type. '_form';
         $actionurl = new moodle_url('/mod/dataform/view/view_edit.php',
                                     array('d' => $this->_df->id(),
                                         'vedit' => $this->id(),
                                         'type' => $this->type,
                                         'returnurl' => $returnurl)); 
-        return new $formclass($actionurl, $custom_data);
+        return new $formclass($this, $actionurl);
     }
 
     /**
@@ -211,21 +210,18 @@ class dataform_view_import extends dataform_view_base {
         global $CFG;
         require_once("$CFG->dirroot/mod/dataform/view/import/import_form.php");
 
-        $custom_data = array();
-        $custom_data['view'] = $this;
-        $custom_data['df'] = $this->_df;
         // hide csv settings
+        $custom_data = array();
         if (empty($this->view->param2)) {
             $custom_data['hidecsvsettings'] = true;
             $custom_data['hidecsvinput'] = true;
-        }
-            
+        }           
         
         $actionurl = new moodle_url('/mod/dataform/import.php',
                                     array('d' => $this->_df->id(),
                                         'vid' => $this->id(),
                                         'import' => 1)); 
-        return new mod_dataform_view_import_import_form($actionurl, $custom_data);
+        return new dataformview_import_import_form($this, $actionurl, $custom_data);
     }
     
     /**
@@ -241,7 +237,7 @@ class dataform_view_import extends dataform_view_base {
             if (trim($text)) {
                 if ($fields = $this->_df->get_fields()) {
                     foreach ($fields as $fieldid => $field) {
-                        if ($patterns = $field->patterns()->search($text)) {
+                        if ($patterns = $field->renderer()->search($text)) {
                             $this->_tags['field'][$fieldid] = $patterns;
                         }
                     }

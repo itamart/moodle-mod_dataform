@@ -23,11 +23,21 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field__entry extends dataform_field_no_content {
+class dataformfield__entry extends dataformfield_no_content {
     public $type = '_entry';
 
     const _ENTRY = 'entry';
 
+    /**
+     *
+     */
+    public static function is_internal() {
+        true;
+    }
+    
+    /**
+     *
+     */
     public static function get_field_objects($dataid) {
         $fieldobjects = array();
         

@@ -28,9 +28,9 @@
 /**
  * Category questions loader
  */
-M.dataform_field_nanogong_upload_recording = {};
+M.dataformfield_nanogong_upload_recording = {};
 
-M.dataform_field_nanogong_upload_recording.init = function(Y, options) {
+M.dataformfield_nanogong_upload_recording.init = function(Y, options) {
     YUI().use('node-base', 'event-base', function(Y) {
 
         var fieldname = options.fieldname;

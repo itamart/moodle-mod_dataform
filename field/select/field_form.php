@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_select_form extends mod_dataform_field_form {
+class dataformfield_select_form extends dataformfield_form {
 
     /**
      *
@@ -39,6 +39,7 @@ class mod_dataform_field_select_form extends mod_dataform_field_form {
 
         // default value
         $mform->addElement('text', 'param2', get_string('default'));
+        $mform->setType('param2', PARAM_TEXT);
 
         // reserve param3 for options separator (e.g. radiobutton, image button)
 

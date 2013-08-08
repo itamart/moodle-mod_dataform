@@ -16,24 +16,26 @@
  
 /**
  * @package dataformfield
- * @copyright 2012 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->libdir/formslib.php");
 
-class mod_dataform_field_form extends moodleform {
+class dataformfield_form extends moodleform {
     protected $_field = null;
     protected $_df = null;
 
+    public function __construct($field, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->_field = $field;
+        $this->_df = $field->df();
+        
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
+    }
+    
     function definition() {        
-        $this->_field = $this->_customdata['field'];
-        $this->_df = $this->_field->df();
         $mform = &$this->_form;
-
-        $streditinga = $this->_field->id() ? get_string('fieldedit', 'dataform', $this->_field->name()) : get_string('fieldnew', 'dataform', $this->_field->type());
-        $mform->addElement('html', html_writer::tag('h2', format_string($streditinga), array('class' => 'mdl-align')));
 
         // buttons
         //-------------------------------------------------------------------------------
@@ -48,19 +50,12 @@ class mod_dataform_field_form extends moodleform {
         
         // description
         $mform->addElement('text', 'description', get_string('description'), array('size'=>'64'));
-        if (!empty($CFG->formatstringstriptags)) {
-            $mform->setType('name', PARAM_TEXT);
-            $mform->setType('description', PARAM_TEXT);
-        } else {
-            $mform->setType('name', PARAM_CLEAN);
-            $mform->setType('description', PARAM_CLEAN);
-        }
 
         // visible
         $options = array(
-            dataform_field_base::VISIBLE_NONE => get_string('fieldvisiblenone', 'dataform'),
-            dataform_field_base::VISIBLE_OWNER => get_string('fieldvisibleowner', 'dataform'),
-            dataform_field_base::VISIBLE_ALL => get_string('fieldvisibleall', 'dataform'),
+            dataformfield_base::VISIBLE_NONE => get_string('fieldvisiblenone', 'dataform'),
+            dataformfield_base::VISIBLE_OWNER => get_string('fieldvisibleowner', 'dataform'),
+            dataformfield_base::VISIBLE_ALL => get_string('fieldvisibleall', 'dataform'),
         );
         $mform->addElement('select', 'visible', get_string('fieldvisibility', 'dataform'), $options);
 
@@ -70,6 +65,21 @@ class mod_dataform_field_form extends moodleform {
         //$options = $options + array_combine(range(1,50), range(1,50));
         $mform->addElement('select', 'edits', get_string('fieldeditable', 'dataform'), $options);
         $mform->setDefault('edits', -1);
+
+        // Label
+        $mform->addElement('textarea', 'label', get_string('fieldlabel', 'dataform'), array('cols' => 60, 'rows' => 5));
+        $mform->addHelpButton('label', 'fieldlabel', 'dataform');
+
+        // Strings strip tags
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('name', PARAM_TEXT);
+            $mform->setType('description', PARAM_TEXT);
+            $mform->setType('label', PARAM_TEXT);
+        } else {
+            $mform->setType('name', PARAM_CLEANHTML);
+            $mform->setType('description', PARAM_CLEANHTML);
+            $mform->setType('label', PARAM_CLEANHTML);
+        }
 
         //-------------------------------------------------------------------------------
         $this->field_definition();

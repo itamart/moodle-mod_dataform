@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 
-class dataform_view_grid extends dataform_view_base {
+class dataformview_grid extends dataformview_base {
 
     protected $type = 'grid';
     protected $_editors = array('section', 'param2');

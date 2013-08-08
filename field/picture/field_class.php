@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/file/field_class.php");
 
-class dataform_field_picture extends dataform_field_file {
+class dataformfield_picture extends dataformfield_file {
     public $type = 'picture';
 
     /**

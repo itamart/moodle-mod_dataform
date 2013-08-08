@@ -435,11 +435,41 @@ function xmldb_dataform_upgrade($oldversion) {
 
     if ($oldversion < 2012121900) {
 
-        // Change groupby 0 to null in views and filters
+        // Changing type of field groupby on table dataform_views to char.
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('groupby', XMLDB_TYPE_CHAR, '64', null, null, null, '', 'perpage');
+        $dbman->change_field_type($table, $field);
+
+        // Changing type of field groupby on table dataform_filters to char.
+        $table = new xmldb_table('dataform_filters');
+        $field = new xmldb_field('groupby', XMLDB_TYPE_CHAR, '64', null, null, null, '', 'selection');
+        $dbman->change_field_type($table, $field);
+
+        // Change groupby 0 to null in existing views and filters
         $DB->set_field('dataform_views', 'groupby', null, array('groupby' => 0));
         $DB->set_field('dataform_filters', 'groupby', null, array('groupby' => 0));
+
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012121900, 'dataform');
+    }
+
+    if ($oldversion < 2013051101) {
+        // Add notification format column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('notificationformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'notification');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add label column to dataform fields
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('label', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'edits');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, 2013051101, 'dataform');
     }
 
     return true;

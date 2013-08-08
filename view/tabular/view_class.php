@@ -33,7 +33,7 @@ require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
  * param3 - table header
  */
 
-class dataform_view_tabular extends dataform_view_base {
+class dataformview_tabular extends dataformview_base {
 
     protected $type = 'tabular';    
     protected $_editors = array('section', 'param2');

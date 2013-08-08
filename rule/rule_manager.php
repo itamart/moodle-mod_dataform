@@ -16,14 +16,14 @@
  
 /**
  * @package dataformrule
- * @copyright 2012 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
  * Rule manager class
  */
-class dataform_rule_manager {
+class dataformrule_manager {
 
     protected $_df;
     protected $_predefinedrules;
@@ -86,10 +86,10 @@ class dataform_rule_manager {
      * given a rule type returns the rule object from get_rules
      * Initializes get_rules if necessary
      */
-    public function get_rules_by_type($type, $menu = false) {
+    public function get_rules_by_plugintype($plugintype, $menu = false) {
         $typerules = array();
         foreach  ($this->get_rules() as $ruleid => $rule) {
-            if ($rule->type() === $type) {
+            if ($rule->plugintype() === $plugintype) {
                 if ($menu) {
                     $typerules[$ruleid] = $rule->name();
                 } else {
@@ -128,7 +128,7 @@ class dataform_rule_manager {
                 $key = 0;
             }
             require_once($type. '/rule_class.php');
-            $ruleclass = 'dataform_rule_'. $type;
+            $ruleclass = 'dataformrule_'. $type;
             $rule = new $ruleclass($this->_df, $key);
             return $rule;
         } else {

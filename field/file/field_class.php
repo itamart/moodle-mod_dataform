@@ -26,7 +26,7 @@ require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 /**
  * 
  */
-class dataform_field_file extends dataform_field_base {
+class dataformfield_file extends dataformfield_base {
     public $type = 'file';
     
     // content - file manager

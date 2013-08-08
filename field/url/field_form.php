@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_url_form extends mod_dataform_field_form {
+class dataformfield_url_form extends dataformfield_form {
 
     /**
      *
@@ -40,7 +40,7 @@ class mod_dataform_field_url_form extends mod_dataform_field_form {
 
         // force link name
         $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size'=>'32'));
-        $mform->setType('param2', PARAM_NOTAGS);
+        $mform->setType('param2', PARAM_TEXT);
     }
 
 }

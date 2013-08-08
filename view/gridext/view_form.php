@@ -22,14 +22,14 @@
  */
 require_once("$CFG->dirroot/mod/dataform/view/grid/view_form.php");
 
-class mod_dataform_view_gridext_form extends mod_dataform_view_grid_form {
+class dataformview_gridext_form extends dataformview_grid_form {
 
     /**
      *
      */
     function view_definition_after_gps() {
 
-        $view = $this->_customdata['view'];
+        $view = $this->_view;
         $editoroptions = $view->editors();
         $editorattr = array('cols' => 40, 'rows' => 5);
 

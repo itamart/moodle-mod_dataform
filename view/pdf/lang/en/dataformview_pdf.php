@@ -22,7 +22,12 @@
  */
 
 $string['pluginname'] = 'PDF';
+
+$string['image'] = 'Image';
+// PDF Settings
 $string['pdfsettings'] = 'PDF settings';
+$string['docname'] = 'Document name';
+$string['docname_help'] = 'A Pattern for the name of the downloaded PDF document. The name pattern can consist of any of the field patterns included in the view.';
 $string['format'] = 'Format';
 $string['orientation'] = 'Orientation';
 $string['auto'] = 'Auto';
@@ -42,9 +47,45 @@ $string['unit_mm'] = 'Millimeter';
 $string['unit_pt'] = 'Point';
 $string['unit_cm'] = 'Centimeter';
 $string['unit_in'] = 'Inch';
-$string['frame'] = 'Frame';
-$string['watermark'] = 'Watermark';
+// PDF Frame
+$string['pdfframe'] = 'PDF Frame';
+$string['pdfframe_help'] = 'PDF Frame';
+// PDF Watermark
+$string['pdfwmark'] = 'PDF Watermark';
+$string['pdfwmark_help'] = 'PDF Watermark';
 $string['transparency'] = 'Watermark transparency';
+$string['transparency_help'] = 'Watermark transparency';
+// PDF TOC
+$string['pdftoc'] = 'PDF TOC';
+$string['tocpage'] = 'TOC Page';
+$string['tocpage_help'] = 'Page number (e.g. 1). The page where the TOC should be displayed. 
+By default (page number empty or 0) the TOC is not displayed.
+<p>Page bookmarks can be added in the repeatd entry section with tags in the format: #@bookmark-type:bookmark-level:bookmark-text@#</p>
+<p><b>Bookmark type:</b> PDF-GBM for group bookmark, PDF-BM for regular bookmark. Group bookmarks display only the first occurence 
+in a sequence of the same bookmark-text.<br />
+<b>Bookmark-level:</b> 0 - n. If the html TOC template is used, 
+it must contain a template definition for each bookmark level that is specified in the content.<br />
+<b>Bookmark-text:</b> The text that will be displayed for the bookmark in the TOC. 
+Field tags can be used to extract the text from the entry content.</p>
+<p>Example:</p>
+<p>#@PDF-GBM:0:##author:name##@#<br />
+#@PDF-BM:1:[[Date masked]]@#</p>
+';
+$string['tocname'] = 'TOC Name';
+$string['tocname_help'] = 'TOC Name';
+$string['toctitle'] = 'TOC Title';
+$string['toctitle_help'] = 'Html for the TOC title that is displayed above the table of content. 
+For example, &lt;h1&gt;TABLE OF CONTENT&lt;/h1&gt; will display the TOC page with the title \'TABLE OF CONTENT\' 
+styled as heading1.';
+$string['toctmpl'] = 'TOC Template';
+$string['toctmpl_help'] = 'The TOC Template specifies the html for displaying the bookmarks in the table of content. 
+The #TOC_DESCRIPTION# and #TOC_PAGE_NUMBER# must be enclosed in span tags.
+<p>For example:</p>
+<p>&lt;div&gt;&lt;span style="color:#FF0000;"&gt;#TOC_DESCRIPTION#&lt;/span&gt; ... &lt;span&gt;#TOC_PAGE_NUMBER#&lt;/span&gt;&lt;/div&gt;<br />
+&lt;div&gt;&lt;span style="color:#00FF00;"&gt;#TOC_DESCRIPTION#&lt;/span&gt; ... &lt;span&gt;#TOC_PAGE_NUMBER#&lt;/span&gt;&lt;/div&gt;</p>
+<p>By this simple template the pdf file will display the TOC with the first bookmark level in red and the second in green. 
+Page numbers will be displayed separated from the bookmark descriptions by ellipsis.</p>
+<p>Leave empty to display a default non-html TOC.</p>';
 $string['pdfsignature'] = 'Digital signature';
 $string['certification'] = 'Certification';
 $string['certpassword'] = 'Password';
@@ -55,6 +96,7 @@ $string['certinforeason'] = 'Info: reason';
 $string['certinfocontact'] = 'Info: contact';
 $string['certperm2'] = 'Filling in forms, instantiating page templates, signing';
 $string['certperm3'] = 'Filling in forms, instantiating page templates, signing, annotation management';
+// Protection
 $string['protmode0'] = 'RSA 40 bit';
 $string['protmode1'] = 'RSA 128 bit';
 $string['protmode2'] = 'AES 128 bit';
@@ -64,6 +106,7 @@ $string['protuserpass'] = 'User password';
 $string['protownerpass'] = 'Owner password';
 $string['protmode'] = 'Mode';
 $string['protperms'] = 'Permissions denied';
+// Permissions
 $string['perm_print'] = 'Print the document';
 $string['perm_modify'] = 'Modify content';
 $string['perm_copy'] = 'Copy/extract content';
@@ -84,3 +127,4 @@ $string['margintop'] = 'Top';
 $string['marginright'] = 'Right';
 $string['marginkeep'] = 'Keep';
 $string['pagebreak'] = 'Page break';
+$string['imagetypes'] = 'jpg|jpeg|gif|png|tif';

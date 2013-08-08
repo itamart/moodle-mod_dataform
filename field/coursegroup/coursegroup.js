@@ -23,9 +23,9 @@
 /**
  * Category coursegroups loader
  */
-M.dataform_field_coursegroup_load_course_groups = {};
+M.dataformfield_coursegroup_load_course_groups = {};
 
-M.dataform_field_coursegroup_load_course_groups.init = function(Y, options) {
+M.dataformfield_coursegroup_load_course_groups.init = function(Y, options) {
     YUI().use('node-base', 'event-base', 'io-base', function(Y) {
         // get field name from options
         var coursefield = options.coursefield;

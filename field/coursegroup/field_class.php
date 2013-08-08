@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_coursegroup extends dataform_field_base {
+class dataformfield_coursegroup extends dataformfield_base {
     public $type = 'coursegroup';
     
     public $course;
@@ -36,6 +36,7 @@ class dataform_field_coursegroup extends dataform_field_base {
 
         $this->course = $this->field->param1;
         $this->group = $this->field->param2;
+        $this->_comparetext = 'content1';
     }
 
     /**
@@ -163,10 +164,9 @@ class dataform_field_coursegroup extends dataform_field_base {
         
         static $i=0;
         $i++;
-        $fieldid = $this->field->id < 0 ? '_'. abs($this->field->id) : $this->field->id;
-        $name = "df_{$fieldid}_{$i}";
+        $fieldid = $this->field->id;
 
-        $varcharcontent = "c{$this->field->id}.content1";
+        $varcharcontent = "c{$fieldid}.content1";
 
         // Set user id to filter on, from url if user profile page
         $path = $PAGE->url->get_path();
@@ -180,7 +180,7 @@ class dataform_field_coursegroup extends dataform_field_base {
             $usergroups = array(-1);
         }
         list($ingroups, $groupids) = $DB->get_in_or_equal($usergroups, SQL_PARAMS_NAMED, "df_{$fieldid}_");           
-        return array(" $varcharcontent $ingroups ", $groupids);
+        return array(" $varcharcontent $ingroups ", $groupids, true);
     }
 
     /**

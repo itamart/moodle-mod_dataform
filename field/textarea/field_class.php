@@ -25,7 +25,7 @@ require_once($CFG->dirroot.'/mod/dataform/field/field_class.php');
 require_once($CFG->dirroot.'/lib/filelib.php');
 require_once($CFG->dirroot.'/repository/lib.php');
 
-class dataform_field_textarea extends dataform_field_base {
+class dataformfield_textarea extends dataformfield_base {
 
     public $type = 'textarea';
 

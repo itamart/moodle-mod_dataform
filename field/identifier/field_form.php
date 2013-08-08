@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_identifier_form extends mod_dataform_field_form {
+class dataformfield_identifier_form extends dataformfield_form {
 
     /**
      *
@@ -42,6 +42,7 @@ class mod_dataform_field_identifier_form extends mod_dataform_field_form {
 
         // Field Salt length (param2)
         $mform->addElement('text', 'param2', get_string('saltsize', 'dataformfield_identifier'), array('size'=>'8'));
+        $mform->setType('param2', PARAM_INT);        
         $mform->addRule('param2', null, 'numeric', null, 'client');        
         $mform->setDefault('param2', 10);        
         $mform->disabledIf('param2', 'param1', 'neq', 'random');              

@@ -91,7 +91,7 @@ if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested v
 // any notifications?
 $df->notifications['bad']['defaultview'] = '';
 $df->notifications['bad']['getstartedviews'] = '';
-if (!$views = $df->get_views_by_type('import', false, true)) {
+if (!$views = $df->get_views_by_type('import', true)) {
     $df->notifications['bad'][] = get_string('importnoneindataform','dataform');  // nothing in database
 }
 

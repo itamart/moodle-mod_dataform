@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_identifier extends dataform_field_base {
+class dataformfield_identifier extends dataformfield_base {
 
     public $type = 'identifier';
 
@@ -71,7 +71,7 @@ class dataform_field_identifier extends dataform_field_base {
         $identifierkey = $this->get_hash_string($entry);
         $uniqueness = !empty($this->field->param4) ? $this->field->param4 : false;       
         if ($uniqueness) {
-            // We check against store idenitifiers in this field
+            // We check against stored idenitifiers in this field
             // To prevent this from going forever under certain configurations
             // after 10 times force random salt we should allow it to end at some point
             $count = 0;

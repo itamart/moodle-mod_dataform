@@ -23,24 +23,11 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_select extends dataform_field_base {
+class dataformfield_select extends dataformfield_base {
 
     public $type = 'select';
     
     protected $_options = array();
-
-    /**
-     * Class constructor
-     *
-     * @param var $df       dataform id or class object
-     * @param var $field    field id or DB record
-     */
-    public function __construct($df = 0, $field = 0) {
-        parent::__construct($df, $field);
-        
-        // Set the options
-        $this->options_menu();
-    }
 
     /**
      * Update a field in the database
@@ -152,6 +139,18 @@ class dataform_field_select extends dataform_field_base {
     }
 
     /**
+     *
+     */
+    public function get_search_value($value) {
+        $options = $this->options_menu();
+        if ($key = array_search($value, $options)) {
+            return $key;
+        } else {
+            return '';
+        }
+    }
+
+    /**
      * 
      */
     public function options_menu($forceget = false) {
@@ -178,7 +177,7 @@ class dataform_field_select extends dataform_field_base {
             $fieldid = $this->field->id;
             $fieldname = $this->name();
             $csvname = $importsettings[$fieldname]['name'];
-            $allownew = $importsettings[$fieldname]['allownew'];
+            $allownew = !empty($importsettings[$fieldname]['allownew']) ? true : false;
             $label = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
             
             if ($label) {

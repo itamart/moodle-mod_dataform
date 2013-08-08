@@ -33,7 +33,7 @@ define("DEFAULT_BACKGROUND", "#DDDDDD");
 
 require_once("$CFG->dirroot/mod/dataform/field/file/field_class.php");
 
-class dataform_field_nanogong extends dataform_field_file {
+class dataformfield_nanogong extends dataformfield_file {
     public $type = 'nanogong';
 
     /**

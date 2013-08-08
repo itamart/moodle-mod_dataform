@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_gradeitem extends dataform_field_base {
+class dataformfield_gradeitem extends dataformfield_base {
 
     public $type = 'gradeitem';
     

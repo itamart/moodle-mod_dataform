@@ -82,18 +82,18 @@ class dataform {
                 throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: $d");
             }
             if (!$this->course = $DB->get_record('course', array('id' => $this->data->course))) {
-                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Course id: {$this->data->course}");
+                throw new moodle_exception('invalidcourse', 'dataform', null, null, "Course id: {$this->data->course}");
             }
             if (!$this->cm = get_coursemodule_from_instance('dataform', $this->id(), $this->course->id)) {
-                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Cm id: {$this->id()}");
+                throw new moodle_exception('invalidcoursemodule', 'dataform', null, null, "Cm id: {$this->id()}");
             }
         // initialize from course module id
         } else if ($id) {
             if (!$this->cm = get_coursemodule_from_id('dataform', $id)) {
-                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Cm id: $id");
+                throw new moodle_exception('invalidcoursemodule '. $id, 'dataform', null, null, "Cm id: $id");
             }
             if (!$this->course = $DB->get_record('course', array('id' => $this->cm->course))) {
-                throw new moodle_exception('invaliddataform', 'dataform', null, null, "Course id: {$this->cm->course}");
+                throw new moodle_exception('invalidcourse', 'dataform', null, null, "Course id: {$this->cm->course}");
             }
             if (!$this->data = $DB->get_record('dataform', array('id' => $this->cm->instance))) {
                 throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: {$this->cm->instance}");
@@ -112,10 +112,10 @@ class dataform {
         }
         
         // set fields manager
-        //$this->_fieldmanager = new dataform_field_manager($this);        
+        //$this->_fieldmanager = new dataformfield_manager($this);        
 
         // set views manager
-        //$this->_viewmanager = new dataform_view_manager($this);
+        //$this->_viewmanager = new dataformview_manager($this);
 
     }
 
@@ -173,7 +173,7 @@ class dataform {
         // set rules manager
         if (!$this->_rulemanager) { 
             require_once('rule/rule_manager.php');
-            $this->_rulemanager = new dataform_rule_manager($this);
+            $this->_rulemanager = new dataformrule_manager($this);
         }
         return $this->_rulemanager;
     }
@@ -281,7 +281,7 @@ class dataform {
             foreach ($views as $view) {
                 $view->delete();
             }
-            $this->get_views(null, false, true);
+            $this->get_views(null, true);
         }
 
         // delete filters
@@ -511,7 +511,7 @@ class dataform {
 
         // set current view and view's page requirements
         $currentview = !empty($urlparams['view']) ? $urlparams['view'] : 0;
-        if ($this->_currentview = $this->get_view_from_id($currentview)) {
+        if ($this->_currentview = $this->get_current_view_from_id($currentview)) {
             $this->_currentview->set_page($page);
         }
         
@@ -521,14 +521,14 @@ class dataform {
             if (!$views) {
                 if ($page == 'view' or $page == 'embed') {
                     $getstarted = new object;
-                    $getstarted->presets = html_writer::link(new moodle_url('preset/index.php', array('d' => $thisid)), get_string('presets', 'dataform'));
-                    $getstarted->fields = html_writer::link(new moodle_url('field/index.php', array('d' => $thisid)), get_string('fields', 'dataform'));
-                    $getstarted->views = html_writer::link(new moodle_url('view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
+                    $getstarted->presets = html_writer::link(new moodle_url('/mod/dataform/preset/index.php', array('d' => $thisid)), get_string('presets', 'dataform'));
+                    $getstarted->fields = html_writer::link(new moodle_url('/mod/dataform/field/index.php', array('d' => $thisid)), get_string('fields', 'dataform'));
+                    $getstarted->views = html_writer::link(new moodle_url('/mod/dataform/view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
 
                     $this->notifications['bad']['getstarted'] = html_writer::tag('div', get_string('getstarted', 'dataform', $getstarted), array('class' => 'mdl-left'));
                 }
             } else if (!$this->data->defaultview) {
-                $linktoviews = html_writer::link(new moodle_url('view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
+                $linktoviews = html_writer::link(new moodle_url('/mod/dataform/view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
                 $this->notifications['bad']['defaultview'] = get_string('viewnodefault','dataform', $linktoviews);
             }
         }
@@ -664,7 +664,7 @@ class dataform {
  *********************************************************************************/
 
     /**
-     * initialize the internal fields
+     * Initialize if needed and return the internal fields
      */
     protected function get_internal_fields() {
         global $CFG;
@@ -677,7 +677,7 @@ class dataform {
                     continue;
                 }
                 require_once("$CFG->dirroot/mod/dataform/field/$fieldname/field_class.php");
-                $fieldclass = "dataform_field_$fieldname";
+                $fieldclass = "dataformfield_$fieldname";
                 $internalfields = $fieldclass::get_field_objects($this->data->id);
                 foreach ($internalfields as $fid => $field) {
                     $this->internalfields[$fid] = $this->get_field($field);
@@ -756,7 +756,7 @@ class dataform {
                 $key = 0;
             }
             require_once('field/'. $type. '/field_class.php');
-            $fieldclass = 'dataform_field_'. $type;
+            $fieldclass = 'dataformfield_'. $type;
             $field = new $fieldclass($this, $key);
             return $field;
         } else {
@@ -943,19 +943,63 @@ class dataform {
  *********************************************************************************/
 
     /**
+     *
+     */
+    protected function get_view_records($forceget = false, $sort = '') {
+        global $DB;
+
+        if (empty($this->views) or $forceget) {
+            $this->views = array();
+            if (!$this->views = $DB->get_records('dataform_views', array('dataid' => $this->id()), $sort)) {
+                return false;
+            }
+        }
+        return $this->views;
+    }
+
+    /**
+     * TODO there is no need to instantiate all viewds!!!
+     * this function creates an instance of the particular subtemplate class   *
+     */
+    public function get_current_view_from_id($viewid = 0) {
+
+        if ($views = $this->get_view_records()) {
+            if ($viewid and isset($views[$viewid])) {
+                $view = $views[$viewid];
+
+            // if can't find the requested, try the default
+            } else if ($viewid = $this->data->defaultview  and isset($views[$viewid])) {
+                $view = $views[$viewid];
+                
+            } else {
+                return false;
+            }
+            
+            return $this->get_view($view, true);
+        }
+
+        return false;
+    }
+
+    /**
      * TODO there is no need to instantiate all viewds!!!
      * this function creates an instance of the particular subtemplate class   *
      */
     public function get_view_from_id($viewid = 0) {
 
-        if ($views = $this->get_views()) {
+        if ($views = $this->get_view_records()) {
             if ($viewid and isset($views[$viewid])) {
-                return $views[$viewid];
+                $view = $views[$viewid];
 
             // if can't find the requested, try the default
             } else if ($viewid = $this->data->defaultview  and isset($views[$viewid])) {
-                return $views[$viewid];
+                $view = $views[$viewid];
+                
+            } else {
+                return false;
             }
+            
+            return $this->get_view($view);
         }
 
         return false;
@@ -966,19 +1010,19 @@ class dataform {
      * invoke plugin methods
      * input: $param $vt - mixed, view record or view type
      */
-    public function get_view($vt) {
+    public function get_view($viewortype, $active = false) {
         global $CFG;
 
-        if ($vt) {
-            if (is_object($vt)) {
-                $type = $vt->type;
+        if ($viewortype) {
+            if (is_object($viewortype)) {
+                $type = $viewortype->type;
             } else {
-                $type = $vt;
-                $vt = 0;
+                $type = $viewortype;
+                $viewortype = 0;
             }
             require_once($CFG->dirroot. '/mod/dataform/view/'. $type. '/view_class.php');
-            $viewclass = 'dataform_view_'. $type;
-            $view = new $viewclass($this, $vt);
+            $viewclass = 'dataformview_'. $type;
+            $view = new $viewclass($this, $viewortype, $active);
             return $view;
         }
     }
@@ -987,60 +1031,57 @@ class dataform {
      * given a view type returns the view object from $this->views
      * Initializes $this->views if necessary
      */
-    public function get_views_by_type($type, $menu = false, $forceget = false) {
-        if (!$views = $this->get_views(null, false, $forceget)) {;
+    public function get_views_by_type($type, $forceget = false) {
+        if (!$views = $this->get_view_records($forceget)) {
             return false;
-        } else {
-            $typeviews = array();
-            foreach  ($views as $viewid => $view) {
-                if ($view->type() === $type) {
-                    if ($menu) {
-                        $typeviews[$viewid] = $view->name();
-                    } else {
-                        $typeviews[$viewid] = $view;
-                    }
-                }
-            }
-            return $typeviews;
         }
+
+        $typeviews = array();
+        foreach  ($views as $viewid => $view) {
+            if ($view->type === $type) {
+                $typeviews[$viewid] = $this->get_view($view);
+            }
+        }
+        return $typeviews;
     }
 
     /**
      *
      */
-    public function get_views($exclude = null, $menu = false, $forceget = false, $sort = '') {
-        global $DB;
-
-        if (empty($this->views) or $forceget) {
-            $this->views = array();
-            if ($views = $DB->get_records('dataform_views', array('dataid' => $this->id()), $sort)) {
-                // collate user views
-                foreach ($views as $viewid => $view) {
-                    $this->views[$viewid] = $this->get_view($view);
-                }
-            }
-        }
-
-        if ($this->views) {
-            if (empty($exclude) and !$menu) {
-                return $this->views;
-            } else {
-                $views = array();
-                foreach ($this->views as $viewid => $view) {
-                    if (!empty($exclude) and in_array($viewid, $exclude)) {
-                        continue;
-                    }
-                    if ($menu) {
-                        $views[$viewid]= $view->view->name;
-                    } else {
-                        $views[$viewid]= $view;
-                    }
-                }
-                return $views;
-            }
-        } else {
+    public function get_views($exclude = null, $forceget = false, $sort = '') {
+        if (!$this->get_view_records($forceget, $sort)) {
             return false;
         }
+
+        static $views = null;
+        
+        if ($views === null or $forceget) {
+            $views = array();
+            foreach ($this->views as $viewid => $view) {
+                if (!empty($exclude) and in_array($viewid, $exclude)) {
+                    continue;
+                }
+                $views[$viewid]= $this->get_view($view);
+            }
+        }
+        return $views;
+    }
+
+    /**
+     *
+     */
+    public function get_views_menu($exclude = null, $forceget = false, $sort = '') {
+        $views = array();
+
+        if ($this->get_view_records($forceget, $sort)) {
+            foreach ($this->views as $viewid => $view) {
+                if (!empty($exclude) and in_array($viewid, $exclude)) {
+                    continue;
+                }
+                $views[$viewid]= $view->name;
+            }
+        }
+        return $views;
     }
 
     /**
@@ -1630,7 +1671,7 @@ class dataform {
 
         // Get event notificataion rule users
         $rm = $this->get_rule_manager();
-        if ($rules = $rm->get_rules_by_type('eventnotification')) {
+        if ($rules = $rm->get_rules_by_plugintype('eventnotification')) {
             foreach ($rules as $rule) {
                 if ($rule->is_enabled() and in_array($event, $rule->get_selected_events())) {
                     $users = array_merge($users, $rule->get_recipient_users($event, $data->items));
@@ -1651,6 +1692,7 @@ class dataform {
         $data->context = $this->context->id;
         $data->event = $event;
         $data->notification = 1;
+        $data->notificationformat = $this->data->notificationformat;
         events_trigger("dataform_$event", $data);
     }
     

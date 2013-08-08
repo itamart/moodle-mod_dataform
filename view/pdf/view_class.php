@@ -24,67 +24,93 @@
 require_once("$CFG->dirroot/mod/dataform/view/view_class.php");
 require_once("$CFG->libdir/pdflib.php");
 
-class dataform_view_pdf extends dataform_view_base {
+class dataformview_pdf extends dataformview_base {
 
     const EXPORT_ALL = 'all';
     const EXPORT_PAGE = 'page';
+    const EXPORT_ENTRY = 'entry';
     const PAGE_BREAK = '<div class="pdfpagebreak"></div>';
 
     protected $type = 'pdf';
     protected $_editors = array('section', 'param2', 'param3', 'param4');
-    protected $_vieweditors = array('section', 'param2');
+    protected $_vieweditors = array('section', 'param2', 'param3', 'param4');
     protected $_settings = null;
     protected $_tmpfiles = null;
 
     /**
      *
      */
+    public static function get_permission_options() {
+        return array(
+            'print' => get_string('perm_print', 'dataformview_pdf'),
+            'modify' => get_string('perm_modify', 'dataformview_pdf'),
+            'copy' => get_string('perm_copy', 'dataformview_pdf'),
+            'fill-forms' => get_string('perm_fill-forms', 'dataformview_pdf'),
+            'extract' => get_string('perm_extract', 'dataformview_pdf'),
+            'assemble' => get_string('perm_assemble', 'dataformview_pdf'),
+            'print-high' => get_string('perm_print-high', 'dataformview_pdf'),
+            //'owner' => get_string('perm_owner', 'dataformview_pdf'),
+        );
+    }
+
+    /**
+     *
+     */
     public function __construct($df = 0, $view = 0) {       
         parent::__construct($df, $view);
+
         if (!empty($this->view->param1)) {
-            $this->_settings = unserialize($this->view->param1);
-        } else {
-            $this->_settings = (object) array(
-                'orientation' => '',
-                'unit' => 'mm',
-                'format' => 'LETTER',
-                'destination' => 'I',
-                'transparency' => 0.5,
-                'header' => (object) array(
-                    'enabled' => false,
-                    'margintop' => 0,
-                    'marginleft' => 10,
-                ),
-                'footer' => (object) array(
-                    'enabled' => false,
-                    'margin' => 10,
-                ),
-                'margins' => (object) array(
-                    'left' => 15,
-                    'top' => 27,
-                    'right' => -1,
-                    'keep' => false,
-                ),
-                'pagebreak' => 'auto',
-                'protection' => (object) array(
-                    'permissions' => array('print', 'copy'),
-                    'user_pass' => '',
-                    'owner_pass' => null,
-                    'mode' => 0,
-                    //'pubkeys' => null                    )
-                ),
-                'signature' => (object) array(
-                    'password' => '',
-                    'type' => 1,
-                    'info' => array(
-                        'Name' => '',
-                        'Location' => '',
-                        'Reason' => '',
-                        'ContactInfo' => '',
-                    )
-                )       
-            );
-        }
+            $settings = unserialize($this->view->param1);
+        }    
+        
+        $this->_settings = (object) array(
+            'docname' => !empty($settings->docname) ? $settings->docname : '',
+            'orientation' => !empty($settings->orientation) ? $settings->orientation : '',
+            'unit' => !empty($settings->unit) ? $settings->unit : 'mm',
+            'format' => !empty($settings->format) ? $settings->format : 'LETTER',
+            'destination' => !empty($settings->destination) ? $settings->destination : 'I',
+            'transparency' => !empty($settings->transparency) ? $settings->transparency : 0.5,
+            'pagebreak' => !empty($settings->pagebreak) ? $settings->pagebreak : 'auto',
+            'toc' => (object) array(
+                'page' => !empty($settings->toc->page) ? $settings->toc->page : '',
+                'name' => !empty($settings->toc->name) ? $settings->toc->name : '',
+                'title' => !empty($settings->toc->title) ? $settings->toc->title : '',
+                'template' => !empty($settings->toc->template) ? $settings->toc->template : '',
+            ),
+            'header' => (object) array(
+                'enabled' => !empty($settings->header->enabled) ? $settings->header->enabled : false,
+                'margintop' => !empty($settings->header->margintop) ? $settings->header->margintop : 0,
+                'marginleft' => !empty($settings->header->marginleft) ? $settings->header->marginleft : 10,
+            ),
+            'footer' => (object) array(
+                'text' => !empty($this->view->eparam4) ? $this->view->eparam4 : '',
+                'enabled' => !empty($settings->footer->enabled) ? $settings->footer->enabled : false,
+                'margin' => !empty($settings->footer->margin) ? $settings->footer->margin : 10,
+            ),
+            'margins' => (object) array(
+                'left' => !empty($settings->margins->left) ? $settings->margins->left : 15,
+                'top' => !empty($settings->margins->top) ? $settings->margins->top : 27,
+                'right' => !empty($settings->margins->right) ? $settings->margins->right : -1,
+                'keep' => !empty($settings->margins->keep) ? $settings->margins->keep : false,
+            ),
+            'protection' => (object) array(
+                'permissions' => !empty($settings->protection->permissions) ? $settings->protection->permissions : array('print', 'copy'),
+                'user_pass' => !empty($settings->protection->user_pass) ? $settings->protection->user_pass : '',
+                'owner_pass' => !empty($settings->protection->owner_pass) ? $settings->protection->owner_pass : null,
+                'mode' => !empty($settings->protection->mode) ? $settings->protection->mode : 0,
+                //'pubkeys' => null                    )
+            ),
+            'signature' => (object) array(
+                'password' => !empty($settings->signature->password) ? $settings->signature->password : '',
+                'type' => !empty($settings->signature->type) ? $settings->signature->type : 1,
+                'info' => array(
+                    'Name' => !empty($settings->signature->info->Name) ? $settings->signature->info->Name : '',
+                    'Location' => !empty($settings->signature->info->Location) ? $settings->signature->info->Location : '',
+                    'Reason' => !empty($settings->signature->info->Reason) ? $settings->signature->info->Reason : '',
+                    'ContactInfo' => !empty($settings->signature->info->ContactInfo) ? $settings->signature->info->ContactInfo : '',
+                )
+            )       
+        );
     }
 
     /**
@@ -94,8 +120,12 @@ class dataform_view_pdf extends dataform_view_base {
         global $CFG;
 
         // proces pdf export request
-        if ($exportpdf = optional_param('exportpdf','', PARAM_ALPHA)) {
-            $this->process_export($exportpdf);
+        if (optional_param('pdfexportall', 0, PARAM_INT)) {
+            $this->process_export(self::EXPORT_ALL);
+        } else if (optional_param('pdfexportpage', 0, PARAM_INT)) {
+            $this->process_export(self::EXPORT_PAGE);
+        } else if ($exportentry = optional_param('pdfexportentry', 0, PARAM_INT)) {
+            $this->process_export($exportentry);
         }
 
         // Do standard view processing
@@ -105,7 +135,7 @@ class dataform_view_pdf extends dataform_view_base {
     /**
      *
      */
-    public function process_export($range = self::EXPORT_PAGE) {
+    public function process_export($export = self::EXPORT_PAGE) {
         global $CFG;
       
         $settings = $this->_settings;
@@ -149,29 +179,23 @@ class dataform_view_pdf extends dataform_view_base {
         if (empty($settings->pagebreak)) {
             $pdf->SetAutoPageBreak(false, 0);
         }
-/*        
+
         // Set the content
-        if ($range == self::EXPORT_ALL) {
-            $entries = new dataform_entries($this->_df, $this);
-            $options = array();
-            // Set a filter to take it all
-            $filter = $this->get_filter();
-            $filter->perpage = 0;
-            $options['filter'] = $filter;
-            // do we need ratings?
-            if ($ratingoptions = $this->is_rating()) {
-                $options['ratings'] = $ratingoptions;
-            }
-            // do we need comments?
-            
-            // Get the entries
-            $entries->set_content($options);
-            $this->_entries->set_content(array('entriesset' => $entries));
-        } else {
-            $this->set_content();
+        if ($export == self::EXPORT_ALL) {
+            $this->_filter->perpage = 0;
+        } else if ($export == self::EXPORT_PAGE) {
+            // Nothing to change in filter
+        } else if ($export) {
+            // Specific entry requested
+            $this->_filter->eids = $export;
         }
-*/
+
         $this->set_content();
+
+        // Exit if no entries
+        if (!$this->_entries->entries()) {
+            return;
+        }
         
         $content = array();
         if ($settings->pagebreak == 'entry') {
@@ -182,11 +206,11 @@ class dataform_view_pdf extends dataform_view_base {
                 $entriesset->found = 1;
                 $entriesset->entries = array($eid => $entry);
                 $this->_entries->set_content(array('entriesset' => $entriesset));
-                $pages = explode(self::PAGEBREAK, $this->display(array('tohtml' => true, 'controls' => false, 'entryactions' => false)));
-                $content += $pages;
+                $pages = explode(self::PAGE_BREAK, $this->display(array('export' => true, 'tohtml' => true, 'controls' => false, 'entryactions' => false)));
+                $content = array_merge($content,$pages);
             }
         } else {
-            $content = explode(self::PAGE_BREAK, $this->display(array('tohtml' => true, 'controls' => false, 'entryactions' => false)));
+            $content = explode(self::PAGE_BREAK, $this->display(array('export' => true, 'tohtml' => true, 'controls' => false, 'entryactions' => false)));
         }
 
 
@@ -194,18 +218,39 @@ class dataform_view_pdf extends dataform_view_base {
         
             $pdf->AddPage();
 
+            // Set page bookmarks
+            $pagecontent = $this->set_page_bookmarks($pdf, $pagecontent);
+
             // Set frame
             $this->set_frame($pdf);
             
             // Set watermark
             $this->set_watermark($pdf);
             
-            $pagecontent = $this->process_content_images($pagecontent);        
-            $pdf->writeHTML($pagecontent);
+            $pagecontent = $this->process_content_images($pagecontent);
+            $this->write_html($pdf, $pagecontent);
         }
        
+        // Set TOC
+        if (!empty($settings->toc->page)) {
+            $pdf->addTOCPage();
+            if (!empty($settings->toc->title)) {
+                $pdf->writeHTML($settings->toc->title);
+            }
+            
+            if (empty($settings->toc->template)) {
+                $pdf->addTOC($settings->toc->page, '', '.', $settings->toc->name);
+            } else {
+                $templates = explode("\n", $settings->toc->template);
+                $pdf->addHTMLTOC($settings->toc->page, $settings->toc->name, $templates);
+            }
+            $pdf->endTOCPage();
+        }
+
         // Send the pdf
-        $pdf->Output('doc.pdf', $settings->destination);
+        $documentname = optional_param('docname', $this->get_documentname($settings->docname), PARAM_TEXT);
+        $destination = optional_param('dest', $settings->destination, PARAM_ALPHA);
+        $pdf->Output("$documentname.pdf", $destination);
 
         // Clean up temp files
         if ($this->_tmpfiles) {
@@ -224,22 +269,6 @@ class dataform_view_pdf extends dataform_view_base {
         return $this->_settings;
     }
     
-    /**
-     *
-     */
-    public static function get_permission_options() {
-        return array(
-            'print' => get_string('perm_print', 'dataformview_pdf'),
-            'modify' => get_string('perm_modify', 'dataformview_pdf'),
-            'copy' => get_string('perm_copy', 'dataformview_pdf'),
-            'fill-forms' => get_string('perm_fill-forms', 'dataformview_pdf'),
-            'extract' => get_string('perm_extract', 'dataformview_pdf'),
-            'assemble' => get_string('perm_assemble', 'dataformview_pdf'),
-            'print-high' => get_string('perm_print-high', 'dataformview_pdf'),
-            //'owner' => get_string('perm_owner', 'dataformview_pdf'),
-        );
-    }
-
     /**
      * Overridden to process pdf specific area files
      */
@@ -264,8 +293,8 @@ class dataform_view_pdf extends dataform_view_base {
     /**
      * Overridden to process pdf specific area files
      */
-    public function to_form() {
-        $data = parent::to_form();
+    public function to_form($data = null) {
+        $data = parent::to_form($data);
       
         // Save pdf specific template files
         $contextid = $this->_df->context->id;
@@ -290,6 +319,30 @@ class dataform_view_pdf extends dataform_view_base {
         return $data;
     }
 
+    /**
+     * Override parent to remove pdf bookmark tags
+     */
+    public function display(array $options = array()) {
+        // For export just return the parent
+        if (!empty($options['export'])) {
+            return parent::display($options);
+        }
+        // For display we need to clean up the bookmark patterns    
+        if (!empty($options['tohtml'])) {
+            $displaycontent = parent::display($options);
+            // Remove the bookmark patterns
+            $displaycontent = preg_replace("%#@PDF-[G]*BM:\d+:[^@]*@#%", '', $displaycontent);
+        
+            return $displaycontent;
+        } else {
+            $options['tohtml'] = true;
+            $displaycontent = parent::display($options);
+            // Remove the bookmark patterns
+            $displaycontent = preg_replace("%#@PDF-[G]*BM:\d+:[^@]*@#%", '', $displaycontent);
+        
+            echo $displaycontent;            
+        }
+    }
 
     /**
      * Returns a fieldset of view options
@@ -452,7 +505,47 @@ class dataform_view_pdf extends dataform_view_base {
     /**
      *
      */
-    protected  function set_frame($pdf) {
+    protected function set_page_bookmarks($pdf, $pagecontent) {
+        $settings = $this->_settings;
+        static $bookmarkgroup = '';
+        
+        // Find all patterns ##PDFBM:d:any text##
+        if (preg_match_all("%#@PDF-[G]*BM:\d+:[^@]*@#%", $pagecontent, $matches)) {
+            if (!empty($settings->toc->page)) {
+                // Get the array of templates
+                $templates = explode("\n", $settings->toc->template);
+                
+                // Add a bookmark for each pattern
+                foreach ($matches[0] as $bookmark) {
+                    $bookmark = trim($bookmark, '#@');
+                    list($bmtype, $bmlevel, $bmtext) = explode(':', $bookmark, 3);
+                    
+                    // Must have a template for the TOC level
+                    if (empty($templates[$bmlevel])) {
+                        continue;;
+                    }
+                    
+                    // Add a group bookmark only if new
+                    if ($bmtype == 'PDF-GBM') {
+                        if ($bmtext != $bookmarkgroup) {
+                            $pdf->Bookmark($bmtext, $bmlevel);
+                            $bookmarkgroup = $bmtext;
+                        }
+                    } else {
+                        $pdf->Bookmark($bmtext, $bmlevel);
+                    }
+                }                   
+             }
+            // remove patterns from page content
+            $pagecontent = str_replace($matches[0], '', $pagecontent);
+        }
+        return $pagecontent;
+    }
+    
+    /**
+     *
+     */
+    protected function set_frame($pdf) {
         // Add to pdf frame image if any
         $fs = get_file_storage();
         if ($frame = $fs->get_area_files($this->_df->context->id, 'mod_dataform', 'view_pdfframe', $this->id(), '', false)) {
@@ -488,7 +581,7 @@ class dataform_view_pdf extends dataform_view_base {
     /**
      *
      */
-    protected  function set_watermark($pdf) {
+    protected function set_watermark($pdf) {
         // Add to pdf watermark image if any
         $fs = get_file_storage();
         if ($wmark = $fs->get_area_files($this->_df->context->id, 'mod_dataform', 'view_pdfwmark', $this->id(), '', false)) {
@@ -520,7 +613,7 @@ class dataform_view_pdf extends dataform_view_base {
     /**
      *
      */
-    protected  function set_signature($pdf) {
+    protected function set_signature($pdf) {
         $fs = get_file_storage();
         if ($cert = $fs->get_area_files($this->_df->context->id, 'mod_dataform', 'view_pdfcert', $this->id(), '', false)) {
             $cert = reset($cert);
@@ -555,6 +648,12 @@ class dataform_view_pdf extends dataform_view_base {
         );
 
         $content = $this->process_content_images($content);
+        // Add the Dataform css to content
+        if ($this->_df->data->css) {
+            $style = html_writer::tag('style', $this->_df->data->css, array('type' => 'text/css'));
+            $content = $style. $content;
+        }
+
         $pdf->SetHeaderData('', 0, '', $content);              
     }
 
@@ -577,7 +676,7 @@ class dataform_view_pdf extends dataform_view_base {
         );
 
         $content = $this->process_content_images($content);
-        //$pdf->SetFooterData('', 0, '', $content);               
+        $pdf->SetFooterData('', 0, '', $content);               
     }
 
     /**
@@ -585,29 +684,61 @@ class dataform_view_pdf extends dataform_view_base {
      */
     protected function process_content_images($content) {
         global $CFG;
-        
-        if (preg_match_all("%$CFG->wwwroot/pluginfile.php(/[^.]+.jpg)%", $content, $matches)) {
 
+        $replacements = array();
+        $tmpdir = make_temp_directory('files');
+            
+        // Does not support theme images (until we find a way to process them)
+
+        // Process pluginfile images
+        $imagetypes = get_string('imagetypes', 'dataformview_pdf');
+        if (preg_match_all("%$CFG->wwwroot/pluginfile.php(/[^.]+.($imagetypes))%", $content, $matches)) {
+            $replacements = array();
+            
             $fs = get_file_storage();
-            $tmpdir = make_temp_directory('');
             foreach ($matches[1] as $imagepath) {
                 if (!$file = $fs->get_file_by_hash(sha1($imagepath)) or $file->is_directory()) {
                     continue;
                 }
-                //$filecontent = $file->get_content();
-                $tmpdir = make_temp_directory('');
                 $filename = $file->get_filename();
-                $filepath = $tmpdir. "files/$filename";
+                $filepath = "$tmpdir/$filename";
                 if ($file->copy_content_to($filepath)) {
-                    $replacements["$CFG->wwwroot/pluginfile.php$imagepath"] = $filepath;//. $filecontent;
+                    $replacements["$CFG->wwwroot/pluginfile.php$imagepath"] = $filepath;
                     $this->_tmpfiles[] = $filepath;
                 }
             }
-            // Replace content
+        }
+        // Replace content
+        if ($replacements) {
             $content = str_replace(array_keys($replacements), $replacements, $content);
         }
         return $content;
     }
+
+    /**
+     *
+     */
+    protected function write_html($pdf, $content) {
+        
+        // Add the Dataform css to content
+        if ($this->_df->data->css) {
+            $style = html_writer::tag('style', $this->_df->data->css, array('type' => 'text/css'));
+            $content = $style. $content;
+        }
+        
+        $pdf->writeHTML($content);
+    }
+    
+    /**
+     *
+     */
+    protected function get_documentname($namepattern) {
+        $docname = 'doc';
+
+        
+        return "$docname.pdf";
+    }
+    
 }
 
 // Extend the TCPDF class to create custom Header and Footer
@@ -625,18 +756,28 @@ class dfpdf extends pdf {
         // Adjust X to override left margin
         $x = $this->GetX();
         $this->SetX($this->_dfsettings->header->marginleft);
-        $this->writeHtml($this->header_string);
+        if (!empty($this->header_string)) {
+            $text = $this->set_page_numbers($this->header_string);
+            $this->writeHtml($text);
+        }
         // Reset X to original
         $this->SetX($x);
     }
 
     // Page footer
     public function Footer() {
-        // Position at 15 mm from bottom
-        $this->SetY(-15);
-        // Set font
-        $this->SetFont('helvetica', 'I', 8);
-        // Page number
-        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+        if (!empty($this->_dfsettings->footer->text)) {
+            $text = $this->set_page_numbers($this->_dfsettings->footer->text);
+            $this->writeHtml($text);
+        }
+    }
+    
+    protected function set_page_numbers($text) {
+        $replacements = array(
+            '##pagenumber##' => $this->getAliasNumPage(),
+            '##totalpages##' => $this->getAliasNbPages(),
+        );
+        $text = str_replace(array_keys($replacements), $replacements, $text);
+        return $text;
     }
 }

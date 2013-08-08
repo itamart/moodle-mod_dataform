@@ -31,8 +31,15 @@ require_once("$CFG->libdir/csvlib.class.php");
 /**
  *
  */
-class mod_dataform_view_csv_import_form extends moodleform {
+class dataformview_csv_import_form extends moodleform {
+    protected $_view;
 
+    public function __construct($view, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->_view = $view;
+        
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
+    }
+    
     /**
      *
      */
@@ -43,7 +50,7 @@ class mod_dataform_view_csv_import_form extends moodleform {
 
     function definition() {
 
-        $view = $this->_customdata['view'];
+        $view = $this->_view;
         $fieldsettings = empty($this->_customdata['hidefieldsettings']) ? true : false;
 
         $mform = &$this->_form;
@@ -69,14 +76,14 @@ class mod_dataform_view_csv_import_form extends moodleform {
      *
      */
     protected function field_settings() {
-        $df = $this->_customdata['df'];
-        $view = $this->_customdata['view'];
+        $view = $this->_view;
+        $df = $view->get_df();
         $mform = &$this->_form;
 
         $mform->addElement('header', 'fieldsettingshdr', get_string('fieldsimportsettings', 'dataformview_import'));
         foreach ($view->get__patterns('field') as $fieldid => $patterns) {
             if ($field = $df->get_field_from_id($fieldid)) {
-                $field->patterns()->display_import($mform, $patterns);
+                $field->renderer()->display_import($mform, $patterns);
             }
         }
     }    
@@ -96,6 +103,7 @@ class mod_dataform_view_csv_import_form extends moodleform {
 
         // enclosure
         $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size'=>'10'));
+        $mform->setType('enclosure', PARAM_NOTAGS);
         $mform->setDefault('enclosure', '');
 
         // encoding
@@ -107,7 +115,7 @@ class mod_dataform_view_csv_import_form extends moodleform {
         $mform->addElement('filepicker', 'importfile', get_string('uploadfile', 'dataformview_import'));
         
         // upload text
-        $mform->addElement('textarea', 'csvtext', get_string('uploadtext', 'dataformview_import'), array('wrap' => 'virtual', 'rows' => '5', 'cols' => '60'));
+        $mform->addElement('textarea', 'csvtext', get_string('uploadtext', 'dataformview_import'), array('wrap' => 'virtual', 'rows' => '5', 'style' => 'width:100%;'));
         
         // update existing entries
         $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_import'));

@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_multiselect extends dataform_field_base {
+class dataformfield_multiselect extends dataformfield_base {
 
     public $type = 'multiselect';
     protected $_options = array();
@@ -82,6 +82,8 @@ class dataform_field_multiselect extends dataform_field_base {
     public function get_search_sql($search) {
         global $DB;
         
+        // TODO Handle search for empty field
+        
         list($not, , $value) = $search;
 
         static $i=0;
@@ -112,9 +114,9 @@ class dataform_field_multiselect extends dataform_field_base {
                 $params[$xname.'d'] = "%#$likesel#%";
             }
             if ($allrequired) {
-                return array(" $not (".implode(" AND ", $conditions).") ", $params);
+                return array(" $not (".implode(" AND ", $conditions).") ", $params, true);
             } else {
-                return array(" $not (".implode(" OR ", $conditions).") ", $params);
+                return array(" $not (".implode(" OR ", $conditions).") ", $params, true);
             }
         } else {
            return array(" ", $params);

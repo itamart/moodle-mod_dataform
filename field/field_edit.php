@@ -79,6 +79,9 @@ navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.p
 // print header
 $df->print_header(array('tab' => 'fields', 'nonotifications' => true, 'urlparams' => $urlparams));
 
+$formheading = $field->id() ? get_string('fieldedit', 'dataform', $field->name()) : get_string('fieldnew', 'dataform', $field->typename());
+echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
+
 // display form
 $mform->set_data($field->to_form());
 $mform->display();

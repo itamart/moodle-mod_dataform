@@ -68,7 +68,6 @@ if ($mform->is_cancelled()){
 
 // process validated    
 } else if ($data = $mform->get_data()) { 
-
     $data = $view->from_form($data);
 
     // add new view
@@ -83,21 +82,19 @@ if ($mform->is_cancelled()){
     }
     
     $df->notifications['good'][] = $log;
-
-    add_to_log($df->course->id, 'dataform', $log,
-               'view/index.php?d='. $df->id(). '&amp;vedit=', $view->id(), $df->cm->id);
-
-    // TODO: set default view       
+    add_to_log($df->course->id, 'dataform', $log, 'view/index.php?d='. $df->id(). '&amp;vedit=', $view->id(), $df->cm->id);
 
     if (!isset($data->submitreturnbutton)) {
+        // TODO: set default view       
+
         if ($urlparams->returnurl) {
             redirect($urlparams->returnurl);
         } else {
             redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
         }
     }
-    
-    // sace and continue so refresh the form
+
+    // Save and continue so refresh the form
     $mform = $view->get_form();       
 }
 
@@ -106,6 +103,9 @@ navigation_node::override_active_url(new moodle_url('/mod/dataform/view/index.ph
 
 // print header
 $df->print_header(array('tab' => 'views', 'nonotifications' => true, 'urlparams' => $urlparams));
+
+$formheading = $view->id() ? get_string('viewedit', 'dataform', $view->name()) : get_string('viewnew', 'dataform', $view->typename());
+echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
 
 // display form
 $mform->set_data($view->to_form());

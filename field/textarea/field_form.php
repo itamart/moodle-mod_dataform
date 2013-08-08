@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_textarea_form extends mod_dataform_field_form {
+class dataformfield_textarea_form extends dataformfield_form {
 
     /**
      *
@@ -54,8 +54,8 @@ class mod_dataform_field_textarea_form extends mod_dataform_field_form {
         $mform->disabledIf('param4', 'param1', 'eq', 0);
 
         // word count
-        $mform->addElement('text', 'param7', get_string('wordcountmin', 'dataformfield_textarea'), array('size'=>'4'));
-        $mform->addElement('text', 'param8', get_string('wordcountmax', 'dataformfield_textarea'), array('size'=>'4'));
+        //$mform->addElement('text', 'param7', get_string('wordcountmin', 'dataformfield_textarea'), array('size'=>'4'));
+        //$mform->addElement('text', 'param8', get_string('wordcountmax', 'dataformfield_textarea'), array('size'=>'4'));
 
     // editor files settings
     //-------------------------------------------------------------------------------

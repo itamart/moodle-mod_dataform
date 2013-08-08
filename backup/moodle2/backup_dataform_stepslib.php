@@ -38,7 +38,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $dataform = new backup_nested_element('dataform', array('id'), array(
             'name', 'intro', 'introformat', 'timemodified', 
             'timeavailable', 'timedue', 'timeinterval', 'intervalcount', 'allowlate',
-            'grade', 'grademethod', 'anonymous', 'notification',
+            'grade', 'grademethod', 'anonymous', 'notification', 'notificationformat',
             'entriesrequired', 'entriestoview', 'maxentries', 
             'timelimit', 'approval', 'grouped', 'rating', 'comments',
             'locks', 'singleedit', 'singleview',
@@ -49,7 +49,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         
         $fields = new backup_nested_element('fields');
         $field = new backup_nested_element('field', array('id'), array(
-            'type', 'name', 'description', 'visible', 'edits',
+            'type', 'name', 'description', 'visible', 'edits', 'label',
             'param1', 'param2', 'param3', 'param4', 'param5', 
             'param6', 'param7', 'param8', 'param9', 'param10'));
 

@@ -23,7 +23,7 @@
 require_once("$CFG->dirroot/mod/dataform/view/view_form.php");
 require_once("$CFG->libdir/csvlib.class.php");
 
-class mod_dataform_view_csv_form extends mod_dataform_view_base_form {
+class dataformview_csv_form extends dataformview_base_form {
 
     /**
      *
@@ -32,7 +32,7 @@ class mod_dataform_view_csv_form extends mod_dataform_view_base_form {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', '', get_string('settings'));
+        $mform->addElement('header', 'settingshdr', get_string('settings'));
 
         // Export type
         $options = array(
@@ -49,6 +49,7 @@ class mod_dataform_view_csv_form extends mod_dataform_view_base_form {
 
         // enclosure
         $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size'=>'10'));
+        $mform->setType('enclosure', PARAM_NOTAGS);
         $mform->setDefault('enclosure', '');
 
         // encoding

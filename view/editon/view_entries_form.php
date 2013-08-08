@@ -25,7 +25,7 @@ require_once(dirname(__FILE__). "/../view_entries_form.php");
 /**
  *
  */
-class mod_dataform_view_editon_entries_form extends mod_dataform_view_entries_form {
+class dataformview_editon_entries_form extends dataformview_entries_form {
 
     function definition() {
 

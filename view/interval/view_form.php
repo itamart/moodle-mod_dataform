@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/view/grid/view_form.php");
 
-class mod_dataform_view_interval_form extends mod_dataform_view_grid_form {
+class dataformview_interval_form extends dataformview_grid_form {
 
     /**
      *

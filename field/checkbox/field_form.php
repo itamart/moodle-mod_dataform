@@ -22,5 +22,5 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/multiselect/field_form.php");
 
-class mod_dataform_field_checkbox_form extends mod_dataform_field_multiselect_form {
+class dataformfield_checkbox_form extends dataformfield_multiselect_form {
 }

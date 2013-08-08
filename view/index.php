@@ -88,7 +88,7 @@ if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested v
 
 // any notifications?
 $df->notifications['bad']['defaultview'] = '';
-if (!$views = $df->get_views(null, false, true, flexible_table::get_sort_for_table('dataformviewsindex'. $df->id()))) {
+if (!$views = $df->get_views(null, true, flexible_table::get_sort_for_table('dataformviewsindex'. $df->id()))) {
     $df->notifications['bad']['getstartedviews'] = get_string('viewnoneindataform','dataform');  // nothing in database
 } else if (empty($df->data->defaultview)) {
     $df->notifications['bad']['defaultview'] = get_string('viewnodefault','dataform', '');

@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/view/grid/view_class.php");
 
-class dataform_view_gridext extends dataform_view_grid {
+class dataformview_gridext extends dataformview_grid {
 
     protected $type = 'gridext';
     protected $_editors = array('section', 'param2', 'param4', 'param5');

@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/rule/rule_class.php");
 
-class dataform_rule_eventnotification extends dataform_rule_notification {
+class dataformrule_eventnotification extends dataformrule_notification {
     public $type = 'eventnotification';
     
     /**
@@ -56,6 +56,13 @@ class dataform_rule_eventnotification extends dataform_rule_notification {
             }
         }
         return $events;
+    }
+
+    /**
+     * Returns the rule plugin type
+     */
+    public function plugintype() {
+        return 'eventnotification';
     }
 }
 

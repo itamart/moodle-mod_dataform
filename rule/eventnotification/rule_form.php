@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/rule/rule_form.php");
 
-class mod_dataform_rule_eventnotification_form extends mod_dataform_rule_notification_form {
+class dataformrule_eventnotification_form extends dataformrule_notification_form {
 
     /**
      *

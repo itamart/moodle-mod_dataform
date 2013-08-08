@@ -23,12 +23,22 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field__time extends dataform_field_no_content {
+class dataformfield__time extends dataformfield_no_content {
     public $type = '_time';
 
     const _TIMECREATED = 'timecreated';
     const _TIMEMODIFIED = 'timemodified';
 
+    /**
+     *
+     */
+    public static function is_internal() {
+        true;
+    }
+    
+    /**
+     *
+     */
     public static function get_field_objects($dataid) {
         $fieldobjects = array();
         
@@ -93,11 +103,11 @@ class dataform_field__time extends dataform_field_no_content {
                 $operator = '=';
             }
             $params[$namefrom] = from;
-            return array(" $not $varcharcontent $operator :$namefrom ", $params);
+            return array(" $not $varcharcontent $operator :$namefrom ", $params, false);
         } else {
             $params[$namefrom] = from;
             $params[$nameto] = to;
-            return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent <= :$nameto) ", $params);
+            return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent <= :$nameto) ", $params, false);
         }
     }
 

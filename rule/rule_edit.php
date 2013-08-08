@@ -79,6 +79,9 @@ navigation_node::override_active_url(new moodle_url('/mod/dataform/rule/index.ph
 // print header
 $df->print_header(array('tab' => 'rules', 'nonotifications' => true, 'urlparams' => $urlparams));
 
+$formheading = $rule->id() ? get_string('ruleedit', 'dataform', $rule->name()) : get_string('rulenew', 'dataform', $rule->typename());
+echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
+
 // display form
 $mform->set_data($rule->to_form());
 $mform->display();

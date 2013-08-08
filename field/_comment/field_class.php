@@ -23,12 +23,22 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field__comment extends dataform_field_no_content {
+class dataformfield__comment extends dataformfield_no_content {
 
     public $type = '_comment';
 
     const _COMMENT = 'comment';
 
+    /**
+     *
+     */
+    public static function is_internal() {
+        true;
+    }
+    
+    /**
+     *
+     */
     public static function get_field_objects($dataid) {
         $fieldobjects = array();
         
@@ -65,17 +75,23 @@ class dataform_field__comment extends dataform_field_no_content {
     public function validation($params) {
         global $DB, $USER;
 
-        // validate params
-        if (empty($params->context)
-                or $params->context->id != $this->df->context->id
-                or $params->courseid != $this->df->course->id
-                or $params->cm->id != $this->df->cm->id) {
-            throw new comment_exception('invalidid', 'dataform');
+        // Validate context
+        if (empty($params->context) or $params->context->id != $this->df->context->id) {
+            throw new comment_exception('invalidcontextid', 'dataform');
+        }
+
+        // Validate course
+        if ($params->courseid != $this->df->course->id) {
+            throw new comment_exception('invalidcourseid', 'dataform');
+        }
+
+        // Validate cm
+        if ($params->cm->id != $this->df->cm->id) {
+            throw new comment_exception('invalidcmid', 'dataform');
         }
 
         // validate comment area
-        if ($params->commentarea != 'entry'
-                and $params->commentarea != 'activity') {
+        if ($params->commentarea != 'entry' and $params->commentarea != 'activity') {
             throw new comment_exception('invalidcommentarea');
         }
 

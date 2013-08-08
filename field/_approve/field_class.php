@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field__approve extends dataform_field_no_content {
+class dataformfield__approve extends dataformfield_no_content {
 
     public $type = '_approve';
 
@@ -40,6 +40,13 @@ class dataform_field__approve extends dataform_field_no_content {
         return $fieldobjects;
     }
 
+    /**
+     *
+     */
+    public static function is_internal() {
+        true;
+    }
+    
     /**
      * 
      */
@@ -59,7 +66,7 @@ class dataform_field__approve extends dataform_field_no_content {
      */
     public function get_search_sql($search) {
         $value = $search[2];
-        return array(" e.approved = $value ", array()); 
+        return array(" e.approved = $value ", array(), false); 
     }
 
     /**

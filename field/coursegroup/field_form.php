@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/field_form.php");
 
-class mod_dataform_field_coursegroup_form extends mod_dataform_field_form {
+class dataformfield_coursegroup_form extends dataformfield_form {
 
     /**
      *
@@ -63,12 +63,12 @@ class mod_dataform_field_coursegroup_form extends mod_dataform_field_form {
         );
 
         $module = array(
-            'name' => 'M.dataform_field_coursegroup_load_course_groups',
+            'name' => 'M.dataformfield_coursegroup_load_course_groups',
             'fullpath' => '/mod/dataform/field/coursegroup/coursegroup.js',
             'requires' => array('base','io','node')
         );
 
-        $PAGE->requires->js_init_call('M.dataform_field_coursegroup_load_course_groups.init', array($options), false, $module);       
+        $PAGE->requires->js_init_call('M.dataformfield_coursegroup_load_course_groups.init', array($options), false, $module);       
     }
 
 }

@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/file/field_form.php");
 
-class mod_dataform_field_nanogong_form extends mod_dataform_field_file_form {
+class dataformfield_nanogong_form extends dataformfield_file_form {
 
     /**
      *

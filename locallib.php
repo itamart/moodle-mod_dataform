@@ -428,7 +428,7 @@ class dataform_notification_handler {
         $message->userfrom        = $data->sender;
         $message->subject         = $subject;
         $message->fullmessage     = $content;
-        $message->fullmessageformat = FORMAT_HTML;
+        $message->fullmessageformat = $data->notificationformat;
         $message->fullmessagehtml = $contenthtml;
         $message->smallmessage    = '';
         if (!empty($data->notification)) {

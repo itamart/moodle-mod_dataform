@@ -23,11 +23,12 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_time extends dataform_field_base {
+class dataformfield_time extends dataformfield_base {
 
     public $type = 'time';
     
     public $date_only;
+    public $masked;
     public $start_year;
     public $stop_year;
     public $display_format;
@@ -35,6 +36,7 @@ class dataform_field_time extends dataform_field_base {
     public function __construct($df = 0, $field = 0) {       
         parent::__construct($df, $field);
         $this->date_only = $this->field->param1;
+        $this->masked = $this->field->param5;
         $this->start_year = $this->field->param2;
         $this->stop_year = $this->field->param3;
         $this->display_format = $this->field->param4;
@@ -50,7 +52,7 @@ class dataform_field_time extends dataform_field_base {
     /**
      *
      */
-    protected function format_content($entry, array $values = null) {
+    protected function format_content($entry, array $values = null) { 
         $fieldid = $this->field->id;
         $oldcontents = array();
         $contents = array();
@@ -58,22 +60,30 @@ class dataform_field_time extends dataform_field_base {
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
+
         // new contents
         $timestamp = null;
         if (!empty($values)) {
             if (count($values) === 1) {
+                $values = reset($values);
+            }
+            
+            if (!is_array($values)) {
                 // assuming timestamp is passed (e.g. in import)
-                $timestamp = reset($values);
+                $timestamp = $values;
+
             } else {
                 // assuming any of year, month, day, hour, minute is passed
                 $enabled = $year = $month = $day = $hour = $minute = 0;
-                foreach ($values as $name => $value) {
+                foreach ($values as $name => $val) {                
                     if (!empty($name)) {          // the time unit
-                        ${$name} = $value;
+                        ${$name} = $val;
                     }
                 }
                 if ($enabled) {
-                    $timestamp = make_timestamp($year, $month, $day, $hour, $minute, 0, 0, false);
+                    if ($year or $month or $day or $hour or $minute) {
+                        $timestamp = make_timestamp($year, $month, $day, $hour, $minute, 0);
+                    }
                 }
             }
         }
@@ -127,12 +137,12 @@ class dataform_field_time extends dataform_field_base {
             if (!$operator) {
                 $operator = '=';
             }
-            $params[$namefrom] = $from;
-            return array(" $not $varcharcontent $operator :$namefrom ", $params);
+            $params[$namefrom] = $from; 
+            return array(" $not $varcharcontent $operator :$namefrom ", $params, true);
         } else {
             $params[$namefrom] = $from;
             $params[$nameto] = $to;
-            return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent < :$nameto) ", $params);
+            return array(" ($not $varcharcontent >= :$namefrom AND $varcharcontent < :$nameto) ", $params, true);
         }
     }
 

@@ -17,7 +17,7 @@
 /**
  * @package mod
  * @subpackage dataform
- * @copyright 2012 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
@@ -27,8 +27,8 @@
  */
 
 $module->component = 'mod_dataform';
-$module->version  = 2012121900;
-$module->release = '2.2.0';
+$module->version  = 2013080700;
+$module->release = '2.3.0';
 $module->requires = 2010112400;
-$module->maturity = MATURITY_RC;
+$module->maturity = MATURITY_BETA;
 //$module->cron     = 60;

@@ -164,7 +164,7 @@ if ($fields) {
 
     foreach ($fields as $fieldid => $field) {
         // Skip internal fields
-        if ($fieldid < 0) {
+        if ($field::is_internal()) {
             continue;
         }
         

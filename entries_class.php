@@ -72,9 +72,19 @@ class dataform_entries {
         } else if (!empty($options['user'])) {
             $entriesset = $this->get_entries(array('search' => array('userid' => $options['user'])));
         } else {
-            $entriesset = $this->get_entries();
+            $entriesset = $this->get_entries($options);
         }            
 
+        // Apply entry content rules
+        $rm = $this->_df->get_rule_manager();
+        if (!empty($entriesset->entries) and $rules = $rm->get_rules_by_plugintype('entrycontent')) {
+            foreach ($rules as $rule) {
+                if ($rule->is_enabled()) {
+                    $entriesset->entries = $rule->apply($entriesset->entries);
+                }
+            }
+        }
+        
         $this->_entries = !empty($entriesset->entries) ? $entriesset->entries : array();
         $this->_entriestotalcount = !empty($entriesset->max) ? $entriesset->max : count($this->_entries);
         $this->_entriesfiltercount = !empty($entriesset->found) ? $entriesset->found : count($this->_entries);
@@ -130,8 +140,15 @@ class dataform_entries {
         $wheregroup = '';
         if ($df->currentgroup) {
             $wheregroup = " AND e.groupid = :{$this->sqlparams($params, 'groupid', $df->currentgroup)} ";
+        } else {
+            // specific groups requested
+            if (!empty($filter->groups)) {
+                list($ingroups, $groupparams) = $DB->get_in_or_equal($filter->groups, SQL_PARAMS_NAMED, 'groups');
+                $whereuser .= " AND e.userid $ingroups ";
+                $params = array_merge($params, array('groups' => $userparams));
+            }
         }
-
+        
         // APPROVE filtering
         $whereapprove = '';
         if ($df->data->approval and !has_capability('mod/dataform:manageentries', $df->context)) {
@@ -173,7 +190,6 @@ class dataform_entries {
         $sqlmax = "SELECT $count FROM $tables WHERE $wheredfid $whereoptions $whereuser $wheregroup $whereapprove";
         // number of entries in this particular view call (with filtering)
         $sqlcount   = "SELECT $count FROM $fromsql WHERE $wheresql";
-
         // base params + search params
         $baseparams = array();
         foreach ($params as $paramset) {
@@ -458,13 +474,13 @@ class dataform_entries {
                             $contents = array_fill_keys(array_keys($entries), array('info' => array(), 'fields' => array()));
                             $calculations = array();
                             $entryinfo = array(
-                                dataform_field__entry::_ENTRY,
-                                dataform_field__time::_TIMECREATED,
-                                dataform_field__time::_TIMEMODIFIED,
-                                dataform_field__approve::_APPROVED,
-                                dataform_field__user::_USERID,
-                                dataform_field__user::_USERNAME,
-                                dataform_field__group::_GROUP
+                                dataformfield__entry::_ENTRY,
+                                dataformfield__time::_TIMECREATED,
+                                dataformfield__time::_TIMEMODIFIED,
+                                dataformfield__approve::_APPROVED,
+                                dataformfield__user::_USERID,
+                                dataformfield__user::_USERNAME,
+                                dataformfield__group::_GROUP
                             );
 
                             // Iterate the data and extract entry and fields content
@@ -481,7 +497,7 @@ class dataform_entries {
                                     // Entry info
                                     if (in_array($fieldid, $entryinfo)) {
                                         // TODO
-                                        if ($fieldid == dataform_field__user::_USERID or $fieldid == dataform_field__user::_USERNAME) {
+                                        if ($fieldid == dataformfield__user::_USERID or $fieldid == dataformfield__user::_USERNAME) {
                                             $entryvar = 'userid';
                                         } else {
                                             $entryvar = $field->get_internalname();

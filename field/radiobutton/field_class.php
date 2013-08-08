@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/select/field_class.php");
 
-class dataform_field_radiobutton extends dataform_field_select {
+class dataformfield_radiobutton extends dataformfield_select {
 
     public $type = 'radiobutton';
     public $separators = array(

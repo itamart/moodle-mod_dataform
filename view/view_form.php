@@ -27,24 +27,25 @@ require_once("$CFG->libdir/formslib.php");
 /**
  *
  */
-class mod_dataform_view_base_form extends moodleform {
+class dataformview_base_form extends moodleform {
+    protected $_view = null;
+    protected $_df = null;
 
+    public function __construct($view, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->_view = $view;
+        $this->_df = $view->get_df();
+        
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
+    }
+    
     /**
      *
      */
     function definition() {
-        $view = $this->_customdata['view'];
-        $df = $this->_customdata['df'];
+        $view = $this->_view;
+        $df = $this->_df;
         $editoroptions = $view->editors();
-        $mform =& $this->_form;
-
-        // hidden optional params
-        //-------------------------------------------------------------------------------
-        $mform->addElement('hidden', 'type', $view->type());
-        $mform->setType('type', PARAM_ALPHA);
-
-        $streditinga = $view->id() ? get_string('viewedit', 'dataform', $view->name()) : get_string('viewnew', 'dataform', $view->typename());
-        $mform->addElement('html', '<h2 class="mdl-align">'.format_string($streditinga).'</h2>');
+        $mform = &$this->_form;
 
         // buttons
         //-------------------------------------------------------------------------------
@@ -52,7 +53,8 @@ class mod_dataform_view_base_form extends moodleform {
 
         // general
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'general', get_string('general', 'form'));
+        $mform->addElement('header', 'general', get_string('viewgeneral', 'dataform'));
+        $mform->addHelpButton('general', 'viewgeneral', 'dataform');
 
         // name and description
         $mform->addElement('text', 'name', get_string('name'));
@@ -73,7 +75,7 @@ class mod_dataform_view_base_form extends moodleform {
         $mform->setDefault('visible', 2);
 
         // filter
-        if (!$filtersmenu = $view->get_filters(null, true)) {
+        if (!$filtersmenu = $df->get_filter_manager()->get_filters(null, true)) {
             $filtersmenu = array(0 => get_string('filtersnonedefined', 'dataform'));
         } else {
            $filtersmenu = array(0 => get_string('choose')) + $filtersmenu;
@@ -100,17 +102,18 @@ class mod_dataform_view_base_form extends moodleform {
         //-------------------------------------------------------------------------------
         $this->view_definition_before_gps();
 
-        // general purpose section
+        // View template
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'sectionhdr', get_string('viewsection', 'dataform'));
+        $mform->addElement('header', 'viewtemplatehdr', get_string('viewtemplate', 'dataform'));
+        $mform->addHelpButton('viewtemplatehdr', 'viewtemplate', 'dataform');
 
         // section position
-        $sectionposoptions = array(0 => 'top', 1 => 'left', 2 => 'right', 3 => 'bottom');
-        $mform->addElement('select', 'sectionpos', get_string('viewsectionpos', 'dataform'), $sectionposoptions);
-        $mform->setDefault('sectionpos', 0);
+        //$sectionposoptions = array(0 => 'top', 1 => 'left', 2 => 'right', 3 => 'bottom');
+        //$mform->addElement('select', 'sectionpos', get_string('viewsectionpos', 'dataform'), $sectionposoptions);
+        //$mform->setDefault('sectionpos', 0);
         
         // section
-        $mform->addElement('editor', 'esection_editor', '', array('cols' => 40, 'rows' => 12), $editoroptions['section']);
+        $mform->addElement('editor', 'esection_editor', '', null, $editoroptions['section']);
         $this->add_tags_selector('esection_editor', 'general');
 
         // view specific definition
@@ -159,7 +162,7 @@ class mod_dataform_view_base_form extends moodleform {
      *
      */
     function add_tags_selector($editorname, $tagstype){
-        $view = $this->_customdata['view'];
+        $view = $this->_view;
         $mform = &$this->_form;
         switch ($tagstype) {
             case 'general':
@@ -203,8 +206,8 @@ class mod_dataform_view_base_form extends moodleform {
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        $df = $this->_customdata['df'];
-        $view = $this->_customdata['view'];
+        $view = $this->_view;
+        $df = $this->_df;
         $errors= array();
         
         if ($df->name_exists('views', $data['name'], $view->id())) {

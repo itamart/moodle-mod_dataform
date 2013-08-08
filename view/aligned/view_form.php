@@ -23,20 +23,19 @@
 
 require_once("$CFG->dirroot/mod/dataform/view/view_form.php");
 
-class mod_dataform_view_aligned_form extends mod_dataform_view_base_form {
+class dataformview_aligned_form extends dataformview_base_form {
 
     /**
      *
      */
     function view_definition_after_gps() {
 
-        $view = $this->_customdata['view'];
-
-        $mform =& $this->_form;
+        $view = $this->_view;
+        $mform = &$this->_form;
 
         // repeated entry (param2)
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', '', get_string('viewlistbody', 'dataform'));
+        $mform->addElement('header', 'entrytemplatehdr', get_string('entrytemplate', 'dataform'));
 
         $mform->addElement('textarea', 'param2', '', array('cols' => 40, 'rows' => 12));
         $this->add_tags_selector('param2', 'view');

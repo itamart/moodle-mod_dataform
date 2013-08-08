@@ -24,7 +24,7 @@ defined('MOODLE_INTERNAL') or die;
 /**
  * Base class for view patterns
  */
-class mod_dataform_view_patterns {
+class dataformview_patterns {
 
     const PATTERN_SHOW_IN_MENU = 0;
     const PATTERN_CATEGORY = 1;
@@ -45,10 +45,22 @@ class mod_dataform_view_patterns {
         $viewid = $this->_view->view->id;
         
         $found = array();
+        // Fixed patterns
         $patterns = array_keys($this->patterns());
         foreach ($patterns as $pattern) {
             if (strpos($text, $pattern) !== false) {
                 $found[] = $pattern;
+            }
+        }
+
+        // Regexp patterns
+        if ($patterns = array_keys($this->regexp_patterns())) {
+            foreach ($patterns as $pattern) {
+                if (preg_match_all("/$pattern/", $text, $matches)) {
+                    foreach ($matches[0] as $match) {
+                        $found[$match] = $match;
+                    }
+                }
             }
         }
 
@@ -89,9 +101,10 @@ class mod_dataform_view_patterns {
         $viewname = $view->name();
         
         $info = array_keys($this->info_patterns());
-        $menus = array_keys($this->menu_patterns());
+        $ref = array_keys($this->ref_patterns());
         $userpref = array_keys($this->userpref_patterns());
         $actions = array_keys($this->action_patterns());
+        $paging = array_keys($this->paging_patterns());
         $paging = array_keys($this->paging_patterns());
         
         $options['filter'] = $view->get_filter();
@@ -103,18 +116,65 @@ class mod_dataform_view_patterns {
         foreach ($tags as $tag) {
             if (in_array($tag, $info)) {
                 $replacements[$tag] = $this->get_info_replacements($tag, $entry, $options);
-            } else if (in_array($tag, $menus)) {
-                $replacements[$tag] = $this->get_menu_replacements($tag, $entry, $options);
+            } else if (in_array($tag, $ref)) {
+                $replacements[$tag] = $this->get_ref_replacements($tag, $entry, $options);
             } else if (in_array($tag, $userpref)) {
                 $replacements[$tag] = $this->get_userpref_replacements($tag, $entry, $options);
             } else if (in_array($tag, $actions)) {
                 $replacements[$tag] = $this->get_action_replacements($tag, $entry, $options);
             } else if (in_array($tag, $paging)) {
                 $replacements[$tag] = $this->get_paging_replacements($tag, $entry, $options);
+            } else if ($this->is_regexp_pattern($tag)) {
+                $replacements[$tag] = $this->get_regexp_replacements($tag, $entry, $options);
             }
         }
-        
+
         return $replacements;
+    }
+
+    /**
+     *
+     */
+    protected function get_regexp_replacements($tag, $entry = null, array $options = null) {
+        global $OUTPUT;
+
+        $df = $this->_view->get_df();
+
+        static $views = null;
+        if ($views === null) {
+            $views = $df->get_views();
+        }
+
+        if ($views) {
+            foreach ($views as $view) {
+                $viewname = $view->name();
+                if (strpos($tag, "#{{viewlink:$viewname;") === 0) {
+                    list(, $linktext, $urlquery, ) = explode(';', $tag);
+                    // Pix icon for text
+                    if (strpos($linktext, '_pixicon:') === 0) {
+                        list(, $icon, $titletext) = explode(':', $linktext);
+                        $linktext = $OUTPUT->pix_icon($icon, $titletext);
+                    }    
+                    // Replace pipes in urlquery with &
+                    $urlquery = str_replace('|', '&', $urlquery);
+                    return html_writer::link($view->get_baseurl()->out(false). "&$urlquery", $linktext);
+                }
+                if (strpos($tag, "#{{viewsesslink:$viewname;") === 0) {
+                    list(, $linktext, $urlquery, ) = explode(';', $tag);
+                    // Pix icon for text
+                    if (strpos($linktext, '_pixicon:') === 0) {
+                        list(, $icon, $titletext) = explode(':', $linktext);
+                        $linktext = $OUTPUT->pix_icon($icon, $titletext);
+                    }    
+                    $urlquery = str_replace('|', '&', $urlquery);
+                    $linkparams = array('sesskey' => sesskey());
+                    $viewlink = new moodle_url($view->get_baseurl(), $linkparams);
+                    return html_writer::link($viewlink->out(false). "&$urlquery", $linktext);
+                }
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -138,19 +198,25 @@ class mod_dataform_view_patterns {
     /**
      *
      */
-    protected function get_menu_replacements($tag, $entry = null, array $options = null) {
-        $replacement = '';
-
+    protected function get_ref_replacements($tag, $entry = null, array $options = null) {
         switch ($tag) {
+            case '##viewurl##':
+                return $this->get_viewurl_replacement();
+            
             case '##viewsmenu##':
-                $replacement = $this->print_views_menu($options, true);
-                break;
+                return $this->print_views_menu($options, true);
 
             case '##filtersmenu##':
-                $replacement = $this->print_filters_menu($options, true);
-                break;
+                return $this->print_filters_menu($options, true);
+
+            default:
+                // View url
+                if (strpos($tag, '##viewurl:') === 0) {
+                    list(, $viewname) = explode(':', trim($tag, '#'));
+                    return $this->get_viewurl_replacement($viewname);
+                }
         }
-        return $replacement;
+        return '';
     }
 
     /**
@@ -160,20 +226,14 @@ class mod_dataform_view_patterns {
         $view = $this->_view;
         $filter = $view->get_filter();
         
-        $replacement = '';
-
         if (!$view->is_forcing_filter() and (!$filter->id or !empty($options['entriescount']))) {
             switch ($tag) {
-                case '##quicksearch##':
-                    $replacement = $this->print_quick_search($filter, true);
-                    break;
-
-                case '##quickperpage##':
-                    $replacement = $this->print_quick_perpage($filter, true);
-                    break;
+                case '##quicksearch##': return $this->print_quick_search($filter, true);
+                case '##quickperpage##': return $this->print_quick_perpage($filter, true);
+                case '##advancedfilter##': return $this->print_advanced_filter($filter, true);
             }
         }
-        return $replacement;
+        return '';
     }
 
     /**
@@ -391,14 +451,44 @@ class mod_dataform_view_patterns {
         }
         return $replacement;
     }
-   
+
+    /**
+     *
+     */
+    protected function get_viewurl_replacement($viewname = null) {
+        $view = $this->_view;
+        
+        // Return this view's url
+        if ($viewname === null) {
+            return $view->get_baseurl()->out(false);
+        }
+
+        $df = $this->_view->get_df();        
+        static $views = null;
+        if ($views === null) {
+            $views = array();
+            if ($theviews = $df->get_views()) {
+                foreach ($theviews as $theview) {
+                    $views[$theview->name()] = $view;
+                }
+            }
+        }
+        
+        if (!empty($views[$viewname])) {
+            return $views[$viewname]->get_baseurl()->out(false);
+        }
+        return '';
+    }
+    
+
+    
     /**
      *
      */
     protected function patterns() {
         $patterns = array_merge(
             $this->info_patterns(),
-            $this->menu_patterns(),
+            $this->ref_patterns(),
             $this->userpref_patterns(),
             $this->action_patterns(),
             $this->paging_patterns()
@@ -421,12 +511,27 @@ class mod_dataform_view_patterns {
     /**
      *
      */
-    protected function menu_patterns() {
-        $cat = get_string('menus', 'dataform');
+    protected function ref_patterns() {
+        $cat = get_string('reference', 'dataform');
         $patterns = array(
+            '##viewurl##' => array(true, $cat),
             '##viewsmenu##' => array(true, $cat),
             '##filtersmenu##' => array(true, $cat),
         );
+        
+        $df = $this->_view->get_df();
+
+        static $views = null;
+        if ($views === null) {
+            $views = $df->get_views_menu();
+        }
+        
+        if ($views) {
+            foreach ($views as $viewname) {
+                $patterns["##viewurl:$viewname##"] = array(false, $cat);
+            }
+        }
+        
         return $patterns;
     }
 
@@ -438,6 +543,7 @@ class mod_dataform_view_patterns {
         $patterns = array(
             '##quicksearch##' => array(true, $cat),
             '##quickperpage##' => array(true, $cat),
+            '##advancedfilter##' => array(true, $cat),
         );
         return $patterns;
     }
@@ -478,6 +584,53 @@ class mod_dataform_view_patterns {
         return $patterns;
     }
 
+
+    
+    /**
+     * TODO Currently not included in the menu
+     */
+    protected function regexp_patterns() {
+        $df = $this->_view->get_df();
+
+        $patterns = array();
+        // Get list of views
+        if ($views = $df->get_views_menu()) {
+            // View link
+            $cat = get_string('reference', 'dataform');
+            foreach ($views as $viewname) {
+                $patterns["#{{viewlink:$viewname;[^;]*;[^;]*;}}#"] = array(true, $cat);
+                $patterns["#{{viewsesslink:$viewname;[^;]*;[^;]*;}}#"] = array(true, $cat);
+            }
+        }
+        return $patterns;
+    }
+
+    /**
+     *
+     */
+    protected function is_regexp_pattern($pattern) {
+        $df = $this->_view->get_df();
+
+        static $views = null;
+        if ($views === null) {
+            $views = $df->get_views_menu();
+        }
+        
+        if ($views) {
+            foreach ($views as $viewname) {
+                if (strpos($pattern, "#{{viewlink:$viewname;") === 0) {
+                    return true;
+                }
+                if (strpos($pattern, "#{{viewsesslink:$viewname;") === 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    
     /**
      *
      */
@@ -491,7 +644,7 @@ class mod_dataform_view_patterns {
 
         $viewjump = '';
 
-        if ($menuviews = $view->get_views(null, true) and count($menuviews) > 1) {
+        if ($menuviews = $df->get_views_menu() and count($menuviews) > 1) {
 
             // Display the view form jump list
             $baseurl = $baseurl->out_omit_querystring();
@@ -524,19 +677,21 @@ class mod_dataform_view_patterns {
         $filterjump = '';
 
         if (!$view->is_forcing_filter() and ($filter->id or !empty($options['entriescount']))) {
-            $menufilters = $view->get_filters(null, true);
-
-            // TODO check session
-            $menufilters[dataform_filter_manager::USER_FILTER] = get_string('filteruserpref', 'dataform');
-            $menufilters[dataform_filter_manager::USER_FILTER_RESET] = get_string('filteruserreset', 'dataform');
-
+            $fm = $df->get_filter_manager();
+            if (!$menufilters = $fm->get_filters(null, true)) {
+                $menufilters = array();
+            }
+            if ($userfilters = $fm->get_user_filters_menu($view->id())) {
+                $menufilters[] = array(get_string('filtermy', 'dataform') => $userfilters);
+            }
+            
             $baseurl = $baseurl->out_omit_querystring();
             $baseurlparams = array('d' => $df->id(),
                                     'sesskey' => sesskey(),
                                     'view' => $view->id());
-            if ($filter->id) {
-                $menufilters[0] = get_string('filtercancel', 'dataform');
-            }
+            //if ($filter->id) {
+            //    $menufilters[0] = get_string('filtercancel', 'dataform');
+            //}
 
             // Display the filter form jump list
             $filterselect = new single_select(new moodle_url($baseurl, $baseurlparams), 'filter', $menufilters, $filter->id, array(''=>'choosedots'), 'filterbrowse_jump');
@@ -569,7 +724,7 @@ class mod_dataform_view_patterns {
                                 'view' => $view->id(),
                                 'filter' => dataform_filter_manager::USER_FILTER_SET);
 
-        if ($filter->id == dataform_filter_manager::USER_FILTER and $filter->search) {
+        if ($filter->id < 0 and $filter->search) {
             $searchvalue = $filter->search;
         } else {
             $searchvalue = '';
@@ -624,7 +779,7 @@ class mod_dataform_view_patterns {
                                 'view' => $view->id(),
                                 'filter' => dataform_filter_manager::USER_FILTER_SET);
 
-        if ($filter->id == dataform_filter_manager::USER_FILTER and $filter->perpage) {
+        if ($filter->id < 0 and $filter->perpage) {
             $perpagevalue = $filter->perpage;
         } else {
             $perpagevalue = 0;
@@ -644,5 +799,28 @@ class mod_dataform_view_patterns {
             echo $perpagejump;
         }
     }
-  
+
+    /**
+     *
+     */
+    protected function print_advanced_filter($filter, $return = false) {
+        global $OUTPUT;
+
+        $view = $this->_view;
+        $df = $view->get_df();
+        $filter = $view->get_filter();
+        $baseurl = $view->get_baseurl();
+
+        $fm = $df->get_filter_manager();
+        $filterform = $fm->get_advanced_filter_form($filter, $view);
+        
+        if ($return) {
+            return html_writer::tag('div', $filterform->html(), array('class' => 'mdl-left'));
+        } else {
+            html_writer::start_tag('div', array('class' => 'mdl-left'));
+            $filterform->display();
+            html_writer::end_tag('div');
+        }
+    }
+
 }

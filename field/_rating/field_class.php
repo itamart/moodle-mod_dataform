@@ -21,9 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
+require_once(dirname(__FILE__). '/../field_class.php');
 
-class dataform_field__rating extends dataform_field_no_content {
+class dataformfield__rating extends dataformfield_no_content {
 
     public $type = '_rating';
 
@@ -40,6 +40,25 @@ class dataform_field__rating extends dataform_field_no_content {
     const _RATINGMIN = 'ratingmin';
     const _RATINGSUM = 'ratingsum';
 
+    /**
+     *
+     */
+    public static function is_internal() {
+        true;
+    }
+    
+    /**
+     * Overriding parent to indicate that this field provides join sql
+     *
+     * @return bool
+     */
+    public function is_joined() {
+        return true;
+    }
+    
+    /**
+     *
+     */
     public static function get_field_objects($dataid) {
         $fieldobjects = array();
         

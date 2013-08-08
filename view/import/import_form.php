@@ -31,7 +31,7 @@ require_once("$CFG->libdir/csvlib.class.php");
 /**
  *
  */
-class mod_dataform_view_import_import_form extends moodleform {
+class dataformview_import_import_form extends moodleform {
 
     /**
      *
@@ -80,7 +80,7 @@ class mod_dataform_view_import_import_form extends moodleform {
         $mform->addElement('header', 'fieldsettingshdr', get_string('fieldsimportsettings', 'dataformview_import'));
         foreach ($view->get__patterns('field') as $fieldid => $patterns) {
             if ($field = $df->get_field_from_id($fieldid)) {
-                $field->patterns()->display_import($mform, $patterns);
+                $field->renderer()->display_import($mform, $patterns);
             }
         }
     }    
@@ -100,6 +100,7 @@ class mod_dataform_view_import_import_form extends moodleform {
 
         // enclosure
         $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size'=>'10'));
+        $mform->setType('enclosure', PARAM_NOTAGS);
         $mform->setDefault('enclosure', '');
 
         // encoding

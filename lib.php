@@ -469,7 +469,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
 
         // TODO
         //require_once("field/$field->type/field_class.php");
-        //$fieldclass = "dataform_field_$field->type";
+        //$fieldclass = "dataformfield_$field->type";
         //if (!$fieldclass::file_ok($relativepath)) {
         //    return false;
         //}
@@ -561,7 +561,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         $fullpath = "/$context->id/mod_dataform/$filearea/$itemid/$relativepath";
 
         //require_once("field/$field->type/field_class.php");
-        //$fieldclass = "dataform_field_$field->type";
+        //$fieldclass = "dataformfield_$field->type";
         //if (!$fieldclass::file_ok($relativepath)) {
         //    return false;
         //}
@@ -614,14 +614,14 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
     if ($templatesmanager or $entriesmanager) {
         $manage = $dfnode->add(get_string('manage', 'dataform'));
         if ($templatesmanager) {
-            $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/preset/index.php', array('id' => $PAGE->cm->id)));
-            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/view/index.php', array('id' => $PAGE->cm->id)));
+            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filter/index.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('rules', 'dataform'), new moodle_url('/mod/dataform/rule/index.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('tools', 'dataform'), new moodle_url('/mod/dataform/tool/index.php', array('id' => $PAGE->cm->id)));
             $manage->add(get_string('jsinclude', 'dataform'), new moodle_url('/mod/dataform/js.php', array('id' => $PAGE->cm->id, 'jsedit' => 1)));
             $manage->add(get_string('cssinclude', 'dataform'), new moodle_url('/mod/dataform/css.php', array('id' => $PAGE->cm->id, 'cssedit' => 1)));
+            $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/preset/index.php', array('id' => $PAGE->cm->id)));
         }
         $manage->add(get_string('import', 'dataform'), new moodle_url('/mod/dataform/import.php', array('id' => $PAGE->cm->id)));
     }
@@ -792,7 +792,7 @@ function dataform_comment_permissions($comment_param) {
     global $CFG;
 
     //require_once("$CFG->field/_comment/field_class.php");
-    //$comment = new dataform_field__comment($comment_param->cm->instance);
+    //$comment = new dataformfield__comment($comment_param->cm->instance);
     //return $comment->permissions($comment_param);
     return array('post'=>true, 'view'=>true);
 }
@@ -813,7 +813,7 @@ function dataform_comment_validate($comment_param) {
     global $CFG;
 
     require_once("field/_comment/field_class.php");
-    $comment = new dataform_field__comment($comment_param->cm->instance);
+    $comment = new dataformfield__comment($comment_param->cm->instance);
     return $comment->validation($comment_param);
 }
 
@@ -821,7 +821,7 @@ function dataform_comment_validate($comment_param) {
  *
  */
 function dataform_comment_add($newcomment, $comment_param) {
-    $df = new dataform(null, $comment_param->cm->instance);
+    $df = new dataform($comment_param->cm->instance);
     $eventdata = (object) array('items' => $newcomment);
     $df->events_trigger("commentadded", $eventdata);
 }
@@ -867,7 +867,7 @@ function dataform_rating_validate($params) {
     require_once("mod_class.php");
     require_once("field/_rating/field_class.php");
     $df = new dataform(null, $params['context']->instanceid);
-    $rating = $df->get_field_from_id(dataform_field__rating::_RATING);
+    $rating = $df->get_field_from_id(dataformfield__rating::_RATING);
     return $rating->validation($params);
 }
 

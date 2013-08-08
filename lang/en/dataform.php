@@ -26,6 +26,8 @@
  * certain copyrights on the Database module may obtain.
  */
 
+$string['fieldlabel'] = 'Field label';
+$string['fieldlabel_help'] = 'The field label allows for specifying a designated field label that can be added to the view by means of the [[fieldname@]] field pattern. This field pattern observes the field visibility and is hidden if the field is set to be hidden. The field label can also serve as a field display template and it interprets patterns of that field if included in the label. For example, with a number field called Number and the field label defined as \'You have earned [[Number]] credits.\' and an entry where the number value is 47 the pattern [[Number@]] would be displayed as \'You have earned 47 credits.\'';
 $string['actions'] = 'Entry actions';
 $string['alignment'] = 'Alignment';
 $string['allowaddoption'] = 'Allow adding options';
@@ -206,6 +208,27 @@ $string['filetypeimage'] = 'Image files';
 $string['filetypejpg'] = 'jpg files';
 $string['filetypepng'] = 'png files';
 $string['filetypes'] = 'Accepted file types';
+// FILTER
+$string['empty'] = 'Empty';
+$string['equal'] = 'Equal';
+$string['greaterthan'] = 'Greater than';
+$string['lessthan'] = 'Less than';
+$string['greaterorequal'] = 'Greater or equal';
+$string['lessorequal'] = 'Less or equal';
+$string['between'] = 'Between';
+$string['contains'] = 'Contains';
+$string['in'] = 'In';
+
+// FILTER FORM
+$string['andor'] = 'and/or ...';
+$string['and'] = 'AND';
+$string['or'] = 'OR';
+$string['is'] = 'IS';
+$string['not'] = 'NOT';
+// FILTER
+$string['filtersortfieldlabel'] = 'Sort field ';
+$string['filtersearchfieldlabel'] = 'Search field ';
+$string['filteradvanced'] = 'Advanced filter';
 $string['filteradd'] = 'Add a filter';
 $string['filterbypage'] = 'By page';
 $string['filtercancel'] = 'Cancel filter';
@@ -237,8 +260,10 @@ $string['filtersnoneindataform'] = 'There are no filters defined for this datafo
 $string['filtersupdated'] = '{$a} filter(s) updated';
 $string['filterupdate'] = 'Update an existing filter';
 $string['filterurlquery'] = 'Url query';
-$string['filteruserpref'] = '* My filter';
+$string['filtermy'] = 'My filter';
 $string['filteruserreset'] = '** Reset my filter';
+
+
 $string['firstdayofweek'] = 'Monday';
 $string['first'] = 'First';
 $string['formemptyadd'] = 'You did not fill out any fields!';
@@ -277,7 +302,7 @@ $string['mappingwarning'] = 'All old fields not mapped to a new field will be lo
 $string['max'] = 'Maximum';
 $string['maxsize'] = 'Maximum size';
 $string['mediafile'] = 'Media file';
-$string['menus'] = 'Menus';
+$string['reference'] = 'Reference';
 /// Message strings
 $string['message_entryadded'] = 'The following entries have been added to {$a->dataformlink} by {$a->senderprofilelink}: {$a->entrylinks}.';
 $string['message_entryupdated'] = 'The following entries have been updated in {$a->dataformlink} by {$a->senderprofilelink}: {$a->entrylinks}.';
@@ -306,7 +331,6 @@ $string['multidelete'] = ' Delete  ';
 $string['multidownload'] = 'Download';
 $string['multiduplicate'] = 'Duplicate';
 $string['multiedit'] = '  Edit   ';
-$string['multientry'] = 'Repeated entry';
 $string['multiexport'] = 'Export';
 $string['multipletags'] = 'Multiple tags found! View not saved';
 $string['multiselect'] = 'Multi-select';
@@ -407,7 +431,7 @@ $string['ruledenyview'] = 'Hide entry from everyone';
 $string['ruledescription'] = 'Rule description';
 $string['ruleedit'] = 'Editing \'{$a}\'';
 $string['rulename'] = 'Dataform auto-linking';
-$string['rulenew'] = 'New rule';
+$string['rulenew'] = 'New {$a} rule';
 $string['rulenoneforaction'] = 'No rules were found for the requested action';
 $string['rule'] = 'rule';
 $string['rulesadded'] = '{$a} rule(s) added';
@@ -477,6 +501,7 @@ $string['viewcustomhours'] = 'Custom refresh interval: hours';
 $string['viewcustomminutes'] = 'Custom refresh interval: minutes';
 $string['viewdescription'] = 'View description';
 $string['viewedit'] = 'Editing \'{$a}\'';
+$string['vieweditthis'] = 'Edit this view';
 $string['viewfieldtags'] = 'Field tags';
 $string['viewfilter'] = 'Filter';
 $string['viewforedit'] = 'View for \'edit\'';
@@ -486,7 +511,8 @@ $string['viewgeneraltags'] = 'General tags';
 $string['viewgroupby'] = 'Group by';
 $string['viewintervalsettings'] = 'Interval settings';
 $string['viewinterval'] = 'When to refresh view content';
-$string['viewlistbody'] = 'Repeated entry';
+$string['entrytemplate'] = 'Entry template';
+$string['entrytemplate_help'] = 'Entry template';
 $string['viewlistfooter'] = 'List footer';
 $string['viewlistheader'] = 'List header';
 $string['viewname'] = 'View name';
@@ -505,7 +531,10 @@ $string['viewsadded'] = '{$a} view(s) added';
 $string['viewsconfirmdelete'] = 'You are about to delete {$a} view(s). Would you like to proceed?';
 $string['viewsconfirmduplicate'] = 'You are about to duplicate {$a} view(s). Would you like to proceed?';
 $string['viewsdeleted'] = '{$a} view(s) deleted';
-$string['viewsection'] = 'General purpose section';
+$string['viewtemplate'] = 'View template';
+$string['viewtemplate_help'] = 'View template';
+$string['viewgeneral'] = 'View general settings';
+$string['viewgeneral_help'] = 'View general settings';
 $string['viewsectionpos'] = 'Section position';
 $string['viewslidepaging'] = 'Slide paging';
 $string['viewsmax'] = 'Maximum views';

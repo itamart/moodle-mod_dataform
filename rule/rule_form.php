@@ -16,7 +16,7 @@
  
 /**
  * @package dataformrule
- * @copyright 2012 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
@@ -26,17 +26,22 @@ require_once("$CFG->libdir/formslib.php");
 /**
  *
  */
-class mod_dataform_rule_form extends moodleform {
+class dataformrule_form extends moodleform {
     protected $_rule = null;
     protected $_df = null;
 
+    public function __construct($rule, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->_rule = $rule;
+        $this->_df = $this->_rule->df;
+        
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);
+    }
+    
+    /**
+     *
+     */
     function definition() {        
-        $this->_rule = $this->_customdata['rule'];
-        $this->_df = $this->_rule->df();
         $mform = &$this->_form;
-
-        $streditinga = $this->_rule->id() ? get_string('ruleedit', 'dataform', $this->_rule->name()) : get_string('rulenew', 'dataform', $this->_rule->type());
-        $mform->addElement('html', html_writer::tag('h2', format_string($streditinga), array('class' => 'mdl-align')));
 
         // buttons
         //-------------------------------------------------------------------------------
@@ -121,7 +126,7 @@ class mod_dataform_rule_form extends moodleform {
 /**
  *
  */
-class mod_dataform_rule_notification_form extends mod_dataform_rule_form {
+class dataformrule_notification_form extends dataformrule_form {
 
     /**
      *
@@ -132,7 +137,7 @@ class mod_dataform_rule_notification_form extends mod_dataform_rule_form {
         $rule = $this->_rule;
 
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', '', get_string('settings', 'dataform'));
+        $mform->addElement('header', 'settingshdr', get_string('settings'));
         
         // notification type: email, message
         $options = array(
@@ -214,4 +219,13 @@ class mod_dataform_rule_notification_form extends mod_dataform_rule_form {
             'email' => 16,
         );
     }
+}/**
+ *
+ */
+
+/**
+ *
+ */
+class dataformrule_entrycontent_form extends dataformrule_form {
+
 }

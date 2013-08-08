@@ -20,12 +20,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->dirroot/mod/dataform/mod_class.php");
+require_once(dirname(__FILE__). '/../mod_class.php');
 
 /**
  * Base class for Dataform Field Types
  */
-abstract class dataform_field_base {
+abstract class dataformfield_base {
 
     const VISIBLE_NONE = 0;
     const VISIBLE_OWNER = 1;
@@ -36,7 +36,7 @@ abstract class dataform_field_base {
     public $df = null;       // The dataform object that this field belongs to
     public $field = null;      // The field object itself, if we know it
 
-    protected $_patterns = null;
+    protected $_renderer = null;
     protected $_distinctvalues = null;
     
     /**
@@ -85,6 +85,7 @@ abstract class dataform_field_base {
         $this->field->description = !empty($forminput->description) ? trim($forminput->description) : '';
         $this->field->visible = isset($forminput->visible) ? $forminput->visible : 2;
         $this->field->edits = isset($forminput->edits) ? $forminput->edits : -1;
+        $this->field->label = !empty($forminput->label) ? $forminput->label : '';
         for ($i=1; $i<=10; $i++) {
             $this->field->{"param$i"} = !empty($forminput->{"param$i"}) ? trim($forminput->{"param$i"}) : null;
         }
@@ -211,17 +212,16 @@ abstract class dataform_field_base {
 
         if (file_exists($CFG->dirroot. '/mod/dataform/field/'. $this->type. '/field_form.php')) {
             require_once($CFG->dirroot. '/mod/dataform/field/'. $this->type. '/field_form.php');
-            $formclass = 'mod_dataform_field_'. $this->type. '_form';
+            $formclass = 'dataformfield_'. $this->type. '_form';
         } else {
             require_once($CFG->dirroot. '/mod/dataform/field/field_form.php');
-            $formclass = 'mod_dataform_field_form';
+            $formclass = 'dataformfield_form';
         }
-        $custom_data = array('field' => $this);
         $actionurl = new moodle_url(
             '/mod/dataform/field/field_edit.php',
             array('d' => $this->df->id(), 'fid' => $this->id(), 'type' => $this->type)
         );
-        return new $formclass($actionurl, $custom_data);
+        return new $formclass($this, $actionurl);
     }
 
     /**
@@ -234,15 +234,15 @@ abstract class dataform_field_base {
     /**
      *
      */
-    public function patterns() {
+    public function renderer() {
         global $CFG;
 
-        if (!$this->_patterns) {
-            $patternsclass = "mod_dataform_field_{$this->type}_patterns";
-            require_once("$CFG->dirroot/mod/dataform/field/{$this->type}/field_patterns.php");
-            $this->_patterns = new $patternsclass($this);
+        if (!$this->_renderer) {
+            $rendererclass = "dataformfield_{$this->type}_renderer";
+            require_once("$CFG->dirroot/mod/dataform/field/{$this->type}/renderer.php");
+            $this->_renderer = new $rendererclass($this);
         }
-        return $this->_patterns;
+        return $this->_renderer;
     }
 
     /**
@@ -274,9 +274,15 @@ abstract class dataform_field_base {
             $options['edit'] = false;
         }
         
-        return $this->patterns()->get_replacements($patterns, $entry, $options);
+        return $this->renderer()->get_replacements($patterns, $entry, $options);
     }
-    
+       
+    /**
+     *
+     */
+    public static function is_internal() {
+        false;
+    }
     
     /**
      *
@@ -444,7 +450,7 @@ abstract class dataform_field_base {
         $fieldname = $this->name();
         // TODO
         // Ugly hack for internal fields
-        if ($fieldid < 0) {
+        if ($this->is_internal()) {
             $setting = reset($importsettings);
             $csvname = $setting['name'];
         } else {
@@ -570,32 +576,68 @@ abstract class dataform_field_base {
 
         static $i=0;
         $i++;
-        $fieldid = $this->field->id < 0 ? '_'. abs($this->field->id) : $this->field->id;
+        $fieldid = $this->field->id;
         $name = "df_{$fieldid}_{$i}";
 
-        $varcharcontent = $this->get_sql_compare_text();
-        $equal = ($not === ''); 
+        // For all NOT criteria except NOT Empty, exclude entries
+        // which don't meet the positive criterion
+        // because some fields may not have content records
+        // and the respective entries may be filter out 
+        // despite meeting the criterion
+        $excludeentries = ($not and $operator !== '');
+        
+        if ($excludeentries) {
+            $varcharcontent = $DB->sql_compare_text('content');
+        } else {
+            $varcharcontent = $this->get_sql_compare_text();
+        }
 
-        if ($operator === 'IN') {
-            $searchvalue = array_map('trim', $value);
-            list($sql, $params) = $DB->get_in_or_equal($searchvalue, SQL_PARAMS_NAMED, "df_{$fieldid}_", $equal);
-            return array(" $varcharcontent $sql ", $params);
+        if ($operator === '') {
+            list($sql, $params) = $DB->get_in_or_equal('', SQL_PARAMS_NAMED, "df_{$fieldid}_", !$not);
+            $sql = " $varcharcontent $sql ";
         } else if ($operator === '=') {
             $searchvalue = trim($value);
-            list($sql, $params) = $DB->get_in_or_equal($searchvalue, SQL_PARAMS_NAMED, "df_{$fieldid}_", $equal);
-            return array(" $varcharcontent $sql ", $params);
+            list($sql, $params) = $DB->get_in_or_equal($searchvalue, SQL_PARAMS_NAMED, "df_{$fieldid}_");
+            $sql = " $varcharcontent $sql ";
+        } else if ($operator === 'IN') {
+            $searchvalue = array_map('trim', $value);
+            list($sql, $params) = $DB->get_in_or_equal($searchvalue, SQL_PARAMS_NAMED, "df_{$fieldid}_");
+            $sql = " $varcharcontent $sql ";
         } else if (in_array($operator, array('LIKE', 'BETWEEN', ''))) {
             $params = array($name => "%$value%");
-            if ($not) {
-                return array($DB->sql_like($varcharcontent, ":$name", false, true, true), $params);
+            $sql = $DB->sql_like($varcharcontent, ":$name", false);
+        } else {
+            $params = array($name => "'$value'");
+            $sql = " $varcharcontent $operator :$name ";
+        }
+
+        // 
+        if ($excludeentries) {
+            // Get entry ids for entries that meet the criterion
+            if ($eids = $this->get_entry_ids_for_content($sql, $params)) {
+                // Get NOT IN sql 
+                list($notinids, $params) = $DB->get_in_or_equal($eids, SQL_PARAMS_NAMED, "df_{$fieldid}_", false);
+                $sql = " e.id $notinids ";
+                return array($sql, $params, false);
             } else {
-                return array($DB->sql_like($varcharcontent, ":$name", false), $params);
+                return null;
             }
         } else {
-            return array(" $not $varcharcontent $operator :$name ", array($name => "'$value'"));
+            return array($sql, $params, true);
         }
     }
 
+    /**
+     *
+     */
+    protected function get_entry_ids_for_content($sql, $params) {
+        global $DB;
+        
+        $sql = " fieldid = :fieldid AND $sql ";
+        $params['fieldid'] = $this->id();
+        return $DB->get_records_select_menu('dataform_contents', $sql, $params, '', 'id,entryid');
+    }
+    
     /**
      *
      */
@@ -617,10 +659,10 @@ abstract class dataform_field_base {
     }
 
     /**
-     * Validate form data in entries form
+     *
      */
-    public function validate($eid, $patterns, $formdata) {
-        return $this->patterns()->validate_data($eid, $patterns, $formdata);
+    public function get_search_value($value) {
+        return $value;
     }
 
     /**
@@ -633,10 +675,28 @@ abstract class dataform_field_base {
     }
 
     /**
+     * Whether this field provides join sql for fetching content
      *
+     * @return bool
+     */
+    public function is_joined() {
+        return false;
+    }
+
+    /**
+     * Whether this field content resides in dataform_contents
+     *
+     * @return bool
      */
     public function is_dataform_content() {
         return true;
+    }
+
+    /**
+     * Validate form data in entries form
+     */
+    public function validate($eid, $patterns, $formdata) {
+        return $this->renderer()->validate_data($eid, $patterns, $formdata);
     }
 
     /**
@@ -657,7 +717,7 @@ abstract class dataform_field_base {
 /**
  * Base class for Dataform field types that require no content
  */
-abstract class dataform_field_no_content extends dataform_field_base {
+abstract class dataformfield_no_content extends dataformfield_base {
     public function update_content($entry, array $values = null) {
         return true;
     }

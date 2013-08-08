@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_url extends dataform_field_base {
+class dataformfield_url extends dataformfield_base {
     public $type = 'url';
 
     /**

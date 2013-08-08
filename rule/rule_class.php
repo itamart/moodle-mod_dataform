@@ -16,7 +16,7 @@
 
 /**
  * @package dataformrule
- * @copyright 2012 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -25,7 +25,7 @@ require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 /**
  * Base class for Dataform Rule Types
  */
-abstract class dataform_rule_base {
+abstract class dataformrule_base {
 
     public $type = 'unknown';  // Subclasses must override the type with their name
 
@@ -129,13 +129,6 @@ abstract class dataform_rule_base {
     }
 
     /**
-     *
-     */
-    public function apply_rule() {
-        return true;
-    }
-
-    /**
      * Getter
      */
     public function get($var) {
@@ -159,6 +152,13 @@ abstract class dataform_rule_base {
      */
     public function type() {
         return $this->type;
+    }
+
+    /**
+     * Returns the rule plugin type
+     */
+    public function plugintype() {
+        return null;
     }
 
     /**
@@ -190,17 +190,16 @@ abstract class dataform_rule_base {
 
         if (file_exists($CFG->dirroot. '/mod/dataform/rule/'. $this->type. '/rule_form.php')) {
             require_once($CFG->dirroot. '/mod/dataform/rule/'. $this->type. '/rule_form.php');
-            $formclass = 'mod_dataform_rule_'. $this->type. '_form';
+            $formclass = 'dataformrule_'. $this->type. '_form';
         } else {
             require_once($CFG->dirroot. '/mod/dataform/rule/rule_form.php');
-            $formclass = 'mod_dataform_rule_form';
+            $formclass = 'dataformrule_form';
         }
-        $custom_data = array('rule' => $this);
         $actionurl = new moodle_url(
             '/mod/dataform/rule/rule_edit.php',
             array('d' => $this->df->id(), 'rid' => $this->id(), 'type' => $this->type)
         );
-        return new $formclass($actionurl, $custom_data);
+        return new $formclass($this, $actionurl);
     }
 
     /**
@@ -255,7 +254,7 @@ abstract class dataform_rule_base {
 /**
  * Base class for Dataform notification rule types
  */
-abstract class dataform_rule_notification extends dataform_rule_base {
+abstract class dataformrule_notification extends dataformrule_base {
     const SEND_MESSAGE = 1;
     const SEND_EMAIL = 2;
 
@@ -508,5 +507,33 @@ abstract class dataform_rule_notification extends dataform_rule_base {
         $posthtml .= '</font><hr />';
         return $posthtml;
     }
+
+    /**
+     * Returns the rule plugin type
+     */
+    public function plugintype() {
+        return 'notification';
+    }   
+}
+
+/**
+ * Base class for Dataform entry content rule types
+ */
+abstract class dataformrule_entrycontent extends dataformrule_base {
+
+    public $type = 'unknown';
     
+    /**
+     *
+     */
+    public function apply(array $entries) {
+        return $entries;
+    }
+
+    /**
+     * Returns the rule plugin type
+     */
+    public function plugintype() {
+        return 'entrycontent';
+    }       
 }

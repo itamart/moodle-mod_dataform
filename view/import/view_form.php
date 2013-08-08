@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/view/view_form.php");
 
-class mod_dataform_view_import_form extends mod_dataform_view_base_form {
+class dataformview_import_form extends dataformview_base_form {
 
     /**
      *

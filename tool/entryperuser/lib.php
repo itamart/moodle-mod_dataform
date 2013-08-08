@@ -24,6 +24,7 @@
 defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->dirroot/mod/dataform/entries_class.php");
+require_once("$CFG->dirroot/mod/dataform/field/_user/field_class.php");
 
 class dataformtool_entryperuser {
     /**
@@ -39,7 +40,7 @@ class dataformtool_entryperuser {
         
         // Construct entries data
         $data = (object) array('eids' => array());
-        $fieldid = $df::_USERID;
+        $fieldid = dataformfield__user::_USERID;
         $entryid = -1;
         foreach ($users as $userid => $unused) {
             $data->eids[$entryid] = $entryid;

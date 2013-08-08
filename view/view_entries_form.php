@@ -24,15 +24,12 @@ require_once $CFG->libdir.'/formslib.php';
 /**
  *
  */
-class mod_dataform_view_entries_form extends moodleform {
+class dataformview_entries_form extends moodleform {
 
     function definition() {
 
         $view = $this->_customdata['view'];
-        $update = $this->_customdata['update'];
         $mform =& $this->_form;
-
-        $mform->addElement('hidden', 'update', $update);
 
         // buttons
         //-------------------------------------------------------------------------------
@@ -52,19 +49,20 @@ class mod_dataform_view_entries_form extends moodleform {
      */
     function add_action_buttons($cancel = true, $submit = null) {
         $mform = &$this->_form;
+        
+        static $i = 0;
+        $i++;
 
-        $mform->addElement('html', '<div class="mdl-align">');
         $arr = array();
         $submitlabel = $submit ? $submit : get_string('savechanges');
-        $arr[] = &$mform->createElement('submit', 'submitbutton', $submitlabel);
+        $arr[] = &$mform->createElement('submit', "submitbutton$i", $submitlabel);
         if ($this->add_action_save_continue()) {
-            $arr[] = &$mform->createElement('submit', 'submitreturnbutton', get_string('savecontinue', 'dataform'));
+            $arr[] = &$mform->createElement('submit', "submitreturnbutton$i", get_string('savecontinue', 'dataform'));
         }
         if ($cancel) {
-            $arr[] = &$mform->createElement('cancel');
+            $arr[] = &$mform->createElement('cancel', "cancel$i");
         }
         $mform->addGroup($arr, 'buttonarr', null, ' ', false);
-        $mform->addElement('html', '</div>');
     }
 
     /**
@@ -95,7 +93,7 @@ class mod_dataform_view_entries_form extends moodleform {
             $view = $this->_customdata['view'];
             $patterns = $view->get__patterns('field');
             $fields = $view->get_view_fields();
-            $entryids = explode(',', $data['update']);
+            $entryids = explode(',', $this->_customdata['update']);
 
             foreach ($entryids as $eid) {
                 // validate all fields for this entry

@@ -1,0 +1,12 @@
+.yui3-panel {
+    outline: none;
+}
+.yui3-panel-content .yui3-widget-hd {
+    font-weight: bold;
+}
+.yui3-panel-content .yui3-widget-bd {
+    padding: 15px;
+}
+.yui3-panel-content label {
+    margin-right: 30px;
+}

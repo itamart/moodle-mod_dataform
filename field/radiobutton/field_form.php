@@ -22,7 +22,7 @@
  */
 require_once("$CFG->dirroot/mod/dataform/field/select/field_form.php");
 
-class mod_dataform_field_radiobutton_form extends mod_dataform_field_select_form {
+class dataformfield_radiobutton_form extends dataformfield_select_form {
 
     /**
      *

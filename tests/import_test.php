@@ -82,7 +82,7 @@ class dataform_import_test extends advanced_testcase {
         
         
         // Import entries
-        $importview = new dataform_view_import($this->dataform, 1);
+        $importview = new dataformview_import($this->dataform, 1);
         $data = (object) array('eids' => array());
         $options = array('settings' => array(
             -6 => array('author:id' => array('name' => 'author:id')),

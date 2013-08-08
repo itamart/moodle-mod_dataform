@@ -23,7 +23,7 @@
 
 require_once("$CFG->dirroot/mod/dataform/field/field_class.php");
 
-class dataform_field_text extends dataform_field_base {
+class dataformfield_text extends dataformfield_base {
 
     public $type = 'text';
 
