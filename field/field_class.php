@@ -584,7 +584,7 @@ abstract class dataformfield_base {
         // because some fields may not have content records
         // and the respective entries may be filter out 
         // despite meeting the criterion
-        $excludeentries = ($not and $operator !== '');
+        $excludeentries = (($not and $operator !== '') or (!$not and $operator === ''));
         
         if ($excludeentries) {
             $varcharcontent = $DB->sql_compare_text('content');
@@ -593,7 +593,7 @@ abstract class dataformfield_base {
         }
 
         if ($operator === '') {
-            list($sql, $params) = $DB->get_in_or_equal('', SQL_PARAMS_NAMED, "df_{$fieldid}_", !$not);
+            list($sql, $params) = $DB->get_in_or_equal('', SQL_PARAMS_NAMED, "df_{$fieldid}_", false);
             $sql = " $varcharcontent $sql ";
         } else if ($operator === '=') {
             $searchvalue = trim($value);
@@ -610,7 +610,6 @@ abstract class dataformfield_base {
             $params = array($name => "'$value'");
             $sql = " $varcharcontent $operator :$name ";
         }
-
         // 
         if ($excludeentries) {
             // Get entry ids for entries that meet the criterion
