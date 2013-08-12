@@ -241,6 +241,8 @@ class mod_dataform_filter_form extends mod_dataform_filter_base_form {
         $fieldoptions = array(0 => get_string('choose')) + $df->get_fields(array('entry'), true);
 
         $mform = &$this->_form;
+        
+        //$mform->addElement('html', dataform_filter_manager::get_filter_url_query($filter));
 
         // buttons
         //-------------------------------------------------------------------------------

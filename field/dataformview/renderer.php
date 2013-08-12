@@ -176,12 +176,14 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
     
         // Custom sort
         if ($soptions = $this->get_sort_options()) {
-            $usort = dataform_filter::get_sort_url_query($soptions);
+            $fm = $this->_df->get_filter_manager();
+            $usort = $fm::get_sort_url_query($soptions);
             $params['usort'] = $usort;
         }
         // Custom search
         if ($soptions = $this->get_search_options($entry)) {
-            $usearch = dataform_filter::get_search_url_query($soptions);
+            $fm = $this->_df->get_filter_manager();
+            $usearch = $fm::get_search_url_query($soptions);
             $params['usearch'] = $usearch;
         }
 
@@ -259,7 +261,7 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
                 }
                 // Convert direction to 0/1
                 $dir = $dir == 'DESC' ? 1 : 0;
-                $soptions[] = array($rfieldid, $dir);
+                $soptions[$rfieldid] = $dir;
             }
         }
         return $soptions;

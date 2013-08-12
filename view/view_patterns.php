@@ -199,23 +199,30 @@ class dataformview_patterns {
      *
      */
     protected function get_ref_replacements($tag, $entry = null, array $options = null) {
-        switch ($tag) {
-            case '##viewurl##':
-                return $this->get_viewurl_replacement();
-            
-            case '##viewsmenu##':
-                return $this->print_views_menu($options, true);
-
-            case '##filtersmenu##':
-                return $this->print_filters_menu($options, true);
-
-            default:
-                // View url
-                if (strpos($tag, '##viewurl:') === 0) {
-                    list(, $viewname) = explode(':', trim($tag, '#'));
-                    return $this->get_viewurl_replacement($viewname);
-                }
+        if ($tag == '##viewsmenu##') {
+            return $this->print_views_menu($options, true);
         }
+
+        if ($tag == '##filtersmenu##') {
+            return $this->print_filters_menu($options, true);
+        }
+
+        // View url
+        if ($tag == '##viewurl##') {
+            return $this->get_viewurl_replacement();
+        }
+        
+        if (strpos($tag, '##viewurl:') === 0) {
+            list(, $viewname) = explode(':', trim($tag, '#'));
+            return $this->get_viewurl_replacement($viewname);
+        }
+
+        // View content
+        if (strpos($tag, '##viewcontent:') === 0) {
+            list(, $viewname) = explode(':', trim($tag, '#'));
+            return $this->get_viewcontent_replacement($viewname);
+        }
+
         return '';
     }
 
@@ -469,13 +476,40 @@ class dataformview_patterns {
             $views = array();
             if ($theviews = $df->get_views()) {
                 foreach ($theviews as $theview) {
-                    $views[$theview->name()] = $view;
+                    $views[$theview->name()] = $theview;
                 }
             }
         }
         
         if (!empty($views[$viewname])) {
             return $views[$viewname]->get_baseurl()->out(false);
+        }
+        return '';
+    }
+    
+    /**
+     *
+     */
+    protected function get_viewcontent_replacement($viewname = null) {
+        $df = $this->_view->get_df();        
+        static $views = null;
+        if ($views === null) {
+            $views = array();
+            if ($theviews = $df->get_views()) {
+                foreach ($theviews as $theview) {
+                    $views[$theview->name()] = $theview;
+                }
+            }
+        }
+        
+        if (!empty($views[$viewname])) {
+            // Cannot display current view or else infinite loop
+            if ($views[$viewname]->id() == $this->_view->id()) {
+                return '';
+            }
+
+            $views[$viewname]->set_content();
+            return $views[$viewname]->display(array('tohtml' => true));
         }
         return '';
     }
@@ -528,7 +562,8 @@ class dataformview_patterns {
         
         if ($views) {
             foreach ($views as $viewname) {
-                $patterns["##viewurl:$viewname##"] = array(false, $cat);
+                $patterns["##viewurl:$viewname##"] = array(false);
+                $patterns["##viewcontent:$viewname##"] = array(false);
             }
         }
         
@@ -789,7 +824,7 @@ class dataformview_patterns {
            20=>20,30=>30,40=>40,50=>50,100=>100,200=>200,300=>300,400=>400,500=>500,1000=>1000);
 
         // Display the view form jump list
-        $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'userperpage', $perpage, $perpagevalue, array(''=>'choosedots'), 'perpage_jump');
+        $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'uperpage', $perpage, $perpagevalue, array(''=>'choosedots'), 'perpage_jump');
         $select->set_label(get_string('filterperpage','dataform'). '&nbsp;');
         $perpagejump = $OUTPUT->render($select);
 

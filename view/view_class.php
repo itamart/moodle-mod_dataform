@@ -55,24 +55,6 @@ class dataformview_base {
     protected $_returntoentriesform = false;
 
     /**
-     * 
-     */
-    public static function get_filter_options_from_url() {
-        $options = array();
-        
-        $options['filterid'] = optional_param('filter', 0, PARAM_INT);
-        $options['afilter'] = optional_param('afilter', 0, PARAM_INT);
-        $options['eids'] = optional_param('eids', 0, PARAM_INT);
-        $options['page'] = optional_param('page', 0, PARAM_INT);
-        $options['usort'] = optional_param('usort', '', PARAM_RAW);
-        $options['usearch'] = optional_param('usearch', '', PARAM_RAW);
-        $options['users'] = optional_param('users', '', PARAM_SEQUENCE);
-        $options['groups'] = optional_param('groups', '', PARAM_SEQUENCE);
-        
-        return $options;
-    }
-    
-    /**
      * Constructor
      * View or dataform or both, each can be id or object
      */
@@ -115,7 +97,8 @@ class dataformview_base {
         $this->set__patterns();
 
         // filter
-        $options = $filteroptions ? self::get_filter_options_from_url() : array();
+        $fm = $this->_df->get_filter_manager();
+        $options = $filteroptions ? $fm::get_filter_options_from_url() : array();
         $this->set_filter($options);
 
         // base url params
@@ -304,20 +287,13 @@ class dataformview_base {
         $this->_filter->contentfields = array_keys($this->get__patterns('field'));
         // Append url sort options
         if ($usort) {
-            $usort = urldecode($usort);
-            $usort = array_map(function($a) {return explode(' ', $a);}, explode(',', $usort));
-            $this->_filter->append_sort_options($usort);
+            $sortoptions = dataform_filter_manager::get_sort_options_from_query($usort);
+            $this->_filter->append_sort_options($sortoptions);
         }
         // Append url search options
         if ($usearch) {
-            $usearch = urldecode($usearch);
-            $soptions = array();
-            $searchies = explode('@', $usearch);
-            foreach ($searchies as $key => $searchy) {
-                list($fieldid, $andor, $options) = explode(':', $searchy);
-                $soptions[$fieldid] = array($andor => array_map(function($a) {return explode(',', $a);}, explode('#', $options)));
-            }
-            $this->_filter->append_search_options($soptions);
+            $searchoptions = dataform_filter_manager::get_search_options_from_query($usearch);
+            $this->_filter->append_search_options($searchoptions);
         }
         // Append custom sort options
         if ($csort) {
@@ -891,6 +867,8 @@ class dataformview_base {
                             'subdirs' => false,
                             'changeformat' => true,
                             'collapsed' => true,
+                            'rows' => 5,
+                            'style' => 'width:100%',
                             'maxfiles' => EDITOR_UNLIMITED_FILES,
                             'maxbytes' => $this->_df->course->maxbytes,
                             'context'=> $this->_df->context);
