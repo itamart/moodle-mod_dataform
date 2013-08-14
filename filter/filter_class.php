@@ -383,8 +383,13 @@ class dataform_filter {
     /**
      *
      */
-    public function append_search_options(array $searchies) {
-        if ($searchies) {
+    public function append_search_options($searchies) {
+        if (!$searchies) {
+            return;
+        }
+
+        if (is_array($searchies)) {
+            // Custom search expects an array
             $searchoptions = $this->customsearch ? unserialize($this->customsearch) : array();
             foreach ($searchies as $fieldid => $searchy) {
                 if (empty($searchoptions[$fieldid])) {
@@ -395,8 +400,12 @@ class dataform_filter {
                 }
             }
             $this->customsearch = serialize($searchoptions);
+        } else {
+            // Quick search expects a string
+            $this->search = $searchies;        
         }
     }
+    
     // Prepend search option
 
 }
@@ -954,14 +963,16 @@ class dataform_filter_manager {
                     }
                     if ($searcharr) {
                         $searchoptions = implode('<br />', $searcharr);
+                        $searchurlquery = '&ucsearch='. self::get_search_url_query($searchfields);
                     }
-                } else {
-                    $searchoptions = $filter->search ? $filter->search : '---';
+                } else if ($filter->search) {
+                    $searchoptions =  $filter->search;
+                    $searchurlquery = '&usearch='. urlendcode($filter->search);
                 }
                 
             }         
             if (!empty($searchoptions)) {
-                $searchurlquery = '&usearch='. self::get_search_url_query($searchfields);
+                
             }
            
             // Per page
@@ -1117,7 +1128,10 @@ class dataform_filter_manager {
             $urlquery[] = 'usort='. self::get_sort_url_query(unserialize($filter->customsort));
         }
         if ($filter->customsearch) {
-            $urlquery[] = 'usearch='. self::get_search_url_query(unserialize($filter->customsearch));
+            $urlquery[] = 'ucsearch='. self::get_search_url_query(unserialize($filter->customsearch));
+        }
+        if ($filter->search) {
+            $urlquery[] = 'usearch='. urlencode($filter->search);
         }
 
         if ($urlquery) {
@@ -1156,9 +1170,9 @@ class dataform_filter_manager {
      *
      */
     public static function get_search_url_query(array $searchies) {
-        $usearch = null;
+        $ucsearch = null;
         if ($searchies) {
-            $usearch = array();
+            $ucsearch = array();
             foreach ($searchies as $fieldid => $andor) {
                 foreach ($andor as $key => $soptions) {
                     if (empty($soptions)) {
@@ -1170,14 +1184,14 @@ class dataform_filter_manager {
                         }
                         list($not, $op, $value) = $options;
                         $searchvalue = is_array($value) ? implode('|', $value) : $value;
-                        $usearch[] = "$fieldid:$key:$not,$op,$searchvalue";
+                        $ucsearch[] = "$fieldid:$key:$not,$op,$searchvalue";
                     }
                 }
             }
-            $usearch = implode('@', $usearch);
-            $usearch = urlencode($usearch);
+            $ucsearch = implode('@', $ucsearch);
+            $ucsearch = urlencode($ucsearch);
         }
-        return $usearch;
+        return $ucsearch;
     }
     
     /**
@@ -1186,8 +1200,8 @@ class dataform_filter_manager {
     public static function get_search_options_from_query($query) {
         $soptions = array();
         if ($query) {
-            $usearch = urldecode($query);
-            $searchies = explode('@', $usearch);
+            $ucsearch = urldecode($query);
+            $searchies = explode('@', $ucsearch);
             foreach ($searchies as $key => $searchy) {
                 list($fieldid, $andor, $options) = explode(':', $searchy);
                 $soptions[$fieldid] = array($andor => array_map(function($a) {return explode(',', $a);}, explode('#', $options)));
@@ -1205,8 +1219,9 @@ class dataform_filter_manager {
             'perpage' => array('uperpage', 0, PARAM_INT),
             'selection' => array('uselection', 0, PARAM_INT),
             'groupby' => array('ugroupby', 0, PARAM_INT),
+            'search' => array('usearch', '', PARAM_RAW),
             'customsort' => array('usort', '', PARAM_RAW),
-            'customsearch' => array('usearch', '', PARAM_RAW),
+            'customsearch' => array('ucsearch', '', PARAM_RAW),
             'page' => array('page', 0, PARAM_INT),
             'eids' => array('eids', 0, PARAM_INT),
             'users' => array('users', '', PARAM_SEQUENCE),
@@ -1226,11 +1241,9 @@ class dataform_filter_manager {
                             $options[$option] = self::get_sort_options_from_query($val);
                         } else if ($option == 'customsearch') {
                             $searchoptions = self::get_search_options_from_query($val);
-                            if (is_array($searchoptions)) {
-                                $options['customsearch'] = $searchoptions;
-                            } else {
-                                $options['search'] = $searchoptions;
-                            }
+                            $options['customsearch'] = $searchoptions;
+                        } else if ($option == 'search') {
+                            $options['search'] = urldecode($val);
                         } else {
                             $options[$option] = $val;
                         }
@@ -1248,11 +1261,9 @@ class dataform_filter_manager {
                     $options[$option] = self::get_sort_options_from_query($val);
                 } else if ($option == 'customsearch') {
                     $searchoptions = self::get_search_options_from_query($val);
-                    if (is_array($searchoptions)) {
-                        $options['customsearch'] = $searchoptions;
-                    } else {
-                        $options['search'] = $searchoptions;
-                    }
+                    $options['customsearch'] = $searchoptions;
+                } else if ($option == 'search') {
+                    $options['search'] = urldecode($val);
                 } else {
                     $options[$option] = $val;
                 }

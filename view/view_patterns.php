@@ -766,9 +766,9 @@ class dataformview_patterns {
         }
 
         // Display the quick search form
-        $label = html_writer::label(get_string('search'), "usersearch");
+        $label = html_writer::label(get_string('search'), 'usearch');
         $inputfield = html_writer::empty_tag('input', array('type' => 'text',
-                                                            'name' => 'usersearch',
+                                                            'name' => 'usearch',
                                                             'value' => $searchvalue,
                                                             'size' => 20));
 

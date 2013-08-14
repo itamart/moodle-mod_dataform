@@ -253,6 +253,7 @@ class dataformview_base {
         $page = !empty($options['page']) ? $options['page'] : 0;
         $usort = !empty($options['usort']) ? $options['usort'] : null;
         $usearch = !empty($options['usearch']) ? $options['usearch'] : null;
+        $ucsearch = !empty($options['ucsearch']) ? $options['ucsearch'] : null;
         $csort = !empty($options['csort']) ? $options['csort'] : null;
         $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
 
@@ -292,7 +293,11 @@ class dataformview_base {
         }
         // Append url search options
         if ($usearch) {
-            $searchoptions = dataform_filter_manager::get_search_options_from_query($usearch);
+            $this->_filter->append_search_options($usearch);
+        }
+        // Append url custom search options
+        if ($ucsearch) {
+            $searchoptions = dataform_filter_manager::get_search_options_from_query($ucsearch);
             $this->_filter->append_search_options($searchoptions);
         }
         // Append custom sort options

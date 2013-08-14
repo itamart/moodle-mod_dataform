@@ -183,8 +183,8 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
         // Custom search
         if ($soptions = $this->get_search_options($entry)) {
             $fm = $this->_df->get_filter_manager();
-            $usearch = $fm::get_search_url_query($soptions);
-            $params['usearch'] = $usearch;
+            $ucsearch = $fm::get_search_url_query($soptions);
+            $params['ucsearch'] = $ucsearch;
         }
 
         $srcurl = new moodle_url('/mod/dataform/embed.php', $params);
