@@ -251,9 +251,9 @@ class dataformview_base {
         $users = !empty($options['users']) ? $options['users'] : null;
         $groups = !empty($options['groups']) ? $options['groups'] : null;
         $page = !empty($options['page']) ? $options['page'] : 0;
-        $usort = !empty($options['usort']) ? $options['usort'] : null;
-        $usearch = !empty($options['usearch']) ? $options['usearch'] : null;
-        $ucsearch = !empty($options['ucsearch']) ? $options['ucsearch'] : null;
+        $customsort = !empty($options['customsort']) ? $options['customsort'] : null;
+        $search = !empty($options['search']) ? $options['search'] : null;
+        $customsearch = !empty($options['customsearch']) ? $options['customsearch'] : null;
         $csort = !empty($options['csort']) ? $options['csort'] : null;
         $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
 
@@ -287,19 +287,18 @@ class dataformview_base {
         // content fields
         $this->_filter->contentfields = array_keys($this->get__patterns('field'));
         // Append url sort options
-        if ($usort) {
-            $sortoptions = dataform_filter_manager::get_sort_options_from_query($usort);
-            $this->_filter->append_sort_options($sortoptions);
+        if ($customsort) {
+            $this->_filter->append_sort_options($customsort);
         }
         // Append url search options
-        if ($usearch) {
-            $this->_filter->append_search_options($usearch);
+        if ($search) {
+            $this->_filter->append_search_options($search);
         }
         // Append url custom search options
-        if ($ucsearch) {
-            $searchoptions = dataform_filter_manager::get_search_options_from_query($ucsearch);
-            $this->_filter->append_search_options($searchoptions);
+        if ($customsearch) {
+            $this->_filter->append_search_options($customsearch);
         }
+
         // Append custom sort options
         if ($csort) {
             $this->_filter->append_sort_options($csort);
@@ -929,7 +928,9 @@ class dataformview_base {
         }
 
         $tags = $this->_tags['view'];
+
         $replacements = $this->patterns()->get_replacements($tags, null, $options);
+
         foreach ($this->_vieweditors as $editor) {
             // Format to apply filters if html
             if ($this->view->{"e$editor".'format'} == FORMAT_HTML) {

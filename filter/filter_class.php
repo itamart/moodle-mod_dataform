@@ -1241,9 +1241,9 @@ class dataform_filter_manager {
                             $options[$option] = self::get_sort_options_from_query($val);
                         } else if ($option == 'customsearch') {
                             $searchoptions = self::get_search_options_from_query($val);
-                            $options['customsearch'] = $searchoptions;
+                            $options[$option] = $searchoptions;
                         } else if ($option == 'search') {
-                            $options['search'] = urldecode($val);
+                            $options[$option] = urldecode($val);
                         } else {
                             $options[$option] = $val;
                         }
@@ -1261,9 +1261,9 @@ class dataform_filter_manager {
                     $options[$option] = self::get_sort_options_from_query($val);
                 } else if ($option == 'customsearch') {
                     $searchoptions = self::get_search_options_from_query($val);
-                    $options['customsearch'] = $searchoptions;
+                    $options[$option] = $searchoptions;
                 } else if ($option == 'search') {
-                    $options['search'] = urldecode($val);
+                    $options[$option] = urldecode($val);
                 } else {
                     $options[$option] = $val;
                 }
