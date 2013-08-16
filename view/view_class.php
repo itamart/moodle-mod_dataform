@@ -1304,7 +1304,30 @@ class dataformview_base {
             foreach ($matches[0] as $pattern) {
                 $cleanpattern = trim($pattern, '%');
                 list($fid, $formula) = explode(':=', $cleanpattern, 2);
-                // Process group formulas (e.g. _F1_)
+                isset($formulas[$fid]) or $formulas[$fid] = array();
+                // Enclose formula in brackets to preserve precedence
+                $formulas[$fid][] = "($formula)";
+                $replacements[$pattern] = $formula;
+            }
+
+            // Process group formulas in formulas (e.g. _F1_)
+            foreach ($formulas as $fid => $formulae) {
+                foreach ($formulae as $key => $formula) {
+                    if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
+                        foreach ($frefs[0] as $fref) {
+                            $fref = trim($fref, '_');
+                            if (isset($formulas[$fref])) {
+                                $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
+                            }
+                        }
+                        $formulae[$key] = $formula;
+                    }
+                }
+                $formulas[$fid] = $formulae;
+            }
+
+            // Process group formulas in replacements (e.g. _F1_)
+            foreach ($replacements as $pattern => $formula) {
                 if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
                     foreach ($frefs[0] as $fref) {
                         $fref = trim($fref, '_');
@@ -1312,13 +1335,11 @@ class dataformview_base {
                             $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
                         }
                     }
+                    $replacements[$pattern] = $formula;
                 }
-                isset($formulas[$fid]) or $formulas[$fid] = array();
-                // Enclose formula in brackets to preserve precedence
-                $formulas[$fid][] = "($formula)";
-                $replacements[$pattern] = $formula;
             }
 
+            // Calculate
             foreach ($replacements as $pattern => $formula) {
                 // Number of decimals can be set as ;n at the end of the formula
                 $decimals = null;
