@@ -85,6 +85,10 @@ class dataformfield_multiselect_renderer extends dataformfield_renderer {
             $selected = $field->default_values();
         }
 
+        // Add a fake element so that the field is processed
+        $mform->addElement('hidden', $fieldname, 1);
+        $mform->setType($fieldname, PARAM_INT);
+        
         list($elem, $separators) = $this->render($mform, "{$fieldname}_selected", $menuoptions, $selected, $required);
         // Add group or element
         if (is_array($elem)) {
@@ -194,7 +198,7 @@ class dataformfield_multiselect_renderer extends dataformfield_renderer {
         $select = &$mform->createElement('select', $fieldname, null, $options);
         $select->setMultiple(true);
         $select->setSelected($selected);
-        return $select;
+        return array($select, null);
     }
 
     /**

@@ -330,6 +330,7 @@ abstract class dataformfield_base {
 
         $fieldid = $this->field->id;
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
+
         list($contents, $oldcontents) = $this->format_content($entry, $values);
 
         $rec = new object();

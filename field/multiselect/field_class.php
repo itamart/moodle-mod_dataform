@@ -167,7 +167,7 @@ class dataformfield_multiselect extends dataformfield_base {
         if (!empty($selected)) {
             $contents[] = implode('#', $selected);
         }
-        
+
         return array($contents, $oldcontents);
     }
 
