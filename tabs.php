@@ -46,7 +46,7 @@ if (isloggedin() and $is_templatemanager) {
     if ($currenttab == 'browse' and !empty($this->_currentview)) {
         $params = array('d' => $this->id(), 'sesskey' => sesskey(), 'vedit' => $this->_currentview->id());
         $editviewurl = new moodle_url('/mod/dataform/view/view_edit.php', $params);
-        $row[] = new tabobject('editview', $editviewurl, $OUTPUT->pix_icon('t/edit', get_string('vieweditthis','dataform')), '');
+        $row[] = new tabobject('editview', $editviewurl, $OUTPUT->pix_icon('t/edit', get_string('vieweditthis','dataform')), get_string('vieweditthis','dataform'));
     }
 
 
