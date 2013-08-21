@@ -173,26 +173,41 @@ class dataformview_csv extends dataformview_aligned {
             return null;
         }
 
-        $csvcontent = array();
-        
+        // Get the field definitions
+        // array(array(pattern => value,...)...)
+        $entryvalues = array();
+        foreach ($exportentries as $entryid => $entry) {
+            $patternvalues = array();
+            $definitions = $this->get_field_definitions($entry, array());
+            foreach ($definitions as $pattern => $definition) {
+                if (is_array($definition)) {
+                    list(, $value) = $definition;
+                    $patternvalues[$pattern] = $value;
+                }
+            }
+            $entryvalues[$entryid] = $patternvalues;
+        }
+
         // Get csv headers from view columns
+        $columnpatterns = array();
         $csvheader = array();
         $columns = $this->get_columns();
         foreach ($columns as $column) {
             list($pattern, $header,) = $column;
+            $columnpatterns[] = $pattern;
             $csvheader[] = $header ? $header : trim($pattern,'[#]');
         }
+
+        $csvcontent = array();       
         $csvcontent[] = $csvheader;
         
         // Get the field definitions
         // array(array(pattern => value,...)...)
-        foreach ($exportentries as $entryid => $entry) {
+        foreach ($entryvalues as $entryid => $patternvalues) {
             $row = array();
-            $definitions = $this->get_field_definitions($entry, array());
-            foreach ($definitions as  $definition) {
-                if (is_array($definition)) {
-                    list(, $value) = $definition;
-                    $row[] = $value;
+            foreach ($columnpatterns as  $pattern) {
+                if (isset($patternvalues[$pattern])) {
+                    $row[] = $patternvalues[$pattern];
                 }
             }
             $csvcontent[] = $row;
