@@ -56,7 +56,7 @@ abstract class dataformfield_renderer {
         
         // Capture label patterns
         if (strpos($text, "[[$fieldname@]]") !== false and !empty($this->_field->field->label)) {
-            $found[] = "[[$fieldname@]]";
+            $found["[[$fieldname@]]"] = "[[$fieldname@]]";
             
             $text = str_replace("[[$fieldname@]]", $this->_field->field->label, $text);
         }
@@ -74,18 +74,20 @@ abstract class dataformfield_renderer {
                 $pattern = $wrapopen. "[$rules]*$pattern". $wrapclose;
                 preg_match_all("/$pattern/", $text, $matches);
                 if (!empty($matches[0])) {
-                    $found = array_merge($found, $matches[0]);
+                    foreach ($matches[0] as $patternmatch) {
+                        $found[$patternmatch] = $patternmatch;
+                    }
                 }
             }
         } else {
             foreach ($patterns as $pattern) {
                 if (strpos($text, $pattern) !== false) {
-                    $found[] = $pattern;
+                    $found[$pattern] = $pattern;
                 }
             }
         }
 
-        return $found;
+        return array_values($found);
     }
 
     /**
