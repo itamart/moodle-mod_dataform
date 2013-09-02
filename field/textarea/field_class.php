@@ -124,9 +124,10 @@ class dataformfield_textarea extends dataformfield_base {
    
         parent::prepare_import_content($data, $importsettings, $csvrecord, $entryid);
 
-        // For editors reformat in editor structure
-        if ($this->is_editor()) {
-            if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
+        if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
+            $iseditor = $this->is_editor();
+            // For editors reformat in editor structure
+            if ($iseditor) {
                 $valuearr = explode('##', $data->{"field_{$fieldid}_{$entryid}"});
                 $content = array();
                 $content['text'] = !empty($valuearr[0]) ? $valuearr[0] : null;
@@ -134,6 +135,10 @@ class dataformfield_textarea extends dataformfield_base {
                 $content['trust'] = !empty($valuearr[2]) ? $valuearr[2] : $this->editoroptions['trusttext'];
                 $data->{"field_{$fieldid}_{$entryid}_editor"} = $content;
                 unset($data->{"field_{$fieldid}_{$entryid}"});
+            }
+            // For simple text replace \r\n with new line
+            if (!$iseditor) {
+                $data->{"field_{$fieldid}_{$entryid}"} = str_replace('\r\n', "\n", $data->{"field_{$fieldid}_{$entryid}"});
             }
         }
         
