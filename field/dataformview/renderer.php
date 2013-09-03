@@ -283,8 +283,10 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
             return $soptions;
         }
 
-        foreach (explode("\n", $field->field->param5) as $key => $searchy) {
+        $searchoptions = array_map('trim', explode("\n", $field->field->param5));
+        foreach ($searchoptions as $searchy) {
             list($andor, $refpattern, $not, $operator, $localpattern) = explode(',', $searchy);
+
             // And/or
             if (empty($andor) or !in_array($andor, array('AND', 'OR'))) {
                 continue;
@@ -293,6 +295,7 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
             if (!$rfieldid = $refview->get_pattern_fieldid($refpattern)) {
                 continue;
             }
+
             // Get value for local pattern or use as value
             $value = '';
             if (!$localfieldid = $localview->get_pattern_fieldid($localpattern)) {
