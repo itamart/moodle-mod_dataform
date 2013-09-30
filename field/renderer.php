@@ -156,7 +156,7 @@ abstract class dataformfield_renderer {
     }
 
     /**
-     *
+     * Depracated
      */
     public function display_import(&$mform, $tags) {
         $fieldid = $this->_field->id();
@@ -169,6 +169,13 @@ abstract class dataformfield_renderer {
         }
     }
 
+    /**
+     *
+     */
+    public function get_pattern_import_settings(&$mform, $pattern) {
+        return array(array(), array());
+    }
+    
     /**
      *
      */

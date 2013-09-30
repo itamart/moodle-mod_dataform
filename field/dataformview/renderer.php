@@ -113,13 +113,13 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
 
         $refdataform = $field->refdataform;
         $refview = $field->refview;
-        $localview = $field->localview;
+        $localview = $field->get_local_view();
 
         // Options for setting the filter
         $foptions = array();
         // Filter id
         if ($field->reffilterid) {
-            $foptions['filterid'] = $field->field->param3;
+            $foptions['id'] = $field->field->param3;
         }
         
         // Search filter by entry author or group
@@ -279,8 +279,8 @@ class dataformfield_dataformview_renderer extends dataformfield_renderer {
             return $soptions;
         }
 
-        if (!$refdataform = $field->refdataform or !$refview = $field->refview or !$localview = $field->localview) {
-            return $soptions;
+        if (!$refdataform = $field->refdataform or !$refview = $field->refview or !$localview = $field->get_local_view()) {
+            //return $soptions;
         }
 
         $searchoptions = array_map('trim', explode("\n", $field->field->param5));

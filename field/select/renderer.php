@@ -164,7 +164,7 @@ class dataformfield_select_renderer extends dataformfield_renderer {
     }
 
     /**
-     *
+     * Deprecated
      */
     public function display_import(&$mform, $tags) {
         $fieldid = $this->_field->id();
@@ -178,6 +178,21 @@ class dataformfield_select_renderer extends dataformfield_renderer {
                             
         $mform->setType("{$name}_name", PARAM_NOTAGS);
         $mform->setDefault("{$name}_name", $tagname);
+    }
+
+    /**
+     *
+     */
+    public function get_pattern_import_settings(&$mform, $pattern) {
+        $fieldid = $this->_field->id();
+        $tagname = $this->_field->name();
+        $name = "f_{$fieldid}_$tagname";
+
+        $elements = array();
+        $elements[] = &$mform->createElement('selectyesno', "{$name}_allownew");
+        $labels = array(' '. get_string('allownewvalues', 'dataformfield_select'). ': ');
+        
+        return array($elements, $labels);
     }
 
     /**

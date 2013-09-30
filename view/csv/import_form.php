@@ -81,10 +81,30 @@ class dataformview_csv_import_form extends moodleform {
         $mform = &$this->_form;
 
         $mform->addElement('header', 'fieldsettingshdr', get_string('fieldsimportsettings', 'dataformview_import'));
-        foreach ($view->get__patterns('field') as $fieldid => $patterns) {
-            if ($field = $df->get_field_from_id($fieldid)) {
-                $field->renderer()->display_import($mform, $patterns);
+        $columns = $view->get_columns();
+        foreach ($columns as $column) {
+            list($pattern, $header,) = $column;
+            $patternname = trim($pattern,'[#]');
+            $header = $header ? $header : $patternname;
+
+            if (!$fieldid = $view->get_pattern_fieldid($pattern)) {
+                continue;
             }
+
+            if (!$field = $df->get_field_from_id($fieldid)) {
+                continue;
+            }
+            
+            $name = "f_{$fieldid}_$patternname";
+
+            $grp = array();
+            $grp[] = &$mform->createElement('text', "{$name}_name", null, array('size'=>'16'));                   
+            list($elements, $labels) = $field->renderer()->get_pattern_import_settings($mform, $pattern);
+            $grp = $grp + $elements;
+            $mform->addGroup($grp, "grp$patternname", $patternname, $labels, false);
+                                
+            $mform->setType("{$name}_name", PARAM_NOTAGS);
+            $mform->setDefault("{$name}_name", $header);
         }
     }    
 
@@ -92,6 +112,7 @@ class dataformview_csv_import_form extends moodleform {
      *
      */
     protected function csv_settings() {
+        $view = $this->_view;
         $mform = &$this->_form;
 
         $mform->addElement('header', 'csvsettingshdr', get_string('csvsettings', 'dataform'));
@@ -99,17 +120,17 @@ class dataformview_csv_import_form extends moodleform {
         // delimiter
         $delimiters = csv_import_reader::get_delimiter_list();
         $mform->addElement('select', 'delimiter', get_string('csvdelimiter', 'dataform'), $delimiters);
-        $mform->setDefault('delimiter', 'comma');
+        $mform->setDefault('delimiter', $view->get_delimiter());
 
         // enclosure
         $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size'=>'10'));
         $mform->setType('enclosure', PARAM_NOTAGS);
-        $mform->setDefault('enclosure', '');
+        $mform->setDefault('enclosure', $view->get_enclosure());
 
         // encoding
         $choices = textlib::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
-        $mform->setDefault('encoding', 'UTF-8');
+        $mform->setDefault('encoding', $view->get_encoding());
 
         // upload file
         $mform->addElement('filepicker', 'importfile', get_string('uploadfile', 'dataformview_import'));

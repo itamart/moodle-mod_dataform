@@ -29,9 +29,13 @@ class dataformfield_dataformview extends dataformfield_no_content {
     public $refdataform = null;
     public $refview = null;
     public $reffilterid = null;
-    public $localview = null;
     public $css = null;
+
+    protected $_localview = null;
     
+    /*
+     *
+     */
     public function __construct($df = 0, $field = 0) {
         global $DB;
         
@@ -51,9 +55,19 @@ class dataformfield_dataformview extends dataformfield_no_content {
         }
         $this->refdataform = $dataform;
         $this->refview = $view;
-        $this->localview = $this->df->get_current_view();
+        $this->localview =  $this->get_local_view();
         $this->reffilterid = $this->field->param3 ? $this->field->param3 : 0;
     }
-
+    
+    /*
+     *
+     */
+    public function get_local_view() {
+        if (!$this->_localview) {
+            $this->_localview = $this->df->get_current_view();
+        }
+        
+        return $this->_localview;
+    }
 }
 

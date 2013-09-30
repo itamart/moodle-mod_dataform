@@ -440,16 +440,6 @@ class dataform_filter_manager {
         $df = $this->_df;
         $dfid = $df->id();
 
-        // Blank filter
-        if ($filterid == self::BLANK_FILTER) {
-            $filter = new object;
-            $filter->dataid = $df->id();
-            $filter->name = get_string('filternew', 'dataform');
-            $filter->perpage = 0;
-
-            return new dataform_filter($filter);
-        }
-        
         // User filter
         if ($filterid < 0) {
             // For actual user filters we need a view and whether advanced
@@ -493,9 +483,17 @@ class dataform_filter_manager {
         // Existing filter
         if ($this->get_filters() and isset($this->_filters[$filterid])) {
             return clone($this->_filters[$filterid]);
-        } else {
-            throw new moodle_exception("Filter $filterid not found for Dataform $dfid");
         }
+        
+        // Blank filter
+        //if ($filterid == self::BLANK_FILTER) {
+            $filter = new object;
+            $filter->dataid = $df->id();
+            $filter->name = get_string('filternew', 'dataform');
+            $filter->perpage = 0;
+
+            return new dataform_filter($filter);
+        //}        
     }
 
     /**
@@ -1019,7 +1017,8 @@ class dataform_filter_manager {
         global $CFG;
         
         require_once("$CFG->dirroot/mod/dataform/filter/filter_form.php");
-        $formurl = new moodle_url($view->get_baseurl(), array('filter' => $filter->id, 'afilter' => 1));         $mform = new mod_dataform_advanced_filter_form($this->_df, $filter, $formurl, array('view' => $view));
+        $formurl = new moodle_url($view->get_baseurl(), array('filter' => $filter->id, 'afilter' => 1));
+        $mform = new mod_dataform_advanced_filter_form($this->_df, $filter, $formurl, array('view' => $view));
         return $mform;        
     }
 
@@ -1215,7 +1214,7 @@ class dataform_filter_manager {
      */
     public static function get_filter_options_from_url($url = null) {
         $filteroptions = array(
-            'filterid' => array('filter', 0, PARAM_INT),
+            'id' => array('filter', 0, PARAM_INT),
             'perpage' => array('uperpage', 0, PARAM_INT),
             'selection' => array('uselection', 0, PARAM_INT),
             'groupby' => array('ugroupby', 0, PARAM_INT),

@@ -35,7 +35,7 @@ class dataformview_csv extends dataformview_aligned {
     protected $_encoding = 'UTF-8';
 
     protected $_showimportform = false;
-    
+
     /**
      *
      */
@@ -208,6 +208,8 @@ class dataformview_csv extends dataformview_aligned {
             foreach ($columnpatterns as  $pattern) {
                 if (isset($patternvalues[$pattern])) {
                     $row[] = $patternvalues[$pattern];
+                } else {
+                    $row[] = '';
                 }
             }
             $csvcontent[] = $row;
@@ -266,6 +268,10 @@ class dataformview_csv extends dataformview_aligned {
             
                 if (!empty($csvcontent)) {
                     $data = $this->process_csv($data, $csvcontent, $options);
+                    if (!empty($data->error)) {
+                        //print_object($data->error);
+                        $this->_showimportform = true;
+                    }
                 }
             }
 
@@ -274,7 +280,7 @@ class dataformview_csv extends dataformview_aligned {
                 $field = $this->_df->get_field_from_id($fieldid);
                 $field->prepare_import_content($data, $importsettings);
             }
-            
+
             return $this->execute_import($data);
         } else {
             // Set import flag to display the form
@@ -315,14 +321,15 @@ class dataformview_csv extends dataformview_aligned {
         $fieldsettings = !empty($options['settings']) ? $options['settings'] : array();
 
         $readcount = $cir->load_csv_content($csvcontent, $encoding, $delimiter);
+
         if (empty($readcount)) { 
-            $data->error = get_string('csvfailed','dataform');
+            $data->error = $cir->get_error();
             return $data;
         }
-    
+
         // csv column headers
         if (!$fieldnames = $cir->get_columns()) {
-            $data->error = get_string('cannotreadtmpfile','error');
+            $data->error = $cir->get_error();
             return $data;
         }
 
@@ -430,7 +437,7 @@ class dataformview_csv extends dataformview_aligned {
     /**
      * Overridden to add default headers from patterns
      */
-    protected function get_columns() {
+    public function get_columns() {
         if (empty($this->_columns)) {
             $this->_columns = array();
             $columns = explode("\n", $this->view->param2);
@@ -450,4 +457,34 @@ class dataformview_csv extends dataformview_aligned {
         }
         return $this->_columns;
     }    
+
+    // GETTERS
+    /**
+     *
+     */
+    public function get_output_type() {
+        return $this->_output;
+    }
+
+    /**
+     *
+     */
+    public function get_delimiter() {
+        return $this->_delimiter;
+    }
+
+    /**
+     *
+     */
+    public function get_enclosure() {
+        return $this->_enclosure;
+    }
+
+    /**
+     *
+     */
+    public function get_encoding() {
+        return $this->_encoding;
+    }
+    
 }

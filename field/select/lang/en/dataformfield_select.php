@@ -17,8 +17,10 @@
 /**
  * @package dataformfield
  * @subpackage select
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'Select';
+$string['allownewvalues'] = 'Allow new values';
+
 

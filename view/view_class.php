@@ -245,7 +245,7 @@ class dataformview_base {
     public function set_filter($options) {
         $fm = $this->_df->get_filter_manager($this);
 
-        $fid = !empty($options['filterid']) ? $options['filterid'] : 0;
+        $fid = !empty($options['id']) ? $options['id'] : 0;
         $afilter = !empty($options['afilter']) ? $options['afilter'] : 0;
         $eids = !empty($options['eids']) ? $options['eids'] : null;
         $users = !empty($options['users']) ? $options['users'] : null;

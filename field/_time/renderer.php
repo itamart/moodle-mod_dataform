@@ -51,7 +51,7 @@ class dataformfield__time_renderer extends dataformfield_renderer {
                     case 'minute': $format = '%M'; break; 
                     case 'hour': $format = '%H'; break; 
                     case 'day': $format = '%a'; break; 
-                    case 'week': $format = '%V'; break; 
+                    case 'week': $format = '%W'; break; 
                     case 'month': $format = '%b'; break; 
                     case 'm': $format = '%m'; break; 
                     case 'year':
@@ -115,7 +115,7 @@ class dataformfield__time_renderer extends dataformfield_renderer {
         // Day (a)
         $patterns["##$fieldname:day##"] = array(false);
         $patterns["##$fieldname:d##"] = array(false);
-        // Week (V)
+        // Week (W)
         $patterns["##$fieldname:week##"] = array(false);
         // Month (b)
         $patterns["##$fieldname:month##"] = array(false);
