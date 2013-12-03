@@ -53,9 +53,12 @@ class dataformfield_multiselect extends dataformfield_base {
      */
     public function parse_search($formdata, $i) {
         $fieldname = "f_{$i}_{$this->field->id}";
-        $selected = optional_param($fieldname, array(), PARAM_NOTAGS);
+        $selected = isset($formdata->$fieldname) ? $formdata->$fieldname : null;
         if ($selected) {
-            $allrequired = optional_param("{$fieldname}_allreq", 0, PARAM_BOOL);
+            // CONTRIB-4770: The array fails {@link dataform_filter_manager::get_search_url_query()}.
+            // Store string instead and make sure parse for the search sql
+            $selected = is_array($selected) ? implode(',', $selected) : $selected;
+            $allrequired = isset($formdata->{"{$fieldname}_allreq"}) ? $formdata->{"{$fieldname}_allreq"} : 0;
             return array('selected'=>$selected, 'allrequired'=>$allrequired);
         } else {
             return false;
@@ -68,8 +71,10 @@ class dataformfield_multiselect extends dataformfield_base {
     public function format_search_value($searchparams) {
         list($not, $operator, $value) = $searchparams;
         if (is_array($value)){
-            $selected = implode(', ', $value['selected']);
-            $allrequired = '('. ($value['allrequired'] ? get_string('requiredall') : get_string('requirednotall', 'dataform')). ')';
+            // CONTRIB-4770: See {@link multiselect::parse_search()}.
+            // Check if array for BC.
+            $selected = is_array($value['selected']) ? implode(', ', $value['selected']) : $value['selected'];
+            $allrequired = '('. ($value['allrequired'] ? get_string('requiredall', 'dataform') : get_string('requirednotall', 'dataform')). ')';
             return $not. ' '. $operator. ' '. $selected. ' '. $allrequired;
         } else {
             return false;
@@ -97,6 +102,10 @@ class dataformfield_multiselect extends dataformfield_base {
         $varcharcontent = $DB->sql_compare_text($content, 255);
 
         if ($selected) {
+            // CONTRIB-4770: See {@link multiselect::parse_search()}.
+            // Check if array for BC.
+            $selected = is_array($selected) ? $selected : explode(',', $selected);
+
             $conditions = array();
             foreach ($selected as $key => $sel) {
                 $xname = $name. $key;

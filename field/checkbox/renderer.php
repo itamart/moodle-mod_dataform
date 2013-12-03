@@ -39,6 +39,7 @@ class dataformfield_checkbox_renderer extends dataformfield_multiselect_renderer
         $separator = $field->separators[(int) $field->get('param2')]['chr'];
 
         $elemgrp = array();
+        $selected = is_array($selected) ? $selected : explode(',', $selected);
         foreach ($options as $i => $option) {
             $cb = &$mform->createElement('advcheckbox', $fieldname. '_'. $i, null, $option, array('group' => $fieldname), array(0, $i));
             $elemgrp[] = $cb;

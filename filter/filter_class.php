@@ -1182,7 +1182,20 @@ class dataform_filter_manager {
                             continue;
                         }
                         list($not, $op, $value) = $options;
-                        $searchvalue = is_array($value) ? implode('|', $value) : $value;
+                        // CONTRIB-4770: See {@link multiselect::parse_search()}.
+                        // Convert second level arrays to strings. 
+                        // TODO Should be adjusted in upgrade to 2.4.
+                        if (is_array($value)) {
+                            foreach ($value as $key => $vals) {
+                                if (is_array($vals)) {
+                                    $value[$key] = implode(',', $vals);
+                                }
+                            }
+                            $searchvalue = implode('|', $value);
+                        } else {
+                            $searchvalue = $value;
+                        }
+                        
                         $ucsearch[] = "$fieldid:$key:$not,$op,$searchvalue";
                     }
                 }

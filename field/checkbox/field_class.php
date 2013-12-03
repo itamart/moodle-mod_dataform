@@ -87,7 +87,9 @@ class dataformfield_checkbox extends dataformfield_multiselect {
             } else {
                 $allrequired = '';
             }
-            return array('selected'=>$selected, 'allrequired'=>$allrequired);
+            // CONTRIB-4770: The array fails {@link dataform_filter_manager::get_search_url_query()}.
+            // Store string instead and make sure parse for the search sql
+            return array('selected' => implode(',', $selected), 'allrequired' => $allrequired);
         } else {
             return false;
         }

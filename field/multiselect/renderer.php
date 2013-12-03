@@ -187,8 +187,15 @@ class dataformfield_multiselect_renderer extends dataformfield_renderer {
         $allreq = &$mform->createElement('checkbox', "{$fieldname}_allreq", null, ucfirst(get_string('requiredall', 'dataform')));
         $mform->setDefault("{$fieldname}_allreq", $allrequired);
         $mform->disabledIf("{$fieldname}_allreq", "searchoperator$i", 'eq', '');
+
+        // The element may be an array (checkboxes) so check.
+        if (is_array($elem)) {
+            $elem[] = $allreq;
+        } else {
+            $elem = array($elem, $allreq);
+        }
         
-        return array(array_merge($elem, $allreq), $separators);
+        return array($elem, $separators);
     }
 
     /**
@@ -197,6 +204,7 @@ class dataformfield_multiselect_renderer extends dataformfield_renderer {
     protected function render(&$mform, $fieldname, $options, $selected, $required = false) {
         $select = &$mform->createElement('select', $fieldname, null, $options);
         $select->setMultiple(true);
+        $selected = is_array($selected) ? $selected : explode(',', $selected);
         $select->setSelected($selected);
         return array($select, null);
     }
