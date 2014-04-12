@@ -27,18 +27,33 @@ defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * PHPUnit data generator testcase
+ * PHPUnit dataform generator testcase
  *
  * @package    mod_dataform
  * @category   phpunit
- * @copyright  2012 Itamar Tzadok
+ * @group      mod_dataform
+ * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_dataform_generator_testcase extends advanced_testcase {
+    protected $_course;
+
+    /**
+     * Test set up.
+     *
+     * This is executed before running any test in this file.
+     */
+    public function setUp() {
+        $this->resetAfterTest();
+
+        // Create a course we are going to add a data module to.
+        $this->_course = $this->getDataGenerator()->create_course();
+    }
+
     public function test_generator() {
         global $DB;
 
-        $this->resetAfterTest(true);
+        $this->setAdminUser();
 
         $this->assertEquals(0, $DB->count_records('dataform'));
 
@@ -49,18 +64,27 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         $this->assertInstanceOf('mod_dataform_generator', $generator);
         $this->assertEquals('dataform', $generator->get_modulename());
 
-        $generator->create_instance(array('course'=>$course->id));
-        $generator->create_instance(array('course'=>$course->id));
-        $data = $generator->create_instance(array('course'=>$course->id));
-        $this->assertEquals(3, $DB->count_records('dataform'));
+        $data1 = $generator->create_instance(array('course'=>$course->id));
+        $data2 = $generator->create_instance(array('course'=>$course->id));
+        $this->assertEquals(2, $DB->count_records('dataform'));
 
-        $cm = get_coursemodule_from_instance('dataform', $data->id);
-        $this->assertEquals($data->id, $cm->instance);
-        $this->assertEquals('dataform', $cm->modname);
-        $this->assertEquals($course->id, $cm->course);
+        $df1 = mod_dataform_dataform::instance($data1->id);
+        $df2 = mod_dataform_dataform::instance($data2->id);
 
-        $context = context_module::instance($cm->id);
-        $this->assertEquals($data->cmid, $context->instanceid);
+        foreach (array($df1, $df2) as $df) {
+            $this->assertEquals($df->course->id, $course->id);
+            
+            $cm = get_coursemodule_from_instance('dataform', $df->id);
+            $this->assertEquals($df->cm->id, $cm->id);
+            $this->assertEquals($df->id, $cm->instance);
+            $this->assertEquals('dataform', $cm->modname);
+            $this->assertEquals($course->id, $cm->course);
+            
+
+            $context = context_module::instance($cm->id);
+            $this->assertEquals($df->context->id, $context->id);
+            $this->assertEquals($df->cm->id, $context->instanceid);
+        }
 
         // test gradebook integration using low level DB access - DO NOT USE IN PLUGIN CODE!
         $data = $generator->create_instance(array('course'=>$course->id, 'grade'=>100));
@@ -69,6 +93,9 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         $this->assertEquals(100, $gitem->grademax);
         $this->assertEquals(0, $gitem->grademin);
         $this->assertEquals(GRADE_TYPE_VALUE, $gitem->gradetype);
-
+       
+        $this->assertNotEquals(2, $DB->count_records('dataform'));
+        $df2->delete();
+        $this->assertEquals(2, $DB->count_records('dataform'));
     }
 }

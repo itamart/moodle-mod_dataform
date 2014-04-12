@@ -23,4 +23,6 @@
 
 $string['pluginname'] = 'Tabular';
 $string['headerrow'] = 'Table with header row';
+$string['headerrow_help'] = 'If set to Yes, it is assumed that the first row in the table template is a header row.';
 $string['table'] = 'Table design';
+$string['table_help'] = 'A table template for displaying the entries. If Table with header row is set to Yes, the first row will be the header row of the displayed table. All the other rows (or all rows if Table with header row is set to No) will be repeated for each entry. Typically the table template will consist of 2 rows if header is used or 1 row if there is no header.';

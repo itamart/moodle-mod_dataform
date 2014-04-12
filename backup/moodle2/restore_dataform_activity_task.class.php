@@ -57,17 +57,35 @@ class restore_dataform_activity_task extends restore_activity_task {
      * 
      */
     public function get_comment_mapping_itemname($commentarea) {
-        if ($commentarea == 'entry') {
-            return 'dataform_entry';
-        } else if ($commentarea == 'activity') {
-            return 'user';
-        }
+        return 'dataform_entry';
+        // TODO Implement comment mapping itemname for non-dataformfield comments
+        //$itemname = parent::get_comment_mapping_itemname($commentarea);
     }
 
     /**
      * Override to remove the course module step if restoring a preset
      */
     public function build() {
+        parent::build();
+
+        // If restoring into a given activity remove the module_info step b/c there
+        // is no need to create a module instance
+        if ($this->get_activityid()) {
+            $steps = array();
+            foreach ($this->steps as $key => $step) {
+                if ($step instanceof restore_module_structure_step) {
+                    continue;
+                }
+                $steps[] = $step;
+            }
+            $this->steps = $steps;
+        }
+    }
+
+    /**
+     * Override to remove the course module step if restoring a preset
+     */
+    public function build1() {
 
         // If restoring into a given activity remove the module_info step b/c there
         // is no need to create a module instance

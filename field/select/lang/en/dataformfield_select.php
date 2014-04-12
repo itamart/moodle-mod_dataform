@@ -21,6 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'Select';
-$string['allownewvalues'] = 'Allow new values';
+$string['allowaddoption'] = 'Allow adding options';
+$string['optionsdefault'] = 'Default value';
+$string['options'] = 'Options';
 
 

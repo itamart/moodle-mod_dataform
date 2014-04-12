@@ -23,6 +23,5 @@
 $subplugins = array(
     'dataformfield'  => 'mod/dataform/field',
     'dataformview' => 'mod/dataform/view',
-    'dataformrule' => 'mod/dataform/rule',
     'dataformtool' => 'mod/dataform/tool',
 );

@@ -26,33 +26,106 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
  
-#page-mod-dataform-view #sortsearch .c0 {
-  text-align: right;
+/** PAGE MOD EMBED */
+ #page-mod-dataform-embed {
+    margin: 0;
+    width: 100%;
 }
 
-#page-mod-dataform-view .approve img.icon {
-  width:34px;
-  height:34px;
+#page-mod-dataform-embed.pagelayout-embedded #content {
+    padding: 0;
 }
 
-#page-mod-dataform-view .approve img.icon {
-  width:34px;
-  height:34px;
-}
-
+/** TAB TREE */ 
 #page-mod-dataform-view .tabtree {
   margin-bottom: 1em;
 }
 
+/** QUICK MENUS */ 
+.quickmenu {   
+}
+
+.quickmenus-wrapper .quickmenu,
+.quickfilters-wrapper .quickfilter{
+    float: left;
+    margin-right: 30px;
+}
+
+.quickmenus-wrapper,
+.quickfilters-wrapper {
+    border: 1px solid #DDD;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.addnewentry-wrapper {
+    margin: 20px 0;
+}
+
+/** ADD NEW ENTRY */ 
+.addnewentry{
+    padding: 10px 15px;
+    background: #4479BA;
+    color: #FFF;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    border: solid 1px #20538D;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.addnewentry:hover, .addnewentry:focus {
+    color: #FFF;
+    background: #356094;
+    border: solid 1px #2A4E77;
+    text-decoration: none;
+}
+
+/** PAGING BAR */
+#page-mod-dataform-view .paging {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  overflow: hidden;
+}
+
+#page-mod-dataform-view .paging div{
+  margin-left: 1em;
+  margin-right: 1em;
+  float: left;
+  min-width: 30px;
+  text-align: center;
+  border: 1 solid #EFEFEF;
+}
+
+#page-mod-dataform-view .paging div.current{
+  background-color: #EFEFEF;
+}
+
+/** SINGLE SELECT */
 #page-mod-dataform-view .singleselect {
   margin: 0.5em 0;
 }
 
+/** ENTRIES VIEW */
 #page-mod-dataform-embed .entriesview,
 #page-mod-dataform-view .entriesview {
   overflow: auto;
+  padding: 10px;
+  border: 1px solid #DDD;;
 }
 
+#page-mod-dataform-embed .entriesview .entry,
+#page-mod-dataform-view .entriesview .entry {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #DDD;;
+}
+
+/** MOODLE FORM */
 #page-mod-dataform-embed.gecko .mform fieldset.hidden,
 #page-mod-dataform-view.gecko .mform fieldset.hidden {
   display: table-column;
@@ -106,20 +179,16 @@
     border: 0 none !important;
 }
 
-#page-mod-dataform-embed {
-    margin: 0;
-    width: 100%;
-}
-
-#page-mod-dataform-embed.pagelayout-embedded #content {
-    padding: 0;
-}
-
-/* Captcha image overlap fix for Safari */
-#recaptcha_image {
-    margin-bottom: 25px;
-}
-
 .mform div.fdescription.required {
     display: none;
 }
+
+.mform fieldset.collapsible legend div.summary {
+    font-size: 14px;
+    line-height: 16px;
+}
+
+.mform fieldset.collapsible legend div.summary span.summarylabel {
+    color: #0088CC;
+}
+

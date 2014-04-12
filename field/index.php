@@ -26,10 +26,9 @@
  */
 
 require_once('../../../config.php');
-require_once('../mod_class.php');
 require_once("$CFG->libdir/tablelib.php");
 
-$urlparams = new object();
+$urlparams = new stdClass;
 
 $urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
 $urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
@@ -45,169 +44,55 @@ $urlparams->editable    = optional_param('editable', 0, PARAM_INT);     // id of
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
-$df = new dataform($urlparams->d, $urlparams->id);
-require_capability('mod/dataform:managetemplates', $df->context);
+$df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
+$df->require_manage_permission('fields');
 
-$df->set_page('field/index', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('field/index', array('urlparams' => $urlparams));
+$PAGE->set_context($df->context);
 
 // activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
+$fieldman = $df->field_manager;
 // Duplicate requested fields
 if ($urlparams->duplicate and confirm_sesskey()) {
-    $df->process_fields('duplicate', $urlparams->duplicate, $urlparams->confirmed);
+    $fieldman->process_fields('duplicate', $urlparams->duplicate, $urlparams->confirmed);
 // Delete requested fields
 } else if ($urlparams->delete and confirm_sesskey()) {
-    $df->process_fields('delete', $urlparams->delete, $urlparams->confirmed);
+    $fieldman->process_fields('delete', $urlparams->delete, $urlparams->confirmed);
 // Set field visibility
 } else if ($urlparams->visible and confirm_sesskey()) {
-    $df->process_fields('visible', $urlparams->visible, true);    // confirmed by default
+    $fieldman->process_fields('visible', $urlparams->visible, true);    // confirmed by default
 // Set field editability
 } else if ($urlparams->editable and confirm_sesskey()) {
-    $df->process_fields('editable', $urlparams->editable, true);    // confirmed by default
+    $fieldman->process_fields('editable', $urlparams->editable, true);    // confirmed by default
 }
 
-// any notifications
-if (!$fields = $df->get_user_defined_fields(true, flexible_table::get_sort_for_table('dataformfieldsindex'. $df->id()))) {
-    $df->notifications['bad'][] = get_string('fieldnoneindataform','dataform');  // nothing in dataform
-}
+// Get the fields
+$fields = $fieldman->get_fields(array('forceget' => true, 'sort' => 'name'));
+$internalfields = array();
 
-// print header
-$df->print_header(array('tab' => 'fields', 'urlparams' => $urlparams));
-
-// Display the field form jump list
-$directories = get_list_of_plugins('mod/dataform/field/');
-$menufield = array();
-
-foreach ($directories as $directory){
-    if ($directory[0] != '_') {
-        // Get name from language files
-        $menufield[$directory] = get_string('pluginname',"dataformfield_$directory");
+// Seperate internal fields
+$internalfieldtypes = $fieldman->get_internal_field_types();
+foreach ($fields as $fieldid => $field) {
+    if (array_key_exists($fieldid, $internalfieldtypes)) {
+        $internalfields[$fieldid] = $field;
+        unset($fields[$fieldid]);
     }
 }
-//sort in alphabetical order
-asort($menufield);
 
-$popupurl = new moodle_url('/mod/dataform/field/field_edit.php', array('d' => $df->id(), 'sesskey' => sesskey()));
-$fieldselect = new single_select($popupurl, 'type', $menufield, null, array(''=>'choosedots'), 'fieldform');
-$fieldselect->set_label(get_string('fieldadd','dataform'). '&nbsp;');
-$br = html_writer::empty_tag('br');
-echo html_writer::tag('div', $br. $OUTPUT->render($fieldselect). $br, array('class'=>'fieldadd mdl-align'));
-//echo $OUTPUT->help_icon('fieldadd', 'dataform');
+$output = $df->get_renderer();
+echo $output->header(array('tab' => 'fields', 'heading' => $df->name, 'urlparams' => $urlparams));
 
-// if there are user fields print admin style list of them
-if ($fields) {
+// Display subplugin selector
+$exclude = array('entryactions', 'entryauthor', 'entrygroup', 'entrytime');
+echo $output->subplugin_select('field', array('exclude' => $exclude));
 
-    $editbaseurl = '/mod/dataform/field/field_edit.php';
-    $actionbaseurl = '/mod/dataform/field/index.php';
-    $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
+// Print admin style list of user defined fields
+echo $output->fields_admin_list('external', '', $fields);
 
-    $stredit = get_string('edit');
-    $strduplicate =  get_string('duplicate');
-    $strdelete = get_string('delete');
-    $strhide = get_string('hide');
-    $strshow = get_string('show');
-    $strlock = get_string('lock', 'dataform');
-    $strunlock = get_string('unlock', 'dataform');
+// Print admin style list of internal fields
+echo $output->fields_admin_list('internal', get_string('fieldsinternal', 'dataform'), $internalfields);
 
-    // The default value of the type attr of a button is submit, so set it to button so that
-    // it doesn't submit the form
-    $selectallnone = html_writer::checkbox(null, null, false, null, array('onclick' => 'select_allnone(\'field\'&#44;this.checked)'));
-    $multiactionurl = new moodle_url($actionbaseurl, $linkparams);
-    $multidelete = html_writer::tag(
-        'button', 
-        $OUTPUT->pix_icon('t/delete', get_string('multidelete', 'dataform')), 
-        array('type' => 'button', 'name' => 'multidelete', 'onclick' => 'bulk_action(\'field\'&#44; \''. $multiactionurl->out(false). '\'&#44; \'delete\')')
-    );
-    $multiduplicate = html_writer::tag(
-        'button', 
-        $OUTPUT->pix_icon('t/copy', get_string('multiduplicate', 'dataform')), 
-        array('type' => 'button', 'name' => 'multiduplicate', 'onclick' => 'bulk_action(\'field\'&#44; \''. $multiactionurl->out(false). '\'&#44; \'duplicate\')')
-    );
-
-    // table headers
-    $headers = array(
-        'name' => get_string('name'),
-        'type' => get_string('type', 'dataform'),
-        'description' => get_string('description'),
-        'visible' => get_string('visible'),
-        'edits' => get_string('fieldeditable', 'dataform'),
-        'edit' => $stredit,
-        'duplicate' => $multiduplicate,
-        'delete' => $multidelete,
-        'selectallnone' => $selectallnone,
-    );
-
-    $table = new flexible_table('dataformfieldsindex'. $df->id());
-    $table->define_baseurl(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id())));
-    $table->define_columns(array_keys($headers));
-    $table->define_headers(array_values($headers));
-
-    // Column sorting
-    $table->sortable(true);
-    $table->no_sorting('description');
-    $table->no_sorting('edit');
-    $table->no_sorting('duplicate');
-    $table->no_sorting('delete');
-    $table->no_sorting('selectallnone');
-
-    // Column styles
-    $table->set_attribute('class', 'generaltable generalbox boxaligncenter boxwidthwide');
-    $table->column_style('visible', 'text-align', 'center');
-    $table->column_style('edits', 'text-align', 'center');
-    $table->column_style('edit', 'text-align', 'center');
-    $table->column_style('duplicate', 'text-align', 'center');
-    $table->column_style('delete', 'text-align', 'center');
-
-    $table->setup();
-
-    foreach ($fields as $fieldid => $field) {
-        // Skip internal fields
-        if ($field::is_internal()) {
-            continue;
-        }
-        
-        $fieldname = html_writer::link(new moodle_url($editbaseurl, $linkparams + array('fid' => $fieldid)), $field->name());
-        $fieldedit = html_writer::link(new moodle_url($editbaseurl, $linkparams + array('fid' => $fieldid)), $OUTPUT->pix_icon('t/edit', $stredit));
-        $fieldduplicate = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('duplicate' => $fieldid)), $OUTPUT->pix_icon('t/copy', $strduplicate));
-        $fielddelete = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('delete' => $fieldid)), $OUTPUT->pix_icon('t/delete', $strdelete));
-        $fieldselector = html_writer::checkbox("fieldselector", $fieldid, false);
-
-        $fieldtype = $field->image(). '&nbsp;'. $field->typename();
-        $fielddescription = shorten_text($field->field->description, 30);
-
-        // visible
-        if ($visible = $field->field->visible) {
-            $visibleicon = $OUTPUT->pix_icon('t/hide', $strhide);
-            $visibleicon = ($visible == 1 ? "($visibleicon)" : $visibleicon);
-        } else {
-           $visibleicon = $OUTPUT->pix_icon('t/show', $strshow);
-        }
-        $fieldvisible = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('visible' => $fieldid)), $visibleicon);
-
-        // Editable
-        if ($editable = $field->field->edits) {
-            $editableicon = $OUTPUT->pix_icon('t/lock', $strlock);
-        } else {
-           $editableicon = $OUTPUT->pix_icon('t/unlock', $strunlock);
-        }
-        $fieldeditable = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('editable' => $fieldid)), $editableicon);
-
-        $table->add_data(array(
-            $fieldname,
-            $fieldtype,
-            $fielddescription,
-            $fieldvisible,
-            $fieldeditable,
-            $fieldedit,
-            $fieldduplicate,
-            $fielddelete,
-            $fieldselector
-        ));
-    }
-
-    $table->finish_output();
-}
-
-$df->print_footer();
+echo $output->footer();

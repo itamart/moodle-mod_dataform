@@ -22,3 +22,18 @@
  */
 
 $string['pluginname'] = 'Aligned';
+$string['entrytemplate'] = 'Entry template';
+$string['entrytemplate_help'] = 'The entry template of the Aligned view is a simplified definition of a table row. It consists of a list of column definitions, each column definition in a new line. The column definition format: fieldpattern|column header (optional)|cell css class (optional). For example, the following definition will display the entries in a headerless table with 3 columns and the specified field patterns in order:
+<p>
+[[Name]]<br />
+[[Email]]<br />
+[[Message]]<br />
+</p>
+The following definition will display the entries in a table with 5 columns and a header row with header titles in the first 3 columns:
+<p>
+[[Name]]|Name<br />
+[[Email]]|Email<br />
+[[Message]]|Message<br />
+[[EAC:edit]]]<br />
+[[EAC:delete]]<br />
+</p>.';

@@ -23,9 +23,6 @@
 
 defined('MOODLE_INTERNAL') or die;
 
-require_once("$CFG->dirroot/mod/dataform/entries_class.php");
-require_once("$CFG->dirroot/mod/dataform/field/_user/field_class.php");
-
 class dataformtool_entryperuser {
     /**
      *
@@ -40,23 +37,22 @@ class dataformtool_entryperuser {
         
         // Construct entries data
         $data = (object) array('eids' => array());
-        $fieldid = dataformfield__user::_USERID;
         $entryid = -1;
         foreach ($users as $userid => $unused) {
             $data->eids[$entryid] = $entryid;
-            $data->{"field_{$fieldid}_{$entryid}"} = $userid;
+            $data->{"entry_{$entryid}_userid"} = $userid;
             $entryid--;
         }
         // Add entries
-        $em = new dataform_entries($df);
+        $em = new mod_dataform_entry_manager($df->id);
         $processed = $em->process_entries('update', $data->eids, $data, true);
         
         if (is_array($processed)) {
             list($strnotify, $processedeids) = $processed;
             if ($entriesprocessed = ($processedeids ? count($processedeids) : 0)) {
-               return array('good', $strnotify);
+               return array('success', $strnotify);
             }
         }
-        return array('bad', get_string('entriesupdated', 'dataform', get_string('no')));                     
+        return array('problem', get_string('entriesupdated', 'dataform', get_string('no')));                     
     }
 }

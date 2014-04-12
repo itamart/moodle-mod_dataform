@@ -20,9 +20,23 @@
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['exportfields'] = 'Export fields';
-$string['outputtype'] = 'Output type';
-$string['pluginname'] = 'Csv';
+$string['pluginname'] = 'CSV';
 $string['csv'] = 'CSV';
 $string['ods'] = 'Calc (Open Office)';
 $string['xls'] = 'Excel';
+$string['expimpsettings'] = 'Export/Import settings';
+$string['updateexisting'] = 'Update existing entries';
+$string['allowupdateexisting'] = 'Allow update existing entries';
+$string['uploadfile'] = 'CSV File';
+$string['uploadtext'] = 'CSV Text';
+$string['importfields'] = 'Import fields';
+$string['test'] = 'Test';
+$string['csvsettings'] = 'CSV settings';
+$string['csvcontent'] = 'CSV content';
+$string['importresults'] = 'Import results';
+$string['exportall'] = 'Export all';
+$string['exportpage'] = 'Export page';
+$string['nothingimported'] = 'Nothing imported';
+$string['noerrorsfound'] = 'No errors found';
+
+

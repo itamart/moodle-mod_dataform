@@ -1,2 +1,0 @@
-id,dataid,name,description,visible,perpage,selection,groupby,search,customsort,customsearch
-1,1,Filter,,1,0,0,0,,,a:1:{i:1;a:1:{s:3:"AND";a:1:{i:0;a:3:{i:0;s:0:"";i:1;s:4:"LIKE";i:2;s:2:"He";}}}}

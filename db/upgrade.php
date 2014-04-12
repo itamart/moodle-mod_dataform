@@ -43,11 +43,33 @@
  */
 
 function xmldb_dataform_upgrade($oldversion) {
-    global $CFG, $DB, $OUTPUT;
+    global $CFG, $DB;
 
     $dbman = $DB->get_manager();
 
     // Moodle v2.1.0 release upgrade line
+    xmldb_dataform_upgrade_2012032100($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012040600($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012050500($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012051600($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012053100($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012060101($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012061700($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012070601($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012081801($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012082600($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012082900($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012092002($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012092207($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012121600($dbman, $oldversion);
+    xmldb_dataform_upgrade_2012121900($dbman, $oldversion);
+    xmldb_dataform_upgrade_2013051101($dbman, $oldversion);
+    xmldb_dataform_upgrade_last($dbman, $oldversion);
+    
+    return true;    
+}    
+
+function xmldb_dataform_upgrade_2012032100($dbman, $oldversion) {
     if ($oldversion < 2012032100) {
         // add field selection to dataform_filters
         $table = new xmldb_table('dataform_filters');
@@ -60,10 +82,10 @@ function xmldb_dataform_upgrade($oldversion) {
         
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012032100, 'dataform');
-    
-    
     }
+}
 
+function xmldb_dataform_upgrade_2012040600($dbman, $oldversion) {
     if ($oldversion < 2012040600) {
         // add field edits to dataform_fields
         $table = new xmldb_table('dataform_fields');
@@ -75,7 +97,9 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012040600, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012050500($dbman, $oldversion) {
     if ($oldversion < 2012050500) {
         // drop field comments from dataform
         $table = new xmldb_table('dataform');
@@ -97,7 +121,9 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012050500, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012051600($dbman, $oldversion) {
     if ($oldversion < 2012051600) {
         // drop field grading from entries
         $table = new xmldb_table('dataform_entries');
@@ -109,7 +135,9 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012051600, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012053100($dbman, $oldversion) {
     if ($oldversion < 2012053100) {
         $table = new xmldb_table('dataform');
 
@@ -128,7 +156,11 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012053100, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012060101($dbman, $oldversion) {
+    global $DB;
+    
     if ($oldversion < 2012060101) {
         // changed stored content of view editors from serialized to formatted string
         // Assumed at this point that serialized content in param fields in the
@@ -169,7 +201,11 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012060101, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012061700($dbman, $oldversion) {
+    global $DB;
+    
     if ($oldversion < 2012061700) {
         // Remove version record of dataform views and fields from config_plugin
         $DB->delete_records_select('config_plugins', $DB->sql_like('plugin', '?'), array('dataform%'));
@@ -214,7 +250,11 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012061700, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012070601($dbman, $oldversion) {
+    global $DB;
+    
     if ($oldversion < 2012070601) {
         // add field default filter to dataform
         $table = new xmldb_table('dataform');
@@ -252,7 +292,9 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012070601, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012081801($dbman, $oldversion) {
     if ($oldversion < 2012081801) {
         // add field visible to dataform_fields
         $table = new xmldb_table('dataform_fields');
@@ -264,7 +306,9 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012081801, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012082600($dbman, $oldversion) {
     if ($oldversion < 2012082600) {
         // Change timelimit field to signed, default -1
         $table = new xmldb_table('dataform_fields');
@@ -277,7 +321,11 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012082600, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012082900($dbman, $oldversion) {
+    global $DB;
+    
     if ($oldversion < 2012082900) {
         $fs = get_file_storage();
         // Move presets from course_packages to course_presets
@@ -321,7 +369,10 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012082900, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012092002($dbman, $oldversion) {
+    global $CFG, $DB;
     if ($oldversion < 2012092002) {
         // Add rules table
         $table = new xmldb_table('dataform_rules');
@@ -333,7 +384,10 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012092002, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012092207($dbman, $oldversion) {
+    global $DB;
     if ($oldversion < 2012092207) {
         // Change type of view matrix/matrixext to grid/gridext
         $DB->set_field('dataform_views', 'type', 'grid', array('type' => 'matrix'));
@@ -342,7 +396,10 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012092207, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012121600($dbman, $oldversion) {
+    global $DB;
     if ($oldversion < 2012121600) {
         // Convert internal field ids whereever they are cached or referenced
         $newfieldids = array(
@@ -432,7 +489,10 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012121600, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2012121900($dbman, $oldversion) {
+    global $DB;
     if ($oldversion < 2012121900) {
 
         // Changing type of field groupby on table dataform_views to char.
@@ -452,7 +512,10 @@ function xmldb_dataform_upgrade($oldversion) {
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2012121900, 'dataform');
     }
+}
 
+function xmldb_dataform_upgrade_2013051101($dbman, $oldversion) {
+    global $DB;
     if ($oldversion < 2013051101) {
         // Add notification format column to dataform
         $table = new xmldb_table('dataform');
@@ -470,6 +533,550 @@ function xmldb_dataform_upgrade($oldversion) {
 
         // dataform savepoint reached
         upgrade_mod_savepoint(true, 2013051101, 'dataform');
+    }
+}
+
+function xmldb_dataform_upgrade_last($dbman, $oldversion) {
+    global $CFG, $DB;
+    
+    $newversion = 2014041100;
+    if ($oldversion < $newversion) {
+        // Drop available-from column to dataform views
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('availablefrom', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'description');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop available-to column to dataform views
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('availableto', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'availablefrom');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop set-as-default column to dataform views
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('setasdefault', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'availableto');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Add inline view column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('inlineview', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'introformat');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add embedded view column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('embedded', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'inlineview');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Change field description column to default null
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('description', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'name');
+        $dbman->change_field_type($table, $field);
+
+        // Transfer comments from internal comments field to mdlcomments
+        if ($dataforms = $DB->get_records('dataform')) {
+            foreach (array_keys($dataforms) as $dataformid) {
+                $df = mod_dataform_dataform::instance($dataformid);
+                // For each Dataform instance get context
+                $context = $df->context;
+                if ($comments = $DB->get_records('comments', array('contextid' => $context->id, 'commentarea' => 'entry'))) {
+                    // Add an mdlcomments field to the Dataform instance
+                    $commentmdl = (object) array(
+                        'dataid' => $dataformid,
+                        'type' => 'commentmdl',
+                        'name' => 'mdlcomments'
+                    );
+                    $commentmdlid = $DB->insert_record('dataform_fields', $commentmdl);
+                    // Update the commentarea to mdlomments
+                    foreach ($comments as $comment) {
+                        $DB->set_field('comments', 'commentarea', 'mdlcomments', array('id' => $comment->id));
+                    }
+                        
+                    // Replace internal comment patterns with the corresponding commentmdl patterns
+                    $replacements = array();
+                    $replacements['##comments##'] = '[[mdlcomments]]';
+                    $replacements['##comments:count##'] = '[[mdlcomments:count]]';
+                    $replacements['##comments:inline##'] = '[[mdlcomments:inline]]';
+                    $replacements['##comments:add##'] = '[[mdlcomments:add]]';
+                    $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
+                }
+            }
+        }
+        
+        // Transfer entry ratings from internal ratings field to ratingmdl
+        if ($dataforms = $DB->get_records('dataform')) {
+            foreach (array_keys($dataforms) as $dataformid) {
+                $df = new mod_dataform_dataform($dataformid);
+                // For each Dataform instance get context
+                $context = $df->context;
+                if ($ratings = $DB->get_records('rating', array('contextid' => $context->id, 'ratingarea' => 'entry'))) {
+                    // Add an mdlcomments field to the Dataform instance
+                    $ratingmdl = (object) array(
+                        'dataid' => $dataformid,
+                        'type' => 'ratingmdl',
+                        'name' => 'mdlratings',
+                    );
+                    $ratingmdlid = $DB->insert_record('dataform_fields', $ratingmdl);
+                    $scaleidupdated = false;
+                    foreach ($ratings as $rating) {
+                        // Update the ratingarea to mdlratings
+                        $DB->set_field('rating', 'ratingarea', 'mdlratings', array('id' => $rating->id));
+                        // Update ratingmdl scaleid once
+                        if (!$scaleidupdated) {
+                            $DB->set_field('dataform_fields', 'param1', $rating->scaleid, array('id' => $ratingmdlid));
+                            $scaleidupdated = true;
+                        }
+                    }
+                        
+                    // Replace internal comment patterns with the corresponding commentmdl patterns
+                    $replacements = array();
+                    $replacements['##ratings##'] = '[[mdlratings]]';
+                    $replacements['##ratings:rate##'] = '[[mdlratings:rate]]';
+                    $replacements['##ratings:view##'] = '[[mdlratings:view]]';
+                    $replacements['##ratings:viewurl##'] = '[[mdlratings:viewurl]]';
+                    $replacements['##ratings:viewinline##'] = '[[mdlratings:viewinline]]';
+                    $replacements['##ratings:avg##'] = '[[mdlratings:avg]]';
+                    $replacements['##ratings:avg:bar##'] = '[[mdlratings:avg:bar]]';
+                    $replacements['##ratings:avg:star##'] = '[[mdlratings:avg:star]]';
+                    $replacements['##ratings:count##'] = '[[mdlratings:count]]';
+                    $replacements['##ratings:max##'] = '[[mdlratings:max]]';
+                    $replacements['##ratings:min##'] = '[[mdlratings:min]]';
+                    $replacements['##ratings:sum##'] = '[[mdlratings:sum]]';
+                    
+                    $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
+                }
+            }
+        }
+        
+        // Add grade calc column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('gradecalc', XMLDB_TYPE_TEXT, 'long', null, null, null, null, 'grademethod');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add formula for existing grade methods
+        $grademethods = array(
+            1 => '[[mdlratings:avg]]',
+            2 => '[[mdlratings:count]]',
+            3 => '[[mdlratings:max]]',
+            4 => '[[mdlratings:min]]',
+            5 => '[[mdlratings:sum]]'
+        );
+        if ($dataforms = $DB->get_records('dataform')) {
+            foreach ($dataforms as $dataform) {
+                if (!empty($dataform->grademethod) and !empty($grademethods[$dataform->grademethod])) {
+                    $formula = '='. $grademethods[$dataform->grademethod];
+                    $DB->set_field('dataform', 'gradecalc', $formula, array('id' => $dataform->id));
+                }
+            }
+        }
+
+        // Entries can now be displayed only by adding the ##entries## tag to the view template
+        // Add ##entries## tag to view templates
+        if ($views = $DB->get_records('dataform_views')) {
+            foreach ($views as $view) {
+                // If there are no patterns there is no entry template
+                // in which case do nothing.
+                if (empty($view->patterns)) {
+                    continue;
+                }
+                
+                if (strpos($view->section, '##entries##') === false) {
+                    $section = $view->section. html_writer::tag('div', '##entries##', array('class' => ''));
+                    // Adjust the patterns
+                    $patterns = unserialize($view->patterns);
+                    if (empty($patterns['view'])) {
+                        $patterns['view'] = array('##entries##');
+                    } else if (!in_array('##entries##', $patterns['view'])) {
+                        $patterns['view'][] = '##entries##';
+                    }
+                    $patterns = serialize($patterns);
+                    $DB->set_field('dataform_views', 'patterns', $patterns, array('id' => $view->id));
+                }
+            }
+        }
+        
+        // Remame view filter column to filterid
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('filter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'groupby');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'filterid');
+        }
+
+        // Rename field edits column to editable
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('edits', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '-1', 'visible');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'editable');
+        }
+
+        // Drop sectionpos column
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('sectionpos', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'section');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop grade method column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('grademethod', XMLDB_TYPE_CHAR, '255', null, null, null, '0', 'grade');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop allow late column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('allowlate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'intervalcount');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop notifcation format column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('notificationformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'notification');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop notifcation column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('notification', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'anonymous');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop entries to view column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('entriestoview', XMLDB_TYPE_INTEGER, '8', null, XMLDB_NOTNULL, null, '0', 'entriesrequired');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop approval column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('approval', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'timelimit');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop rating column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('rating', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'grouped');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop rss column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('rss', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'rss');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        
+        // Drop rss articles column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('rssarticles', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'singleview');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop singleview column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('singleview', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'singleedit');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop singleedit column
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('singleedit', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'grouped');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Drop rules table
+        $table = new xmldb_table('dataform_rules');
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Rename entry approved column to state
+        $table = new xmldb_table('dataform_entries');
+        $field = new xmldb_field('approved', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'state');
+        }
+
+        // Change entry state column precision to 4
+        $table = new xmldb_table('dataform_entries');
+        $field = new xmldb_field('state', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+        }
+
+        // Transfer entrystate from internal field to entrystates
+        if ($dataforms = $DB->get_records('dataform')) {
+            foreach (array_keys($dataforms) as $dataformid) {
+                $df = mod_dataform_dataform::instance($dataformid);
+                if (!$views = $df->view_manager->get_views()) {
+                    continue;
+                }
+                
+                // The Dataform will require update if patterns for fieldid -5 exist
+                $requireupdate = false;
+                foreach ($views as $view) {
+                    if (!$patterns = $view->patterns) {
+                        continue;
+                    }
+                    
+                    // Check both -5 and approve in case upgrading an old version where internal 
+                    // field ids are verbose.
+                    // Note that 'approve' field id will not be replaced.
+                    if (!empty($patterns['field'][-5]) or !empty($patterns['field']['approve'])) {
+                        $requireupdate = true;
+                        break;
+                    }
+                }
+                
+                // Update
+                if ($requireupdate) {                
+                    // Add an entrystate field to the Dataform instance
+                    $entrystates = (object) array(
+                        'dataid' => $dataformid,
+                        'type' => 'entrystate',
+                        'name' => 'entrystates'
+                    );
+                    $fieldid = $DB->insert_record('dataform_fields', $entrystates);
+                        
+                    // Replace internal approve patterns with the corresponding entrystates patterns
+                    $replacements = array();
+                    $replacements['##approve##'] = '[[entrystates]]';
+                    $replacements['##approved##'] = '[[entrystates:state]]';
+                    $replacements['##multiapprove##'] = '[[entrystates:bulkinstate]]';
+                    $replacements['##multiapprove:icon##'] = '[[entrystates:bulkinstate]]';
+                    $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
+                }
+            }
+        }
+
+        // Replace fieldview action patterns
+        if ($dataforms = $DB->get_records('dataform')) {
+            $replacements = array(
+                '##selectallnone##' => '##selectallnone##',
+                '##multiduplicate##' => '##bulkduplicate##',
+                '##multiduplicate:icon##' => '##bulkduplicate##',
+                '##multiedit##' => '##bulkedit##',
+                '##multiedit:icon##' => '##bulkedit##',
+                '##multidelete##' => '##bulkdelete##',
+                '##multidelete:icon##' => '##bulkdelete##',
+                '##multiexport##' => '##bulkexport##',
+                '##multiexport:icon##' => '##bulkexport##',
+                '##multiapprove##' => '',
+                '##multiapprove:icon##' => '',
+                '##bulkinstate##' => '',
+            );
+            foreach (array_keys($dataforms) as $dataformid) {
+                $df = mod_dataform_dataform::instance($dataformid);
+                if (!$views = $df->view_manager->get_views()) {
+                    continue;
+                }
+                $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
+            }
+        }
+        
+        // MOVE SEPARATE PARTICIPANTS FROM GROUP MODE TO SETTING
+        // Add individualized column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('individualized', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'entriesrequired');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Update dataform course modules and dataforms
+        $moduleid = $DB->get_field('modules', 'id', array('name' => 'dataform'));
+        if ($cms = $DB->get_records('course_modules', array('module' => $moduleid, 'groupmode' => -1))) {
+            foreach ($cms as $cmid => $cm) {
+                $DB->set_field('course_modules', 'groupmode', 0, array('id' => $cmid));
+                $DB->set_field('dataform', 'individualized', 1, array('id' => $cm->instance));
+            }
+        }
+        
+        // Change multiselect field type to selectmulti
+        $DB->set_field('dataform_fields', 'type', 'selectmulti', array('type' => 'multiselect'));        
+
+        // Add submission (settings) field to dataform view
+        $table = new xmldb_table('dataform_views');
+        $field = new xmldb_field('submission', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'patterns');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Move all appearance settings of picture fields from param4-10 into param4
+        // as base64_encode(serialize((object) $appearance))
+        if ($picturefields = $DB->get_records('dataform_fields', array('type' => 'picture'))) {
+            $changes = array(
+                'param4' => 'dispw',
+                'param5' => 'disph',
+                'param6' => 'dispu',
+                'param7' => 'maxw',
+                'param8' => 'maxh',
+                'param9' => 'thumbw',
+                'param10' => 'thumbh',
+            );
+                
+            foreach ($picturefields as $field) {
+                $appearance = array();
+                
+                if ($field->param6 == 'px') {
+                    $field->param6 = null;
+                }
+
+                foreach ($changes as $param => $var) {
+                    if ($field->$param) {
+                        $appearance[$var] = $field->$param;
+                        $field->$param = null;
+                    }
+                }
+                if ($appearance) {
+                    $field->param4 = base64_encode(serialize((object) $appearance));
+                    $DB->update_record('dataform_fields', $field);
+                }
+            }
+        }
+        
+        // Replace pagingbar pattern to paging:bar
+        if ($dataforms = $DB->get_records('dataform')) {
+            $replacements = array(
+                '##pagingbar##' => '##paging:bar##',
+            );
+            foreach (array_keys($dataforms) as $dataformid) {
+                $df = mod_dataform_dataform::instance($dataformid);
+                if (!$views = $df->view_manager->get_views()) {
+                    continue;
+                }
+                $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
+            }
+        }
+        
+        // Enclose content of selectmulti and checkbox fields with #...#
+        // This is done to allow the search filter to work on these fields.
+        list($intype, $params) = $DB->get_in_or_equal(array('selectmulti', 'checkbox'));
+        if ($fields = $DB->get_records_select('dataform_fields', " type $intype ", $params)) {
+            // Get the content fields
+            list($inids, $params) = $DB->get_in_or_equal(array_keys($fields));
+            if ($contents = $DB->get_records_select('dataform_contents', " fieldid $inids ", $params)) {
+                foreach ($contents as $content) {
+                    if (empty($content->content)) {
+                        // Shouldn't be but just in case
+                        $DB->delete_records('dataform_contents', array('id' => $content->id));
+                    } else {
+                        $content->content = '#'. $content->content. '#';
+                        $DB->update_record('dataform_contents', $content);
+                    }
+                }
+            }
+        }
+        
+        // Replace entrytime, entrygroup, entryauthor, entryactions and entryid patterns
+        if ($dataforms = $DB->get_records('dataform')) {
+            $replacements = array();
+
+            // Entry id
+            $replacements["##entryid##"] = "[[entryid]]";
+
+            // Entry actions
+            $fieldname = get_string('fieldname', 'dataformfield_entryactions');
+            $pvars = array('actionmenu', 'edit', 'delete', 'select', 'export', 'duplicate');
+            foreach ($pvars as $pvar) {
+                $replacements["##$pvar##"] = "[[$fieldname:$pvar]]";
+            }
+            $pvars = array('anchor', 'more', 'moreurl');
+            foreach ($pvars as $pvar) {
+                $replacements["##$pvar##"] = "[[$fieldname:$pvar]]";
+            }
+            
+            // Hidden patterns for view designated more and edit
+            if ($views = $DB->get_records('dataform_views')) {
+                foreach ($views as $view) {
+                    $viewname = $view->name;
+                    $replacements["##more:$viewname##"] = "[[$fieldname:more:$viewname]]";
+                    $replacements["##moreurl:$viewname##"] = "[[$fieldname:moreurl:$viewname]]";
+                    $replacements["##edit:$viewname##"] = "[[$fieldname:edit:$viewname]]";
+                }
+            }            
+
+            // Entry author
+            $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
+            foreach (explode(',', user_picture::fields()) as $internalname) {
+                $replacements["##author:{$internalname}##"] = "[[$fieldname:$internalname]]";
+            }
+            foreach (array('username', 'name', 'edit', 'picturelarge') as $pvar) {
+                $patterns["##author:$pvar##"] = "[[$fieldname:$pvar]]";
+            }
+            
+            // Entry group
+            $fieldname = get_string('fieldname', 'dataformfield_entrygroup');
+            foreach (array('id', 'name', 'picture', 'picturelarge', 'edit') as $item) {
+                $replacements["##group:$item##"] = "[[$fieldname:$item]]";
+            }
+
+            // Entry time
+            $fieldname = get_string('fieldname', 'dataformfield_entrytime');
+            foreach (array('timecreate', 'timemodified') as $timevar) {
+                $replacements["##$timevar##"] = "[[$fieldname:$timevar]]";
+                $replacements["##$timevar:date##"] = "[[$fieldname:$timevar:date]]";
+                $replacements["##$timevar:minute##"] = "[[$fieldname:$timevar:minute]]";
+                $replacements["##$timevar:hour##"] = "[[$fieldname:$timevar:hour]]";
+                $replacements["##$timevar:day##"] = "[[$fieldname:$timevar:day]]";
+                $replacements["##$timevar:d##"] = "[[$fieldname:$timevar:d]]";
+                $replacements["##$timevar:week##"] = "[[$fieldname:$timevar:week]]";
+                $replacements["##$timevar:month##"] = "[[$fieldname:$timevar:month]]";
+                $replacements["##$timevar:m##"] = "[[$fieldname:$timevar:m]]";
+                $replacements["##$timevar:year##"] = "[[$fieldname:$timevar:year]]";
+                $replacements["##$timevar:Y##"] = "[[$fieldname:$timevar:Y]]";
+            }
+
+            // Csv export patterns
+            $replacements["##export:all##"] = "##exportall##";
+            $replacements["##export:page##"] = "##exportpage##";
+
+            foreach (array_keys($dataforms) as $dataformid) {
+                $df = mod_dataform_dataform::instance($dataformid);
+                if (!$views = $df->view_manager->get_views()) {
+                    continue;
+                }
+                $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
+            }
+        }
+        
+        // Dataformview->visible changed to 0|1, so adjust any instance
+        // that is not 0 to 1.
+        if ($views = $DB->get_records('dataform_views')) {
+            foreach ($views as $view) {
+                if ($view->visible and $view->visible != 1) {
+                    $DB->set_field('dataform_views', 'visible', 1, array('id' => $view->id));
+                }
+            }
+        }
+
+        // Add completionentries column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('completionentries', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '0', 'defaultfilter');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, $newversion, 'dataform');
     }
 
     return true;

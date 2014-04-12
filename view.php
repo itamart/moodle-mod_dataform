@@ -27,42 +27,47 @@
  */
 
 require_once('../../config.php');
-require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 
-$urlparams = new object();
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);           // course module id
+$urlparams = new stdClass;
+$urlparams->d = optional_param('d', 0, PARAM_INT);  // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);  // course module id
 
-$urlparams->view = optional_param('view', 0, PARAM_INT);       // current view id
-$urlparams->filter = optional_param('filter', 0, PARAM_INT);     // current filter (-1 for user filter)
+// Current view id
+$urlparams->view = optional_param('view', 0, PARAM_INT);
+// Current filter ('filtid' is used in the action url of entries form due to conflicts with 'filter' in moodleforms)
+$urlparams->filter = optional_param('filter', optional_param('filtid', 0, PARAM_INT), PARAM_INT);
 $urlparams->pagelayout = optional_param('pagelayout', '', PARAM_ALPHAEXT);
 $urlparams->refresh = optional_param('refresh', 0, PARAM_INT);
 $urlparams->renew = optional_param('renew', 0, PARAM_INT);
 
 // Set a dataform object with guest autologin
-$df = new dataform($urlparams->d, $urlparams->id, true);
+$df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id, true);
 
 $pageparams = array(
         'js' => true,
         'css' => true,
         'rss' => true,
-        'modjs' => true,
         'completion' => true,
         'comments' => true,
         'urlparams' => $urlparams);        
 $df->set_page('view', $pageparams);
 
-require_capability('mod/dataform:viewentry', $df->context);
+// Activate navigation node
+$currentviewid = $urlparams->view ? $urlparams->view : $df->defaultview;
+if ($currentviewid) {
+    navigation_node::override_active_url(new moodle_url('/mod/dataform/view.php', array('d' => $df->id, 'view' => $currentviewid)));
+}
 
-$df->set_content();
+$df->process_data();
 
+$output = $df->get_renderer();
 $headerparams = array(
-        'heading' => 'true',
+        'heading' => $df->name,
         'tab' => 'browse',
         'groups' => true,
         'urlparams' => $urlparams);
-$df->print_header($headerparams);
+echo $output->header($headerparams);
 
-$df->display();
+echo $df->display();
 
-$df->print_footer();
+echo $output->footer();

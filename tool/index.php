@@ -20,9 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once('../../../config.php');
-require_once('../mod_class.php');
 
-$urlparams = new object();
+$urlparams = new stdClass;
 
 $urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
 $urlparams->id = optional_param('id', 0, PARAM_INT);           // course module id
@@ -33,10 +32,11 @@ $urlparams->run    = optional_param('run', '', PARAM_PLUGIN);  // tool plugin to
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
-$df = new dataform($urlparams->d, $urlparams->id);
-require_capability('mod/dataform:managetemplates', $df->context);
+$df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
+$df->require_manage_permission('tools');
 
-$df->set_page('tool/index', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('tool/index', array('urlparams' => $urlparams));
+$PAGE->set_context($df->context);
 
 // activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/tool/index.php', array('id' => $df->cm->id)));
@@ -50,36 +50,35 @@ if ($urlparams->run and confirm_sesskey()) {  // Run selected tool
         if ($result = $toolclass::run($df)) {
             list($goodbad, $message) = $result;
         } else {
-            $goodbad = 'bad';
+            $goodbad = 'problem';
             $message = '';
         }
-        $df->notifications[$goodbad][] = $message;
+        $df->notifications = array($goodbad => array('' => $message));
     }
 }
 
 // Get the list of tools
-$directories = get_list_of_plugins('mod/dataform/tool/');
 $tools = array();
-foreach ($directories as $directory){
-    $tools[$directory] = (object) array(
-        'name' => get_string('pluginname',"dataformtool_$directory"),
-        'description' => get_string('pluginname_help',"dataformtool_$directory")
+foreach (array_keys(core_component::get_plugin_list('dataformtool')) as $subpluginname) {
+    $tools[$subpluginname] = (object) array(
+        'name' => get_string('pluginname',"dataformtool_$subpluginname"),
+        'description' => get_string('pluginname_help',"dataformtool_$subpluginname")
     );
 }
 ksort($tools);    //sort in alphabetical order
 
 // any notifications?
 if (!$tools) {
-    $df->notifications['bad'][] = get_string('toolnoneindataform','dataform');  // nothing in database
+    $df->notifications = array('problem' => array('toolnoneindataform' => get_string('toolnoneindataform', 'dataform')));
 }
 
-// print header
-$df->print_header(array('tab' => 'tools', 'urlparams' => $urlparams));
+$output = $df->get_renderer();
+echo $output->header(array('tab' => 'tools', 'heading' => $df->name, 'urlparams' => $urlparams));
 
 // if there are tools print admin style list of them
 if ($tools) {
     $actionbaseurl = '/mod/dataform/tool/index.php';
-    $linkparams = array('d' => $df->id(), 'sesskey' => sesskey());
+    $linkparams = array('d' => $df->id, 'sesskey' => sesskey());
                         
     /// table headings
     $strname = get_string('name');
@@ -106,5 +105,5 @@ if ($tools) {
     echo html_writer::table($table);
 }
 
-$df->print_footer();
+echo $output->footer();
 

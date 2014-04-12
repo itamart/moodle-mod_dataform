@@ -1,4 +1,4 @@
-id,userid,groupid,dataid,timecreated,timemodified,approved
+id,userid,groupid,dataid,timecreated,timemodified,state
 1,1,0,1,1234567891,1234567892,1
 2,2,0,1,1234567891,1234567892,1
 3,3,0,1,1234567891,1234567892,1

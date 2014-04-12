@@ -22,17 +22,21 @@
  */
 defined('MOODLE_INTERNAL') or die;
 
+$ADMIN->add('modsettings', new admin_category('moddataformfolder', new lang_string('pluginname', 'mod_dataform'), $module->is_enabled() === false));
+
+$settings = new admin_settingpage($section, get_string('settings', 'mod_dataform'), 'moodle/site:config', $module->is_enabled() === false);
+
 if ($ADMIN->fulltree) {
     // enable rss feeds
     if (empty($CFG->enablerssfeeds)) {
         $options = array(0 => get_string('rssglobaldisabled', 'admin'));
-        $str = get_string('configenablerssfeeds', 'dataform').'<br />'.get_string('configenablerssfeedsdisabled2', 'admin');
+        $str = new lang_string('configenablerssfeeds', 'dataform').'<br />'.new lang_string('configenablerssfeedsdisabled2', 'admin');
 
     } else {
         $options = array(0=>get_string('no'), 1=>get_string('yes'));
-        $str = get_string('configenablerssfeeds', 'dataform');
+        $str = new lang_string('configenablerssfeeds', 'dataform');
     }
-    $settings->add(new admin_setting_configselect('dataform_enablerssfeeds', get_string('enablerssfeeds', 'admin'),
+    $settings->add(new admin_setting_configselect('dataform_enablerssfeeds', new lang_string('enablerssfeeds', 'admin'),
                        $str, 0, $options));
 
     $unlimited = get_string('unlimited');
@@ -42,29 +46,49 @@ if ($ADMIN->fulltree) {
 
     // max fields
     $options = array_combine($keys, $values);
-    $settings->add(new admin_setting_configselect('dataform_maxfields', get_string('fieldsmax', 'dataform'),
-                       get_string('configmaxfields', 'dataform'), 0, $options));
+    $settings->add(new admin_setting_configselect('dataform_maxfields', new lang_string('fieldsmax', 'dataform'),
+                       new lang_string('configmaxfields', 'dataform'), 0, $options));
 
     // max views
     $options = array_combine($keys, $values);
-    $settings->add(new admin_setting_configselect('dataform_maxviews', get_string('viewsmax', 'dataform'),
-                       get_string('configmaxviews', 'dataform'), 0, $options));
+    $settings->add(new admin_setting_configselect('dataform_maxviews', new lang_string('viewsmax', 'dataform'),
+                       new lang_string('configmaxviews', 'dataform'), 0, $options));
 
     // max filters
     $options = array_combine($keys, $values);
-    $settings->add(new admin_setting_configselect('dataform_maxfilters', get_string('filtersmax', 'dataform'),
-                       get_string('configmaxfilters', 'dataform'), 0, $options));
+    $settings->add(new admin_setting_configselect('dataform_maxfilters', new lang_string('filtersmax', 'dataform'),
+                       new lang_string('configmaxfilters', 'dataform'), 0, $options));
 
     // max entries
     $keys = range(-1,500);
     $values = range(0,500);
     array_unshift($values, $unlimited);
     $options = array_combine($keys, $values);
-    $settings->add(new admin_setting_configselect('dataform_maxentries', get_string('entriesmax', 'dataform'),
-                       get_string('configmaxentries', 'dataform'), -1, $options));
+    $settings->add(new admin_setting_configselect('dataform_maxentries', new lang_string('entriesmax', 'dataform'),
+                       new lang_string('configmaxentries', 'dataform'), -1, $options));
 
     // allow anonymous entries
     $options = array(0=>get_string('no'), 1=>get_string('yes'));
-    $settings->add(new admin_setting_configselect('dataform_anonymous', get_string('entriesanonymous', 'dataform'),
-                       get_string('configanonymousentries', 'dataform'), 0, $options));
+    $settings->add(new admin_setting_configselect('dataform_anonymous', new lang_string('anonymousentries', 'dataform'),
+                       new lang_string('configanonymousentries', 'dataform'), 0, $options));
+}
+
+$ADMIN->add('moddataformfolder', $settings);
+// Tell core we already added the settings structure.
+$settings = null;
+
+// Site presets manager
+$ADMIN->add('moddataformfolder', new admin_externalpage('moddataform_sitepresets', new lang_string('presetavailableinsite', 'dataform'), '/mod/dataform/admin/sitepresets.php'));    
+
+// Acceptance tests
+$ADMIN->add('moddataformfolder', new admin_externalpage('moddataform_acceptancetests', new lang_string('pluginname', 'tool_behat'), '/mod/dataform/admin/acceptancetests.php'));    
+
+// Strings checker
+$ADMIN->add('moddataformfolder', new admin_externalpage('moddataform_stringschecker', new lang_string('stringschecker', 'dataform'), '/mod/dataform/admin/stringschecker.php'));    
+
+// Add admin tools
+foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/admin") as $filename) {
+    $toolname = basename($filename, '.php');
+    $tool = "mod_dataform\admin\\$toolname";
+    $ADMIN->add('moddataformfolder', new admin_externalpage("moddataform_$toolname", $tool::get_visible_name(), $tool::get_url()));
 }

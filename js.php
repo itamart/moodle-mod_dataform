@@ -34,8 +34,7 @@ $urlparams->id = optional_param('id', 0, PARAM_INT);   // course module id
 $urlparams->jsedit = optional_param('jsedit', 0, PARAM_BOOL);   // edit mode
 
 if ($urlparams->jsedit) {
-    require_once('mod_class.php');
-    require_once $CFG->libdir.'/formslib.php';
+    require_once("$CFG->libdir/formslib.php");
 
     class mod_dataform_js_form extends moodleform {
 
@@ -53,11 +52,11 @@ if ($urlparams->jsedit) {
             $mform->addElement('header', 'generalhdr', get_string('headerjs', 'dataform'));
 
             // includes
-            $attributes = array('wrap' => 'virtual', 'rows' => 5, 'cols' => 60);
+            $attributes = array('wrap' => 'virtual', 'rows' => 3, 'style' => 'width:95%');
             $mform->addElement('textarea', 'jsincludes', get_string('jsincludes', 'dataform'), $attributes);
 
             // code
-            $attributes = array('wrap' => 'virtual', 'rows' => 15, 'cols' => 60);
+            $attributes = array('wrap' => 'virtual', 'rows' => 5, 'style' => 'width:95%');
             $mform->addElement('textarea', 'js', get_string('jscode', 'dataform'), $attributes);
 
             // uploads
@@ -77,45 +76,36 @@ if ($urlparams->jsedit) {
     }
 
     // Set a dataform object
-    $df = new dataform($urlparams->d, $urlparams->id);
-    require_capability('mod/dataform:managetemplates', $df->context);
+    $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
+    $df->require_manage_permission('js');
 
     $df->set_page('js', array('urlparams' => $urlparams));
 
     // activate navigation node
     navigation_node::override_active_url(new moodle_url('/mod/dataform/js.php', array('id' => $df->cm->id, 'jsedit' => 1)));
 
-    $mform = new mod_dataform_js_form(new moodle_url('/mod/dataform/js.php', array('d' => $df->id(), 'jsedit' => 1))); 
+    $mform = new mod_dataform_js_form(new moodle_url('/mod/dataform/js.php', array('d' => $df->id, 'jsedit' => 1))); 
 
     if ($mform->is_cancelled()) {
     
     } else if ($data = $mform->get_data()){
-        $rec = new object();
+        $rec = new stdClass;
         $rec->js = $data->js;
         $rec->jsincludes = $data->jsincludes;        
         $df->update($rec, get_string('jssaved', 'dataform'));
         
         // add uploaded files
-        $usercontext = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $data->jsupload, 'sortorder', false)) {
-            $filerec = new object;
-            $filerec->contextid = $df->context->id;
-            $filerec->component = 'mod_dataform';
-            $filerec->filearea = 'js';
-            $filerec->filepath = '/';
-            
-            foreach ($files as $file) {
-                $filerec->filename = $file->get_filename();
-                $fs->create_file_from_storedfile($filerec, $file);
-            }
-            $fs->delete_area_files($usercontext->id, 'user', 'draft', $data->jsupload);
-        }
-        
-        add_to_log($df->course->id, 'dataform', 'js saved', 'js.php?id='. $df->cm->id. '&amp;d='. $df->id(), $df->id(), $df->cm->id);
+        $options = array(
+            'subdirs' => 0,
+            'maxbytes' => $COURSE->maxbytes,
+            'maxfiles' => 10,
+            'accepted_types' => array('*.js')
+        );
+        file_save_draft_area_files($data->jsupload, $df->context->id, 'mod_dataform', 'js', 0, $options);
     }
 
-    $df->print_header(array('tab' => 'js', 'urlparams' => $urlparams));
+    $output = $df->get_renderer();
+    echo $output->header(array('tab' => 'js', 'heading' => $df->name, 'urlparams' => $urlparams));
 
     $options = array(
         'subdirs' => 0,
@@ -124,11 +114,14 @@ if ($urlparams->jsedit) {
     );
     $draftitemid = file_get_submitted_draft_itemid('jsupload');
     file_prepare_draft_area($draftitemid, $df->context->id, 'mod_dataform', 'js', 0, $options);
-    $df->data->jsupload = $draftitemid;
 
-    $mform->set_data($df->data);
+    $data = $df->data;
+    $data->jsupload = $draftitemid;
+
+    $mform->set_data($data);
     $mform->display();
-    $df->print_footer();
+    
+    echo $output->footer();
 
 } else {
 

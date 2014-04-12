@@ -20,10 +20,13 @@
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['displaydimensions'] = 'Display dimensions (width x height)';
-$string['maxdimensions'] = 'Max dimensions (width x height)px';
+$string['displaydimensions'] = 'Display dimensions';
+$string['displaydimensions_help'] = 'The size of the displayed image. Aspect ratio is preserved if only width or height are specified.';
+$string['maxdimensions'] = 'Max size';
+$string['maxdimensions_help'] = 'The max size (in pixels) of the stored images. If specified, larger images will be cropped.';
 $string['pluginname'] = 'Picture';
 $string['resizingimages'] = 'Resizing image thumbnails...';
-$string['thumbdimensions'] = 'Thumb dimensions (width x height)px';
+$string['thumbdimensions'] = 'Thumb size';
+$string['thumbdimensions_help'] = 'The thumb size (in pixels of the stored images. If not specified, thumbs are not generated.';
 
 

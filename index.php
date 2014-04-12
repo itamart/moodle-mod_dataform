@@ -27,7 +27,6 @@
  */
 
 require_once("../../config.php");
-require_once("$CFG->dirroot/mod/dataform/mod_class.php");
 require_once("$CFG->dirroot/mod/dataform/lib.php");
 
 $id             = required_param('id', PARAM_INT);   // course
@@ -46,7 +45,8 @@ if (!$course = $DB->get_record('course', array('id' => $id))) {
 $context = context_course::instance($course->id);
 require_course_login($course);
 
-add_to_log($course->id, "dataform", "view all", "index.php?id=$course->id", "");
+// Must have viewindex capability
+require_capability('mod/dataform:indexview', $context);
 
 $modulename = get_string('modulename','dataform');
 $modulenameplural  = get_string('modulenameplural','dataform');
@@ -60,7 +60,7 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 if (!$dataforms = get_all_instances_in_course("dataform", $course)) {
-    notice(get_string('thereareno', 'moodle',$modulenameplural) , new moodle_url('/course/view.php', array('id', $course->id)));
+    notice(get_string('thereareno', 'moodle',$modulenameplural) , new moodle_url('/course/view.php', array('id' => $course->id)));
 }
 
 $usesections = course_format_uses_sections($course->format);
@@ -92,15 +92,10 @@ $table->align[] = 'left';
 $table->head[] = get_string('entries', 'dataform');
 $table->align[] = 'center';
 
-// number of pending entries
-$table->head[] = get_string('entriespending', 'dataform');
-$table->align[] = 'center';
-
 // rss
 $rss = (!empty($CFG->enablerssfeeds) and !empty($CFG->dataform_enablerssfeeds));
 if ($rss) {
-    require_once($CFG->libdir."/rsslib.php");
-    $table->head[] = 'RSS';
+    $table->head[] = get_string('rss');
     $table->align[] = 'center';
 }
 
@@ -121,9 +116,9 @@ $strdelete = get_string('delete');
 foreach ($dataforms as $dataform) {
     $tablerow = array();
     
-    $df = new dataform($dataform);
+    $df = mod_dataform_dataform::instance($dataform->id);
 
-    if (!has_capability('mod/dataform:viewindex', $df->context)) {
+    if (!has_capability('mod/dataform:indexview', $df->context)) {
         continue;
     }
 
@@ -151,19 +146,16 @@ foreach ($dataforms as $dataform) {
     $tablerow[] = format_text($dataform->intro, $dataform->introformat, $options);
 
     // number of entries
-    $tablerow[] = $df->get_entriescount(dataform::COUNT_ALL);
-    
-    // number of pending entries
-    $tablerow[] = $df->get_entriescount(dataform::COUNT_LEFT);
+    $tablerow[] = $df->get_entries_count(mod_dataform_dataform::COUNT_ALL);
     
     // rss
-    if ($rss) {
-        if ($dataform->rssarticles > 0) {
-            $tablerow[] = rss_get_link($course->id, $USER->id, 'dataform', $dataform->id, 'RSS');
-        } else {
-            $tablerow[] = '';
+    $rsslinks = array();
+    if ($rss and $rssviews = $df->get_rss_views()) {
+        foreach ($rssviews as $view) {
+            $rsslinks[] = $view->get_rss_link();
         }
     }
+    $tablerow[] = implode(' ', $rsslinks);
 
     if ($showeditbuttons) {
         $buttons = array();

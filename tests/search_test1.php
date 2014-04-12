@@ -27,7 +27,6 @@
 defined('MOODLE_INTERNAL') or die;
 
 global $CFG;
-require_once($CFG->dirroot . '/mod/dataform/lib.php');
 require_once($CFG->dirroot . '/lib/csvlib.class.php');
 
 
@@ -127,9 +126,9 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
         $fieldinfo['4']->data = 'VIC';
 
         foreach($fieldinfo as $field) {
-            $searchfield = data_get_field_from_id($field->id, $data);
+            $searchfield = data_get_field_by_id($field->id, $data);
             if ($field->id == 2) {
-                $searchfield->field->param1 = 'Hahn Premium';
+                $searchfield->param1 = 'Hahn Premium';
                 $val = array();
                 $val['selected'] = array('0' => 'Hahn Premium');
                 $val['allrequired'] = 0;
@@ -146,7 +145,7 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
         $user = $DB->get_record('user', array('id'=>6));
         $this->finalrecord[6] = new stdClass();
         $this->finalrecord[6]->id = 6;
-        $this->finalrecord[6]->approved = 1;
+        $this->finalrecord[6]->state = 1;
         $this->finalrecord[6]->timecreated = 1234567891;
         $this->finalrecord[6]->timemodified = 1234567892;
         $this->finalrecord[6]->userid = 6;

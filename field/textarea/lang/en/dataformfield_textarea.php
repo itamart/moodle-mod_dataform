@@ -24,9 +24,6 @@
 $string['pluginname'] = 'Text area';
 $string['rows'] = 'Rows';
 $string['cols'] = 'Columns';
-$string['wordcountmax'] = 'Maximum words';
-$string['wordcountmin'] = 'Minimum words';
-$string['wordcountshow'] = 'Show wordcount bar';
-
+$string['trusttext'] = 'Trust text';
 
 

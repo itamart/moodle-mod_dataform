@@ -25,16 +25,15 @@
 
 defined('MOODLE_INTERNAL') or die;
 
-
 /**
  * Page module PHPUnit data generator class
  *
  * @package    mod_dataform
  * @category   phpunit
- * @copyright  2012 Itamar Tzadok
+ * @copyright  2014 Itamar Tzadok
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_dataform_generator extends phpunit_module_generator {
+class mod_dataform_generator extends testing_module_generator {
 
     /**
      * Create new dataform module instance
@@ -43,39 +42,74 @@ class mod_dataform_generator extends phpunit_module_generator {
      * @return stdClass activity record with extra cmid field
      */
     public function create_instance($record = null, array $options = null) {
-        global $CFG;
-        require_once("$CFG->dirroot/mod/dataform/lib.php");
-        require_once("$CFG->dirroot/mod/dataform/locallib.php");
-
-        $this->instancecount++;
-        $i = $this->instancecount;
-
         $record = (object)(array)$record;
-        $options = (array)$options;
 
-        if (empty($record->course)) {
-            throw new coding_exception('module generator requires $record->course');
-        }
-        if (!isset($record->name)) {
-            $record->name = get_string('pluginname', 'dataform').' '.$i;
-        }
-        if (!isset($record->intro)) {
-            $record->intro = 'Test dataform '.$i;
-        }
-        if (!isset($record->introformat)) {
-            $record->introformat = FORMAT_MOODLE;
-        }
-        if (!isset($record->grade)) {
-            $record->grade = 0;
-        }
-        if (isset($options['idnumber'])) {
-            $record->cmidnumber = $options['idnumber'];
-        } else {
-            $record->cmidnumber = '';
-        }
-
-        $record->coursemodule = $this->precreate_course_module($record->course, $options);
-        $id = dataform_add_instance($record, null);
-        return $this->post_add_instance($id, $record->coursemodule);
+        return parent::create_instance($record, (array)$options);
     }
+    
+    /**
+     * Generates a dataform view.
+     * @param array|stdClass $record
+     * @param array $options
+     * @return stdClass generated object
+     */
+    public function create_view($record, array $options = null) {
+        $record = (object)(array)$record;
+        $df = mod_dataform_dataform::instance($record->dataid);
+        $view = $df->view_manager->get_view($record->type);
+        $view->generate_default_view();
+        $view->name = $record->name;
+        $view->add($view->data);
+        
+        // Set as default if specified
+        if (!empty($record->default)) {
+            $df->view_manager->process_views('default', $view->id, true);
+        }
+        return $view->data;
+    }
+    
+    /**
+     * Generates a dataform field.
+     * @param array|stdClass $record
+     * @param array $options
+     * @return stdClass generated object
+     */
+    public function create_field($record, array $options = null) {
+        $record = (object)(array)$record;
+        $df = mod_dataform_dataform::instance($record->dataid);
+        $field = $df->field_manager->get_field($record->type);
+        $field->name = $record->name;
+        $field->create($field->data);
+        return $field->data;
+    }
+    
+    /**
+     * Generates a dataform entry.
+     * @param array|stdClass $record
+     * @param array $options
+     * @return stdClass generated object
+     */
+    public function create_entry($record, array $options = null) {
+        global $DB;
+        
+        // Convert timecreated and timemodified
+        $record['timecreated'] = !empty($record['timecreated']) ? strtotime($record['timecreated']) : 0;
+        $record['timemodified'] = !empty($record['timemodified']) ? strtotime($record['timemodified']) : 0;
+        
+        $df = \mod_dataform_dataform::instance($record['dataid']);
+        $entry = \mod_dataform\pluginbase\dataformentry::blank_instance($df, (object)(array)$record);
+        $entry->id = $DB->insert_record('dataform_entries', $entry);
+        
+        // Add content
+        if ($fields = $df->field_manager->get_fields()) {
+            foreach ($fields as $field) {
+                if (!empty($record[$field->name])) {
+                    $field->update_content($entry, array($record[$field->name]));
+                }
+            }
+        }
+            
+        return $entry;
+    }
+    
 }

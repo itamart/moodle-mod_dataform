@@ -27,8 +27,8 @@
  */
 
 require_once("$CFG->libdir/portfolio/caller.php");
-require_once("$CFG->dirroot/mod/dataform/mod_class.php");
-require_once($CFG->libdir . '/filelib.php');
+require_once("$CFG->libdir/filelib.php");
+require_once("$CFG->dirroot/calendar/lib.php");
 
 /**
  * The class to handle entry exports of a dataform module
@@ -99,7 +99,6 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             $dbtime = PORTFOLIO_TIME_HIGH;
         }
         
-        // TODO by file sizes 
         // (only if export includes embedded files but this is in config and not
         // yet accessible here ...)
         $filetime = PORTFOLIO_TIME_HIGH;
@@ -123,15 +122,15 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      */
     public function prepare_package() {
         // set the exported view content
-        $df = new dataform(null, $this->id);
-        $view = $df->get_view_from_id($this->vid);
-        $view->set_filter(array('filterid' => $this->fid, 'eids' => $this->eids));
-        $view->set_content();
+        $df = mod_dataform_dataform::instance(null, $this->id);
+        $viewman = mod_dataform_view_manager::instance($df->id);
+        $view = $viewman->get_view_by_id($this->vid);
+        $view->set_viewfilter(array('filterid' => $this->fid, 'eids' => $this->eids));
 
         // export to spreadsheet
         if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_SPREADSHEET) {
-            $content = $view->display(array('controls' => false, 'tohtml' => true));
-            $filename = clean_filename($view->name(). '-full.'. $this->get_export_config('spreadsheettype'));
+            $content = $view->display(array('controls' => false));
+            $filename = clean_filename($view->name. '-full.'. $this->get_export_config('spreadsheettype'));
             $this->exporter->write_new_file($content, $filename);
             return;
         }
@@ -151,11 +150,9 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             
             // export content
             if ($exportfiles != self::CONTENT_FILESONLY) {
-                // TODO the user may choose to export without files
                 $content = $view->display(array('controls' => false,
-                                                'tohtml' => true,
                                                 'pluginfileurl' => $this->exporter->get('format')->get_file_directory()));
-                $filename = clean_filename($view->name(). '-full.htm');
+                $filename = clean_filename($view->name. '-full.htm');
                 $this->exporter->write_new_file($content, $filename);
             }
             return;
@@ -354,93 +351,71 @@ class dataform_file_info_container extends file_info {
 }
 
 /**
- * Event handler for Dataform notifications
+ * Dataform helper for Moodle Calendar management
  */
-class dataform_notification_handler {
+class dataform_calendar_helper {
     /**
      *
      */
-    public static function notify_entry($data) {
-        // Create links to entries and store in data->entrylinks
-        $entrylinks = array();
-        $baseurl = $data->view->get_baseurl();
-        foreach ($data->items as $entryid => $entry) {
-            $entrylinks[] = html_writer::link(new moodle_url($baseurl, array('eids' => $entryid)), $entryid);
-        }
-        $data->entrylinks = implode(',', $entrylinks);
-        self::notify($data);
-    }
-    
-    /**
-     *
-     */
-    public static function notify_commentadded($data) {
-        self::notify($data);
-    }
-    
-    /**
-     *
-     */
-    public static function notify_ratingadded($data) {
-        self::notify($data);
-    }
-    
-    /**
-     *
-     */
-    public static function notify_ratingupdated($data) {
-        self::notify($data);
-    }
-    
-    /**
-     *
-     */
-    protected static function notify($data) {
-        global $SITE, $CFG;
-
-		if (empty($data->users) or empty($data->event)) {
-            return true;
-        }
+    public static function update_event_timeavailable($data) {
+        global $DB;
         
-        $users = $data->users;
-        $event = $data->event;
-        
-        // Prepare message
-		$strdataform = get_string('pluginname', 'dataform');
-        $sitename = format_string($SITE->fullname);
-        $data->siteurl = $CFG->wwwroot;
-        $data->coursename = !empty($data->coursename) ? $data->coursename : 'Unspecified course';
-        $data->dataformname = !empty($data->dataformname) ? $data->dataformname : 'Unspecified dataform';
-        $data->dataformurl = !empty($data->dataformurl) ? $data->dataformurl : '';
-        $notename = get_string("messageprovider:dataform_$event", 'dataform');
-        $notedetails = get_string("message_$event", 'dataform', $data);
-        
-		$subject = "$sitename -> $data->coursename -> $strdataform $data->dataformname:  $notename";
-		$content = $notedetails;
-		$contenthtml = text_to_html($content, false, false, true);
-		
-        // Send message
-        $message = new object;
-        $message->siteshortname   = format_string($SITE->shortname);
-        $message->component       = 'mod_dataform';
-        $message->name            = "dataform_$event";
-        $message->context         = $data->context;
-        $message->userfrom        = $data->sender;
-        $message->subject         = $subject;
-        $message->fullmessage     = $content;
-        $message->fullmessageformat = $data->notificationformat;
-        $message->fullmessagehtml = $contenthtml;
-        $message->smallmessage    = '';
-        if (!empty($data->notification)) {
-            $message->notification = 1;
-        }           
+        if (!empty($data->timeavailable)) {
+            $event = new stdClass;
+            $event->name        = $data->name;
+            $event->description = format_module_intro('dataform', $data, $data->coursemodule);
+            $event->timestart   = $data->timeavailable;
 
-        foreach ($users as $user) {
-            $message->userto = $user;
-            message_send($message);
+            if ($event->id = $DB->get_field('event', 'id', array('modulename' => 'dataform', 'instance' => $data->id))) {
+                $calendarevent = calendar_event::load($event->id);
+                $calendarevent->update($event);
+            } else {
+                $event->courseid    = $data->course;
+                $event->groupid     = 0;
+                $event->userid      = 0;
+                $event->modulename  = 'dataform';
+                $event->instance    = $data->id;
+                $event->eventtype   = 'available';
+                $event->timeduration = 0;
+                $event->visible = $DB->get_field('course_modules', 'visible', array('module' => $data->module, 'instance' => $data->id));
+
+                calendar_event::create($event);
+            }
+        } else {
+            $DB->delete_records('event', array('modulename' => 'dataform', 'instance' => $data->id, 'eventtype' => 'available'));
         }
+    }
 
-        return true;
+    /**
+     *
+     */
+    public static function update_event_timedue($data) {
+        global $DB;
+
+        if (!empty($data->timedue)) {
+            $event = new stdClass;
+            $event->name        = $data->name;
+            $event->description = format_module_intro('dataform', $data, $data->coursemodule);
+            $event->timestart   = $data->timedue;
+
+            if ($event->id = $DB->get_field('event', 'id', array('modulename' => 'dataform', 'instance' => $data->id))) {
+                $calendarevent = calendar_event::load($event->id);
+                $calendarevent->update($event);
+            } else {
+                $event->courseid    = $data->course;
+                $event->groupid     = 0;
+                $event->userid      = 0;
+                $event->modulename  = 'dataform';
+                $event->instance    = $data->id;
+                $event->eventtype   = 'due';
+                $event->timeduration = 0;
+                $event->visible = $DB->get_field('course_modules', 'visible', array('module' => $data->module, 'instance' => $data->id));
+
+                calendar_event::create($event);
+            }
+        } else {
+            $DB->delete_records('event', array('modulename' => 'dataform', 'instance' => $data->id, 'eventtype' => 'due'));
+        }
     }
 
 }

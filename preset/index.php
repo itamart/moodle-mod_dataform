@@ -22,10 +22,8 @@
  */
 
 require_once('../../../config.php');
-require_once('../mod_class.php');
-require_once('preset_form.php');
 
-$urlparams = new object();
+$urlparams = new stdClass;
 
 $urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
 $urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
@@ -41,33 +39,35 @@ $urlparams->download =     optional_param('download', '', PARAM_SEQUENCE);     /
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
-$df = new dataform($urlparams->d, $urlparams->id);
-require_capability('mod/dataform:managetemplates', $df->context);
-$df->set_page('preset/index', array('modjs' => true, 'urlparams' => $urlparams));
+$df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
+$df->require_manage_permission('presets');
+
+$df->set_page('preset/index', array('urlparams' => $urlparams));
+$PAGE->set_context($df->context);
 
 // activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/preset/index.php', array('id' => $df->cm->id)));
 
-$pm = $df->get_preset_manager();
+$pm = mod_dataform_preset_manager::instance($df->id);
 
 // DATA PROCESSING
 $pm->process_presets($urlparams);
 
-$localpresets = $pm->get_user_presets($pm::PRESET_COURSEAREA);
-$sharedpresets = $pm->get_user_presets($pm::PRESET_SITEAREA);
 
-// any notifications
-if (!$localpresets and !$sharedpresets) {
-    $df->notifications['bad'][] = get_string('presetnoneavailable','dataform');  // No presets in dataform
-}
-
-// print header
-$df->print_header(array('tab' => 'presets', 'urlparams' => $urlparams));
+$output = $df->get_renderer();
+echo $output->header(array('tab' => 'presets', 'heading' => $df->name, 'urlparams' => $urlparams));
 
 // print the preset form
 $pm->print_preset_form();
 
-// if there are presets print admin style list of them
-$pm->print_presets_list($localpresets, $sharedpresets);
+// Print admin style list of course presets
+$presets = $pm->get_user_presets($pm::PRESET_COURSEAREA);
+echo html_writer::tag('h4', get_string('presetavailableincourse', 'dataform'));
+echo $pm->get_course_presets_list($presets);
 
-$df->print_footer();
+// Print admin style list of site presets
+$presets = $pm->get_user_presets($pm::PRESET_SITEAREA);
+echo html_writer::tag('h4', get_string('presetavailableinsite', 'dataform'));
+echo $pm->get_site_presets_list($presets);
+
+echo $output->footer();

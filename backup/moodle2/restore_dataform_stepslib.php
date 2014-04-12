@@ -29,8 +29,6 @@
  */
 class restore_dataform_activity_structure_step extends restore_activity_structure_step {
 
-    protected $groupmode = 0;
-    
     /**
      *
      */
@@ -41,21 +39,14 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
-        $paths[] = new restore_path_element('dataform_module', '/activity/dataform/module');
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
         $paths[] = new restore_path_element('dataform_view', '/activity/dataform/views/view');
-        $paths[] = new restore_path_element('dataform_rule', '/activity/dataform/rules/rule');
 
         if ($userinfo) {
             $paths[] = new restore_path_element('dataform_entry', '/activity/dataform/entries/entry');
             $paths[] = new restore_path_element('dataform_content', '/activity/dataform/entries/entry/contents/content');
             $paths[] = new restore_path_element('dataform_rating', '/activity/dataform/entries/entry/ratings/rating');
-            $paths[] = new restore_path_element('dataform_grade', '/activity/dataform/grades/grade');
-/*
-            $paths[] = new restore_path_element('dataform_comment', '/activity/dataform/entries/entry/comments/comment');
-            $paths[] = new restore_path_element('dataform_gradecomment', '/activity/dataform/gradecomments/gradecomment');
-*/
         }
 
         // Return the paths wrapped into standard activity structure
@@ -78,10 +69,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         if ($data->grade < 0) { // scale found, get mapping
             $data->grade = -($this->get_mappingid('scale', abs($data->grade)));
-        }
-
-        if ($data->rating < 0) { // scale found, get mapping
-            $data->rating = -($this->get_mappingid('scale', abs($data->rating)));
         }
 
         $newitemid = $this->task->get_activityid();
@@ -123,19 +110,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     /**
      *
      */
-    protected function process_dataform_module($data) {
-        global $DB;
-
-        $data = (object)$data;
-        // Adjust groupmode in course_modules->groupmode
-        if (isset($data->groupmode)) {
-            $DB->set_field('course_modules', 'groupmode', $data->groupmode, array('id' => $this->task->get_moduleid()));
-        }
-    }
-
-    /**
-     *
-     */
     protected function process_dataform_field($data) {
         global $DB;
 
@@ -160,11 +134,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $data->dataid = $this->get_new_parentid('dataform');
 
-        // adjust groupby field id
-        if ($data->groupby > 0) {
-            $data->groupby = $this->get_mappingid('dataform_field', $data->groupby);
-        }
-                    
         // adjust customsort field ids
         if ($data->customsort) {
             $customsort = unserialize($data->customsort);
@@ -209,14 +178,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $data->dataid = $this->get_new_parentid('dataform');
 
-        // adjust groupby field id
-        if ($data->groupby > 0) {
-            $data->groupby = $this->get_mappingid('dataform_field', $data->groupby);
-        }
-
         // adjust view filter id
-        if ($data->filter) {
-            $data->filter = $this->get_mappingid('dataform_filter', $data->filter);
+        if ($data->filterid) {
+            $data->filterid = $this->get_mappingid('dataform_filter', $data->filterid);
         }
 
         // adjust pattern field ids
@@ -236,22 +200,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         // insert the dataform_views record
         $newitemid = $DB->insert_record('dataform_views', $data);
         $this->set_mapping('dataform_view', $oldid, $newitemid, true); // files by this item id
-    }
-
-    /**
-     *
-     */
-    protected function process_dataform_rule($data) {
-        global $DB;
-
-        $data = (object)$data;
-        $oldid = $data->id;
-
-        $data->dataid = $this->get_new_parentid('dataform');
-
-        // insert the dataform_fields record
-        $newitemid = $DB->insert_record('dataform_rules', $data);
-        $this->set_mapping('dataform_rule', $oldid, $newitemid, false); // no files
     }
 
     /**
@@ -309,15 +257,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     /**
      *
      */
-    protected function process_dataform_grade($data) {
-        $data = (object)$data;
-        $data->itemid = $this->get_mappingid('user', $data->itemid);
-        $this->process_this_rating($data);        
-    }
-
-    /**
-     *
-     */
     protected function process_this_rating($data) {
         global $DB;
         $data = (object)$data;
@@ -339,15 +278,18 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
      */
     protected function after_execute() {
         global $DB;
-        // Add data related files, no need to match by itemname (just internally handled context)
+        // Add dataform related files, no need to match by itemname (just internally handled context)
         $this->add_related_files('mod_dataform', 'intro', null);
+        $this->add_related_files('mod_dataform', 'activityicon', null);
 
         // Add content related files, matching by item id (dataform_content)
         $this->add_related_files('mod_dataform', 'content', 'dataform_content');
 
-        // Add content related files, matching by item id (dataform_view)
-        // TODO it's not quite item id; need to add folders there
-        $this->add_related_files('mod_dataform', 'view', 'dataform_view');
+        // Add dataformview related files, matching by item id (dataform_view)
+        $this->add_related_dataformplugin_files('dataformview', 'dataform_view');
+
+        // Add dataformfield related files, matching by item id (dataform_field)
+        $this->add_related_dataformplugin_files('dataformfield', 'dataform_field');
 
         // TODO Add preset related files, matching by itemname (data_content)
         //$this->add_related_files('mod_dataform', 'course_presets', 'dataform');
@@ -368,23 +310,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
         }
 
-        // single edit view
-        if ($singleedit = $DB->get_field('dataform', 'singleedit', array('id' => $dataformnewid))) {
-            if ($singleedit = $this->get_mappingid('dataform_view', $singleedit)) {
-                $DB->set_field('dataform', 'singleedit', $singleedit, array('id' => $dataformnewid));
-            }
-        }
-
-        // single view
-        if ($singleview = $DB->get_field('dataform', 'singleview', array('id' => $dataformnewid))) {
-            if ($singleview = $this->get_mappingid('dataform_view', $singleview)) {
-                $DB->set_field('dataform', 'singleview', $singleview, array('id' => $dataformnewid));
-            }
-        }
-
-        // Update group mode if the original was set to internal mode
-        
-
 
         // Update id of userinfo fields if needed
         // TODO can we condition this on restore to new site?
@@ -397,5 +322,17 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
         }
 
+    }
+    
+    protected function add_related_dataformplugin_files($plugintype, $source) {
+        global $CFG;
+        
+        $plugins = core_component::get_plugin_list($plugintype);
+        foreach ($plugins as $type => $unused){
+            $pluginclass = $plugintype. "_$type". "_$type";
+            foreach ($pluginclass::get_file_areas() as $filearea) {
+                $this->add_related_files($pluginclass, $filearea, $source);
+            }
+        }
     }
 }

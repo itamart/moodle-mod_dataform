@@ -23,4 +23,8 @@
 $string['alttext'] = 'Alt text';
 $string['clearcontent'] = 'Clear content';
 $string['pluginname'] = 'File';
+$string['newline'] = 'New line';
+$string['filesseparator'] = 'Separator';
+$string['filesseparator_help'] = 'Select New line to display multiple files in separate lines.';
+
 

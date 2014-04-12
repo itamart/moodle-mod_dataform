@@ -17,7 +17,7 @@
 /**
  * @package mod
  * @subpackage dataform
- * @copyright 2012 Itamar Tzadok
+ * @copyright 2013 Itamar Tzadok {@link http://substantialmethods.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
@@ -28,27 +28,34 @@
 defined('MOODLE_INTERNAL') or die;
 
 require_once ("$CFG->dirroot/course/moodleform_mod.php");
-require_once($CFG->dirroot. '/mod/dataform/mod_class.php');
 
 class mod_dataform_mod_form extends moodleform_mod {
     
     protected $_df = null; 
 
-    function definition() {
-        global $CFG;
-        
-        if ($cmid = optional_param('update', 0, PARAM_INT)) {
-            $this->_df = new dataform(0, $cmid);
-        }
-        
+    function definition() {      
         $mform = &$this->_form;
 
-        // buttons
-        //-------------------------------------------------------------------------------
     	$this->add_action_buttons();
 
-        // name and intro
-        //-------------------------------------------------------------------------------
+        $this->definition_general();
+        $this->definition_appearance();
+        $this->definition_timing();
+        $this->definition_entry_settings();
+        $this->standard_grading_coursemodule_elements();
+        $this->definition_grading();
+        $this->standard_coursemodule_elements();
+
+    	$this->add_action_buttons();
+    }
+    
+    /**
+     *
+     */
+    protected function definition_general() {
+        global $CFG;
+        
+        $mform = &$this->_form;
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // name
@@ -59,173 +66,201 @@ class mod_dataform_mod_form extends moodleform_mod {
             $mform->setType('name', PARAM_CLEANHTML);
         }
         $mform->addRule('name', null, 'required', null, 'client');
-        $mform->setDefault('name', get_string('modulename', 'dataform'));
+        $mform->setDefault('name', get_string('dataformnew', 'dataform'));
 
         // intro
-        $this->add_intro_editor(false, get_string('intro', 'dataform'));
+        $this->add_intro_editor(false, get_string('description'));
+    }
 
-        // timing
-        //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'timinghdr', get_string('timing', 'form'));
+    /**
+     *
+     */
+    protected function definition_appearance() {
+        global $COURSE;
+        
+        // We want to hide that when using the singleactivity course format because it is confusing.
+        if (!$this->courseformat->has_view_page()) {
+            return;
+        }
+
+        $mform = &$this->_form;
+        
+        $mform->addElement('header', 'coursedisplayhdr', get_string('appearance'));
+        // Activity icon
+        $options = array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes, 'maxfiles' => 1, 'accepted_types' => array('image'));
+        $draftitemid = file_get_submitted_draft_itemid('activityicon');
+        file_prepare_draft_area($draftitemid, $this->context->id, 'mod_dataform', 'activityicon', 0, $options);
+        $mform->addElement('filemanager', 'activityicon', get_string('activityicon', 'dataform'), null, $options);
+        $mform->setDefault('activityicon', $draftitemid);
+        $mform->addHelpButton('activityicon', 'activityicon', 'mod_dataform');
+        
+        // Displayed view
+        $options = array(0 => get_string('choosedots'));
+        if ($this->_instance) {
+            if ($views = mod_dataform_view_manager::instance($this->_instance)->get_views_menu(array('forceget' => true))) {
+                $options = $options + $views;
+            }
+        }    
+        $mform->addElement('select', 'inlineview', get_string('inlineview', 'mod_dataform'), $options);
+        $mform->addHelpButton('inlineview', 'inlineview', 'mod_dataform');
+        
+        // Embedded
+        $mform->addElement('selectyesno', 'embedded', get_string('embedded', 'mod_dataform'));
+        $mform->addHelpButton('embedded', 'embedded', 'mod_dataform');
+        $mform->disabledIf('embedded', 'inlineview', 'eq', 0);
+    }    
+
+    /**
+     *
+     */
+    protected function definition_timing() {
+        $mform = &$this->_form;
+        $mform->addElement('header', 'timinghdr', get_string('timing', 'dataform'));
 
         // time available
-        $mform->addElement('date_time_selector', 'timeavailable', get_string('dftimeavailable', 'dataform'), array('optional'=>true));
+        $mform->addElement('date_time_selector', 'timeavailable', get_string('timeavailable', 'dataform'), array('optional'=>true));
+        $mform->addHelpButton('timeavailable', 'timeavailable', 'mod_dataform');
+        
         // time due
-        $mform->addElement('date_time_selector', 'timedue', get_string('dftimedue', 'dataform'), array('optional'=>true));
+        $mform->addElement('date_time_selector', 'timedue', get_string('timedue', 'dataform'), array('optional'=>true));
+        $mform->addHelpButton('timedue', 'timedue', 'mod_dataform');
         $mform->disabledIf('timedue', 'interval', 'gt', 0);
 
-        // interval between required entries
-        $mform->addElement('duration', 'timeinterval', get_string('dftimeinterval', 'dataform'));
-        $mform->disabledIf('timeinterval', 'timeavailable[off]', 'checked');
-        $mform->disabledIf('timeinterval', 'timedue[off]');
-
-        // number of intervals
-        $mform->addElement('select', 'intervalcount', get_string('dfintervalcount', 'dataform'), array_combine(range(1,100),range(1,100)));
+        // Activity interval
+        $mform->addElement('duration', 'timeinterval', get_string('timeinterval', 'dataform'));
+        $mform->addHelpButton('timeinterval', 'timeinterval', 'mod_dataform');
+        $mform->disabledIf('timeinterval', 'timeavailable[enabled]', 'notchecked');
+        $mform->disabledIf('timeinterval', 'timedue[enabled]', 'checked');
+        
+        // Number of intervals
+        $mform->addElement('select', 'intervalcount', get_string('intervalcount', 'dataform'), array_combine(range(1,100),range(1,100)));
         $mform->setDefault('intervalcount', 1);
-        $mform->disabledIf('intervalcount', 'timeavailable[off]', 'checked');
-        $mform->disabledIf('intervalcount', 'timedue[off]');
-        $mform->disabledIf('intervalcount', 'timeinterval', 'eq', '');
-
-        // allow late
-        $mform->addElement('checkbox', 'allowlate', get_string('dflateallow', 'dataform') , get_string('dflateuse', 'dataform'));
-
-        // rss
-        //-------------------------------------------------------------------------------
-        if($CFG->enablerssfeeds && $CFG->dataform_enablerssfeeds){
-            $mform->addElement('header', 'rssshdr', get_string('rss'));
-
-            $mform->addElement('select', 'rssarticles', get_string('numberrssarticles', 'dataform') , $countoptions);
-        }
-
-        // grading
-        //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'gradinghdr', get_string('rating', 'rating'));
-
-        // entry rating
-        $mform->addElement('modgrade', 'grade', get_string('grade'));
-        $mform->setDefault('grade', 0);
-
-        // rating method
-        $grademethods = array(
-            0 => get_string('ratingmanual', 'dataform'),
-            1 => get_string('ratingsavg', 'dataform'),
-            2 => get_string('ratingscount', 'dataform'),
-            3 => get_string('ratingsmax', 'dataform'),
-            4 => get_string('ratingsmin', 'dataform'),
-            5 => get_string('ratingssum', 'dataform')
-        );
-        $mform->addElement('select', 'grademethod', get_string('gradingmethod', 'dataform'), $grademethods);
-        $mform->setDefault('grademethod', 0);
-        $mform->disabledIf('grademethod', 'grade', 'eq', 0);
+        $mform->addHelpButton('intervalcount', 'intervalcount', 'mod_dataform');
+        $mform->disabledIf('intervalcount', 'timeavailable[enabled]', 'notchecked');
+        $mform->disabledIf('intervalcount', 'timedue[enabled]', 'checked');
+        $mform->disabledIf('intervalcount', 'timeinterval[number]', 'eq', '');
+        $mform->disabledIf('intervalcount', 'timeinterval[number]', 'eq', 0);
         
-        // entry rating
-        $mform->addElement('modgrade', 'rating', get_string('rating', 'dataform'));
-        $mform->setDefault('rating', 0);
-
-        // Notifications
-        //-------------------------------------------------------------------------------
-        // Types
-        $mform->addElement('header', 'notificationshdr', get_string('notifications'));
-        $grp=array();
-        foreach (dataform::get_notification_types() as $type => $key) {
-            $grp[] = &$mform->createElement('advcheckbox', $type, null, get_string("messageprovider:dataform_$type", 'dataform'), null, array(0,$key));
-        }
-        $mform->addGroup($grp, 'notificationgrp', get_string('notificationenable', 'dataform'), html_writer::empty_tag('br'), false);
-        // Format
-        $options = array(
-            FORMAT_HTML => get_string('formathtml'),
-            FORMAT_HTML => get_string('formatplain'),
-        );
-        $mform->addElement('select', 'notificationformat', get_string('format'), $options);
+    }
+    
+    /**
+     *
+     */
+    protected function definition_entry_settings() {
+        global $CFG;
         
-        // entry settings
-        //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'entrysettingshdr', get_string('entrysettings', 'dataform'));
+        $mform = &$this->_form;
+        $mform->addElement('header', 'entrysettingshdr', get_string('entries', 'dataform'));
 
         if ($CFG->dataform_maxentries > 0) { 
             // Admin limit, select from dropdown
             $maxoptions = (array_combine(range(0, $CFG->dataform_maxentries),range(0, $CFG->dataform_maxentries)));
-
-            // required entries
-            $mform->addElement('select', 'entriesrequired', get_string('entriesrequired', 'dataform'), array(0=>get_string('none')) + $maxoptions);
-            // required entries to view
-            $mform->addElement('select', 'entriestoview', get_string('entriestoview', 'dataform'), array(0=>get_string('none')) + $maxoptions);
-            // max entries
+            // Max entries
             $mform->addElement('select', 'maxentries', get_string('entriesmax', 'dataform'), $maxoptions);
             $mform->setDefault('maxentries', $CFG->dataform_maxentries);
-        
+            // Required entries
+            $mform->addElement('select', 'entriesrequired', get_string('entriesrequired', 'dataform'), array(0=>get_string('none')) + $maxoptions);
+
         } else {
             // No limit or no entries
             $admindeniesentries = (int) !$CFG->dataform_maxentries; 
             $mform->addElement('hidden', 'admindeniesentries', $admindeniesentries);
             $mform->setType('admindeniesentries', PARAM_INT);
 
-            // required entries
-            $mform->addElement('text', 'entriesrequired', get_string('entriesrequired', 'dataform'));
-            $mform->setDefault('entriesrequired', 0);
-            $mform->addRule('entriesrequired', null, 'numeric', null, 'client');
-            $mform->setType('entriesrequired', PARAM_INT);
-            $mform->disabledIf('entriesrequired', 'admindeniesentries', 'eq', 1);
-
-            // required entries to view
-            $mform->addElement('text', 'entriestoview', get_string('entriestoview', 'dataform'));
-            $mform->setDefault('entriestoview', 0);
-            $mform->addRule('entriestoview', null, 'numeric', null, 'client');
-            $mform->setType('entriestoview', PARAM_INT);
-            $mform->disabledIf('entriestoview', 'admindeniesentries', 'eq', 1);
-
-            // max entries
+            // Max entries
             $mform->addElement('text', 'maxentries', get_string('entriesmax', 'dataform'));
             $mform->setDefault('maxentries', -1);
             $mform->addRule('maxentries', null, 'numeric', null, 'client');
             $mform->setType('maxentries', PARAM_INT);
             $mform->disabledIf('maxentries', 'admindeniesentries', 'eq', 1);
 
+            // Required entries
+            $mform->addElement('text', 'entriesrequired', get_string('entriesrequired', 'dataform'));
+            $mform->setDefault('entriesrequired', 0);
+            $mform->addRule('entriesrequired', null, 'numeric', null, 'client');
+            $mform->setType('entriesrequired', PARAM_INT);
+            $mform->disabledIf('entriesrequired', 'admindeniesentries', 'eq', 1);
+
         }
 
-        // anonymous entries
-        if ($CFG->dataform_anonymous) { 
-            $mform->addElement('selectyesno', 'anonymous', get_string('entriesanonymous', 'dataform'));
-            $mform->setDefault('anonymous', 0);
-        }
+        $mform->addHelpButton('maxentries', 'entriesmax', 'mod_dataform');
+        $mform->addHelpButton('entriesrequired', 'entriesrequired', 'mod_dataform');
         
-        // group entries
+        // Force separate participants
+        $mform->addElement('selectyesno', 'individualized', get_string('separateparticipants', 'dataform'));
+        $mform->addHelpButton('individualized', 'separateparticipants', 'dataform');
+        
+        // Force group entries
         $mform->addElement('selectyesno', 'grouped', get_string('groupentries', 'dataform'));
         $mform->disabledIf('grouped', 'groupmode', 'eq', 0);
-        $mform->disabledIf('grouped', 'groupmode', 'eq', -1);
+        $mform->addHelpButton('grouped', 'groupentries', 'mod_dataform');
         
+        // Force anonymous entries
+        if ($CFG->dataform_anonymous) { 
+            $mform->addElement('selectyesno', 'anonymous', get_string('anonymizeentries', 'dataform'));
+            $mform->setDefault('anonymous', 0);
+            $mform->addHelpButton('anonymous', 'anonymizeentries', 'mod_dataform');
+        } else {
+            $mform->addElement('hidden', 'anonymous', 0);
+            $mform->setType('anonymous', PARAM_INT);
+            $mform->addElement('static', 'anonymousna', get_string('anonymizeentries', 'dataform'), get_string('notapplicable', 'dataform'));
+            $mform->addHelpButton('anonymousna', 'anonymizeentries', 'mod_dataform');
+        }
+            
         // time limit to manage an entry
         $mform->addElement('text', 'timelimit', get_string('entrytimelimit', 'dataform'));
         $mform->setType('timelimit', PARAM_INT);
         $mform->setDefault('timelimit', -1);
         $mform->addRule('timelimit', null, 'numeric', null, 'client');
-
-        $mform->addElement('selectyesno', 'approval', get_string('requireapproval', 'dataform'));
-        
-        // common course elements
-        //-------------------------------------------------------------------------------
-        $this->standard_coursemodule_elements();
-
-        // add separate participants group option
-        //_elements has a numeric index, this code accesses the elements by name
-        $groups = &$mform->getElement('groupmode');
-        $groups->addOption(get_string('separateparticipants', 'dataform'), -1);
-
-        // buttons
-        //-------------------------------------------------------------------------------
-    	$this->add_action_buttons();
+        $mform->addHelpButton('timelimit', 'entrytimelimit', 'mod_dataform');        
     }
+    
+    /**
+     *
+     */
+    protected function definition_grading() {
+        $mform = &$this->_form;
+
+        $mform->setDefault('grade', 0);
+        
+        // Grading formula
+        $mform->addElement('textarea', 'gradecalc', get_string('calculation', 'grades'));
+        $mform->setDefault('gradecalc', '');
+        $mform->disabledIf('gradecalc', 'grade', 'eq', 0);
+        $mform->disabledIf('gradecalc', 'advancedgradingmethod_activity', 'neq', '');
+        $mform->addHelpButton('gradecalc', 'calculation', 'grades');
+        
+    }
+    
+
+
+    function add_completion_rules() {
+        $mform =& $this->_form;
+
+        $group=array();
+        $group[] =& $mform->createElement('checkbox', 'completionentriesenabled', '', get_string('completionentries','dataform'));
+        $group[] =& $mform->createElement('text', 'completionentries', '', array('size'=>3));
+        $mform->setType('completionentries',PARAM_INT);
+        $mform->addGroup($group, 'completionentriesgroup', get_string('completionentriesgroup','dataform'), array(' '), false);
+        $mform->disabledIf('completionentries','completionentriesenabled','notchecked');
+
+        return array('completionentriesgroup');
+    }
+
+    function completion_rule_enabled($data) {
+        return (!empty($data['completionentriesenabled']) && $data['completionentries'] != 0);
+    }
+
 
     /**
      *
      */
     function data_preprocessing(&$data){
-        if (!empty($data->notification)) {
-            $notification = $data->notification;
-            foreach (dataform::get_notification_types() as $type => $key) {
-                $data->$type = $notification & $key;
-            }
-        }
+        $data = (array) $data;
+        parent::data_preprocessing($data);
+
+        // Set up the completion checkboxes which aren't part of standard data.
+        $data['completionentriesenabled'] = (int) !empty($data['completionentries']);
     }
 
     /**
@@ -239,20 +274,49 @@ class mod_dataform_mod_form extends moodleform_mod {
     /**
      *
      */
-    function get_data($slashed = true) {
-        if ($data = parent::get_data($slashed)) {
-            if (!empty($data->timeinterval)) {
-                $data->timedue = $data->timeavailable + ($data->timeinterval * $data->intervalcount);
-            }
-            // Set notification
-            $data->notification = 0;
-            foreach (dataform::get_notification_types() as $type => $key) {
-                if (!empty($data->$type)) {
-                    $data->notification = $data->notification | $key;
-                }
+    function get_data() {
+        $data = parent::get_data();
+        if (!$data) {
+            return false;
+        }
+
+        if (empty($data->timeavailable)) {
+            unset($data->timeinterval);
+            $data->intervalcount = 1;
+        }
+
+        if (empty($data->timeinterval)) {
+            $data->intervalcount = 1;
+        }
+
+        // Turn off completion settings if the checkboxes aren't ticked
+        if (!empty($data->completionunlocked)) {
+            $autocompletion = !empty($data->completion) && $data->completion==COMPLETION_TRACKING_AUTOMATIC;
+            if (empty($data->completionentriesenabled) or !$autocompletion) {
+                $data->completionentries = 0;
             }
         }
+
         return $data;
     }
 
+    /**
+     *
+     */
+    function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        // Completion: Automatic on-view completion can not work together with 'Inline view' option
+        if (empty($errors['completion']) 
+                    and array_key_exists('completion', $data)
+                    and $data['completion'] == COMPLETION_TRACKING_AUTOMATIC
+                    and !empty($data['completionview'])
+                    and !empty($data['inlineview'])) {
+            $errors['completion'] = get_string('noautocompletioninline', 'mod_dataform');
+        }
+
+        return $errors;
+    }
+
+    
 }

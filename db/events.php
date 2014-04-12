@@ -18,56 +18,13 @@
 /**
  * Event handler definition.
  *
- * @package mod
- * @package dataform
- * @copyright  2012 Itamar Tzadok 
+ * @package mod_dataform
+ * @category db
+ * @copyright  2014 Itamar Tzadok 
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') or die;
 
-/* List of handlers */
-$handlers = array (
-    'dataform_entryadded' => array (
-        'handlerfile'      => '/mod/dataform/locallib.php',
-        'handlerfunction'  => array('dataform_notification_handler', 'notify_entry'),
-        'schedule'         => 'instant',
-        'internal'         => 1,
-    ),
-
-    'dataform_entryupdated' => array (
-        'handlerfile'      => '/mod/dataform/locallib.php',
-        'handlerfunction'  => array('dataform_notification_handler', 'notify_entry'),
-        'schedule'         => 'instant',
-        'internal'         => 1,
-    ),
-
-    'dataform_entrydeleted' => array (
-        'handlerfile'      => '/mod/dataform/locallib.php',
-        'handlerfunction'  => array('dataform_notification_handler', 'notify_entry'),
-        'schedule'         => 'instant',
-        'internal'         => 1,
-    ),
-
-    'dataform_commentadded' => array (
-        'handlerfile'      => '/mod/dataform/locallib.php',
-        'handlerfunction'  => array('dataform_notification_handler', 'notify_commentadded'),
-        'schedule'         => 'instant',
-        'internal'         => 1,
-    ),
-
-    'dataform_ratingadded' => array (
-        'handlerfile'      => '/mod/dataform/locallib.php',
-        'handlerfunction'  => array('dataform_notification_handler', 'notify_ratingadded'),
-        'schedule'         => 'instant',
-        'internal'         => 1,
-    ),
-
-    'dataform_ratingupdated' => array (
-        'handlerfile'      => '/mod/dataform/locallib.php',
-        'handlerfunction'  => array('dataform_notification_handler', 'notify_ratingupdated'),
-        'schedule'         => 'instant',
-        'internal'         => 1,
-    ),
-
-);
+/* List of observers */
+$observers = mod_dataform_observers_helper::observers();

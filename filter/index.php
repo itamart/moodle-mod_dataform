@@ -22,89 +22,61 @@
  */
 
 require_once('../../../config.php');
-require_once('../mod_class.php');
 
-$urlparams = new object();
+$urlparams = new stdClass;
 
 $urlparams->d          = optional_param('d', 0, PARAM_INT);             // dataform id
 $urlparams->id         = optional_param('id', 0, PARAM_INT);            // course module id
-$urlparams->fid        = optional_param('fid', 0 , PARAM_INT);          // update filter id
 
 // filters list actions
-$urlparams->new        = optional_param('new', 0, PARAM_INT);     // new filter
 $urlparams->default    = optional_param('default', 0, PARAM_INT);  // id of filter to default
-$urlparams->visible    = optional_param('visible', 0, PARAM_SEQUENCE);     // filter ids (comma delimited) to hide/show
-$urlparams->fedit      = optional_param('fedit', 0, PARAM_INT);   // filter id to edit
+$urlparams->showhide    = optional_param('showhide', 0, PARAM_SEQUENCE);     // filter ids (comma delimited) to hide/show
 $urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // filter ids (comma delim) to delete
 $urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // filter ids (comma delim) to duplicate
 
 $urlparams->confirmed  = optional_param('confirmed', 0, PARAM_INT);    
 
-// filter actions
-$urlparams->update     = optional_param('update', 0, PARAM_INT);   // update filter
-$urlparams->cancel     = optional_param('cancel', 0, PARAM_BOOL);
-
 // Set a dataform object
-$df = new dataform($urlparams->d, $urlparams->id);
-require_capability('mod/dataform:managetemplates', $df->context);
+$df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
+$df->require_manage_permission('filters');
 
-$df->set_page('filter/index', array('modjs' => true, 'urlparams' => $urlparams));
+$df->set_page('filter/index', array('urlparams' => $urlparams));
 
 // activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/filter/index.php', array('id' => $df->cm->id)));
 
-$fm = $df->get_filter_manager();
+$fm = mod_dataform_filter_manager::instance($df->id);
 
 // DATA PROCESSING
-if ($urlparams->update and confirm_sesskey()) {  // Add/update a new filter
-    $fm->process_filters('update', $urlparams->fid, true);
-
-} else if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested filters
+if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested filters
     $fm->process_filters('duplicate', $urlparams->duplicate, $urlparams->confirmed);
 
 } else if ($urlparams->delete and confirm_sesskey()) { // Delete any requested filters
     $fm->process_filters('delete', $urlparams->delete, $urlparams->confirmed);
 
-} else if ($urlparams->visible and confirm_sesskey()) {    // set filter's visibility
-    $fm->process_filters('visible', $urlparams->visible, true);    // confirmed by default
+} else if ($urlparams->showhide and confirm_sesskey()) {    // set filter's visibility
+    $fm->process_filters('visible', $urlparams->showhide, true);    // confirmed by default
 
 } else if ($urlparams->default and confirm_sesskey()) {  // set filter to default
     if ($urlparams->default == -1) {
-        $df->set_default_filter();    // reset
+        $df->update((object) array('defaultfilter' => 0));    // reset
     } else {
-        $df->set_default_filter($urlparams->default); 
+        $df->update((object) array('defaultfilter' => $urlparams->default));
     }
 }
 
-//  Edit a new filter
-if ($urlparams->new and confirm_sesskey()) {    
-    $filter = $fm->get_filter_from_id($fm::BLANK_FILTER);
-    $filterform = $fm->get_filter_form($filter);
-    $fm->display_filter_form($filterform, $filter, $urlparams);
-
-// (or) edit existing filter
-} else if ($urlparams->fedit and confirm_sesskey()) {  
-    $filter = $fm->get_filter_from_id($urlparams->fedit);
-    $filterform = $fm->get_filter_form($filter);
-    $fm->display_filter_form($filterform, $filter, $urlparams);
-
-// (or) display the filters list
-} else {    
-    // Any notifications?
-    if (!$filters = $fm->get_filters(null, false, true)) {
-        $df->notifications['bad'][] = get_string('filtersnoneindataform','dataform');  // nothing in dataform
-    }
-
-    // Print header
-    $df->print_header(array('tab' => 'filters', 'urlparams' => $urlparams));
-
-    // Print the filter add link
-    $fm->print_add_filter();
-
-    // If there are filters print admin style list of them
-    if ($filters) {
-        $fm->print_filter_list();
-    }
+// Any notifications?
+if (!$filters = $fm->get_filters(null, false, true)) {
+    $df->notifications = array('problem' => array('filtersnoneindataform' => get_string('filtersnoneindataform', 'dataform')));
 }
 
-$df->print_footer();
+$output = $df->get_renderer();
+echo $output->header(array('tab' => 'filters', 'heading' => $df->name, 'urlparams' => $urlparams));
+
+// Display add new filter link
+echo $output->add_filter_link();
+
+// Display admin style list of filters
+echo $output->filters_admin_list();
+
+echo $output->footer();

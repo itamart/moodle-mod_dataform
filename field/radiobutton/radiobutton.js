@@ -5,38 +5,43 @@
  */
 
 /**
- * Select registrations for multiactions
+ * Required alert in entries form
  */
 M.dataformfield_radiobutton_required = {};
 
 M.dataformfield_radiobutton_required.init = function(Y, options) {
-    YUI().use('node', function (Y) {
+    Y.use('node', function (Y) {
         var fieldname = options.fieldname;
-        var selected = options.selected;
         var err_message = options.message;
         
-        if (!Y.one('#fgroup_id_'+fieldname+'_grp')) {
+        var required = function (e, element) {
+            if (e) {
+                element = this;
+            }
+            
+            if (!element) {
+                return;
+            }
+            
+            var empty = true;
+            element.all('.fgroup input').each(function(check) {
+                if (check.get('checked')) {
+                    empty = false;
+                }
+            });
+            element.all('.felement.ftext.error').remove();
+            if (empty) {
+                element.one('.fgrouplabel').insert('<div class="felement ftext error"><span class="error">'+err_message+'</span></div>', 'after');
+            }
+        }
+        
+        var selector = '#fgroup_id_'+fieldname+'.fitem.required';
+        
+        if (!Y.one(selector)) {
             return;
         }
         
-        Y.one('#fgroup_id_'+fieldname+'_grp').on('click', function (e) {
-            if (e.target.get('className') === 'radiobuttongroup'+fieldname+'_selected') {
-                var empty = true;
-                Y.all('.radiobuttongroup'+fieldname+'_selected').each(function(check) {
-                    if (check.get('checked')) {
-                        empty = false;
-                    }
-                });
-                Y.all('#fgroup_id_'+fieldname+'_grp .fgrouplabel label span').remove();
-                if (empty) {
-                    Y.one('#fgroup_id_'+fieldname+'_grp .fgrouplabel label').append('<span class="error">'+err_message+'</span>');
-                }
-            }
-        });
-        
-        Y.all('#fgroup_id_'+fieldname+'_grp .fgrouplabel label span').remove();
-        if (!selected) {
-            Y.one('#fgroup_id_'+fieldname+'_grp .fgrouplabel label').append('<span class="error">'+err_message+'</span>');
-        }
+        Y.one(selector).on('click', required);
+        required(null, Y.one(selector));
     });
 };

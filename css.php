@@ -34,8 +34,7 @@ $urlparams->id = optional_param('id', 0, PARAM_INT);   // course module id
 $urlparams->cssedit = optional_param('cssedit', 0, PARAM_BOOL);   // edit mode
 
 if ($urlparams->cssedit) {
-    require_once('mod_class.php');
-    require_once $CFG->libdir.'/formslib.php';
+    require_once("$CFG->libdir/formslib.php");
 
     class mod_dataform_css_form extends moodleform {
 
@@ -53,11 +52,11 @@ if ($urlparams->cssedit) {
             $mform->addElement('header', 'generalhdr', get_string('headercss', 'dataform'));
 
             // includes
-            $attributes = array('wrap' => 'virtual', 'rows' => 5, 'cols' => 60);
+            $attributes = array('wrap' => 'virtual', 'rows' => 3, 'style' => 'width:95%');
             $mform->addElement('textarea', 'cssincludes', get_string('cssincludes', 'dataform'), $attributes);
 
             // code
-            $attributes = array('wrap' => 'virtual', 'rows' => 15, 'cols' => 60);
+            $attributes = array('wrap' => 'virtual', 'rows' => 5, 'style' => 'width:95%');
             $mform->addElement('textarea', 'css', get_string('csscode', 'dataform'), $attributes);
 
             // uploads
@@ -77,46 +76,37 @@ if ($urlparams->cssedit) {
     }
 
     // Set a dataform object
-    $df = new dataform($urlparams->d, $urlparams->id);
-    require_capability('mod/dataform:managetemplates', $df->context);
+    $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
+    $df->require_manage_permission('css');
 
     $df->set_page('css', array('urlparams' => $urlparams));
 
     // activate navigation node
     navigation_node::override_active_url(new moodle_url('/mod/dataform/css.php', array('id' => $df->cm->id, 'cssedit' => 1)));
 
-    $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id(), 'cssedit' => 1))); 
+    $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id, 'cssedit' => 1))); 
 
     if ($mform->is_cancelled()) {
     
     } else if ($data = $mform->get_data()){
         // update the dataform
-        $rec = new object();
+        $rec = new stdClass;
         $rec->css = $data->css;
         $rec->cssincludes = $data->cssincludes;        
         $df->update($rec, get_string('csssaved', 'dataform'));
         
         // add uploaded files
-        $usercontext = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $data->cssupload, 'sortorder', false)) {
-            $filerec = new object;
-            $filerec->contextid = $df->context->id;
-            $filerec->component = 'mod_dataform';
-            $filerec->filearea = 'css';
-            $filerec->filepath = '/';
-            
-            foreach ($files as $file) {
-                $filerec->filename = $file->get_filename();
-                $fs->create_file_from_storedfile($filerec, $file);
-            }
-            $fs->delete_area_files($usercontext->id, 'user', 'draft', $data->cssupload);
-        }
-        
-        add_to_log($df->course->id, 'dataform', 'css saved', 'css.php?id='. $df->cm->id. '&amp;d='. $df->id(), $df->id(), $df->cm->id);
+        $options = array(
+            'subdirs' => 0,
+            'maxbytes' => $COURSE->maxbytes,
+            'maxfiles' => 10,
+            'accepted_types' => array('*.css')
+        );
+        file_save_draft_area_files($data->cssupload, $df->context->id, 'mod_dataform', 'css', 0, $options);
     }
 
-    $df->print_header(array('tab' => 'css', 'urlparams' => $urlparams));
+    $output = $df->get_renderer();
+    echo $output->header(array('tab' => 'css', 'heading' => $df->name, 'urlparams' => $urlparams));
 
     $options = array(
         'subdirs' => 0,
@@ -125,12 +115,13 @@ if ($urlparams->cssedit) {
     );
     $draftitemid = file_get_submitted_draft_itemid('cssupload');
     file_prepare_draft_area($draftitemid, $df->context->id, 'mod_dataform', 'css', 0, $options);
-    $df->data->cssupload = $draftitemid;
 
+    $data = $df->data;
+    $data->cssupload = $draftitemid;
 
-    $mform->set_data($df->data);
+    $mform->set_data($data);
     $mform->display();
-    $df->print_footer();
+    echo $output->footer();
 
 } else {
 
