@@ -68,8 +68,6 @@ class mod_dataform_strings_helper {
     public static function general() {
         $string = array();
 
-        $string['stringschecker'] = 'Strings checker';
-
         $string['dataformnone'] = 'No Dataforms found';
         $string['dataformnotready'] = 'This activity is not ready for viewing';
         $string['dataformearly'] = 'This activity is scheduled to start {$a}';
@@ -267,9 +265,6 @@ class mod_dataform_strings_helper {
 
         // DATAFORM
         $string['min'] = 'Minimum';
-        $string['modulename'] = 'Dataform';
-        $string['modulename_help'] = 'The dataform module may be used for creating a wide range of activities/resources by allowing the instructor/manager to design and create a custom content form from various input elements (e.g.  texts, numbers, images, files, urls, etc.), and participants to submit content and view submitted content.';
-        $string['modulenameplural'] = 'Dataforms';
         $string['more'] = 'More';
         $string['moreurl'] = 'More URL';
         $string['movezipfailed'] = 'Can\'t move zip';
@@ -286,8 +281,6 @@ class mod_dataform_strings_helper {
         $string['nomaximum'] = 'No maximum';
         $string['notopenyet'] = 'Sorry, this activity is not available until {$a}';
 
-        $string['stringschecker'] = 'Strings checker';
-        
         return $string;
     }
     

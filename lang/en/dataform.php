@@ -26,4 +26,7 @@
  * certain copyrights on the Database module may obtain.
  */
 
-$string = mod_dataform_strings_helper::all();
+$string['modulename'] = 'Dataform';
+$string['modulename_help'] = 'The dataform module may be used for creating a wide range of activities/resources by allowing the instructor/manager to design and create a custom content form from various input elements (e.g.  texts, numbers, images, files, urls, etc.), and participants to submit content and view submitted content.';
+$string['modulenameplural'] = 'Dataforms';
+$string = $string + mod_dataform_strings_helper::all();
