@@ -80,12 +80,6 @@ $settings = null;
 // Site presets manager
 $ADMIN->add('moddataformfolder', new admin_externalpage('moddataform_sitepresets', new lang_string('presetavailableinsite', 'dataform'), '/mod/dataform/admin/sitepresets.php'));    
 
-// Acceptance tests
-$ADMIN->add('moddataformfolder', new admin_externalpage('moddataform_acceptancetests', new lang_string('pluginname', 'tool_behat'), '/mod/dataform/admin/acceptancetests.php'));    
-
-// Strings checker
-$ADMIN->add('moddataformfolder', new admin_externalpage('moddataform_stringschecker', new lang_string('stringschecker', 'dataform'), '/mod/dataform/admin/stringschecker.php'));    
-
 // Add admin tools
 foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/admin") as $filename) {
     $toolname = basename($filename, '.php');

@@ -96,29 +96,21 @@ Feature: Dataform activity individualized
         And I do not see "assistant1"
         And I do not see "student2"
 
-        Given I go to dataform page "view.php?d=1&view=1&eids=1"
-        Then I see "Return to list"
-        And I do not see "student1"
-        And I do not see "student2"
-        And I do not see "assistant1"
-        And I do not see "teacher1"
-        
-        Given I go to dataform page "view.php?d=1&view=1&editentries=1"
-        Then I do not see "Return to list"
-        And I do not see "student1"
-        And I do not see "student2"
-        And I do not see "assistant1"
-        And I do not see "teacher1"
-        And I do not see "Save"
-        And I do not see "Cancel"
-        
+        # Try accessing student1's entry
         Given I go to dataform page "view.php?d=1&view=1&eids=2"
         Then I see "Return to list"
         And I see "student1"
-        And I do not see "student2"
-        And I do not see "assistant1"
-        And I do not see "teacher1"
         
+        # Try viewing student2's entry
+        Given I go to dataform page "view.php?d=1&view=1&eids=4"
+        Then I see "Return to list"
+        And I do not see "student2"
+        
+        # Try editing student2's entry
+        Given I go to dataform page "view.php?d=1&view=1&editentries=4"
+        And I do not see "student2"
+        And I do not see "Save"
+               
         And I log out
 
         # As teacher1 make sure I see all entries

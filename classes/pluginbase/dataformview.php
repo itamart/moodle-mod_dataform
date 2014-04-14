@@ -129,15 +129,18 @@ class dataformview {
         $csort = !empty($options['csort']) ? $options['csort'] : null;
         $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
         
-        // Url options here only if active and has permission
+        // Url options
         if ($urloptions = ($this->is_active() ? $fm::get_filter_options_from_url() : null)) {
-            $params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
-            if (\mod_dataform\access\view_filter_override::validate($params)) {
-                $eids = $eids ? $eids : (!empty($urloptions['eids']) ? $urloptions['eids'] : null);
-                $users = $users ? $users : (!empty($urloptions['users']) ? $urloptions['users'] : null);
-                $groups = $groups ? $groups : (!empty($urloptions['groups']) ? $urloptions['groups'] : null);
-                $page = $page ? $page : (!empty($urloptions['page']) ? $urloptions['page'] : 0);
-            }
+            // Options that do not require permission
+            $eids = $eids ? $eids : (!empty($urloptions['eids']) ? $urloptions['eids'] : null);
+            $users = $users ? $users : (!empty($urloptions['users']) ? $urloptions['users'] : null);
+            $groups = $groups ? $groups : (!empty($urloptions['groups']) ? $urloptions['groups'] : null);
+            $page = $page ? $page : (!empty($urloptions['page']) ? $urloptions['page'] : 0);
+
+            // Options that require permission
+            //$params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
+            //if (\mod_dataform\access\view_filter_override::validate($params)) {
+            //}
         }
 
         if ($this->filterid) {

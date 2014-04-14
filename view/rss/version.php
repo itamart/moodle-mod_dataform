@@ -22,7 +22,7 @@
  */
 
 $plugin->component = 'dataformview_rss';
-$plugin->version  = 2014041100;
+$plugin->version  = 2014041200;
 $plugin->requires = 2013111800;
 $plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = array('mod_dataform' => 2014041100);
+$plugin->dependencies = array('mod_dataform' => 2014041200);

@@ -341,84 +341,6 @@ Feature: View submission buttons
         And I see "Entry 18"
 
         And I log out
-        
-        #Clean up
-        #############################
-        When I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-        Then I delete this dataform
-
-    Examples:
-        | viewtype |
-        | aligned |
-        | grid |
-        | tabular |
-        | pdf |
-        | rss |
-
-
-    @javascript
-    Scenario Outline: Submission should not be allowed when no submission buttons enabled
-        # 100 steps
-        
-        Given I start afresh with dataform "Test Dataform"
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-
-        # Add a text field       
-        When I go to manage dataform "fields"
-        And I add a dataform field "text" with "Field 01"        
-        Then I see "Field 01"
-        
-        # Add a view with with default submission buttons
-        When I follow "Views"
-        And I set the field "Add a view" to "<viewtype>"
-        And I set the field "Name" to "View 01"
-        And I press "Save changes"
-        
-        Then I see "View 01"
-        And I see "Default view is not set."
-        When I set "View 01" as default view
-        Then I do not see "Default view is not set."
-
-        # Go to browse view        
-        When I follow "Browse"
-        Then I see "Add a new entry"
-
-        And I log out
-        
-        # TEACHER SUBMITS AN ENTRY
-        #############################
-        When I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-        Then I see "Add a new entry"
-
-        When I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 01"
-        And I press "Save"
-        Then I see "Entry 01"
-        And "id_editentry1" "link" should exist
-        
-        And I log out
-
-        # STUDENT SUBMITS AN ENTRY
-        #############################
-        When I log in as "student1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-        Then I see "Add a new entry"
-
-        When I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 02"
-        And I press "Save"
-        Then I see "Entry 02"
-        And "id_editentry1" "link" should not exist
-        And "id_editentry2" "link" should exist
-        
-        And I log out
 
         # DISABLE SUBMISSION BUTTONS
         #############################
@@ -429,6 +351,10 @@ Feature: View submission buttons
         And I follow "id_editview1"
         And I expand all fieldsets
         And I set the field "savebuttonenable" to ""
+        And I set the field "savecontbuttonenable" to ""
+        And I set the field "savenewbuttonenable" to ""
+        And I set the field "savecontnewbuttonenable" to ""
+        And I set the field "savenewcontbuttonenable" to ""
         And I set the field "cancelbuttonenable" to ""
         And I press "Save changes"        
         Then I see "View 01"
@@ -442,7 +368,7 @@ Feature: View submission buttons
         And I follow "Test Dataform"
         Then I do not see "Add a new entry"
         And "id_editentry1" "link" should not exist
-        And "id_editentry2" "link" should not exist
+        And "id_editentry10" "link" should not exist
 
         # I shouldn't be able to edit via the url
         
@@ -455,7 +381,7 @@ Feature: View submission buttons
         And I follow "Test Dataform"
         Then I do not see "Add a new entry"
         And "id_editentry1" "link" should not exist
-        And "id_editentry2" "link" should not exist
+        And "id_editentry10" "link" should not exist
 
         # I shouldn't be able to edit via the url
         
@@ -467,11 +393,12 @@ Feature: View submission buttons
         And I follow "Course 1"
         And I follow "Test Dataform"
         Then I delete this dataform
-        
+
+
     Examples:
         | viewtype |
         | aligned |
         | grid |
-        | tabular |
-        | pdf |
+        | interval |
         | rss |
+        | tabular |
