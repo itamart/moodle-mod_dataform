@@ -249,7 +249,7 @@ abstract class dataformfieldrenderer {
         $delims = implode('|', $patterns);
         
         // Escape [ and ] and the pattern rule character *
-        $delims = str_replace(array('[', ']', self::PATTERN_REQUIRED), array('\[', '\]', self::PATTERN_REQUIRED), $delims);
+        $delims = quotemeta($delims);
 
         $parts = preg_split("/($delims)/", $field->label, null, PREG_SPLIT_DELIM_CAPTURE);
         $htmlparts = '';

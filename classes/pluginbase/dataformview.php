@@ -1058,7 +1058,7 @@ class dataformview {
     protected function split_tags($patterns, $subject) {
         $delims = implode('|', $patterns);
         // Escape [ and ] and the pattern rule character *
-        $delims = str_replace(array('[', ']', dataformfieldrenderer::PATTERN_REQUIRED), array('\[', '\]', dataformfieldrenderer::PATTERN_REQUIRED), $delims);
+        $delims = quotemeta($delims);
 
         $elements = preg_split("/($delims)/", $subject, null, PREG_SPLIT_DELIM_CAPTURE);
 
