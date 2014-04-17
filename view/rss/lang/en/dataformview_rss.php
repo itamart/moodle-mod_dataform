@@ -24,18 +24,18 @@
 $string['pluginname'] = 'RSS';
 $string['feedtemplate'] = 'Feed template';
 $string['feedtemplate_help'] = 'Feed template';
-$string['feedtitle'] = 'Title';
+$string['feedtitle'] = 'Feed title';
 $string['feedtitle_help'] = 'Feed title';
-$string['feedview'] = 'View';
+$string['feedview'] = 'Feed view';
 $string['feedview_help'] = 'Feed view';
-$string['feeddescription'] = 'Description';
+$string['feeddescription'] = 'Feed description';
 $string['feeddescription_help'] = 'Feed description';
 $string['itemtemplate'] = 'Item template';
 $string['itemtemplate_help'] = 'Item template';
-$string['itemtitle'] = 'Title';
+$string['itemtitle'] = 'Item title';
 $string['itemtitle_help'] = 'Item title';
-$string['itemview'] = 'View';
+$string['itemview'] = 'Item view';
 $string['itemview_help'] = 'Item view';
-$string['itemdescription'] = 'Description';
+$string['itemdescription'] = 'Item description';
 $string['itemdescription_help'] = 'Item description';
 

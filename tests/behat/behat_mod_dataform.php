@@ -472,12 +472,36 @@ class behat_mod_dataform extends behat_base {
      *
      * @Given /^I apppend "(?P<text_string>(?:[^"]|\\")*)" to field "(?P<field_string>(?:[^"]|\\")*)"$/
      * @param string $text
-     * @param string $field
+     * @param string $locator
      */
-    public function i_append_to_field($text, $field) {
-        $fieldnode = $this->find_field($field);
-        $value = $fieldnode->getValue();
-        $fieldnode->setValue($value. $text);
+    public function i_append_to_field($text, $locator) {
+        $node = $this->find_field($field);
+        $value = $node->getValue(). $text;
+        $field = behat_field_manager::get_form_field($node, $this->getSession());
+        $field->set_value($value);
+    }
+
+    /**
+     * Replaces text in the field's content. 
+     * The step begins in a form.
+     *
+     * @Given /^I replace in field "(?P<field_string>(?:[^"]|\\")*)" "(?P<text_string>(?:[^"]|\\")*)" with "(?P<replacement_string>(?:[^"]|\\")*)"$/
+     * @param string $locator
+     * @param string $text
+     * @param string $replacement
+     */
+    public function i_replace_in_field_with($locator, $text, $replacement) {
+        $node = $this->find_field($locator);
+        $field = behat_field_manager::get_form_field($node, $this->getSession());
+        $value = $field->get_value();
+        $value = str_replace($text, $replacement, $value);
+        
+        // Hack to remove new line characters from editor field value
+        if (get_class($field) == 'behat_form_editor') {
+            $value = str_replace(array("\n", "\r"), '', $value);        
+        }
+        
+        $field->set_value($value);
     }
 
     /**
