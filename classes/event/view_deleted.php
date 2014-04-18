@@ -43,7 +43,7 @@ class view_deleted extends view_base {
     protected function init() {
         $this->data['objecttable'] = 'dataform_views';
         $this->data['crud'] = 'd';
-        $this->data['level'] = self::LEVEL_TEACHING;
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
     }
 
     /**

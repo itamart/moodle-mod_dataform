@@ -43,7 +43,7 @@ class filter_updated extends filter_base {
     protected function init() {
         $this->data['objecttable'] = 'dataform_filters';
         $this->data['crud'] = 'u';
-        $this->data['level'] = self::LEVEL_TEACHING;
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
     }
 
     /**

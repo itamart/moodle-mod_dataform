@@ -44,7 +44,7 @@ class field_content_updated extends field_base {
     protected function init() {
         $this->data['objecttable'] = 'dataform_contents';
         $this->data['crud'] = 'u';
-        $this->data['level'] = self::LEVEL_PARTICIPATING;
+        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
     
     /**

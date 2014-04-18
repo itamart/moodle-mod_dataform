@@ -43,7 +43,7 @@ class field_created extends field_base {
     protected function init() {
         $this->data['objecttable'] = 'dataform_fields';
         $this->data['crud'] = 'c';
-        $this->data['level'] = self::LEVEL_TEACHING;
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
     }
 
     /**

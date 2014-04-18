@@ -22,7 +22,5 @@
  */
 
 $plugin->component = 'dataformview_grid';
-$plugin->version  = 2014041200;
-$plugin->requires = 2013111800;
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = array('mod_dataform' => 2014041200);
+$plugin->version  = 2014041800;
+$plugin->requires = 2014041700;

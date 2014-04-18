@@ -44,7 +44,7 @@ class entry_created extends entry_base {
     protected function init() {
         $this->data['objecttable'] = 'dataform_entries';
         $this->data['crud'] = 'c';
-        $this->data['level'] = self::LEVEL_PARTICIPATING;
+        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
 
     /**

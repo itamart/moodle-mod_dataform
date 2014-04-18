@@ -43,7 +43,7 @@ class view_viewed extends view_base {
     protected function init() {
         $this->data['objecttable'] = 'dataform_views';
         $this->data['crud'] = 'r';
-        $this->data['level'] = self::LEVEL_PARTICIPATING;
+        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
 
     /**
