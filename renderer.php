@@ -770,47 +770,6 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $browse = new tabobject('browse', new moodle_url('/mod/dataform/view.php', array('d' => $dfid)), get_string('browse', 'dataform'));
         $manage = new tabobject('manage', new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid)), get_string('manage', 'dataform'));
 
-        // Management tabs
-        $tabs = array();
-        // Views
-        if ($manager['views']) {
-            $tabs[] = new tabobject('views', new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid)), get_string('views', 'dataform'));
-        }
-        // Fields
-        if ($manager['fields']) {
-            $tabs[] = new tabobject('fields', new moodle_url('/mod/dataform/field/index.php', array('d' => $dfid)), get_string('fields', 'dataform'));
-        }
-        // Filters
-        if ($manager['filters']) {
-            $tabs[] = new tabobject('filters', new moodle_url('/mod/dataform/filter/index.php', array('d' => $dfid)), get_string('filters', 'dataform'));
-        }
-        // Access
-        if ($manager['access']) {
-            $tabs[] = new tabobject('access', new moodle_url('/mod/dataform/access/index.php', array('d' => $dfid)), get_string('access', 'dataform'));
-        }
-        // Notifications
-        if ($manager['notifications']) {
-            $tabs[] = new tabobject('notification', new moodle_url('/mod/dataform/notification/index.php', array('d' => $dfid)), get_string('notifications'));
-        }
-        // Css
-        if ($manager['css']) {
-            $tabs[] = new tabobject('css', new moodle_url('/mod/dataform/css.php', array('d' => $dfid, 'cssedit' => 1)), get_string('cssinclude', 'dataform'));
-        }
-        // JS
-        if ($manager['js']) {
-            $tabs[] = new tabobject('js', new moodle_url('/mod/dataform/js.php', array('d' => $dfid, 'jsedit' => 1)), get_string('jsinclude', 'dataform'));
-        }
-        // Tools
-        if ($manager['tools']) {
-            $tabs[] = new tabobject('tools', new moodle_url('/mod/dataform/tool/index.php', array('d' => $dfid)), get_string('tools', 'dataform'));
-        }
-        // Preses
-        if ($manager['presets']) {
-            $tabs[] = new tabobject('presets', new moodle_url('/mod/dataform/preset/index.php', array('d' => $dfid)), get_string('presets', 'dataform'));
-        }
-
-        $manage->subtree = $tabs;
-
         $maintabs = array($browse, $manage);
         // Add view edit tab
         if ($currenttab == 'browse' and $manager['views'] and $currentview = $df->currentview and $currentview->id) {
@@ -822,6 +781,56 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         if ($currenttab != 'browse') {
             $inactive = $manage->inactive = true;
+
+            // Management tabs
+            $tabs = array();
+            // Views
+            if ($manager['views']) {
+                $url = new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('views', $url, get_string('views', 'dataform'));
+            }
+            // Fields
+            if ($manager['fields']) {
+                $url = new moodle_url('/mod/dataform/field/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('fields', $url, get_string('fields', 'dataform'));
+            }
+            // Filters
+            if ($manager['filters']) {
+                $url = new moodle_url('/mod/dataform/filter/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('filters', $url, get_string('filters', 'dataform'));
+            }
+            // Access
+            if ($manager['access']) {
+                $url = new moodle_url('/mod/dataform/access/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('access', $url, get_string('access', 'dataform'));
+            }
+            // Notifications
+            if ($manager['notifications']) {
+                $url = new moodle_url('/mod/dataform/notification/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('notification', $url, get_string('notifications'));
+            }
+            // Css
+            if ($manager['css']) {
+                $url = new moodle_url('/mod/dataform/css.php', array('d' => $dfid, 'cssedit' => 1));
+                $tabs[] = new tabobject('css', $url, get_string('cssinclude', 'dataform'));
+            }
+            // JS
+            if ($manager['js']) {
+                $url = new moodle_url('/mod/dataform/js.php', array('d' => $dfid, 'jsedit' => 1));
+                $tabs[] = new tabobject('js', $url, get_string('jsinclude', 'dataform'));
+            }
+            // Tools
+            if ($manager['tools']) {
+                $url = new moodle_url('/mod/dataform/tool/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('tools', $url, get_string('tools', 'dataform'));
+            }
+            // Preses
+            if ($manager['presets']) {
+                $url = new moodle_url('/mod/dataform/preset/index.php', array('d' => $dfid));
+                $tabs[] = new tabobject('presets', $url, get_string('presets', 'dataform'));
+            }
+
+            $manage->subtree = $tabs;
         }
 
         return $this->output->tabtree($maintabs, $currenttab);
