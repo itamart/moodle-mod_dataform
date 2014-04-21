@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataform
  * @copyright 2013 Itamar Tzadok
@@ -27,13 +27,12 @@ class mod_dataform_access_manager extends mod_dataform_rule_manager {
 
     public static function instance($dataformid) {
         static $instances = array();
-        
+
         if (empty($instances[$dataformid])) {
             $instances[$dataformid] = new mod_dataform_access_manager($dataformid);
         }
         return $instances[$dataformid];
     }
-
 
     /**
      * Returns the category of rules the manager refer to.

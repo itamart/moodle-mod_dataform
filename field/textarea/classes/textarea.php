@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage textarea
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 require_once($CFG->dirroot.'/lib/filelib.php');
 require_once($CFG->dirroot.'/repository/lib.php');
@@ -40,7 +39,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
         $trust = $this->param4 ? $this->param4 : 0;
         $maxbytes = $this->param5 ? $this->param5 : 0;
         $maxfiles = $this->param6 ? $this->param6 : -1;
-        
+
         $editoroptions = array();
         $editoroptions['context'] = $this->df->context;
         $editoroptions['trusttext'] = $trust;
@@ -50,7 +49,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
         $editoroptions['changeformat'] = 0;
         $editoroptions['forcehttps'] = false;
         $editoroptions['noclean'] = false;
-        
+
         return $editoroptions;
     }
 
@@ -76,10 +75,10 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
 
         if (!$rec->id = $contentid or $savenew) {
             $rec->id = $DB->insert_record('dataform_contents', $rec);
-        }        
+        }
 
-        // Editor content
         if ($this->is_editor()) {
+            // Editor content
             $data = (object) $values;
             $data->{'editor_editor'} = $data->editor;
 
@@ -88,16 +87,16 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
             $rec->content = $data->editor;
             $rec->content1 = $data->{'editorformat'};
 
-        // Text area content
         } else {
-            $value = reset($values);           
+            // Text area content
+            $value = reset($values);
             if (is_array($value)) {
                 // Import: One value as array of text,format,trust, so take the text
                 $value = reset($value);
-            }                
+            }
             $rec->content = clean_param($value, PARAM_NOTAGS);
-        }            
-        
+        }
+
         return $DB->update_record('dataform_contents', $rec);
     }
 
@@ -109,11 +108,11 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
     }
 
     /**
-     * 
+     *
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
         $fieldid = $this->id;
-   
+
         $data = parent::prepare_import_content($data, $importsettings, $csvrecord, $entryid);
 
         if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
@@ -133,7 +132,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
                 $data->{"field_{$fieldid}_{$entryid}"} = str_replace('\r\n', "\n", $data->{"field_{$fieldid}_{$entryid}"});
             }
         }
-        
+
         return $data;
     }
 

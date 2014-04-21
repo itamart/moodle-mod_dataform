@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->try_crud_view('interval', $df);
         $this->try_crud_view('rss', $df);
         $this->try_crud_view('tabular', $df);
-        
+
         $df->delete();
     }
 
@@ -97,7 +97,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->try_crud_field('number', $df);
         $this->try_crud_field('time', $df);
         $this->try_crud_field('entrystate', $df);
-        
+
         $df->delete();
     }
 
@@ -106,17 +106,17 @@ class mod_dataform_events_testcase extends advanced_testcase {
      */
     public function test_filter_events() {
         global $DB;
-        
+
         $df = $this->get_a_dataform();
         $filter = $df->filter_manager->get_filter_blank();
-        
-        // CREATE 
-        //Trigger and capture the event.
+
+        // CREATE
+        // Trigger and capture the event.
         $sink = $this->redirectEvents();
         $filter->update();
         $events = $sink->get_events();
         $event = reset($events);
-        
+
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\filter_created', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
@@ -135,7 +135,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'filters update', "filter/index.php?d=$df->id&amp;fid=$filter->id", $filter->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
+
         // DELETE
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -147,7 +147,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertInstanceOf('\mod_dataform\event\filter_deleted', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'filters delete', "filter/index.php?d=$df->id&amp;delete=$filter->id", $filter->id, $df->cm->id);
-        $this->assertEventLegacyLogData($expected, $event);        
+        $this->assertEventLegacyLogData($expected, $event);
 
         $df->delete();
     }
@@ -157,7 +157,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
      */
     public function test_entry_events() {
         global $DB;
-        
+
         $df = $this->get_a_dataform();
 
         // SETUP
@@ -165,18 +165,18 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $field = $df->field_manager->add_field('text');
         // Add a view
         $view = $df->view_manager->add_view('aligned');
-        
+
         $entryman = $view->entry_manager;
-        
+
         $data = (object) array('submitbutton_save' => 'Save');
-        
-        // CREATE 
-        //Trigger and capture the event.
+
+        // CREATE
+        // Trigger and capture the event.
         $sink = $this->redirectEvents();
         list(, $eids) = $entryman->process_entries('update', array(-1), $data, true);
         $events = $sink->get_events();
         $event = reset($events);
-        
+
         $entryid = reset($eids);
         $filter = $view->filter;
         $filter->eids = $entryid;
@@ -200,7 +200,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'entries update', "view.php?d=$df->id&amp;view=$view->id&amp;eids=$entryid", $entryid, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
+
         // UPDATE FIELD CONTENT
         $entry = (object) array('id' => $entryid);
         // Trigger and capture the event.
@@ -224,7 +224,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertInstanceOf('\mod_dataform\event\entry_deleted', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'entries delete', "view.php?d=$df->id&amp;view=$view->id", $entryid, $df->cm->id);
-        $this->assertEventLegacyLogData($expected, $event);        
+        $this->assertEventLegacyLogData($expected, $event);
 
         $df->delete();
     }
@@ -235,8 +235,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
     protected function try_crud_view($type, $df) {
         $view = $df->view_manager->get_view($type);
 
-        // CREATE 
-        //Trigger and capture the event.
+        // CREATE
+        // Trigger and capture the event.
         $sink = $this->redirectEvents();
         $view->add($view->data);
         $events = $sink->get_events();
@@ -247,9 +247,9 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'views add', "view/index.php?d=$df->id&amp;vedit=$view->id", $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
-        // READ (view) 
-        //Trigger and capture the event.
+
+        // READ (view)
+        // Trigger and capture the event.
         $sink = $this->redirectEvents();
         $view->display();
         $events = $sink->get_events();
@@ -260,7 +260,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'views view', "view.php?d=$df->id&amp;view=$view->id", $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
+
         // UPDATE
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -273,7 +273,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'views update', "view/index.php?d=$df->id&amp;vedit=$view->id", $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
+
         // DELETE
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -294,7 +294,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
     protected function try_crud_field($type, $df) {
         $field = $df->field_manager->get_field($type);
 
-        // CREATE 
+        // CREATE
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
         $field->create($field->data);
@@ -306,8 +306,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'fields add', "field/index.php?d=$df->id&amp;fid=$field->id", $field->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
-        // UPDATE 
+
+        // UPDATE
         // Trigger and capture the event for creating a field.
         $sink = $this->redirectEvents();
         $field->update($field->data);
@@ -319,7 +319,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'fields update', "field/index.php?d=$df->id&amp;fid=$field->id", $field->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-        
+
         // DELETE
         // Trigger and capture the event for creating a field.
         $sink = $this->redirectEvents();
@@ -333,6 +333,5 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $expected = array($df->course->id, 'dataform', 'fields delete', "field/index.php?d=$df->id&amp;delete=$field->id", $field->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
     }
-
 
 }

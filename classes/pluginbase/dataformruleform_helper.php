@@ -12,9 +12,9 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_dataform\pluginbase; 
+namespace mod_dataform\pluginbase;
 
 /**
  * @package dataform
@@ -32,30 +32,30 @@ class dataformruleform_helper {
      */
     public static function general_definition($mform, $dataformid, $prefix = null) {
         global $CFG;
-        
+
         $paramtext = (!empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN);
-        
-        //-------------------------------------------------------------------------------
+
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // name
-        $mform->addElement('text', $prefix. 'name', get_string('name'), array('size'=>'32'));
+        // Name
+        $mform->addElement('text', $prefix. 'name', get_string('name'), array('size' => '32'));
         $mform->addRule($prefix. 'name', null, 'required', null, 'client');
         $mform->setType($prefix. 'name', $paramtext);
-        
-        // description
-        $mform->addElement('text', $prefix. 'description', get_string('description'), array('size'=>'64'));
+
+        // Description
+        $mform->addElement('text', $prefix. 'description', get_string('description'), array('size' => '64'));
         $mform->setType($prefix. 'description', PARAM_CLEAN);
 
-        // enabled
+        // Enabled
         $mform->addElement('selectyesno', $prefix. 'enabled', get_string('ruleenabled', 'dataform'));
         $mform->setDefault($prefix. 'enabled', 1);
 
         // Time from
-        $mform->addElement('date_time_selector', $prefix. 'timefrom', get_string('from'), array('optional'=>true));
-        
+        $mform->addElement('date_time_selector', $prefix. 'timefrom', get_string('from'), array('optional' => true));
+
         // Time to
-        $mform->addElement('date_time_selector', $prefix. 'timeto', get_string('to'), array('optional'=>true));
+        $mform->addElement('date_time_selector', $prefix. 'timeto', get_string('to'), array('optional' => true));
 
         // Views
         $options = array(0 => get_string('all'), 1 => get_string('selected', 'form'));
@@ -67,7 +67,7 @@ class dataformruleform_helper {
         }
         $select = &$mform->addElement('select', $prefix. 'views', null, $items);
         $select->setMultiple(true);
-        $mform->disabledIf($prefix. 'views', $prefix. 'viewselection', 'eq', 0);                
+        $mform->disabledIf($prefix. 'views', $prefix. 'viewselection', 'eq', 0);
     }
 
     /**
@@ -80,7 +80,7 @@ class dataformruleform_helper {
             $options = $options + $filters;
         }
         $mform->addElement('select', $prefix. 'filterid', get_string('filter', 'dataform'), $options);
-        
+
         // Custom filter
         self::custom_search_definition($mform, $dataformid, $customsearch);
     }
@@ -96,7 +96,7 @@ class dataformruleform_helper {
             'AND' => get_string('and', 'dataform'),
             'OR' => get_string('or', 'dataform'),
         );
-        
+
         $fieldoptions = self::get_field_search_options_menu($fields);
 
         $isnotoptions = array(
@@ -120,7 +120,7 @@ class dataformruleform_helper {
         if ($customsearch) {
             $searchfields = $customsearch;
             // If not from form then the searchfields is aggregated and we need
-            // to flatten them. An aggregated array should have a non-zero key 
+            // To flatten them. An aggregated array should have a non-zero key
             // (fieldid) in the first element.
             if (key($searchfields)) {
                 foreach ($searchfields as $fieldid => $searchfield) {
@@ -134,7 +134,7 @@ class dataformruleform_helper {
                                 continue;
                             }
                             list($element, $not, $operator, $value) = $searchoption;
-                            $searchcriteria[] = array("$fieldid,$element", $andor, $not, $operator, $value);
+                            $searchcriteria[] = array("$fieldid, $element", $andor, $not, $operator, $value);
                         }
                     }
                 }
@@ -155,7 +155,7 @@ class dataformruleform_helper {
             }
 
             $i = $count + 1;
-            
+
             list($fieldid, $andor, $not, $operator, $value) = $searchcriterion;
 
             $arr = array();
@@ -163,11 +163,11 @@ class dataformruleform_helper {
             $arr[] = &$mform->createElement('selectgroups', "searchfield$count", null, $fieldoptions);
             $arr[] = &$mform->createElement('select', "searchnot$count", null, $isnotoptions);
             $arr[] = &$mform->createElement('select', "searchoperator$count", '', $operatoroptions);
-            $arr[] = &$mform->createElement('text', "searchvalue$count", '');                            
+            $arr[] = &$mform->createElement('text', "searchvalue$count", '');
             $mform->addGroup($arr, "customsearcharr$count", "$fieldlabel$i", ' ', false);
 
             $mform->setType("searchvalue$count", PARAM_TEXT);
-            
+
             $mform->setDefault("searchandor$count", $andor);
             $mform->setDefault("searchfield$count", $fieldid);
             $mform->setDefault("searchnot$count", $not);
@@ -178,11 +178,11 @@ class dataformruleform_helper {
             $mform->disabledIf("searchnot$count", "searchfield$count", 'eq', '');
             $mform->disabledIf("searchoperator$count", "searchfield$count", 'eq', '');
             $mform->disabledIf("searchvalue$count", "searchoperator$count", 'eq', '');
-            
+
             if ($count) {
                 $prev = $count - 1;
                 $mform->disabledIf("customsearcharr$count", "searchfield$prev", 'eq', '');
-            }   
+            }
 
             $count++;
         }
@@ -200,7 +200,7 @@ class dataformruleform_helper {
             }
         }
         return $menu;
-    }    
+    }
 
     /**
      *
@@ -215,7 +215,7 @@ class dataformruleform_helper {
                 }
 
                 $i = (int) str_replace('searchandor', '', $var);
-                // check if trying to define a search criterion
+                // Check if trying to define a search criterion
                 if ($searchandor = $formdata->{"searchandor$i"}) {
                     if ($searchelement = $formdata->{"searchfield$i"}) {
                         list($fieldid, $element) = explode(',', $searchelement);
@@ -244,10 +244,9 @@ class dataformruleform_helper {
             }
         }
         return null;
-    }    
+    }
 
 
-    
     /**
      *
      */
@@ -256,7 +255,7 @@ class dataformruleform_helper {
 
         // Time from and time to
         if (!empty($data[$prefix. 'timefrom']) and !empty($data[$prefix. 'timeto']) and $data[$prefix. 'timeto'] <= $data[$prefix. 'timefrom']) {
-            $errors[$prefix. 'timeto'] = get_string('errorinvalidtimeto','dataform');
+            $errors[$prefix. 'timeto'] = get_string('errorinvalidtimeto', 'dataform');
         }
 
         return $errors;

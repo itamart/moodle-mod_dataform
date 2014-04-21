@@ -12,9 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
-
-namespace mod_dataform\pluginbase; 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataform
@@ -22,26 +20,27 @@ namespace mod_dataform\pluginbase;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->libdir/blocklib.php");
+namespace mod_dataform\pluginbase;
 
+require_once("$CFG->libdir/blocklib.php");
 
 /**
  * Base class for Dataform Access Types
  */
 class dataformrule {
 
-    protected $_block = null; // The context block 
+    protected $_block = null; // The context block
     protected $_dataformid;
-    
+
     /**
      *
-     */   
+     */
     public function __construct($dataformid, $category, $block = null) {
         $this->_dataformid = $dataformid;
         $this->_category = $category;
         $this->_block = $block;
     }
-    
+
     /**
      * Magic get method
      *
@@ -65,7 +64,7 @@ class dataformrule {
     public function get_dataformid() {
         return $this->_dataformid;
     }
-    
+
     /**
      *
      */
@@ -73,11 +72,11 @@ class dataformrule {
         if (empty($this->_block)) {
             return null;
         }
-        
+
         if (empty($this->_block->config)) {
             $this->_block->config = new \stdClass;
         }
-        
+
         if (empty($this->_block->config->name)) {
             $this->_block->config->name = get_string('rulenew', 'dataform', $this->get_typename());;
         }
@@ -103,7 +102,7 @@ class dataformrule {
         }
         return null;
     }
-    
+
     /**
      * Returns the rule category.
      * @return string
@@ -111,7 +110,7 @@ class dataformrule {
     public function get_category() {
         return $this->_category;
     }
-    
+
     /**
      * Returns the rule type from blockname - dataform - category.
      * @return string
@@ -123,7 +122,7 @@ class dataformrule {
         }
         return null;
     }
-    
+
     /**
      * Returns the type name of the rule
      */
@@ -157,7 +156,7 @@ class dataformrule {
         if (empty($this->_block)) {
             return null;
         }
-        
+
         return $this->_block->context;
     }
 
@@ -167,7 +166,6 @@ class dataformrule {
     public function delete() {
         blocks_delete_instance($this->_block->instance);
     }
-
 
 
     /**
@@ -211,7 +209,7 @@ class dataformrule {
         if (!empty($config->timefrom) and $now < $config->timefrom) {
             return false;
         }
-        
+
         if (!empty($config->timeto) and $now > $config->timeto) {
             return false;
         }
@@ -222,7 +220,7 @@ class dataformrule {
             if (!$view = $vm->get_view_by_id($data['viewid'])) {
                 return false;
             }
-            
+
             if (!in_array($view->name, $config->views)) {
                 return false;
             }
@@ -231,24 +229,23 @@ class dataformrule {
         if (!$this->_block->is_applicable($data)) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      *
      */
     public function has_capability($capability) {
         return has_capability($capability, $this->_block->context);
     }
-    
+
     /**
      *
      */
     public function require_capability($capability) {
-        require_capability($capability,$this->_block->context);
+        require_capability($capability, $this->_block->context);
     }
-
 
     /**
      * Returns the list of views the rule applies to.
@@ -259,14 +256,14 @@ class dataformrule {
         if (!$this->is_enabled()) {
             return null;
         }
-        
+
         if (!empty($this->_block->config->views)) {
             return $this->_block->config->views;
         }
         // Return all views
         return \mod_dataform_view_manager::instance($this->_dataformid)->get_views_menu();
     }
-    
+
     /**
      * Returns the list of fields the rule applies to.
      *
@@ -282,5 +279,5 @@ class dataformrule {
         }
         return null;
     }
-    
+
 }

@@ -12,15 +12,15 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformview
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
-namespace mod_dataform\pluginbase; 
+
+namespace mod_dataform\pluginbase;
 
 defined('MOODLE_INTERNAL') or die;
 
@@ -52,14 +52,14 @@ class dataformviewpatterns {
         $viewid = $this->_view->id;
 
         $found = array();
-        
+
         if ($patterns) {
             foreach ($patterns as $pattern) {
                 if (strpos($text, $pattern) !== false) {
                     $found[] = $pattern;
                 }
             }
-        } else {       
+        } else {
             // Fixed patterns
             $patterns = array_keys($this->patterns());
             foreach ($patterns as $pattern) {
@@ -93,7 +93,7 @@ class dataformviewpatterns {
         if ($showall) {
             return array_keys($this->patterns());
         }
-        
+
         // Only visible
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
@@ -121,21 +121,21 @@ class dataformviewpatterns {
      * @return array Associative array of associative arrays
      */
     public final function get_menu($showall = false) {
-        // the default menu category for views
+        // The default menu category for views
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // which category
+                // Which category
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('views', 'dataform');
                 }
-                // prepare array
+                // Prepare array
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // add tag
+                // Add tag
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -149,14 +149,14 @@ class dataformviewpatterns {
         global $CFG, $OUTPUT;
         $view = $this->_view;
         $viewname = $view->name;
-        
+
         $info = array_keys($this->info_patterns());
         $ref = array_keys($this->ref_patterns());
         $userpref = array_keys($this->userpref_patterns());
         $actions = array_keys($this->action_patterns());
         $paging = array_keys($this->paging_patterns());
         $fieldview = array_keys($this->fieldview_patterns());
-        
+
         $options['filter'] = $view->get_filter();
         $options['baseurl'] = new \moodle_url($view->get_baseurl(), array('sesskey' => sesskey()));
         $edit = !empty($options['edit']) ? $options['edit'] : false;
@@ -216,10 +216,10 @@ class dataformviewpatterns {
      */
     protected function get_info_replacement($tag, $entry = null, array $options = null) {
         global $OUTPUT;
-        
+
         $view = $this->_view;
         $entryman = $view->entry_manager;
-        
+
         $replacement = '';
         switch ($tag) {
             // Print notifications
@@ -256,7 +256,7 @@ class dataformviewpatterns {
                 $mform = $view->get_new_entry_form();
                 $replacement = $mform->render();
                 break;
-                
+
             case '##editentry##':
                 if (!$view->editentries) {
                     $entryid = -1;
@@ -266,18 +266,17 @@ class dataformviewpatterns {
                     $entryid = reset($entryids);
                     $entryid = ($entryid < 0 ? -1 : $entryid);
                 }
-                
+
                 if ($entryid == -1) {
                     $mform = $view->get_new_entry_form();
                     $replacement = $mform->render();
                 } else if ($entryid > 0) {
                     $view->editentries = $entryid;
                     $replacement = $view->get_entries_display($options);
-                } else {
-                    // Notify something
                 }
+                // We may want to notify something if none of the above applies.
                 break;
-                
+
             case '##entries##':
                 $replacement = $view->get_entries_display($options);
                 break;
@@ -292,7 +291,7 @@ class dataformviewpatterns {
         global $PAGE;
 
         $output = $PAGE->get_renderer('mod_dataform', 'dataformview');
-        
+
         if ($tag == '##viewsmenu##') {
             return $output->render_views_menu($this->_view);
         }
@@ -305,7 +304,7 @@ class dataformviewpatterns {
         if ($tag == '##viewurl##') {
             return $this->get_viewurl_replacement($this->_view->name);
         }
-        
+
         if (strpos($tag, '##viewurl:') === 0) {
             list(, $viewname) = explode(':', trim($tag, '#'));
             return $this->get_viewurl_replacement($viewname);
@@ -336,9 +335,12 @@ class dataformviewpatterns {
 
             switch ($tag) {
                 // Deprecate (at some point)
-                case '##advancedfilter##': return $output->render_advanced_filter($view);
-                case '##quicksearch##': return $output->render_quick_search($view);
-                case '##quickperpage##': return $output->render_quick_perpage($view);
+                case '##advancedfilter##':
+                    return $output->render_advanced_filter($view);
+                case '##quicksearch##':
+                    return $output->render_quick_search($view);
+                case '##quickperpage##':
+                    return $output->render_quick_perpage($view);
             }
         }
         return '';
@@ -351,7 +353,7 @@ class dataformviewpatterns {
         global $CFG, $OUTPUT, $PAGE;
 
         $replacement = '';
-        
+
         $view = $this->_view;
         $df = $view->df;
         $filter = $view->get_filter();
@@ -364,7 +366,7 @@ class dataformviewpatterns {
             if ($view->user_is_editing() or !$view->allows_submission()) {
                 return '';
             }
-            
+
             $accessparams = array('dataformid' => $view->dataid, 'viewid' => $view->id);
             if (!\mod_dataform\access\entry_add::validate($accessparams)) {
                 return '';
@@ -377,7 +379,7 @@ class dataformviewpatterns {
             } else {
                 $options = array_combine(range(-1, -20), range(1, 20));
                 $select = new \single_select(new \moodle_url($baseurl), 'editentries', $options, null, array(0 => get_string('dots', 'dataform')), 'newentries_jump');
-                $select->set_label(get_string('entryaddmultinew','dataform'). '&nbsp;');
+                $select->set_label(get_string('entryaddmultinew', 'dataform'). '&nbsp;');
                 return $OUTPUT->render($select);
             }
         }
@@ -392,7 +394,7 @@ class dataformviewpatterns {
         global $PAGE;
 
         $output = $PAGE->get_renderer('mod_dataform', 'dataformview');
-        
+
         if ($tag == '##paging:bar##') {
             return $output->render_pagingbar($this->_view);
         }
@@ -404,7 +406,7 @@ class dataformviewpatterns {
      */
     protected function get_fieldview_replacement($tag, $entry = null, array $options = null) {
         $view = $this->_view;
-    
+
         // Get the field name
         list($fieldname) = explode(':', trim($tag, '#[]'));
         // Get the field
@@ -416,19 +418,19 @@ class dataformviewpatterns {
         }
         return null;
     }
-    
+
     /**
      *
      */
     protected function get_viewurl_replacement($viewname) {
         $thisview = $this->_view;
-        
+
         // Return this view's url
         if ($viewname == $thisview->name) {
             return $thisview->get_baseurl()->out(false);
         }
 
-        $df = $thisview->get_df();        
+        $df = $thisview->get_df();
         static $views = null;
         if (empty($views[$viewname])) {
             if ($view = $thisview->df->view_manager->get_view_by_name($viewname)) {
@@ -436,12 +438,12 @@ class dataformviewpatterns {
                 return $view->get_baseurl()->out(false);
             }
         } else {
-            return $views[$viewname]->get_baseurl()->out(false);        
+            return $views[$viewname]->get_baseurl()->out(false);
         }
-        
+
         return '';
     }
-    
+
     /**
      *
      */
@@ -451,7 +453,7 @@ class dataformviewpatterns {
         $thisview = $this->_view;
         $view = null;
         static $views = array();
-        
+
         list($viewname, $linktext, $urlquery, ) = explode(';', $linkpattern);
         // Return this view's url
         if ($viewname == $thisview->name) {
@@ -469,7 +471,7 @@ class dataformviewpatterns {
             if (strpos($linktext, '_pixicon:') === 0) {
                 list(, $icon, $titletext) = explode(':', $linktext);
                 $linktext = $OUTPUT->pix_icon($icon, $titletext);
-            }    
+            }
             // Replace pipes in urlquery with &
             $urlquery = str_replace('|', '&', $urlquery);
             $linkparams = array();
@@ -479,10 +481,10 @@ class dataformviewpatterns {
             $viewlink = new \moodle_url($view->get_baseurl(), $linkparams);
             return \html_writer::link($viewlink->out(false). "&$urlquery", $linktext);
         }
-        
+
         return '';
     }
-    
+
     /**
      *
      */
@@ -503,12 +505,11 @@ class dataformviewpatterns {
         } else {
             return $views[$viewname]->display();
         }
-        
+
         return '';
     }
-    
 
-    
+
     /**
      *
      */
@@ -552,19 +553,19 @@ class dataformviewpatterns {
             '##viewsmenu##' => array(true, $cat),
             '##filtersmenu##' => array(true, $cat),
         );
-        
+
         static $views = null;
         if ($views === null) {
             $views = $this->_view->df->view_manager->get_views_menu();
         }
-        
+
         if ($views) {
             foreach ($views as $viewname) {
                 $patterns["##viewurl:$viewname##"] = array(false);
                 $patterns["##viewcontent:$viewname##"] = array(false);
             }
         }
-        
+
         return $patterns;
     }
 
@@ -627,7 +628,6 @@ class dataformviewpatterns {
     }
 
 
-    
     /**
      * Returns a list of regexp patterns.
      * Not included in the view patterns menu.
@@ -653,11 +653,11 @@ class dataformviewpatterns {
      */
     protected function is_regexp_pattern($pattern) {
         static $views = null;
-        
+
         if ($views === null) {
             $views = $this->_view->df->view_manager->get_views_menu();
         }
-        
+
         if ($views) {
             foreach ($views as $viewname) {
                 if (strpos($pattern, "#{{viewlink:$viewname;") === 0) {

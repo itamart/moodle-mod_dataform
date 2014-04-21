@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -29,14 +29,14 @@
 require_once("../../config.php");
 require_once("$CFG->dirroot/mod/dataform/lib.php");
 
-$id             = required_param('id', PARAM_INT);   // course
-//$add            = optional_param('add', '', PARAM_ALPHA);
-//$update         = optional_param('update', 0, PARAM_INT);
-//$duplicate      = optional_param('duplicate', 0, PARAM_INT);
-//$hide           = optional_param('hide', 0, PARAM_INT);
-//$show           = optional_param('show', 0, PARAM_INT);
-//$movetosection  = optional_param('movetosection', 0, PARAM_INT);
-//$delete         = optional_param('delete', 0, PARAM_INT);
+$id             = required_param('id', PARAM_INT);   // Course
+// $add            = optional_param('add', '', PARAM_ALPHA);
+// $update         = optional_param('update', 0, PARAM_INT);
+// $duplicate      = optional_param('duplicate', 0, PARAM_INT);
+// $hide           = optional_param('hide', 0, PARAM_INT);
+// $show           = optional_param('show', 0, PARAM_INT);
+// $movetosection  = optional_param('movetosection', 0, PARAM_INT);
+// $delete         = optional_param('delete', 0, PARAM_INT);
 
 if (!$course = $DB->get_record('course', array('id' => $id))) {
     throw new moodle_exception('invalidcourseid');
@@ -48,19 +48,19 @@ require_course_login($course);
 // Must have viewindex capability
 require_capability('mod/dataform:indexview', $context);
 
-$modulename = get_string('modulename','dataform');
-$modulenameplural  = get_string('modulenameplural','dataform');
+$modulename = get_string('modulename', 'dataform');
+$modulenameplural  = get_string('modulenameplural', 'dataform');
 
 $PAGE->set_url('/mod/dataform/index.php', array('id' => $id));
 $PAGE->set_pagelayout('incourse');
-$PAGE->navbar->add($modulename, new moodle_url('/mod/dataform/index.php', array('id'=>$course->id)));
+$PAGE->navbar->add($modulename, new moodle_url('/mod/dataform/index.php', array('id' => $course->id)));
 $PAGE->set_title($modulename);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
 
 if (!$dataforms = get_all_instances_in_course("dataform", $course)) {
-    notice(get_string('thereareno', 'moodle',$modulenameplural) , new moodle_url('/course/view.php', array('id' => $course->id)));
+    notice(get_string('thereareno', 'moodle', $modulenameplural) , new moodle_url('/course/view.php', array('id' => $course->id)));
 }
 
 $usesections = course_format_uses_sections($course->format);
@@ -74,32 +74,32 @@ $table->attributes['cellpadding'] = '2';
 $table->head  = array ();
 $table->align = array ();
 
-// section
+// Section
 if ($usesections) {
     $table->head[] = get_string('sectionname', 'format_'.$course->format);
     $table->align[] = 'center';
 }
 
-// name
+// Name
 $table->head[] = get_string('name');
 $table->align[] = 'left';
 
-// description
+// Description
 $table->head[] = get_string('description');
 $table->align[] = 'left';
 
-// number of entries
+// Number of entries
 $table->head[] = get_string('entries', 'dataform');
 $table->align[] = 'center';
 
-// rss
+// Rss
 $rss = (!empty($CFG->enablerssfeeds) and !empty($CFG->dataform_enablerssfeeds));
 if ($rss) {
     $table->head[] = get_string('rss');
     $table->align[] = 'center';
 }
 
-// actions
+// Actions
 if ($showeditbuttons = $PAGE->user_allowed_editing()) {
     $table->head[] = '';
     $table->align[] = 'center';
@@ -115,14 +115,14 @@ $strdelete = get_string('delete');
 
 foreach ($dataforms as $dataform) {
     $tablerow = array();
-    
+
     $df = mod_dataform_dataform::instance($dataform->id);
 
     if (!has_capability('mod/dataform:indexview', $df->context)) {
         continue;
     }
 
-    // section
+    // Section
     if ($usesections) {
         if ($dataform->section !== $currentsection) {
             if ($currentsection !== null) {
@@ -135,20 +135,20 @@ foreach ($dataforms as $dataform) {
         }
     }
 
-    // name (linked; dim if not visible)
+    // Name (linked; dim if not visible)
     $linkparams = !$dataform->visible ? array('class' => 'dimmed') : null;
     $linkedname = html_writer::link(new moodle_url('/mod/dataform/view.php', array('id' => $dataform->coursemodule)),
                                 format_string($dataform->name, true),
                                 $linkparams);
     $tablerow[] = $linkedname;
 
-    // description
+    // Description
     $tablerow[] = format_text($dataform->intro, $dataform->introformat, $options);
 
-    // number of entries
+    // Number of entries
     $tablerow[] = $df->get_entries_count(mod_dataform_dataform::COUNT_ALL);
-    
-    // rss
+
+    // Rss
     $rsslinks = array();
     if ($rss and $rssviews = $df->get_rss_views()) {
         foreach ($rssviews as $view) {
@@ -162,17 +162,17 @@ foreach ($dataforms as $dataform) {
         $editingurl->param('update', $dataform->coursemodule);
         $buttons['edit'] = html_writer::link($editingurl, $OUTPUT->pix_icon('t/edit', $stredit));
         $editingurl->remove_params('update');
-        
+
         $editingurl->param('delete', $dataform->coursemodule);
         $buttons['delete'] = html_writer::link($editingurl, $OUTPUT->pix_icon('t/delete', $strdelete));
         $editingurl->remove_params('delete');
 
         $tablerow[] = implode('&nbsp;&nbsp;&nbsp;', $buttons);
     }
-    
+
     $table->data[] = $tablerow;
 }
 
 echo html_writer::empty_tag('br');
-echo html_writer::tag('div', html_writer::table($table), array('class'=>'no-overflow'));
+echo html_writer::tag('div', html_writer::table($table), array('class' => 'no-overflow'));
 echo $OUTPUT->footer();

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage textarea
@@ -26,46 +26,46 @@ class dataformfield_textarea_form extends mod_dataform\pluginbase\dataformfieldf
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
         global $CFG;
 
         $mform =& $this->_form;
 
         // Field settings
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // field width (cols)
-        $mform->addElement('text', 'param2', get_string('cols', 'dataformfield_textarea'), array('size'=>'8'));
+        // Field width (cols)
+        $mform->addElement('text', 'param2', get_string('cols', 'dataformfield_textarea'), array('size' => '8'));
         $mform->setType('param2', PARAM_INT);
         $mform->addRule('param2', null, 'numeric', null, 'client');
 
-        // field height (rows)
-        $mform->addElement('text', 'param3', get_string('rows', 'dataformfield_textarea'), array('size'=>'8'));
+        // Field height (rows)
+        $mform->addElement('text', 'param3', get_string('rows', 'dataformfield_textarea'), array('size' => '8'));
         $mform->setType('param3', PARAM_INT);
         $mform->addRule('param3', null, 'numeric', null, 'client');
 
         // Text format
-        //$options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
-        //$mform->addElement('select', 'param7', get_string('filemaxsize', 'dataform'), $options);
-        
+        // $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
+        // $mform->addElement('select', 'param7', get_string('filemaxsize', 'dataform'), $options);
+
         // Trust text
         $mform->addElement('selectyesno', 'param4', get_string('trusttext', 'dataformfield_textarea'));
-        //$mform->disabledIf('param4', 'param1', 'eq', 0);
+        // $mform->disabledIf('param4', 'param1', 'eq', 0);
 
         // Enable editor
         $mform->addElement('selectyesno', 'param1', get_string('editorenable', 'dataform'));
 
         // Editor file settings
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
-        // max bytes
+        // Max bytes
         $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
         $mform->addElement('select', 'param5', get_string('filemaxsize', 'dataform'), $options);
         $mform->disabledIf('param5', 'param1', 'eq', 0);
 
-        // max files
+        // Max files
         $range = range(1, 100);
         $options = array(-1 => get_string('unlimited')) + array_combine($range, $range);
         $mform->addElement('select', 'param6', get_string('filesmax', 'dataform'), $options);

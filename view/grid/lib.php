@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage grid
- * @copyright 2013 Itamar Tzadok 
+ * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -43,7 +43,7 @@ function dataformview_grid_pluginfile($course, $cm, $context, $filearea, $args, 
 
     if ($context->contextlevel == CONTEXT_MODULE) {
         require_course_login($course, true, $cm);
-        
+
         $viewid = (int) array_shift($args);
         $dataformid = $cm->instance;
 
@@ -61,8 +61,8 @@ function dataformview_grid_pluginfile($course, $cm, $context, $filearea, $args, 
             return false;
         }
 
-        // finally send the file
-        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+        // Finally send the file
+        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
     }
     return false;
 }

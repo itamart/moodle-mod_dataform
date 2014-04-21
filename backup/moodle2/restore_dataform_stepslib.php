@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
@@ -35,9 +35,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     protected function define_structure() {
 
         $paths = array();
-        $userinfo = $this->get_setting_value('userinfo'); // restore content and user info (requires the backup users)
+        $userinfo = $this->get_setting_value('userinfo'); // Restore content and user info (requires the backup users)
 
-        
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
@@ -67,17 +66,17 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $data->timeavailable = $this->apply_date_offset($data->timeavailable);
         $data->timedue = $this->apply_date_offset($data->timedue);
 
-        if ($data->grade < 0) { // scale found, get mapping
+        if ($data->grade < 0) { // Scale found, get mapping
             $data->grade = -($this->get_mappingid('scale', abs($data->grade)));
         }
 
         $newitemid = $this->task->get_activityid();
-        
-        if ($newitemid) { 
+
+        if ($newitemid) {
             $data->id = $newitemid;
             $DB->update_record('dataform', $data);
         } else {
-            // insert the dataform record
+            // Insert the dataform record
             $newitemid = $DB->insert_record('dataform', $data);
         }
         $this->apply_activity_instance($newitemid);
@@ -92,13 +91,13 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         global $DB;
 
         if ($newitemid == $this->task->get_activityid()) {
-            // remap task module id
+            // Remap task module id
             $this->set_mapping('course_module', $this->task->get_old_moduleid(), $this->task->get_moduleid());
-            // remap task context id
+            // Remap task context id
             $this->set_mapping('context', $this->task->get_old_contextid(), $this->task->get_contextid());
         } else {
             // Save activity id in task
-            $this->task->set_activityid($newitemid); 
+            $this->task->set_activityid($newitemid);
             // Apply the id to course_modules->instance
             $DB->set_field('course_modules', 'instance', $newitemid, array('id' => $this->task->get_moduleid()));
         }
@@ -118,9 +117,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $data->dataid = $this->get_new_parentid('dataform');
 
-        // insert the dataform_fields record
+        // Insert the dataform_fields record
         $newitemid = $DB->insert_record('dataform_fields', $data);
-        $this->set_mapping('dataform_field', $oldid, $newitemid, true); // files by this item id
+        $this->set_mapping('dataform_field', $oldid, $newitemid, true); // Files by this item id
     }
 
     /**
@@ -134,7 +133,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $data->dataid = $this->get_new_parentid('dataform');
 
-        // adjust customsort field ids
+        // Adjust customsort field ids
         if ($data->customsort) {
             $customsort = unserialize($data->customsort);
             $sortfields = array();
@@ -147,8 +146,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
             $data->customsort = serialize($sortfields);
         }
-                        
-        // adjust customsearch field ids
+
+        // Adjust customsearch field ids
         if ($data->customsearch) {
             $customsearch = unserialize($data->customsearch);
             $searchfields = array();
@@ -161,10 +160,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
             $data->customsearch = serialize($searchfields);
         }
-        
-        // insert the dataform_filters record
+
+        // Insert the dataform_filters record
         $newitemid = $DB->insert_record('dataform_filters', $data);
-        $this->set_mapping('dataform_filter', $oldid, $newitemid, false); // no files associated
+        $this->set_mapping('dataform_filter', $oldid, $newitemid, false); // No files associated
     }
 
     /**
@@ -178,12 +177,12 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $data->dataid = $this->get_new_parentid('dataform');
 
-        // adjust view filter id
+        // Adjust view filter id
         if ($data->filterid) {
             $data->filterid = $this->get_mappingid('dataform_filter', $data->filterid);
         }
 
-        // adjust pattern field ids
+        // Adjust pattern field ids
         if ($data->patterns) {
             $patterns = unserialize($data->patterns);
             $newpatterns = array('view' => $patterns['view'], 'field' => array());
@@ -196,10 +195,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
             $data->patterns = serialize($newpatterns);
         }
-        
-        // insert the dataform_views record
+
+        // Insert the dataform_views record
         $newitemid = $DB->insert_record('dataform_views', $data);
-        $this->set_mapping('dataform_view', $oldid, $newitemid, true); // files by this item id
+        $this->set_mapping('dataform_view', $oldid, $newitemid, true); // Files by this item id
     }
 
     /**
@@ -223,9 +222,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         }
         $data->groupid = $this->get_mappingid('group', $data->groupid);
 
-        // insert the dataform_entries record
+        // Insert the dataform_entries record
         $newitemid = $DB->insert_record('dataform_entries', $data);
-        $this->set_mapping('dataform_entry', $oldid, $newitemid, false); // no files associated
+        $this->set_mapping('dataform_entry', $oldid, $newitemid, false); // No files associated
     }
 
     /**
@@ -240,9 +239,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $data->fieldid = $this->get_mappingid('dataform_field', $data->fieldid);
         $data->entryid = $this->get_new_parentid('dataform_entry');
 
-        // insert the data_content record
+        // Insert the data_content record
         $newitemid = $DB->insert_record('dataform_contents', $data);
-        $this->set_mapping('dataform_content', $oldid, $newitemid, true); // files by this item id
+        $this->set_mapping('dataform_content', $oldid, $newitemid, true); // Files by this item id
     }
 
     /**
@@ -251,7 +250,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     protected function process_dataform_rating($data) {
         $data = (object)$data;
         $data->itemid = $this->get_new_parentid('dataform_entry');
-        $this->process_this_rating($data);        
+        $this->process_this_rating($data);
     }
 
     /**
@@ -262,7 +261,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $data = (object)$data;
 
         $data->contextid = $this->task->get_contextid();
-        if ($data->scaleid < 0) { // scale found, get mapping
+        if ($data->scaleid < 0) { // Scale found, get mapping
             $data->scaleid = -($this->get_mappingid('scale', abs($data->scaleid)));
         }
         $data->rating = $data->value;
@@ -272,7 +271,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $newitemid = $DB->insert_record('rating', $data);
     }
-    
+
     /**
      *
      */
@@ -292,24 +291,23 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $this->add_related_dataformplugin_files('dataformfield', 'dataform_field');
 
         // TODO Add preset related files, matching by itemname (data_content)
-        //$this->add_related_files('mod_dataform', 'course_presets', 'dataform');
+        // $this->add_related_files('mod_dataform', 'course_presets', 'dataform');
 
         $dataformnewid = $this->get_new_parentid('dataform');
-        
-        // default view
+
+        // Default view
         if ($defaultview = $DB->get_field('dataform', 'defaultview', array('id' => $dataformnewid))) {
             if ($defaultview = $this->get_mappingid('dataform_view', $defaultview)) {
                 $DB->set_field('dataform', 'defaultview', $defaultview, array('id' => $dataformnewid));
             }
         }
 
-        // default filter
+        // Default filter
         if ($defaultfilter = $DB->get_field('dataform', 'defaultfilter', array('id' => $dataformnewid))) {
             if ($defaultfilter = $this->get_mappingid('dataform_filter', $defaultfilter)) {
                 $DB->set_field('dataform', 'defaultfilter', $defaultfilter, array('id' => $dataformnewid));
             }
         }
-
 
         // Update id of userinfo fields if needed
         // TODO can we condition this on restore to new site?
@@ -323,12 +321,12 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         }
 
     }
-    
+
     protected function add_related_dataformplugin_files($plugintype, $source) {
         global $CFG;
-        
+
         $plugins = core_component::get_plugin_list($plugintype);
-        foreach ($plugins as $type => $unused){
+        foreach ($plugins as $type => $unused) {
             $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
                 $this->add_related_files($pluginclass, $filearea, $source);

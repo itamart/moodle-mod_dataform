@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
@@ -65,13 +65,13 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2012121900($dbman, $oldversion);
     xmldb_dataform_upgrade_2013051101($dbman, $oldversion);
     xmldb_dataform_upgrade_last($dbman, $oldversion);
-    
-    return true;    
-}    
+
+    return true;
+}
 
 function xmldb_dataform_upgrade_2012032100($dbman, $oldversion) {
     if ($oldversion < 2012032100) {
-        // add field selection to dataform_filters
+        // Add field selection to dataform_filters
         $table = new xmldb_table('dataform_filters');
         $field = new xmldb_field('selection', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'perpage');
 
@@ -79,60 +79,60 @@ function xmldb_dataform_upgrade_2012032100($dbman, $oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012032100, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012040600($dbman, $oldversion) {
     if ($oldversion < 2012040600) {
-        // add field edits to dataform_fields
+        // Add field edits to dataform_fields
         $table = new xmldb_table('dataform_fields');
         $field = new xmldb_field('edits', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '-1', 'description');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012040600, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012050500($dbman, $oldversion) {
     if ($oldversion < 2012050500) {
-        // drop field comments from dataform
+        // Drop field comments from dataform
         $table = new xmldb_table('dataform');
         $field = new xmldb_field('comments');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-        // drop field locks
+        // Drop field locks
         $field = new xmldb_field('locks');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-        // add field rules
+        // Add field rules
         $field = new xmldb_field('rules', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'rating');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012050500, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012051600($dbman, $oldversion) {
     if ($oldversion < 2012051600) {
-        // drop field grading from entries
+        // Drop field grading from entries
         $table = new xmldb_table('dataform_entries');
         $field = new xmldb_field('grading');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012051600, 'dataform');
     }
 }
@@ -141,37 +141,37 @@ function xmldb_dataform_upgrade_2012053100($dbman, $oldversion) {
     if ($oldversion < 2012053100) {
         $table = new xmldb_table('dataform');
 
-        // add field cssincludes
+        // Add field cssincludes
         $field = new xmldb_field('cssincludes', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'css');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // add field jsincludes
+        // Add field jsincludes
         $field = new xmldb_field('jsincludes', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'js');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012053100, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012060101($dbman, $oldversion) {
     global $DB;
-    
+
     if ($oldversion < 2012060101) {
-        // changed stored content of view editors from serialized to formatted string
+        // Changed stored content of view editors from serialized to formatted string
         // Assumed at this point that serialized content in param fields in the
-        // view table is editor content which needs to be unserialized to 
-        // $text, $format, $trust and restored as "ft:{$format}tr:{$trust}ct:$text" 
-        
+        // View table is editor content which needs to be unserialized to
+        // $text, $format, $trust and restored as "ft:{$format}tr:{$trust}ct:$text"
+
         // Get all views
         if ($views = $DB->get_records('dataform_views')) {
             foreach ($views as $view) {
                 $update = false;
-                // section field
+                // Section field
                 if (!empty($view->section)) {
                     $editordata = @unserialize($view->section);
                     if ($editordata !== false) {
@@ -179,7 +179,7 @@ function xmldb_dataform_upgrade_2012060101($dbman, $oldversion) {
                         $view->section = "ft:{$format}tr:{$trust}ct:$text";
                         $update = true;
                     }
-                }                
+                }
                 // 10 param fields
                 for ($i = 1; $i <= 10; ++$i) {
                     $param = "param$i";
@@ -191,30 +191,30 @@ function xmldb_dataform_upgrade_2012060101($dbman, $oldversion) {
                             $update = true;
                         }
                     }
-                } 
+                }
                 if ($update) {
                     $DB->update_record('dataform_views', $view);
                 }
             }
         }
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012060101, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012061700($dbman, $oldversion) {
     global $DB;
-    
+
     if ($oldversion < 2012061700) {
         // Remove version record of dataform views and fields from config_plugin
         $DB->delete_records_select('config_plugins', $DB->sql_like('plugin', '?'), array('dataform%'));
         // Change type of view block/blockext to matrix/matrixext
         $DB->set_field('dataform_views', 'type', 'matrix', array('type' => 'block'));
         $DB->set_field('dataform_views', 'type', 'matrixext', array('type' => 'blockext'));
-        
-        // Move content of matrixext param1 -> param4 and param3 -> param5 
-       if ($views = $DB->get_records('dataform_views', array('type' => 'matrixext'))) {
+
+        // Move content of matrixext param1 -> param4 and param3 -> param5
+        if ($views = $DB->get_records('dataform_views', array('type' => 'matrixext'))) {
             foreach ($views as $view) {
                 if (!empty($view->param1) or !empty($view->param3)) {
                     $view->param4 = $view->param1;
@@ -225,9 +225,9 @@ function xmldb_dataform_upgrade_2012061700($dbman, $oldversion) {
                 }
             }
         }
-        
-        // Move content of editon param3 -> param7 
-       if ($views = $DB->get_records('dataform_views', array('type' => 'editon'))) {
+
+        // Move content of editon param3 -> param7
+        if ($views = $DB->get_records('dataform_views', array('type' => 'editon'))) {
             foreach ($views as $view) {
                 if (!empty($view->param3)) {
                     $view->param7 = $view->param3;
@@ -237,34 +237,34 @@ function xmldb_dataform_upgrade_2012061700($dbman, $oldversion) {
                 }
             }
         }
-        
-        // Move content of tabular param1 -> param3 
-       if ($views = $DB->get_records('dataform_views', array('type' => 'tabular'))) {
+
+        // Move content of tabular param1 -> param3
+        if ($views = $DB->get_records('dataform_views', array('type' => 'tabular'))) {
             foreach ($views as $view) {
                 $view->param3 = $view->param1;
                 $view->param1 = null;
                 $DB->update_record('dataform_views', $view);
             }
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012061700, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012070601($dbman, $oldversion) {
     global $DB;
-    
+
     if ($oldversion < 2012070601) {
-        // add field default filter to dataform
+        // Add field default filter to dataform
         $table = new xmldb_table('dataform');
         $field = new xmldb_field('defaultfilter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'defaultview');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         // Move content of dataform->defaultsort to a new default filter
-       if ($dataforms = $DB->get_records('dataform')) {
+        if ($dataforms = $DB->get_records('dataform')) {
             $strdefault = get_string('default');
             foreach ($dataforms as $dfid => $dataform) {
                 if (!empty($dataform->defaultsort)) {
@@ -282,28 +282,28 @@ function xmldb_dataform_upgrade_2012070601($dbman, $oldversion) {
                 }
             }
         }
-        
-        // drop dataform field defaultsort
+
+        // Drop dataform field defaultsort
         $field = new xmldb_field('defaultsort');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012070601, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012081801($dbman, $oldversion) {
     if ($oldversion < 2012081801) {
-        // add field visible to dataform_fields
+        // Add field visible to dataform_fields
         $table = new xmldb_table('dataform_fields');
         $field = new xmldb_field('visible', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '2', 'description');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012081801, 'dataform');
     }
 }
@@ -317,15 +317,15 @@ function xmldb_dataform_upgrade_2012082600($dbman, $oldversion) {
             $dbman->change_field_unsigned($table, $field);
             $dbman->change_field_default($table, $field);
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012082600, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_2012082900($dbman, $oldversion) {
     global $DB;
-    
+
     if ($oldversion < 2012082900) {
         $fs = get_file_storage();
         // Move presets from course_packages to course_presets
@@ -333,7 +333,7 @@ function xmldb_dataform_upgrade_2012082900($dbman, $oldversion) {
             foreach ($dataforms as $df) {
                 $context = context_course::instance($df->course);
                 if ($presets = $fs->get_area_files($context->id, 'mod_dataform', 'course_packages')) {
-                
+
                     $filerecord = new object;
                     $filerecord->contextid = $context->id;
                     $filerecord->component = 'mod_dataform';
@@ -366,7 +366,7 @@ function xmldb_dataform_upgrade_2012082900($dbman, $oldversion) {
         }
         $fs->delete_area_files(SYSCONTEXTID, 'mod_dataform', 'site_packages');
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012082900, 'dataform');
     }
 }
@@ -380,8 +380,8 @@ function xmldb_dataform_upgrade_2012092002($dbman, $oldversion) {
             $filepath = "$CFG->dirroot/mod/dataform/db/install.xml";
             $dbman->install_one_table_from_xmldb_file($filepath, 'dataform_rules');
         }
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012092002, 'dataform');
     }
 }
@@ -392,8 +392,8 @@ function xmldb_dataform_upgrade_2012092207($dbman, $oldversion) {
         // Change type of view matrix/matrixext to grid/gridext
         $DB->set_field('dataform_views', 'type', 'grid', array('type' => 'matrix'));
         $DB->set_field('dataform_views', 'type', 'gridext', array('type' => 'matrixext'));
-        
-        // dataform savepoint reached
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012092207, 'dataform');
     }
 }
@@ -423,7 +423,7 @@ function xmldb_dataform_upgrade_2012121600($dbman, $oldversion) {
             -144 => 'ratingmin',
             -145 => 'ratingsum',
         );
-        
+
         // View patterns
         if ($views = $DB->get_records('dataform_views')) {
             foreach ($views as $view) {
@@ -451,7 +451,7 @@ function xmldb_dataform_upgrade_2012121600($dbman, $oldversion) {
             foreach ($filters as $filter) {
                 $update = false;
 
-                // adjust customsort field ids
+                // Adjust customsort field ids
                 if ($filter->customsort) {
                     $customsort = unserialize($filter->customsort);
                     $sortfields = array();
@@ -465,8 +465,8 @@ function xmldb_dataform_upgrade_2012121600($dbman, $oldversion) {
                     }
                     $filter->customsort = serialize($sortfields);
                 }
-                                
-                // adjust customsearch field ids
+
+                // Adjust customsearch field ids
                 if ($filter->customsearch) {
                     $customsearch = unserialize($filter->customsearch);
                     $searchfields = array();
@@ -484,9 +484,9 @@ function xmldb_dataform_upgrade_2012121600($dbman, $oldversion) {
                     $DB->update_record('dataform_filters', $filter);
                 }
             }
-        }        
-        
-        // dataform savepoint reached
+        }
+
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012121600, 'dataform');
     }
 }
@@ -509,7 +509,7 @@ function xmldb_dataform_upgrade_2012121900($dbman, $oldversion) {
         $DB->set_field('dataform_views', 'groupby', null, array('groupby' => 0));
         $DB->set_field('dataform_filters', 'groupby', null, array('groupby' => 0));
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2012121900, 'dataform');
     }
 }
@@ -531,14 +531,14 @@ function xmldb_dataform_upgrade_2013051101($dbman, $oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, 2013051101, 'dataform');
     }
 }
 
 function xmldb_dataform_upgrade_last($dbman, $oldversion) {
     global $CFG, $DB;
-    
+
     $newversion = 2014041100;
     if ($oldversion < $newversion) {
         // Drop available-from column to dataform views
@@ -599,7 +599,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                     foreach ($comments as $comment) {
                         $DB->set_field('comments', 'commentarea', 'mdlcomments', array('id' => $comment->id));
                     }
-                        
+
                     // Replace internal comment patterns with the corresponding commentmdl patterns
                     $replacements = array();
                     $replacements['##comments##'] = '[[mdlcomments]]';
@@ -610,7 +610,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 }
             }
         }
-        
+
         // Transfer entry ratings from internal ratings field to ratingmdl
         if ($dataforms = $DB->get_records('dataform')) {
             foreach (array_keys($dataforms) as $dataformid) {
@@ -635,7 +635,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                             $scaleidupdated = true;
                         }
                     }
-                        
+
                     // Replace internal comment patterns with the corresponding commentmdl patterns
                     $replacements = array();
                     $replacements['##ratings##'] = '[[mdlratings]]';
@@ -650,12 +650,12 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                     $replacements['##ratings:max##'] = '[[mdlratings:max]]';
                     $replacements['##ratings:min##'] = '[[mdlratings:min]]';
                     $replacements['##ratings:sum##'] = '[[mdlratings:sum]]';
-                    
+
                     $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
                 }
             }
         }
-        
+
         // Add grade calc column to dataform
         $table = new xmldb_table('dataform');
         $field = new xmldb_field('gradecalc', XMLDB_TYPE_TEXT, 'long', null, null, null, null, 'grademethod');
@@ -685,11 +685,11 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
         if ($views = $DB->get_records('dataform_views')) {
             foreach ($views as $view) {
                 // If there are no patterns there is no entry template
-                // in which case do nothing.
+                // In which case do nothing.
                 if (empty($view->patterns)) {
                     continue;
                 }
-                
+
                 if (strpos($view->section, '##entries##') === false) {
                     $section = $view->section. html_writer::tag('div', '##entries##', array('class' => ''));
                     // Adjust the patterns
@@ -704,7 +704,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 }
             }
         }
-        
+
         // Remame view filter column to filterid
         $table = new xmldb_table('dataform_views');
         $field = new xmldb_field('filter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'groupby');
@@ -781,7 +781,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-        
+
         // Drop rss articles column
         $table = new xmldb_table('dataform');
         $field = new xmldb_field('rssarticles', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'singleview');
@@ -830,25 +830,25 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 if (!$views = $df->view_manager->get_views()) {
                     continue;
                 }
-                
+
                 // The Dataform will require update if patterns for fieldid -5 exist
                 $requireupdate = false;
                 foreach ($views as $view) {
                     if (!$patterns = $view->patterns) {
                         continue;
                     }
-                    
-                    // Check both -5 and approve in case upgrading an old version where internal 
-                    // field ids are verbose.
+
+                    // Check both -5 and approve in case upgrading an old version where internal
+                    // Field ids are verbose.
                     // Note that 'approve' field id will not be replaced.
                     if (!empty($patterns['field'][-5]) or !empty($patterns['field']['approve'])) {
                         $requireupdate = true;
                         break;
                     }
                 }
-                
+
                 // Update
-                if ($requireupdate) {                
+                if ($requireupdate) {
                     // Add an entrystate field to the Dataform instance
                     $entrystates = (object) array(
                         'dataid' => $dataformid,
@@ -856,7 +856,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                         'name' => 'entrystates'
                     );
                     $fieldid = $DB->insert_record('dataform_fields', $entrystates);
-                        
+
                     // Replace internal approve patterns with the corresponding entrystates patterns
                     $replacements = array();
                     $replacements['##approve##'] = '[[entrystates]]';
@@ -892,7 +892,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
             }
         }
-        
+
         // MOVE SEPARATE PARTICIPANTS FROM GROUP MODE TO SETTING
         // Add individualized column to dataform
         $table = new xmldb_table('dataform');
@@ -900,7 +900,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         // Update dataform course modules and dataforms
         $moduleid = $DB->get_field('modules', 'id', array('name' => 'dataform'));
         if ($cms = $DB->get_records('course_modules', array('module' => $moduleid, 'groupmode' => -1))) {
@@ -909,9 +909,9 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 $DB->set_field('dataform', 'individualized', 1, array('id' => $cm->instance));
             }
         }
-        
+
         // Change multiselect field type to selectmulti
-        $DB->set_field('dataform_fields', 'type', 'selectmulti', array('type' => 'multiselect'));        
+        $DB->set_field('dataform_fields', 'type', 'selectmulti', array('type' => 'multiselect'));
 
         // Add submission (settings) field to dataform view
         $table = new xmldb_table('dataform_views');
@@ -919,9 +919,9 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         // Move all appearance settings of picture fields from param4-10 into param4
-        // as base64_encode(serialize((object) $appearance))
+        // As base64_encode(serialize((object) $appearance))
         if ($picturefields = $DB->get_records('dataform_fields', array('type' => 'picture'))) {
             $changes = array(
                 'param4' => 'dispw',
@@ -932,10 +932,10 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 'param9' => 'thumbw',
                 'param10' => 'thumbh',
             );
-                
+
             foreach ($picturefields as $field) {
                 $appearance = array();
-                
+
                 if ($field->param6 == 'px') {
                     $field->param6 = null;
                 }
@@ -952,7 +952,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 }
             }
         }
-        
+
         // Replace pagingbar pattern to paging:bar
         if ($dataforms = $DB->get_records('dataform')) {
             $replacements = array(
@@ -966,7 +966,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
             }
         }
-        
+
         // Enclose content of selectmulti and checkbox fields with #...#
         // This is done to allow the search filter to work on these fields.
         list($intype, $params) = $DB->get_in_or_equal(array('selectmulti', 'checkbox'));
@@ -985,7 +985,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 }
             }
         }
-        
+
         // Replace entrytime, entrygroup, entryauthor, entryactions and entryid patterns
         if ($dataforms = $DB->get_records('dataform')) {
             $replacements = array();
@@ -1003,7 +1003,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
             foreach ($pvars as $pvar) {
                 $replacements["##$pvar##"] = "[[$fieldname:$pvar]]";
             }
-            
+
             // Hidden patterns for view designated more and edit
             if ($views = $DB->get_records('dataform_views')) {
                 foreach ($views as $view) {
@@ -1012,7 +1012,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                     $replacements["##moreurl:$viewname##"] = "[[$fieldname:moreurl:$viewname]]";
                     $replacements["##edit:$viewname##"] = "[[$fieldname:edit:$viewname]]";
                 }
-            }            
+            }
 
             // Entry author
             $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
@@ -1022,7 +1022,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
             foreach (array('username', 'name', 'edit', 'picturelarge') as $pvar) {
                 $patterns["##author:$pvar##"] = "[[$fieldname:$pvar]]";
             }
-            
+
             // Entry group
             $fieldname = get_string('fieldname', 'dataformfield_entrygroup');
             foreach (array('id', 'name', 'picture', 'picturelarge', 'edit') as $item) {
@@ -1057,9 +1057,9 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
                 $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
             }
         }
-        
+
         // Dataformview->visible changed to 0|1, so adjust any instance
-        // that is not 0 to 1.
+        // That is not 0 to 1.
         if ($views = $DB->get_records('dataform_views')) {
             foreach ($views as $view) {
                 if ($view->visible and $view->visible != 1) {
@@ -1075,7 +1075,7 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // dataform savepoint reached
+        // Dataform savepoint reached
         upgrade_mod_savepoint(true, $newversion, 'dataform');
     }
 

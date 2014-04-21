@@ -3,10 +3,10 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
     function STATER(config) {
         STATER.superclass.constructor.apply(this, arguments);
     }
-    
-    STATER.NAME = 'moodle-dataformfield_entrystate-stater';    
+
+    STATER.NAME = 'moodle-dataformfield_entrystate-stater';
     STATER.ATTRS = {
-        api: {value: M.cfg.wwwroot+'/mod/dataform/field/entrystate/ajax.php'},
+        api: {value: M.cfg.wwwroot + '/mod/dataform/field/entrystate/ajax.php'},
         d: {value: 0},
         fieldid: {value: 0},
         entryid: {value: 0},
@@ -20,7 +20,7 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
             var entryid = this.get('entryid');
             var fieldid = this.get('fieldid');
 
-            this.container = Y.one('#entrystates_'+entryid+'_'+fieldid);
+            this.container = Y.one('#entrystates_' + entryid + '_' + fieldid);
             if (!this.container) {
                 Y.log('Could not locate the state container', 'debug');
                 return;
@@ -69,7 +69,7 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
                                 alert(data.error);
                             }
                         } catch(e) {
-                            alert(e.message+" "+outcome.responseText);
+                            alert(e.message + " " + outcome.responseText);
                         }
                         return false;
                     }
@@ -84,7 +84,7 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
             Y.io(this.get('api'), cfg);
         }
     });
-    
+
     // Define a name space to call
     M.dataformfield_entrystate = M.dataformfield_entrystate || {};
     M.dataformfield_entrystate.stater = M.dataformfield_entrystate.stater || {};

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,12 +25,11 @@ namespace mod_dataform\interfaces;
 
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
  * Interface for dataform rss support
  *
  * The interface that is implemented by any dataformview plugin which supports rss.
- * It forces inheriting classes to define methos that are called from the dataform 
+ * It forces inheriting classes to define methos that are called from the dataform
  * rss lib.
  *
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -73,4 +72,3 @@ interface rss {
     public function get_rss_header_description();
 
 }
-

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entryactions
@@ -26,19 +26,19 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform =& $this->_form;
-      
+
         foreach (array('edit', 'more') as $action) {
             $this->field_definition_action($action);
         }
     }
-    
+
     /**
      *
      */
-    function field_definition_action($action) {
+    public function field_definition_action($action) {
         global $CFG;
 
         $field = $this->_field;
@@ -60,22 +60,22 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
         $mform->addElement('text', "actionparams_$action", get_string('actionparams', 'dataformfield_entryactions'));
         $mform->setType("actionparams_$action", PARAM_TEXT);
         $mform->addHelpButton("actionparams_$action", 'targetview', 'dataformfield_entryactions');
-        
+
         // Theme icon
         $mform->addElement('text', "themeicon_$action", get_string('themeicon', 'dataformfield_entryactions'));
         $mform->setType("themeicon_$action", PARAM_TEXT);
         $mform->addHelpButton("themeicon_$action", 'targetview', 'dataformfield_entryactions');
-/*        
+        /*
         // Custom icon
         $options = array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes, 'maxfiles' => 1, 'accepted_types' => array('image'));
         $draftitemid = file_get_submitted_draft_itemid('customicon');
         file_prepare_draft_area($draftitemid, $this->context->id, 'mod_dataform', "field_{$action}icon", 0, $options);
         $mform->addElement('filemanager', 'customicon', get_string('activityicon', 'dataform'), null, $options);
         $mform->setDefault('customicon', $draftitemid);
-        
+
         // Entry condition (filter)
-*/        
-        
+        */
+
     }
 
 }

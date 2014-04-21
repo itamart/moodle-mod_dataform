@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage picture
@@ -28,23 +28,23 @@ defined('MOODLE_INTERNAL') or die;
 class dataformfield_picture_renderer extends dataformfield_file_renderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name;
         $edit = !empty($options['edit']);
 
-        // there is only one possible pattern here so no check
+        // There is only one possible pattern here so no check
         $replacements = parent::replacements($patterns, $entry, $options);
 
         if ($edit) {
             // Just return because the edite pattern has already been processed by the parent
             return $replacements;
         }
-        
+
         // Browse mode
-        foreach ($patterns as $pattern => $cleanpattern) {            
+        foreach ($patterns as $pattern => $cleanpattern) {
             $displaybrowse = '';
             switch ($cleanpattern) {
                 case "[[$fieldname:tn-url]]":
@@ -66,20 +66,20 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
                     $displaybrowse = $this->display_browse($entry, array('tn' => 1, 'base64' => 1));
                     break;
             }
-            
+
             if (!empty($displaybrowse)) {
                 $replacements[$pattern] = $displaybrowse;
-            }            
+            }
         }
 
         return $replacements;
     }
 
     /**
-     * 
+     *
      */
     public function pluginfile_patterns() {
-        $fieldname =  $this->_field->name;
+        $fieldname = $this->_field->name;
         return array(
             "[[{$fieldname}]]",
             "[[{$fieldname}:linked]]",
@@ -92,23 +92,23 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
      */
     protected function display_file($file, $path, $altname, $params = null) {
         $field = $this->_field;
-        
+
         if ($file->is_valid_image()) {
             $filename = $file->get_filename();
             $imgattr = array('style' => array());
 
             if (!empty($params['tn'])) {
-                // decline if the file is not really a thumbnail
+                // Decline if the file is not really a thumbnail
                 if (strpos($filename, 'thumb_') === false) {
                     return '';
                 }
             } else {
-                // decline if the file is a thumbnail
+                // Decline if the file is a thumbnail
                 if (strpos($filename, 'thumb_') !== false) {
                     return '';
                 }
 
-                // the picture's display dimension may be set in the field
+                // The picture's display dimension may be set in the field
                 if ($field->appearance->dispw) {
                     $imgattr['style'][] = 'width:'. s($field->appearance->dispw). s($field->appearance->dispu);
                 }
@@ -117,7 +117,7 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
                 }
             }
 
-            // calculate src: either moodle url or base64
+            // Calculate src: either moodle url or base64
             if (!empty($params['download'])) {
                 return $this->display_link($file, $path, $altname, $params);
             } else if (!empty($params['base64'])) {
@@ -125,8 +125,8 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
             } else {
                 $pluginfileurl = new moodle_url('/pluginfile.php');
                 $src = moodle_url::make_file_url($pluginfileurl, "$path/$filename");
-                
-                // for url request return it here
+
+                // For url request return it here
                 if (!empty($params['url'])) {
                     return $src;
                 }
@@ -148,7 +148,7 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -161,6 +161,6 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
         $patterns["[[{$fieldname}:tn-linked]]"] = array(false);
         $patterns["[[{$fieldname}:tn-base64]]"] = array(false);
 
-        return $patterns; 
+        return $patterns;
     }
 }

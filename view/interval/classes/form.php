@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage interval
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -35,7 +35,7 @@ class dataformview_interval_form extends dataformview_grid_form {
 
         // View interval
         $this->definition_view_interval();
-        
+
         // Submission settings
         $this->definition_view_submission();
     }
@@ -46,23 +46,23 @@ class dataformview_interval_form extends dataformview_grid_form {
     protected function definition_view_interval() {
         $mform =& $this->_form;
 
-        // specifications
-        //-------------------------------------------------------------------------------
+        // Specifications
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'intervalsettingshdr', get_string('settings', 'dataformview_interval'));
 
-        // interval
+        // Interval
         $intervals = array(0 => get_string('always'),
                         'hourly' => get_string('hourly', 'dataformview_interval'),
                         'daily' => get_string('daily', 'dataformview_interval'),
                         'weekly' => get_string('weekly', 'dataformview_interval'),
                         'monthly' => get_string('monthly', 'dataformview_interval'),
                         'custom' => get_string('custom', 'dataformview_interval'));
-        
+
         $strminutes = get_string('minutes');
         $strhours = get_string('hours');
         $strdays = get_string('days');
 
-        $intervalgrp=array();
+        $intervalgrp = array();
         $intervalgrp[] = &$mform->createElement('select', 'param5', null, $intervals);
         $intervalgrp[] = &$mform->createElement('select', 'customminutes', null, range(0, 59));
         $intervalgrp[] = &$mform->createElement('select', 'customhours', null, range(0, 23));
@@ -71,15 +71,15 @@ class dataformview_interval_form extends dataformview_grid_form {
         $mform->disabledIf('customminutes', 'param5', 'neq', 'custom');
         $mform->disabledIf('customhours', 'param5', 'neq', 'custom');
         $mform->disabledIf('customdays', 'param5', 'neq', 'custom');
-        
-        // selection type
+
+        // Selection type
         $types = array(mod_dataform_entry_manager::SELECT_FIRST_PAGE => get_string('first', 'dataformview_interval'),
                         mod_dataform_entry_manager::SELECT_LAST_PAGE => get_string('last', 'dataformview_interval'),
                         mod_dataform_entry_manager::SELECT_NEXT_PAGE => get_string('next'),
                         mod_dataform_entry_manager::SELECT_RANDOM_PAGE => get_string('random', 'dataformview_interval'));
         $mform->addElement('select', 'param4', get_string('selection', 'dataformview_interval'), $types);
-        
-        // reset next
+
+        // Reset next
         $mform->addElement('text', 'param8', get_string('resetnext', 'dataformview_interval'), array('size' => 8));
         $mform->setType('param8', PARAM_INT);
         $mform->setDefault('param8', 100);
@@ -90,9 +90,9 @@ class dataformview_interval_form extends dataformview_grid_form {
     /**
      *
      */
-    function data_preprocessing(&$data){
+    public function data_preprocessing(&$data) {
         parent::data_preprocessing($data);
-        if (!empty($data->param6)){
+        if (!empty($data->param6)) {
             $customsecs = $data->param6;
             $customdays = floor($customsecs / 86400);
             $daysinsecs = $customdays * 86400;
@@ -108,7 +108,7 @@ class dataformview_interval_form extends dataformview_grid_form {
     /**
      *
      */
-    function set_data($data) {
+    public function set_data($data) {
         $this->data_preprocessing($data);
         parent::set_data($data);
     }
@@ -116,9 +116,9 @@ class dataformview_interval_form extends dataformview_grid_form {
     /**
      *
      */
-    function get_data() {
+    public function get_data() {
         if ($data = parent::get_data()) {
-            // set custom refresh (param6)
+            // Set custom refresh (param6)
             $customrefreshsecs = 0;
             if (!empty($data->customminutes)) {
                 $customrefreshsecs += ($data->customminutes * 60);

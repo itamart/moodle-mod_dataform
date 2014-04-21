@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage duration
@@ -21,23 +21,22 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 class dataformfield_duration_duration extends mod_dataform\pluginbase\dataformfield {
     public $width;
     public $widthunit;
-    
+
     protected $_units = null;
-    
+
     /**
-     * 
+     *
      */
-    public function __construct($field) {       
+    public function __construct($field) {
         parent::__construct($field);
-        
+
         $this->width = $this->param2;
         $this->widthunit = $this->param3;
     }
-    
+
     /**
      * Returns time associative array of unit length.
      *
@@ -76,13 +75,11 @@ class dataformfield_duration_duration extends mod_dataform\pluginbase\dataformfi
     }
 
     /**
-     * 
+     *
      */
     protected function get_sql_compare_text($column = 'content') {
-        global $DB;    
+        global $DB;
         return $DB->sql_cast_char2int("c{$this->id}.$column", true);
     }
 
-    
 }
-

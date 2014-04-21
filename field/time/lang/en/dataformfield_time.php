@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage time
@@ -24,7 +24,8 @@
 $string['dateonly'] = 'Date only';
 $string['dateonly_help'] = 'Select this option to display only the date portion of the field value and a date only selector when the field is edited.';
 $string['displayformat'] = 'Display format';
-$string['displayformat_help'] = 'You can set a custom display format for the field value. Format options can be found at <a href="http://php.net/manual/en/function.strftime.php">PHP strftime format</a>.';
+$string['displayformat_help'] = 'You can set a custom display format for the field value.
+Format options can be found at <a href="http://php.net/manual/en/function.strftime.php">PHP strftime format</a>.';
 $string['stopyear'] = 'Stop year';
 $string['stopyear_help'] = 'Year value (YYYY). This value determines the max year value in the date/time selector in editing mode. Leave 0 or empty to use Moodle default.';
 $string['fromtimestamp'] = 'From timestamp: ';
@@ -37,4 +38,5 @@ $string['year'] = 'Year';
 $string['hour'] = 'Hour';
 $string['minute'] = 'Minute';
 $string['masked'] = 'Masked';
-$string['masked_help'] = 'Select this option to render Time/Date selector dropdowns with labels (e.g. Year, Month, Day) for empty values. The labels are defined in the language pack.';
+$string['masked_help'] = 'Select this option to render Time/Date selector dropdowns with labels (e.g. Year, Month, Day)
+for empty values. The labels are defined in the language pack.';

@@ -12,33 +12,33 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage aligned
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview {
 
     protected $_editors = array('section');
-    
+
     protected $_columns = null;
-    
+
     /**
      * Generates the default entry template for a new view instance or when reseting an existing instance.
      *
      * @return void
      */
     protected function get_default_entry_template() {
-        // get all the fields
+        // Get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
-            return; // you shouldn't get that far if there are no user fields
+            return; // You shouldn't get that far if there are no user fields
         }
 
-        // set content
+        // Set content
         $this->param2 = '';
         // Author
         $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
@@ -50,7 +50,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
                 $this->param2 .= "\n[[$fieldname]]";
             }
         }
-        // actions
+        // Actions
         $fieldname = get_string('fieldname', 'dataformfield_entryactions');
         $this->param2 .= "\n[[$fieldname:edit]]\n[[$fieldname:delete]]";
     }
@@ -72,8 +72,8 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
                 $header = !empty($arr[1]) ? $arr[1] : '';
                 $class = !empty($arr[2]) ? $arr[2] : '';
 
-                $definition = array($tag, $header, $class);                
-                $this->_columns[] = $definition;            
+                $definition = array($tag, $header, $class);
+                $this->_columns[] = $definition;
             }
         }
         return $this->_columns;
@@ -84,10 +84,10 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
      */
     public function replace_patterns_in_view($patterns, $replacements) {
         $this->param2 = str_replace($patterns, $replacements, $this->param2);
-        
+
         parent::replace_patterns_in_view($patterns, $replacements);
-    } 
-    
+    }
+
     /**
      *
      */
@@ -100,7 +100,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         if ($this->has_headers()) {
             $columns = $this->get_columns();
             foreach ($columns as $column) {
-                list(,$header,$class) = $column;
+                list(, $header, $class) = $column;
                 $tableheader .= html_writer::tag('th', $header, array('class' => $class));
             }
             $tableheader = html_writer::tag('thead', html_writer::tag('tr', $tableheader));
@@ -109,14 +109,14 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         // Open table and wrap header with thead
         $elements[] = html_writer::start_tag('table', array('class' => 'generaltable')). $tableheader;
 
-        // flatten the set to a list of elements, wrap with tbody and close table
+        // Flatten the set to a list of elements, wrap with tbody and close table
         $elements[] = html_writer::start_tag('tbody');
-        foreach ($entriesset as $entryid => $entry_definitions) {
-            $elements = array_merge($elements, $entry_definitions);
+        foreach ($entriesset as $entryid => $entrydefinitions) {
+            $elements = array_merge($elements, $entrydefinitions);
         }
         $elements[] = html_writer::end_tag('tbody'). html_writer::end_tag('table');
 
-        // Add group heading 
+        // Add group heading
         $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
         if ($name) {
             array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
@@ -141,7 +141,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         // Generate entry table row
         $htmlcontent .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            list($tag,,$class) = array_map('trim', $column);
+            list($tag, , $class) = array_map('trim', $column);
             if (isset($fielddefinitions[$tag])) {
                 $fielddefinition = $fielddefinitions[$tag];
                 if (!is_array($fielddefinition)) {
@@ -163,7 +163,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         }
         $htmlcontent .= html_writer::end_tag('tr');
         $elements[] = $htmlcontent;
-        return $elements;      
+        return $elements;
     }
 
     /**
@@ -171,10 +171,9 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
      */
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
-        
+
         // Get the columns definition from the view template
         $columns = $this->get_columns();
-
 
         // Get field definitions for new entry
         $fields = $this->get_fields();
@@ -194,7 +193,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         // Generate entry table row
         $elements[] = html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            list($tag,,$class) = array_map('trim', $column);
+            list($tag, , $class) = array_map('trim', $column);
             if (!empty($fielddefinitions[$tag])) {
                 $fielddefinition = $fielddefinitions[$tag];
                 if (!is_array($fielddefinition)) {
@@ -209,7 +208,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
             }
         }
         $elements[] = html_writer::end_tag('tr');
-        
+
         return $elements;
     }
 
@@ -224,7 +223,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         }
         return false;
     }
-    
+
     /**
      * Overriding parent to add param2 to templates text.
      *
@@ -233,7 +232,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
     protected function get_templates_text() {
         $text = parent::get_templates_text();
         $text .= ($this->param2 ? ' '. $this->param2 : '');
-        
+
         return trim($text);;
     }
 }

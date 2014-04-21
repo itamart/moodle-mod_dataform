@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -27,7 +27,7 @@
  */
 
 require_once("$CFG->dirroot/grade/grading/lib.php");
- 
+
 /**
  * Dataform class
  */
@@ -45,11 +45,11 @@ class mod_dataform_dataform {
     /** @var context_module The activity context object. */
     protected $_context;
     /** @var string Name of current display page. */
-    protected $_pagefile = 'view';   
+    protected $_pagefile = 'view';
 
     /** @var array List of good/bad notifications. */
     protected $_notifications;
-    
+
     /** @var int group mode. */
     protected $_groupmode = 0;
     /** @var int Id of current group in the activity. */
@@ -58,9 +58,9 @@ class mod_dataform_dataform {
     protected $_currentview;
     /** @var dataform_renderer the custom renderer for this module */
     private $_renderer;
-    
+
     // STATIC METHODS
-    
+
     /**
      * Returns dataform instance.
      * Throws an exception on error.
@@ -72,7 +72,7 @@ class mod_dataform_dataform {
      */
     public static function instance($dataformid, $cmid = 0, $autologinguest = false) {
         global $DB;
-        
+
         static $instances = array();
 
         if (!$dataformid) {
@@ -80,13 +80,13 @@ class mod_dataform_dataform {
                 throw new moodle_exception('invalidcoursemodule', 'dataform', null, null, "Cm id: $cmid");
             }
         }
-        
+
         if (empty($instances[$dataformid])) {
             $instances[$dataformid] = new mod_dataform_dataform($dataformid, null, $autologinguest);
         }
         return $instances[$dataformid];
     }
-    
+
     /**
      * Returns dataform content for inline display.
      * Used in {@link dataform_cm_info_view()} and in {@link block_dataform_view::get_content()}.
@@ -106,12 +106,12 @@ class mod_dataform_dataform {
                     'completion' => true,
                     'comments' => true,
                     'nologin' => true,
-            );        
+            );
             $pageoutput = $df->set_page('external', $params);
-            
+
             if (!empty($filterid)) {
                 $view->set_viewfilter(array('id' => $filterid));
-            } else {       
+            } else {
                 $view->set_viewfilter();
             }
             $viewcontent = $view->display();
@@ -130,18 +130,18 @@ class mod_dataform_dataform {
      */
     public static function get_content_embedded($dataformid, $viewid, $filterid = null, $containerstyle = null) {
         global $DB;
-        
+
         if (!$dataform = $DB->get_record('dataform', array('id' => $dataformid))) {
             return null;
         }
-        
+
         // Set the url for the iframe
         $urlparams = array('d' => $dataformid, 'view' => $viewid);
         if ($filterid) {
             $urlparams['filter'] = $filterid;
-        }        
+        }
         $dataurl = new moodle_url('/mod/dataform/embed.php', $urlparams);
-        
+
         // The iframe
         $params = array();
         $dataformname = str_replace(' ', '_', $dataform->name);
@@ -160,11 +160,13 @@ class mod_dataform_dataform {
                             $styles[$attribute] = "$value;";
                         }
                     }
-                }                
-            }    
-            $stylestr = implode('',array_map(function($a, $b){return "$a: $b";}, array_keys($styles), $styles));
+                }
+            }
+            $stylestr = implode('', array_map(function($a, $b) {
+                return "$a: $b";
+            }, array_keys($styles), $styles));
             $params['style'] = $stylestr;
-            
+
             // Add scrolling attr
             if (!empty($styles['overflow']) and $styles['overflow'] == 'hidden;') {
                 $params['scrolling'] = 'no';
@@ -174,19 +176,19 @@ class mod_dataform_dataform {
         return html_writer::tag('iframe', null, $params);
     }
 
- 
-    
+
     // CONSTRUCTOR
-    
+
     /**
      * constructor
      */
     public function __construct($d = 0, $id = 0, $autologinguest = false) {
         global $DB;
 
-        // initialize from dataform id or object
         if ($d) {
-            if (is_object($d)) { // try object first
+            // Initialize from dataform id or object
+            if (is_object($d)) {
+                // Try object first
                 $this->_data = $d;
             } else if (!$this->_data = $DB->get_record('dataform', array('id' => $d))) {
                 throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: $d");
@@ -197,8 +199,8 @@ class mod_dataform_dataform {
             if (!$this->_cm = get_coursemodule_from_instance('dataform', $this->id, $this->course->id)) {
                 throw new moodle_exception('invalidcoursemodule', 'dataform', null, null, "Cm id: {$this->id}");
             }
-        // initialize from course module id
         } else if ($id) {
+            // Initialize from course module id
             if (!$this->_cm = get_coursemodule_from_id('dataform', $id)) {
                 throw new moodle_exception('invalidcoursemodule '. $id, 'dataform', null, null, "Cm id: $id");
             }
@@ -210,10 +212,10 @@ class mod_dataform_dataform {
             }
         }
 
-        // get context
+        // Get context
         $this->_context = \context_module::instance($this->_cm->id);
 
-        // set groups
+        // Set groups
         $this->_groupmode = groups_get_activity_groupmode($this->_cm);
         $this->_currentgroup = groups_get_activity_group($this->_cm, true);
     }
@@ -253,20 +255,19 @@ class mod_dataform_dataform {
         return null;
     }
 
-
     /**
      * Sets the dataform page.
      *
      * @param string $pagefile current page file
-     * @param array $params 
+     * @param array $params
      */
     public function set_page($pagefile = 'view', $params = null) {
         global $CFG, $PAGE, $USER, $OUTPUT;
-        
+
         $htmloutput = '';
 
         $this->_pagefile = ($pagefile == 'external' ? 'view' : $pagefile);
-        
+
         $params = (object) $params;
         $urlparams = array();
         if (!empty($params->urlparams)) {
@@ -286,17 +287,16 @@ class mod_dataform_dataform {
 
         // LOGIN REQUIREMENT
         if (empty($params->nologin)) {
-            // guest auto login
+            // Guest auto login
             $autologinguest = false;
             if ($pagefile == 'view' or $pagefile == 'embed' or $pagefile == 'external') {
                 $autologinguest = true;
 
             }
-            
-            // require login
+
+            // Require login
             require_login($this->course->id, $autologinguest, $this->cm);
         }
-
 
         // RENEW if requested
         if ($manager and !empty($urlparams['renew']) and confirm_sesskey()) {
@@ -307,7 +307,7 @@ class mod_dataform_dataform {
         if (!empty($params->rss)) {
             $this->set_page_rss();
         }
-        
+
         // COMMENTS
         if (!empty($params->comments)) {
             require_once("$CFG->dirroot/comment/lib.php");
@@ -315,21 +315,20 @@ class mod_dataform_dataform {
         }
 
         $externalpage = ($pagefile == 'external');
-        
+
         // EDITING (not on external pages)
         $this->set_page_editing_mode($pagefile, $urlparams);
-        
-        
+
         // AUTO REFRESH
         if (!empty($urlparams['refresh']) and !$externalpage) {
-           $PAGE->set_periodic_refresh_delay($urlparams['refresh']);
+            $PAGE->set_periodic_refresh_delay($urlparams['refresh']);
         }
 
         // PAGE LAYOUT
         if (!empty($params->pagelayout) and !$externalpage) {
             $PAGE->set_pagelayout($params->pagelayout);
         }
-            
+
         // COMPLETION Mark as viewed
         if (!empty($params->completion) and !$externalpage) {
             require_once($CFG->libdir . '/completionlib.php');
@@ -338,18 +337,18 @@ class mod_dataform_dataform {
         }
 
         // CSS
-        $htmloutput .=  !empty($params->css) ? $this->set_page_css() : '';
-        
+        $htmloutput .= !empty($params->css) ? $this->set_page_css() : '';
+
         // JS
         if (!empty($params->js)) {
             $this->set_page_js();
         }
 
         $PAGE->set_title($this->name);
-        $PAGE->set_heading($this->course->fullname);            
-        
+        $PAGE->set_heading($this->course->fullname);
+
         // Set current view and view's page requirements only if activity ready (with default view)
-        // and access allowed
+        // And access allowed
         if ($this->defaultview) {
             $currentviewid = !empty($urlparams['view']) ? $urlparams['view'] : $this->defaultview;
 
@@ -364,7 +363,7 @@ class mod_dataform_dataform {
 
         // Notifications for not ready, early and past due.
         $this->set_notification_activity_not_ready($pagefile);
-        
+
         return $htmloutput;
     }
 
@@ -401,24 +400,23 @@ class mod_dataform_dataform {
         if ($this->_renderer) {
             return $this->_renderer;
         }
-        
+
         global $PAGE;
         $this->_renderer = $PAGE->get_renderer('mod_dataform');
         $this->_renderer->set_df($this->id);
         return $this->_renderer;
     }
 
-    
     /**
      * Sets the dataform page css.
      *
-     * @return string 
+     * @return string
      */
     protected function set_page_css() {
         global $PAGE;
-        
+
         $cssurls = array();
-        // js includes from the js template
+        // Js includes from the js template
         if ($this->cssincludes) {
             foreach (explode("\n", $this->cssincludes) as $cssinclude) {
                 $cssinclude = trim($cssinclude);
@@ -435,8 +433,8 @@ class mod_dataform_dataform {
                 $filename = $file->get_filename();
                 $cssurls[] = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
             }
-        }                
-        // css code from the css template
+        }
+        // Css code from the css template
         if ($this->css) {
             $cssurls[] = new moodle_url('/mod/dataform/css.php', array('d' => $this->id));
         }
@@ -450,8 +448,8 @@ class mod_dataform_dataform {
         }
 
         // CSS cannot be required after head, so in that case return the tags
-        // and they will be added to the html.
-        $csstags = '';       
+        // And they will be added to the html.
+        $csstags = '';
         $attrs = array('rel' => 'stylesheet', 'type' => 'text/css');
         foreach ($cssurls as $cssurl) {
             $attrs['href'] = $cssurl;
@@ -471,7 +469,7 @@ class mod_dataform_dataform {
 
         $jsurls = array();
 
-        // js includes from the js template
+        // Js includes from the js template
         if ($this->jsincludes) {
             foreach (explode("\n", $this->jsincludes) as $jsinclude) {
                 $jsinclude = trim($jsinclude);
@@ -488,8 +486,8 @@ class mod_dataform_dataform {
                 $filename = $file->get_filename();
                 $jsurls[] = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
             }
-        }                
-        // js code from the js template
+        }
+        // Js code from the js template
         if ($this->js) {
             $jsurls[] = new moodle_url('/mod/dataform/js.php', array('d' => $this->id));
         }
@@ -498,7 +496,7 @@ class mod_dataform_dataform {
             $PAGE->requires->js($jsurl);
         }
     }
-       
+
     /**
      * Sets the dataform page rss.
      *
@@ -506,15 +504,15 @@ class mod_dataform_dataform {
      */
     protected function set_page_rss() {
         global $CFG;
-        
+
         if (!empty($CFG->enablerssfeeds) and !empty($CFG->dataform_enablerssfeeds)) {
-                
+
             // Get rss views and add http header for each one
             if ($rssviews = $this->get_rss_views()) {
                 require_once("$CFG->libdir/rsslib.php");
                 foreach ($rssviews as $viewid => $view) {
-                    $rsstitle = $view->get_rss_header_title(); //format_string($this->course->shortname) . ': %fullname%';
-                    $componentinstance = $this->id. "/$viewid"; 
+                    $rsstitle = $view->get_rss_header_title(); // Format_string($this->course->shortname) . ': %fullname%';
+                    $componentinstance = $this->id. "/$viewid";
                     rss_add_http_header($this->context, 'mod_dataform', $componentinstance, $rsstitle);
                 }
             }
@@ -530,25 +528,25 @@ class mod_dataform_dataform {
      */
     protected function set_page_editing_mode($pagefile, $urlparams) {
         global $PAGE, $USER;
-        
+
         if ($pagefile == 'external') {
             return;
         }
-        
+
         // Is user editing
         $PAGE->set_url("/mod/dataform/$pagefile.php", $urlparams);
-        
+
         // Editing button (omit in embedded dataforms)
         if ($pagefile != 'embed' and $PAGE->user_allowed_editing()) {
-             // teacher editing mode
+             // Teacher editing mode
             if ($urlparams['edit'] != -1) {
                 $USER->editing = $urlparams['edit'];
             }
 
             $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
                 '<input type="hidden" name="d" value="'.$this->id.'" />'.
-                '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing()?0:1).'" />'.
-                '<input type="submit" value="'.get_string($PAGE->user_is_editing()?'blockseditoff':'blocksediton').'" /></div></form></td></tr></table>';
+                '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing() ? 0 : 1).'" />'.
+                '<input type="submit" value="'.get_string($PAGE->user_is_editing() ? 'blockseditoff' : 'blocksediton').'" /></div></form></td></tr></table>';
             $PAGE->set_button($buttons);
         }
     }
@@ -563,7 +561,7 @@ class mod_dataform_dataform {
         $manager = has_capability('mod/dataform:managetemplates', $this->context);
         $thisid = $this->id;
         $this->notifications = array();
-        
+
         // Not ready
         if (!$this->defaultview) {
             if ($manager) {
@@ -582,24 +580,23 @@ class mod_dataform_dataform {
                     }
                 } else if (!$this->defaultview) {
                     $linktoviews = html_writer::link(new moodle_url('/mod/dataform/view/index.php', array('d' => $thisid)), get_string('views', 'dataform'));
-                    $this->notifications = array('problem' => array('defaultview' => get_string('viewnodefault','dataform', $linktoviews)));
+                    $this->notifications = array('problem' => array('defaultview' => get_string('viewnodefault', 'dataform', $linktoviews)));
                 }
             } else {
-                $this->notifications = array('problem' => array('dataformnotready' => get_string('dataformnotready','dataform')));        
+                $this->notifications = array('problem' => array('dataformnotready' => get_string('dataformnotready', 'dataform')));
             }
         }
-        
+
         // Early
         if ($this->is_early()) {
-            $this->notifications = array('info' => array('dataformearly' => get_string('dataformearly','dataform', userdate($this->timeavailable))));
+            $this->notifications = array('info' => array('dataformearly' => get_string('dataformearly', 'dataform', userdate($this->timeavailable))));
         }
-        
+
         // Late
         if ($this->is_past_due()) {
-            $this->notifications = array('info' => array('dataformpastdue' => get_string('dataformpastdue','dataform', userdate($this->timedue))));
+            $this->notifications = array('info' => array('dataformpastdue' => get_string('dataformpastdue', 'dataform', userdate($this->timedue))));
         }
     }
-
 
     // UPDATERS
 
@@ -614,22 +611,21 @@ class mod_dataform_dataform {
         if ($params) {
             $updatedf = false;
             foreach ($params as $key => $value) {
-                $oldvalue = $this->{$key} ? $this->{$key} : null; 
-                $newvalue = !empty($value) ? $value : null; 
+                $oldvalue = $this->{$key} ? $this->{$key} : null;
+                $newvalue = !empty($value) ? $value : null;
                 if ($newvalue != $oldvalue) {
-                    $this->{$key} = $value;                    
+                    $this->{$key} = $value;
                     $updatedf = true;
                 }
             }
-            
+
             if ($updatedf) {
                 if ($DB->update_record('dataform', $this->data)) {
-                    if ($notify === true) {
-                        // Do nothing for now
-                    } else if ($notify) {
+                    // Process notification message.
+                    if ($notify and $notify !== true) {
                         $this->notifications = array('success' => array('' => $notify));;
                     }
-                    
+
                     // Trigger event
                     $eventparams = array(
                         'objectid' => $this->cm->id,
@@ -645,7 +641,7 @@ class mod_dataform_dataform {
                     $event->add_record_snapshot('course', $this->course);
                     $event->add_record_snapshot('dataform', $this->data);
                     $event->trigger();
-                    
+
                 } else {
                     if ($notify === true) {
                         $this->notifications = array('problem' => array('dfupdatefailed' => get_string('dfupdatefailed', 'dataform')));
@@ -670,7 +666,7 @@ class mod_dataform_dataform {
 
         // First reset everything
         $this->reset();
-        
+
         // Delete the instance itself
         return $DB->delete_records('dataform', array('id' => $this->id));
     }
@@ -683,10 +679,10 @@ class mod_dataform_dataform {
     protected function reset() {
         // Must have manage templates capability
         require_capability('mod/dataform:managetemplates', $this->context);
-    
+
         // Reset settings
         $this->reset_settings();
-    
+
         // Delete all component items
         mod_dataform_field_manager::instance($this->id)->delete_fields();
         mod_dataform_view_manager::instance($this->id)->delete_views();
@@ -694,23 +690,23 @@ class mod_dataform_dataform {
         mod_dataform_filter_manager::instance($this->id)->delete_advanced_filters();
         mod_dataform_access_manager::instance($this->id)->delete_rules();
         mod_dataform_notification_manager::instance($this->id)->delete_rules();
-        
+
         // Reset user data
         $this->reset_user_data();
-        
+
         // Delete remaining files (e.g. css, js)
         $fs = get_file_storage();
         $fs->delete_area_files($this->context->id, 'mod_dataform');
-        
+
         // Clean up gradebook
         dataform_grade_item_delete($this->data);
-        
+
         // Refresh events
         dataform_refresh_events($this->course->id);
-        
+
         // Delete context content
         $this->context->delete_content();
-        
+
         return true;
     }
 
@@ -721,7 +717,7 @@ class mod_dataform_dataform {
      */
     protected function reset_settings() {
         global $DB;
-        
+
         $data = new \stdClass;
         $data->name = get_string('dataformnew', 'dataform');
         $data->intro = null;
@@ -746,11 +742,11 @@ class mod_dataform_dataform {
         $data->jsincludes = null;
         $data->defaultview = 0;
         $data->defaultfilter = 0;
-        
+
         // Reset grading manager
         $gradingman = get_grading_manager($this->context, 'mod_dataform', 'activity');
         $gradingman->set_active_method(null);
-        
+
         return $this->update($data);
     }
 
@@ -768,14 +764,13 @@ class mod_dataform_dataform {
 
         // Reset grades
         dataform_update_grades($this->data, $userid);
-        
+
         return true;
     }
 
 
-
     // GETTERS
-    
+
     /**
      *
      */
@@ -839,7 +834,6 @@ class mod_dataform_dataform {
         return $this->_notifications;
     }
 
-
     /**
      * Returns the view manager for the Dataform instance.
      *
@@ -877,7 +871,6 @@ class mod_dataform_dataform {
     }
 
 
-
     // SETTERS
 
     /**
@@ -900,41 +893,40 @@ class mod_dataform_dataform {
     }
 
 
-    
     /**
      *
      */
     public function get_entries_count($type, $userid = 0) {
         global $DB;
-        
+
         $params = array('id'  => $this->id);
         if ($userid) {
             $params['userid'] = $userid;
         }
-        
+
         switch ($type) {
             case self::COUNT_ALL:
                 $count = $DB->count_records('dataform_entries', $params);
                 break;
-        
+
             case self::COUNT_LEFT:
                 $count = '---';
                 break;
-                
-            default: 
+
+            default:
                 $count = '---';
-        
+
         }
 
         return $count;
     }
-    
+
     /**
      *
      */
     public function get_entries_count_per_user($type = self::COUNT_ALL, $userid = 0) {
         global $DB;
-        
+
         $sql = "
             SELECT
                 userid AS id,
@@ -948,39 +940,38 @@ class mod_dataform_dataform {
         $where = '';
         $groupby = " GROUP BY userid ";
         $params = array('id'  => $this->id);
-        
+
         if ($userid) {
             $where .= " AND userid = ? ";
             $params[] = $userid;
         }
-        
+
         switch ($type) {
             case self::COUNT_ALL:
                 return $DB->get_records_sql($sql. $where. $groupby, $params);
-        
+
             case self::COUNT_APPROVED:
                 $where .= " state = ? ";
                 $params['state'] = 1;
                 return $DB->get_records_sql($sql. $where. $groupby, $params);
-        
+
             case self::COUNT_UNAPPROVED:
                 $where .= " state = ? ";
                 $params['state'] = 0;
                 return $DB->get_records_sql($sql. $where. $groupby, $params);
-        
+
             case self::COUNT_LEFT:
                 break;
-                
-            default: 
-        
+
+            default:
+
         }
 
         return null;
     }
-    
 
 
-    //  GRADING
+    // GRADING
 
     /**
      *
@@ -988,9 +979,9 @@ class mod_dataform_dataform {
     public function get_gradebook_users(array $userids = null) {
         global $DB, $CFG;
 
-        // get the list of users by gradebook roles
+        // Get the list of users by gradebook roles
         if (!empty($CFG->gradebookroles)) {
-            $gradebookroles = explode(",", $CFG->gradebookroles);
+            $gradebookroles = explode(", ", $CFG->gradebookroles);
 
         } else {
             $gradebookroles = '';
@@ -1000,15 +991,15 @@ class mod_dataform_dataform {
             $groupingsusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id');
             $gusers = $groupingsusers ? array_keys($groupingsusers) : null;
         }
-        
+
         if (!empty($userids)) {
             if (!empty($gusers)) {
                 $gusers = array_intersect($userids, $gusers);
             } else {
                 $gusers = $userids;
             }
-        }           
-                    
+        }
+
         if (isset($gusers)) {
             if (!empty($gusers)) {
                 list($inuids, $params) = $DB->get_in_or_equal($gusers);
@@ -1017,7 +1008,7 @@ class mod_dataform_dataform {
                     $this->context,
                     true,
                     user_picture::fields('u'),
-                    'u.lastname ASC', 
+                    'u.lastname ASC',
                     true,
                     $this->currentgroup,
                     '',
@@ -1034,18 +1025,17 @@ class mod_dataform_dataform {
                 $this->context,
                 true,
                 'u.id, u.lastname, u.firstname',
-                'u.lastname ASC', 
+                'u.lastname ASC',
                 true,
                 $this->currentgroup
             );
         }
     }
 
-
     /**
      * Returns user's grades in the dataform instance per the instance grade settings.
      * For simple direct grading can use grade calculation to automate the grading.
-     * Simple direct with no calculation returns nothing because the grades are overriden 
+     * Simple direct with no calculation returns nothing because the grades are overriden
      * in the gradebook and cannot be changed from the activity.
      *
      * @global object CFG
@@ -1054,7 +1044,7 @@ class mod_dataform_dataform {
      */
     public function get_user_grades($userid = 0) {
         global $CFG;
-        
+
         if (!$this->grade) {
             return null;
         }
@@ -1069,7 +1059,7 @@ class mod_dataform_dataform {
         if ($this->gradecalc) {
             return $this->get_user_grades_calculated($userid);
         }
-        
+
         return false;
     }
 
@@ -1080,19 +1070,19 @@ class mod_dataform_dataform {
      */
     public function get_user_grades_calculated($userid = 0) {
         global $CFG;
-        
+
         if (!$this->gradecalc) {
             return null;
         }
-        
+
         require_once("$CFG->libdir/mathslib.php");
         $formula = $this->gradecalc;
-        
+
         $patterns = array();
         $users = array();
         $grades = array();
-        
-        // Num entries pattern 
+
+        // Num entries pattern
         if (strpos($formula, '##numentries##') !== false) {
             $patterns['##numentries##'] = 0;
             if ($numentries = $this->get_entries_count_per_user(self::COUNT_ALL, $userid)) {
@@ -1101,7 +1091,7 @@ class mod_dataform_dataform {
                         $users[$userid] = array();
                     }
                     $users[$userid]['##numentries##'] = $count->numentries;
-                }    
+                }
             }
         }
 
@@ -1114,12 +1104,12 @@ class mod_dataform_dataform {
                 if (!$field = $this->field_manager->get_field_by_pattern($pattern)) {
                     continue;
                 }
-                
+
                 // The field must be an instance of interface grading
                 if (!($field instanceof mod_dataform\interfaces\grading)) {
                     continue;
                 }
-                
+
                 // Get user values for the pattern
                 if (!$values = $field->get_user_values($pattern, $userid)) {
                     continue;
@@ -1134,7 +1124,7 @@ class mod_dataform_dataform {
                 }
             }
         }
-        
+
         // For each user calculate the formula and create a grade object
         foreach ($users as $userid => $values) {
             $replacements = array_merge($patterns, $values);
@@ -1142,7 +1132,7 @@ class mod_dataform_dataform {
 
             $calc = new calc_formula("=$calculation");
             $result = $calc->evaluate();
-            // false as result indicates some problem
+            // False as result indicates some problem
             if ($result !== false) {
                 $grades[$userid] = (object) array(
                     'id' => $userid,
@@ -1161,29 +1151,28 @@ class mod_dataform_dataform {
      */
     public function is_grading_num_entries() {
         global $CFG;
-        
+
         if (!$this->grade) {
             return false;
         }
-        
+
         // Look for numentries in gradecalc.
         if (!$this->gradecalc or strpos($this->gradecalc, '##numentries##') === false) {
             return false;
         }
 
-        // There is numentries in gradecalc so check the grading method to see if calc is used. 
+        // There is numentries in gradecalc so check the grading method to see if calc is used.
         require_once("$CFG->dirroot/grade/grading/lib.php");
         $gradingman = get_grading_manager($this->context, 'mod_dataform', 'activity');
         $controller = $gradingman->get_active_controller();
         if (!empty($controller)) {
             return false;
         }
-        
+
         return true;
     }
 
-
-    //  USER
+    // USER
 
     /**
      * has a user reached the max number of entries?
@@ -1207,7 +1196,7 @@ class mod_dataform_dataform {
      */
     public function user_require_entries($options = null) {
         global $OUTPUT;
-        
+
         if (!$this->entriesrequired) {
             return 0;
         }
@@ -1237,56 +1226,56 @@ class mod_dataform_dataform {
         global $USER, $CFG, $DB;
 
         static $numentries = null;
-        static $numentries_intervaled = null;
+        static $numentriesintervaled = null;
 
         if (!$perinterval and !is_null($numentries)) {
             return $numentries;
         }
 
-        if ($perinterval and !is_null($numentries_intervaled)) {
-            return $numentries_intervaled;
-        }        
+        if ($perinterval and !is_null($numentriesintervaled)) {
+            return $numentriesintervaled;
+        }
 
         $params = array();
         $params[] = $this->id;
 
-        $and_whereuserorgroup = '';
-        $and_whereinterval = '';
-        
-        // go by user
+        $andwhereuserorgroup = '';
+        $andwhereinterval = '';
+
         if (!$this->grouped) {
-            $and_whereuserorgroup = " AND userid = ? ";
-            $params[] = $USER->id;            
-        // go by group
+            // Go by user.
+            $andwhereuserorgroup = " AND userid = ? ";
+            $params[] = $USER->id;
         } else {
-            $and_whereuserorgroup = " AND groupid = ? ";
-            // if user is trying add an entry and got this far
-            //  the user should belong to the current group
-            $params[] = $this->currentgroup;                    
+            // Go by group.
+            $andwhereuserorgroup = " AND groupid = ? ";
+            // If user is trying add an entry and got this far
+            // The user should belong to the current group
+            $params[] = $this->currentgroup;
         }
-        
-        // time interval
+
+        // Time interval
         if ($timeinterval = $this->timeinterval and $perinterval) {
             $timeavailable = $this->timeavailable;
             $elapsed = time() - $timeavailable;
             $intervalstarttime = (floor($elapsed / $timeinterval) * $timeinterval) + $timeavailable;
             $intervalendtime = $intervalstarttime + $timeinterval;
-            $and_whereinterval = " AND timecreated >= ? AND timecreated < ? ";
+            $andwhereinterval = " AND timecreated >= ? AND timecreated < ? ";
             $params[] = $intervalstarttime;
             $params[] = $intervalendtime;
 
         }
 
-        $select = "dataid = ? $and_whereuserorgroup $and_whereinterval";
+        $select = "dataid = ? $andwhereuserorgroup $andwhereinterval";
         $entriescount = $DB->count_records_select('dataform_entries', $select, $params);
-        
+
         if (!$perinterval) {
             $numentries = $entriescount;
         } else {
-            $numentries_intervaled = $entriescount;
-        }        
+            $numentriesintervaled = $entriescount;
+        }
 
-        return $entriescount;        
+        return $entriescount;
     }
 
     /**
@@ -1299,7 +1288,7 @@ class mod_dataform_dataform {
 
         if ($manager === null) {
             $manager = array();
-        
+
             $manager['templates'] = has_capability('mod/dataform:managetemplates', $this->context);
             $manager['views'] = has_capability('mod/dataform:manageviews', $this->context);
             $manager['fields'] = has_capability('mod/dataform:managefields', $this->context);
@@ -1310,13 +1299,13 @@ class mod_dataform_dataform {
             $manager['js'] = has_capability('mod/dataform:managejs', $this->context);
             $manager['tools'] = has_capability('mod/dataform:managetools', $this->context);
             $manager['presets'] = has_capability('mod/dataform:managepresets', $this->context);
-            
+
             // Empty if no permissions
             if (!in_array(true, $manager)) {
                 $manager = array();
             }
         }
-        
+
         return $manager;
     }
 
@@ -1331,7 +1320,6 @@ class mod_dataform_dataform {
         }
     }
 
-    
     // TIMING
 
     /**
@@ -1347,7 +1335,7 @@ class mod_dataform_dataform {
         }
         return false;
     }
-    
+
     /**
      * Returns true if the activity has a designated due time
      * and now is after that time.
@@ -1356,17 +1344,17 @@ class mod_dataform_dataform {
      */
     public function is_past_due() {
         $now = time();
-        
+
         // No intervals
         if ($timedue = $this->timedue and $now > $timedue) {
             return true;
         }
-        
+
         // With intervals
         if ($this->intervalcount > 1) {
             return ($now > ($this->timeavailable + ($this->intervalcount * $this->timeinterval)));
         }
-        
+
         return false;
     }
 
@@ -1379,7 +1367,7 @@ class mod_dataform_dataform {
         if ($this->is_early() or $this->is_past_due()) {
             return 0;
         }
-    
+
         if ($this->intervalcount > 1) {
             $now = time();
             return ceil(($now - $this->timeavailable) / $this->timeinterval);
@@ -1411,7 +1399,7 @@ class mod_dataform_dataform {
         if (!$this->timeinterval) {
             return $this->timedue;
         }
-        return ($this->interval_current_start + $this->timeinterval -1);
+        return ($this->interval_current_start + $this->timeinterval - 1);
     }
 
     // UTILITY
@@ -1428,7 +1416,7 @@ class mod_dataform_dataform {
             (int) $id
         );
         $where = " dataid = ? AND name = ? AND id <> ? ";
-        
+
         return $DB->record_exists_select("dataform_{$table}", $where, $params);
     }
 
@@ -1437,11 +1425,11 @@ class mod_dataform_dataform {
     /**
      * Returns a list of rss view the current user has access to.
      *
-     * @return array|bool Associative array viewid => dataformview_rss, false if no views    
+     * @return array|bool Associative array viewid => dataformview_rss, false if no views
      */
     public function get_rss_views() {
         static $views;
-        
+
         if (!isset($views)) {
             if ($views = $this->view_manager->get_views_by_instanceof('mod_dataform\interfaces\rss')) {
                 // Remove unpermitted
@@ -1452,9 +1440,9 @@ class mod_dataform_dataform {
                     }
                 }
             }
-        }   
-        
+        }
+
         return $views;
     }
-    
+
 }

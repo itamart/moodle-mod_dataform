@@ -25,7 +25,7 @@
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 /** PAGE MOD EMBED */
  #page-mod-dataform-embed {
     margin: 0;
@@ -36,13 +36,13 @@
     padding: 0;
 }
 
-/** TAB TREE */ 
+/** TAB TREE */
 #page-mod-dataform-view .tabtree {
   margin-bottom: 1em;
 }
 
-/** QUICK MENUS */ 
-.quickmenu {   
+/** QUICK MENUS */
+.quickmenu {
 }
 
 .quickmenus-wrapper .quickmenu,
@@ -62,7 +62,7 @@
     margin: 20px 0;
 }
 
-/** ADD NEW ENTRY */ 
+/** ADD NEW ENTRY */
 .addnewentry{
     padding: 10px 15px;
     background: #4479BA;
@@ -191,4 +191,3 @@
 .mform fieldset.collapsible legend div.summary span.summarylabel {
     color: #0088CC;
 }
-

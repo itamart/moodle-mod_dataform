@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entryauthor
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 
 class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dataformfield_internal {
@@ -46,7 +45,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
         );
         return $field;
     }
-    
+
     /**
      * Overrides {@link dataformfield::prepare_import_content()} to set import of entry::userid.
      *
@@ -54,7 +53,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
         global $DB;
-        
+
         $csvname = '';
 
         // Author id
@@ -102,7 +101,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
     }
 
     /**
-     * 
+     *
      */
     public function get_sort_sql($element = null) {
         if ($element == 'name') {
@@ -132,9 +131,9 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
             } else {
                 // No other settings for this element should be processed
                 return null;
-            }           
+            }
         }
-        
+
         return parent::get_search_sql($search);
     }
 
@@ -151,8 +150,8 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
     /**
      * Return array of sort options menu as
      * $fieldid,element => name, for the filter form.
-     * 
-     * 
+     *
+     *
      * @return null|array
      */
     public function get_sort_options_menu() {
@@ -168,7 +167,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
     /**
      * Return array of search options menu as
      * $fieldid,element => name, for the filter form.
-     * 
+     *
      * @return null|array
      */
     public function get_search_options_menu() {
@@ -186,13 +185,13 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
      */
     public function get_distinct_content($element, $sortdir = 0) {
         global $CFG, $DB;
-        
+
         $sortdir = $sortdir ? 'DESC' : 'ASC';
         $contentfull = $this->get_sort_sql();
-        $sql = "SELECT DISTINCT $contentfull 
-                  FROM {user} u 
-                       JOIN {dataform_entries} e ON u.id = e.userid 
-                 WHERE e.dataid = ? AND  $contentfull IS NOT NULL 
+        $sql = "SELECT DISTINCT $contentfull
+                  FROM {user} u
+                       JOIN {dataform_entries} e ON u.id = e.userid
+                 WHERE e.dataid = ? AND  $contentfull IS NOT NULL
                  ORDER BY $contentfull $sortdir";
 
         $distinctvalues = array();

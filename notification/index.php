@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformnotification
  * @copyright 2013 Itamar Tzadok
@@ -24,20 +24,20 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d          = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id         = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->d          = optional_param('d', 0, PARAM_INT);             // Dataform id
+$urlparams->id         = optional_param('id', 0, PARAM_INT);            // Course module id
 
-// items list actions
+// Items list actions
 $urlparams->type = optional_param('type', '', PARAM_ALPHA);          // Type of a rule to add
 $urlparams->biid = optional_param('biid', 0, PARAM_INT);   // Block id of rule to edit
-$urlparams->update = optional_param('update', 0, PARAM_INT);   // update item
+$urlparams->update = optional_param('update', 0, PARAM_INT);   // Update item
 $urlparams->cancel = optional_param('cancel', 0, PARAM_BOOL);
 
 $urlparams->enable = optional_param('enable', 0, PARAM_INT);     // Enable context (show block)
 $urlparams->disable = optional_param('disable', 0, PARAM_INT);     // Disable context (hide block)
 $urlparams->delete = optional_param('delete', 0, PARAM_INT);   // Delete context (delete block)
 
-$urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);    
+$urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
@@ -46,7 +46,7 @@ $df->require_manage_permission('notifications');
 $df->set_page('notification/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/notification/index.php', array('id' => $df->cm->id)));
 
 $nman = mod_dataform_notification_manager::instance($df->id);

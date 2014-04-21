@@ -12,9 +12,9 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_dataform\pluginbase; 
+namespace mod_dataform\pluginbase;
 
 /**
  * @package dataform
@@ -27,16 +27,15 @@ namespace mod_dataform\pluginbase;
  */
 class dataformnotificationform_helper extends  dataformruleform_helper {
 
-
     /**
      *
      */
     public static function notification_definition($mform, $dataformid, $prefix = null) {
         global $DB;
-        
+
         $paramtext = (!empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN);
-        
-        //-------------------------------------------------------------------------------
+
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'messagehdr', get_string('message', 'message'));
         $mform->setExpanded('messagehdr');
 
@@ -46,15 +45,15 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
             1 => get_string('conversation', 'dataform'),
         );
         $mform->addElement('select', $prefix. 'messagetype', get_string('type', 'dataform'), $options);
-        
+
         // Subject
         $mform->addElement('text', $prefix. 'subject', get_string('subject', 'dataform'));
         $mform->setType($prefix. 'subject', $paramtext);
-        
+
         // Message
         $mform->addElement('textarea', $prefix. 'message', get_string('message', 'dataform'));
         $mform->setType($prefix. 'message', $paramtext);
-        
+
         // Format
         $options = array(
             FORMAT_PLAIN => get_string('formatplain'),
@@ -63,10 +62,10 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
         $mform->addElement('select', $prefix. 'messageformat', get_string('format'), $options);
 
         // Sender: Entry author, manager
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'senderhdr', get_string('from'));
         $mform->setExpanded('senderhdr');
-        
+
         $admin = get_admin();
         $options = array(
             \core_user::NOREPLY_USER => get_string('noreply', 'dataform'),
@@ -76,12 +75,12 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
             'event' => get_string('event', 'dataform'),
         );
         $mform->addElement('select', $prefix. 'sender', get_string('from'), $options);
-        
+
         // Recipient
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'recipientshdr', get_string('to'));
         $mform->setExpanded('recipientshdr');
-        
+
         // Admin
         $mform->addElement('checkbox', $prefix. 'recipientadmin', get_string('admin'));
         // Support
@@ -96,14 +95,14 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
         // Email (comma delimited)
         $mform->addElement('text', $prefix. 'recipientemail', get_string('email'));
         $mform->setType($prefix. 'recipientemail', $paramtext);
-                
+
     }
 
     /**
      *
      */
     public static function notification_validation($data, $files, $prefix = null) {
-        $errors= array();
+        $errors = array();
 
         // Must have a recipient
         if (empty($data[$prefix.'recipientadmin'])
@@ -112,9 +111,9 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
                 and empty($data[$prefix.'recipientrole'])
                 and empty($data[$prefix.'recipientusername'])
                 and empty($data[$prefix.'recipientemail'])) {
-            $errors[$prefix.'recipientadmin'] = get_string('err_required','form');
+            $errors[$prefix.'recipientadmin'] = get_string('err_required', 'form');
         }
-        
+
         return $errors;
     }
 }

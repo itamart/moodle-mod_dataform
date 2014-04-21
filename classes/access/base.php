@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ abstract class base {
     public static function validate($params) {
         $dataformid = $params['dataformid'];
         $df = \mod_dataform_dataform::instance($dataformid);
-        
+
         // In group mode, not member must have accessallgroups
         // At this point, does not apply to particular rules.
         if ($df->groupmode) {
@@ -53,7 +53,7 @@ abstract class base {
                 }
             }
         }
-        
+
         $accessman = \mod_dataform_access_manager::instance($dataformid);
         $accesstype = get_called_class();
 
@@ -71,22 +71,22 @@ abstract class base {
                         if (!$rule->has_capability($capability)) {
                             return false;
                         }
-                    }   
+                    }
                 }
             }
         }
-        
+
         if (!$rulesapplied) {
             $dataformcontext = \mod_dataform_dataform::instance($dataformid)->context;
             foreach ($params['capabilities'] as $capability) {
                 if (!has_capability($capability, $dataformcontext)) {
                     return false;
                 }
-            }   
+            }
         }
         return true;
     }
-    
+
     /**
      * @return array
      */
@@ -115,7 +115,7 @@ abstract class base {
         } else {
             return has_capability($capability, \mod_dataform_dataform::instance($dataformid)->context);
         }
-            
+
         return true;
     }
 
@@ -146,5 +146,5 @@ abstract class base {
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         return array();
     }
-    
+
 }

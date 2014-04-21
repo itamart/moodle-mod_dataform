@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage file
@@ -21,14 +21,13 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 /**
- * 
+ *
  */
 class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
-    // content - file manager
-    // content1 - alt name
-    // content2 - download counter
+    // Content - file manager
+    // Content1 - alt name
+    // Content2 - download counter
 
     /**
      * Returns appearance settings from param4
@@ -37,13 +36,13 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
      */
     public function get_appearance() {
         $appearance = new stdClass;
-        
+
         if ($this->param4) {
             $appearance->separator = $this->param4;
         } else {
             $appearance->separator = "\n";
         }
-        
+
         return $appearance;
     }
 
@@ -53,7 +52,7 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
     protected function content_names() {
         return array('filemanager', 'alttext');
     }
-    
+
     /**
      *
      */
@@ -72,14 +71,14 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
             }
         }
 
-        // store uploaded files
+        // Store uploaded files
         $contentid = isset($entry->{"c{$this->id}_id"}) ? $entry->{"c{$this->id}_id"} : null;
         $draftarea = $filemanager;
         $usercontext = context_user::instance($USER->id);
 
         $fs = get_file_storage();
         if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftarea, 'sortorder', false)) {
-            // there are files to upload so add/update content record
+            // There are files to upload so add/update content record
             $rec = new object;
             $rec->fieldid = $fieldid;
             $rec->entryid = $entryid;
@@ -92,8 +91,8 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
                 $rec->id = $contentid;
                 $DB->update_record('dataform_contents', $rec);
             }
-            
-            // now save files
+
+            // Now save files
             $options = array('subdirs' => 0,
                                 'maxbytes' => $this->param1,
                                 'maxfiles' => $this->param2,
@@ -103,8 +102,8 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
 
             $this->update_content_files($contentid);
 
-        // user cleared files from the field
         } else if (!empty($contentid) and !$savenew) {
+            // User cleared files from the field
             $this->delete_content($entryid);
         }
         return true;
@@ -132,12 +131,12 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
         global $USER;
-    
+
         $fieldid = $this->id;
 
         // Only one imported pattern ''
         $settings = reset($importsettings);
-        
+
         static $draftid;
         $fs = get_file_storage();
         $usercontext = context_user::instance($USER->id);
@@ -149,10 +148,10 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
 
             if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $zipdraftid, 'sortorder', false)) {
                 $zipfile = reset($files);
-                // extract files to the draft area
+                // Extract files to the draft area
                 $zipper = get_file_packer('application/zip');
                 $zipfile->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
-                //$zipfile->delete();
+                // $zipfile->delete();
             }
         }
 
@@ -165,7 +164,7 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
                 $varname = "field_{$fieldid}_$entryid";
                 $itemid = file_get_unused_draft_itemid();
                 $data->{"{$varname}_filemanager"} = $itemid;
-                
+
                 foreach ($filenames as $filename) {
                     if ($file = $fs->get_file($usercontext->id, 'user', 'draft', $draftid, '/', $filename)) {
                         $rec = new stdClass;
@@ -179,7 +178,7 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
             }
         }
 
-        return $data;        
+        return $data;
     }
 
     /**
@@ -191,10 +190,10 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
 
     /**
      * Overriding parent to return no sort/search options.
-     * 
+     *
      * @return array
      */
     public function get_sort_options_menu() {
         return array();
-    }    
+    }
 }

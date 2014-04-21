@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type string fieldname the name of the field.
- *      @type int dataid the id of the dataform activity.
+ *      string fieldname the name of the field.
+ *      int dataid the id of the dataform activity.
  * }
  *
  * @package    mod_dataform

@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage commentmdl
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */ 
+ */
 
 $capabilities = array(
     // Add Cmment
@@ -35,7 +35,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:comment'
+        'clonepermissionsfrom' => 'mod/dataform:comment'
     ),
 
     // Delete own comment
@@ -65,7 +65,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:managecomments'
+        'clonepermissionsfrom' => 'mod/dataform:managecomments'
     ),
 
     // View Comments

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataform
  * @category preset
@@ -21,31 +21,30 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
+namespace mod_dataform\pluginbase;
 
 defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->libdir/formslib.php");
-
 
 /**
  *
  */
 class dataformpresetform extends \moodleform {
 
-    function definition() {
+    public function definition() {
         global $COURSE;
 
         $mform = &$this->_form;
         $indataform = !empty($this->_customdata['dataformid']);
 
         $mform->addElement('header', 'presetshdr', get_string('presetadd', 'dataform'));
-        
+
         // Preset current Dataform
         if ($indataform) {
             $grp = array();
             $grp[] = &$mform->createElement('radio', 'preset_source', null, get_string('presetfromdataform', 'dataform'), 'current');
-            
+
             $packdata = array(
                 'nodata' => get_string('presetnodata', 'dataform'),
                 'data' => get_string('presetdata', 'dataform'),
@@ -56,12 +55,12 @@ class dataformpresetform extends \moodleform {
             $mform->addGroup($grp, 'psourcegrp', null, array('  ', '<br />'), false);
             $mform->setDefault('preset_source', 'current');
         }
-        
+
         // Upload preset
         $options = array('subdirs' => 0,
                             'maxbytes' => $COURSE->maxbytes,
                             'maxfiles' => 1,
-                            'accepted_types' => array('*.zip','*.mbz'));
+                            'accepted_types' => array('*.zip', '*.mbz'));
         $mform->addElement('filepicker', 'uploadfile', null, null, $options);
         $mform->disabledIf('uploadfile', 'preset_source', 'neq', 'file');
 

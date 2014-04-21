@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage select
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield {
     protected $_options = array();
@@ -30,13 +29,13 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
      */
     public function update($data) {
         global $DB;
-        
-        // before we update get the current options
-        $oldoptions = $this->options_menu();
-        // update
-        parent::update($data);       
 
-        // adjust content if necessary
+        // Before we update get the current options
+        $oldoptions = $this->options_menu();
+        // Update
+        parent::update($data);
+
+        // Adjust content if necessary
         $adjustments = array();
         // Get updated options
         $newoptions = $this->options_menu(true);
@@ -49,19 +48,19 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
         }
 
         if (!empty($adjustments)) {
-            // fetch all contents of the field whose content in keys
+            // Fetch all contents of the field whose content in keys
             list($incontent, $params) = $DB->get_in_or_equal(array_keys($adjustments));
             array_unshift($params, $this->id);
             $contents = $DB->get_records_select_menu('dataform_contents',
                                         " fieldid = ? AND content $incontent ",
                                         $params,
                                         '',
-                                        'id,content'); 
+                                        'id,content');
             if ($contents) {
                 if (count($contents) == 1) {
                     list($id, $content) = each($contents);
                     $DB->set_field('dataform_contents', 'content', $adjustments[$content], array('id' => $id));
-                } else { 
+                } else {
                     $params = array();
                     $sql = "UPDATE {dataform_contents} SET content = CASE id ";
                     foreach ($contents as $id => $content) {
@@ -86,18 +85,18 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     protected function content_names() {
         return array('selected', 'newvalue');
     }
-    
+
     /**
      *
      */
     protected function format_content($entry, array $values = null) {
         $fieldid = $this->id;
-        // old contents
+        // Old contents
         $oldcontents = array();
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
-        // new contents
+        // New contents
         $contents = array();
 
         $selected = $newvalue = null;
@@ -108,8 +107,8 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
                     ${$name} = $value;
                 }
             }
-        }        
-        // update new value in the field type
+        }
+        // Update new value in the field type
         if ($newvalue = s($newvalue)) {
             $options = $this->options_menu();
             if (!$selected = (int) array_search($newvalue, $options)) {
@@ -118,7 +117,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
                 $this->update($this->data);
             }
         }
-        // add the content
+        // Add the content
         if (!is_null($selected)) {
             $contents[] = $selected;
         }
@@ -127,7 +126,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     }
 
     /**
-     * 
+     *
      */
     protected function get_sql_compare_text($column = 'content') {
         global $DB;
@@ -159,12 +158,12 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     }
 
     /**
-     * 
+     *
      */
     public function options_menu($forceget = false) {
         if (!$this->_options or $forceget) {
             if ($this->param1) {
-                $rawoptions = explode("\n",$this->param1);
+                $rawoptions = explode("\n", $this->param1);
                 foreach ($rawoptions as $key => $option) {
                     $option = trim($option);
                     if ($option != '') {
@@ -178,31 +177,31 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
 
     // IMPORT EXPORT
     /**
-     * 
+     *
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
-        // import only from csv
+        // Import only from csv
         if (!$csvrecord) {
             return $data;
         }
-        
+
         // There is only one import pattern for this field
         $importsetting = reset($importsettings);
-        
+
         $fieldid = $this->id;
         $csvname = $importsetting['name'];
         $allownew = !empty($importsetting['allownew']) ? true : false;
         $label = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
-        
+
         if ($label) {
             $options = $this->options_menu();
             if ($optionkey = array_search($label, $options)) {
                 $data->{"field_{$fieldid}_{$entryid}_selected"} = $optionkey;
             } else if ($allownew) {
                 $data->{"field_{$fieldid}_{$entryid}_newvalue"} = $label;
-            }                    
+            }
         }
-    
+
         return $data;
     }
 

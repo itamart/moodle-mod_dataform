@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -25,16 +25,16 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);             // Dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);            // Course module id
 
-// presets list actions
-$urlparams->apply =     optional_param('apply', 0, PARAM_INT);  // path of preset to apply
-$urlparams->torestorer =     optional_param('torestorer', 1, PARAM_INT);  // apply user data to restorer
-$urlparams->map =       optional_param('map', 0, PARAM_BOOL);  // map new preset fields to old fields
-$urlparams->delete =    optional_param('delete', '', PARAM_SEQUENCE);   // ids of presets to delete
-$urlparams->share =     optional_param('share', '', PARAM_SEQUENCE);     // ids of presets to share
-$urlparams->download =     optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
+// Presets list actions
+$urlparams->apply = optional_param('apply', 0, PARAM_INT);  // Path of preset to apply
+$urlparams->torestorer = optional_param('torestorer', 1, PARAM_INT);  // Apply user data to restorer
+$urlparams->map = optional_param('map', 0, PARAM_BOOL);  // Map new preset fields to old fields
+$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // Ids of presets to delete
+$urlparams->share = optional_param('share', '', PARAM_SEQUENCE);     // Ids of presets to share
+$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);     // Ids of presets to download in one zip
 
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
@@ -45,7 +45,7 @@ $df->require_manage_permission('presets');
 $df->set_page('preset/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/preset/index.php', array('id' => $df->cm->id)));
 
 $pm = mod_dataform_preset_manager::instance($df->id);
@@ -53,11 +53,10 @@ $pm = mod_dataform_preset_manager::instance($df->id);
 // DATA PROCESSING
 $pm->process_presets($urlparams);
 
-
 $output = $df->get_renderer();
 echo $output->header(array('tab' => 'presets', 'heading' => $df->name, 'urlparams' => $urlparams));
 
-// print the preset form
+// Print the preset form
 $pm->print_preset_form();
 
 // Print admin style list of course presets

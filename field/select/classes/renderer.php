@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage select
@@ -22,16 +22,15 @@
  */
 defined('MOODLE_INTERNAL') or die;
 
-
 /**
- * 
+ *
  */
 class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     protected $_cats = array();
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -49,11 +48,11 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
                 if ($cleanpattern == "[[$fieldname:addnew]]") {
                     $params['addnew'] = true;
                 }
-                $replacements[$pattern] = array(array($this,'display_edit'), array($entry, $params));
+                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $params));
             }
             return $replacements;
-        } 
-        
+        }
+
         // Browse mode
         foreach ($patterns as $pattern => $cleanpattern) {
             if ($cleanpattern == "[[$fieldname:options]]") {
@@ -81,8 +80,8 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $fieldname = "field_{$fieldid}_$entryid";
         $required = !empty($options['required']);
         $selected = !empty($entry->{"c{$fieldid}_content"}) ? (int) $entry->{"c{$fieldid}_content"} : 0;
-        
-        // check for default value
+
+        // Check for default value
         if (!$selected and $defaultval = $field->param2) {
             $selected = (int) array_search($defaultval, $menuoptions);
         }
@@ -96,7 +95,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
             } else {
                 $mform->addElement($elem);
             }
-            
+
             // Required
             if ($required) {
                 $this->set_required($mform, $fieldname, $selected);
@@ -111,7 +110,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
                 $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
             }
             return;
-        }        
+        }
     }
 
     /**
@@ -126,7 +125,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
             $options = $field->options_menu();
 
             if (!empty($params['options'])) {
-                $str = array();           
+                $str = array();
                 foreach ($options as $key => $option) {
                     $isselected = (int) ($key == $selected);
                     $str[] = "$isselected $option";
@@ -147,7 +146,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
                 return $options[$selected];
             }
         }
-        
+
         return '';
     }
 
@@ -159,19 +158,19 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $field = $this->_field;
         $fieldid = $field->id;
         $fieldname = $field->name;
-        
+
         // Only [[fieldname]] can be imported
         if ($patternname != $fieldname) {
             return array(array(), array());
-        }            
-        
+        }
+
         $name = "f_{$fieldid}_";
 
         list($grp, $labels) = parent::get_pattern_import_settings($mform, $patternname, $header);
 
         $grp[] = &$mform->createElement('selectyesno', "{$name}_allownew");
         $labels = array_merge($labels, array(' '. get_string('allowaddoption', 'dataformfield_selectmulti'). ': '));
-        
+
         return array($grp, $labels);
     }
 
@@ -188,19 +187,19 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $str = '';
         if (isset($entry->{"c{$fieldid}_content"})) {
             $selected = (int) $entry->{"c{$fieldid}_content"};
-            
+
             $options = $field->options_menu();
             if ($selected and $selected <= count($options) and $selected != $this->_cats[$fieldid]) {
                 $this->_cats[$fieldid] = $selected;
                 $str = $options[$selected];
             }
         }
-        
+
         return $str;
     }
 
     /**
-     * 
+     *
      */
     protected function render(&$mform, $fieldname, $options, $selected, $required = false) {
         $select = &$mform->createElement('select', $fieldname, null, array('' => get_string('choosedots')) + $options);
@@ -216,7 +215,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -228,6 +227,6 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $patterns["[[$fieldname:cat]]"] = array(false);
         $patterns["[[$fieldname:key]]"] = array(false);
 
-        return $patterns; 
+        return $patterns;
     }
 }

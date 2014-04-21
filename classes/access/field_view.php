@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  */
 class field_view extends base {
 
-        
     /**
      * Validates that current user can view the field content.
      *
@@ -43,19 +42,19 @@ class field_view extends base {
      */
     public static function validate($params) {
         global $USER;
-        
+
         $dataformid = $params['dataformid'];
         // Must have fieldid
         if (empty($params['fieldid'])) {
             return false;
         }
-        $field = \mod_dataform_field_manager::instance($dataformid)->get_field_by_id($params['fieldid']);  
+        $field = \mod_dataform_field_manager::instance($dataformid)->get_field_by_id($params['fieldid']);
         $entry = $params['entry'];
 
         if ($field->visible != $field::VISIBLE_ALL) {
             // Entry managers can access any field
             if (!$canmanageentries = has_capability('mod/dataform:manageentries', $field->df->context)) {
-                
+
                 if ($field->visible == $field::VISIBLE_NONE) {
                     return false;
                 }
@@ -70,16 +69,15 @@ class field_view extends base {
         return parent::validate($params);
     }
 
-
     /**
      * @return null|array
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $fieldid = $params['fieldid'];
-        
+
         return $man->get_type_rules('field');
     }
- 
+
     /**
      * @return array
      */

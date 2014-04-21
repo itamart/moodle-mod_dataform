@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type string fieldname the name of the field.
- *      @type int dataid the id of the dataform activity.
- *      @type int entryid the id of the entry.
+ *      string fieldname the name of the field.
+ *      int dataid the id of the dataform activity.
+ *      int entryid the id of the entry.
  * }
  *
  * @package    mod_dataform
@@ -46,14 +46,16 @@ class field_content_updated extends field_base {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
-    
+
     /**
      * Returns description of what happened.
      *
      * @return string
      */
     public function get_description() {
-        return 'The content of field '. $this->objectid. ' belonging to the dataform activity '. $this->other['dataid'] . ' has been updated for entry ' . $this->other['entryid']. '.';
+        return 'The content of field '. $this->objectid.
+            ' belonging to the dataform activity '. $this->other['dataid'].
+            ' has been updated for entry '. $this->other['entryid']. '.';
     }
 
 }

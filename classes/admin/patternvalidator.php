@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ class patternvalidator {
     /**
      * Run the tool.
      *
-     * @return view 
+     * @return view
      */
     public static function run() {
         global $DB, $OUTPUT;
@@ -74,14 +74,14 @@ class patternvalidator {
         $analyse = optional_param('analyse', 0, PARAM_INT);
         $confirm = optional_param('confirm', 0, PARAM_INT);
         $execute = optional_param('execute', 0, PARAM_INT);
-        
+
         $baseurl = self::get_url();
         $summarylink = \html_writer::link(new \moodle_url($baseurl, array('summary' => 1)), 'Summary');
         $analyselink = \html_writer::link(new \moodle_url($baseurl, array('analyse' => 1)), 'Analyse');
         $executelink = \html_writer::link(new \moodle_url($baseurl, array('execute' => 1)), 'Execute');
-        
+
         echo \html_writer::tag('div', "$summarylink | $analyselink | $executelink");
-        
+
         if (!$dataforms = $DB->get_records('dataform')) {
             return get_string('dataformnone', 'dataform');
         }
@@ -89,29 +89,29 @@ class patternvalidator {
         if (!$analyse and !$execute) {
             return self::get_summary($dataforms);
         }
-        
+
         $brokenpatterns = array();
         foreach ($dataforms as $dataformid => $dataform) {
             $df = \mod_dataform_dataform::instance($dataformid);
             if (!$views = $df->view_manager->get_views()) {
                 continue;
             }
-            
+
             foreach ($views as $viewid => $view) {
                 if ($updates = $view->patterns_check()) {
                     $brokenpatterns = array_merge($brokenpatterns, $updates);
                 }
             }
         }
-        
+
         // No problems
         if (!$brokenpatterns) {
             return $OUTPUT->notification(get_string('patternsnonebroken', 'dataform'), 'notifysuccess');
-        }           
+        }
 
         $table = new \html_table();
         $table->head = array('Pattern Name', 'Dataform', 'View', 'Type', 'Problem');
-        foreach ($brokenpatterns as $info) {        
+        foreach ($brokenpatterns as $info) {
             $table->data[] = array(
                 $info['pattern'],
                 $info['dataform'],
@@ -127,21 +127,21 @@ class patternvalidator {
     /**
      * Returns summary of dataforms in the course/site.
      *
-     * @params recordset List of dataform instances 
-     * @return string HTML fragment 
+     * @params recordset List of dataform instances
+     * @return string HTML fragment
      */
     public static function get_summary($dataforms) {
         global $DB;
-        
+
         $table = new \html_table();
         $table->head = array('Name', 'Views', 'Fields', 'Filters', 'Entries');
         foreach ($dataforms as $dataformid => $instance) {
-        
+
             $numviews = $DB->count_records('dataform_views', array('dataid' => $dataformid));
             $numfields = $DB->count_records('dataform_fields', array('dataid' => $dataformid));
             $numfilters = $DB->count_records('dataform_filters', array('dataid' => $dataformid));
             $numentries = $DB->count_records('dataform_entries', array('dataid' => $dataformid));
-        
+
             $table->data[] = array(
                 $instance->name,
                 $numviews,
@@ -150,7 +150,7 @@ class patternvalidator {
                 $numentries,
             );
         }
-                     
+
         return \html_writer::table($table);
     }
 }

@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -20,8 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
- 
+namespace mod_dataform\pluginbase;
+
 /**
  * Base class for Dataform Field Types
  */
@@ -34,7 +34,7 @@ abstract class dataformfield {
     protected $_field;
     protected $_renderer = null;
     protected $_distinctvalues = null;
-    
+
     /**
      * @return array List of the field file areas
      */
@@ -52,7 +52,7 @@ abstract class dataformfield {
         if (empty($field)) {
             throw new coding_exception('Field object must be passed to field constructor.');
         }
-        
+
         $this->_field = $field;
     }
 
@@ -91,7 +91,6 @@ abstract class dataformfield {
         return null;
     }
 
-    
     /**
      * Sets up a field object
      *
@@ -103,7 +102,7 @@ abstract class dataformfield {
         $this->visible = isset($data->visible) ? $data->visible : 2;
         $this->editable = isset($data->editable) ? $data->editable : -1;
         $this->label = !empty($data->label) ? $data->label : '';
-        for ($i=1; $i<=10; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $this->{"param$i"} = !empty($data->{"param$i"}) ? trim($data->{"param$i"}) : null;
         }
     }
@@ -117,7 +116,7 @@ abstract class dataformfield {
         if (!empty($data)) {
             $this->set_field($data);
         }
-        if ($this->id = $DB->insert_record('dataform_fields', $this->data)){
+        if ($this->id = $DB->insert_record('dataform_fields', $this->data)) {
             // Trigger an event for creating this field.
             $event = \mod_dataform\event\field_created::create($this->default_event_params);
             $event->add_record_snapshot('dataform_fields', $this->data);
@@ -133,7 +132,7 @@ abstract class dataformfield {
      */
     public function update($data) {
         global $DB;
-        
+
         if (!empty($data)) {
             $this->set_field($data);
         }
@@ -143,7 +142,7 @@ abstract class dataformfield {
             $event = \mod_dataform\event\field_updated::create($this->default_event_params);
             $event->add_record_snapshot('dataform_fields', $this->data);
             $event->trigger();
-            
+
             return $this->id;
         }
         return false;
@@ -167,12 +166,11 @@ abstract class dataformfield {
             $event = \mod_dataform\event\field_deleted::create($this->default_event_params);
             $event->add_record_snapshot('dataform_fields', $this->data);
             $event->trigger();
-            
+
             return true;
         }
         return false;
     }
-
 
     // GETTERS/SETTERS
 
@@ -254,7 +252,7 @@ abstract class dataformfield {
             )
         );
     }
-    
+
     /**
      *
      */
@@ -296,17 +294,17 @@ abstract class dataformfield {
         if (!$this->is_visible($entry)) {
             return array_fill_keys($patterns, '');
         }
-        
+
         return $this->renderer->get_replacements($patterns, $entry, $options);
     }
-       
+
     /**
      * Updates the field content for the specified entry and returns the content id
      * if new content is created or the true|false result of the update.
      *
      * @param stdClass $entry
      * @param array $values An associative array of values (see {@link dataformfield::get_content_from_data()})
-     * @param bool $savenew Whether an existing entry is saved as a new one 
+     * @param bool $savenew Whether an existing entry is saved as a new one
      * @return bool|int
      */
     public function update_content($entry, array $values = null, $savenew = false) {
@@ -346,12 +344,12 @@ abstract class dataformfield {
             $updated = true;
 
         } else if (is_null($contentid) and !empty($contents)) {
-            // insert only if no old contents and there is new contents
+            // Insert only if no old contents and there is new contents
             $rec->id = $DB->insert_record('dataform_contents', $rec);
             $updated = true;
 
         } else {
-            // update if new is different from old
+            // Update if new is different from old
             foreach ($contents as $key => $content) {
                 if (!isset($oldcontents[$key]) or $content !== $oldcontents[$key]) {
                     $rec->id = $contentid; // MUST_EXIST
@@ -361,7 +359,7 @@ abstract class dataformfield {
                 }
             }
         }
-        
+
         if ($updated) {
             // Trigger an event for updating this field.
             $eventparams = $this->default_event_params;
@@ -370,10 +368,10 @@ abstract class dataformfield {
             $event = \mod_dataform\event\field_content_updated::create($eventparams);
             $event->add_record_snapshot('dataform_contents', $rec);
             $event->trigger();
-            
+
             return $rec->id;
         }
-            
+
         return false;
     }
 
@@ -423,7 +421,7 @@ abstract class dataformfield {
                     $DB->update_record('dataform_contents', $content);
                 }
 
-                // rename content dir if exists
+                // Rename content dir if exists
                 $path = $CFG->dataroot.'/'.$this->df->course->id.'/'.$CFG->moddata.'/dataform/'.$this->df->id;
                 $olddir = "$path/". $this->id;
                 $newdir = "$path/$tofieldid";
@@ -512,7 +510,7 @@ abstract class dataformfield {
     protected function content_names() {
         return array('');
     }
-    
+
     /**
      * Returns true if content for content name is empty.
      * Subtypes may need to override if they require a different test from empty().
@@ -527,7 +525,7 @@ abstract class dataformfield {
         }
         return empty($content);
     }
-    
+
     /**
      *
      */
@@ -536,11 +534,11 @@ abstract class dataformfield {
         $oldcontents = array();
         $contents = array();
 
-        // old content
+        // Old content
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
-        // new content
+        // New content
         if (!empty($values)) {
             $content = reset($values);
             $contents[] = (string) clean_param($content, PARAM_NOTAGS);
@@ -566,7 +564,6 @@ abstract class dataformfield {
         return $filearea;
     }
 
-    
     // IMPORT EXPORT
     /**
      * Adds to the data the import content for the field.
@@ -581,7 +578,7 @@ abstract class dataformfield {
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
         $fieldid = $this->id;
         $csvname = '';
-        
+
         $setting = reset($importsettings);
         if (!empty($setting['name'])) {
             $csvname = $setting['name'];
@@ -619,7 +616,7 @@ abstract class dataformfield {
     public function get_select_sql() {
         if ($this->id > 0) {
             $alias = $this->get_sql_alias();
-            
+
             $arr = array();
             $arr[] = " $alias.id AS {$alias}_id ";
             foreach ($this->get_content_parts() as $part) {
@@ -692,7 +689,7 @@ abstract class dataformfield {
      * Override if the field is non-sortable or has different sort options.
      * Elements:
      * - Content
-     * 
+     *
      * @return array
      */
     public function get_sort_options_menu() {
@@ -723,7 +720,7 @@ abstract class dataformfield {
         list($element, $not, $operator, $value) = $search;
         $varcharcontent = $this->get_sql_compare_text($element);
         $params = array();
-        
+
         if ($operator === '' and $not) {
             list($sql, $params) = $DB->get_in_or_equal('', null, null, false);
             $sql = " $varcharcontent $sql ";
@@ -731,7 +728,7 @@ abstract class dataformfield {
             $searchvalue = trim($value);
             list($sql, $params) = $DB->get_in_or_equal($searchvalue);
             $sql = " $varcharcontent $sql ";
-        } else if ($operator === 'IN') {            
+        } else if ($operator === 'IN') {
             $searchvalue = is_array($value) ? $value : array_map('trim', explode(',', $value));
             list($sql, $params) = $DB->get_in_or_equal($searchvalue);
             $sql = " $varcharcontent $sql ";
@@ -741,25 +738,25 @@ abstract class dataformfield {
             $params[] = $arg1;
             $params[] = $arg2;
             $sql = " ($not $varcharcontent >= ? AND $varcharcontent <= ?) ";
-        } else if ($operator === 'LIKE') {            
+        } else if ($operator === 'LIKE') {
             $params = array("%$value%");
             $sql = $DB->sql_like($varcharcontent, '?', false);
         } else {
             $params = array($value);
             $sql = " $varcharcontent $operator ? ";
         }
-        
+
         // For all NOT criteria except NOT Empty, exclude entries
-        // which don't meet the positive criterion
-        // because some fields may not have content records
-        // and the respective entries may be filter out 
-        // despite meeting the criterion
+        // Which don't meet the positive criterion
+        // Because some fields may not have content records
+        // And the respective entries may be filter out
+        // Despite meeting the criterion
         $excludeentries = (($not and $operator !== '') or (!$not and $operator === ''));
-        
+
         if ($excludeentries) {
             // Get entry ids for entries that meet the criterion
             if ($eids = $this->get_entry_ids_for_content($sql, $params)) {
-                // Get NOT IN sql 
+                // Get NOT IN sql
                 list($notinids, $params) = $DB->get_in_or_equal($eids, null, null, false);
                 $sql = " e.id $notinids ";
                 return array($sql, $params, false);
@@ -785,9 +782,9 @@ abstract class dataformfield {
     /**
      * Return array of search options menu as
      * $fieldid,element => name, for the filter form.
-     * By default sortable options are also the searchable ones. 
+     * By default sortable options are also the searchable ones.
      * Override if the field has different search options from sort options.
-     * 
+     *
      * @return array
      */
     public function get_search_options_menu() {
@@ -796,13 +793,13 @@ abstract class dataformfield {
 
     /**
      * Returns a list of elements to which quick search may be applied.
-     * 
+     *
      * @return array
      */
     public function get_simple_search_elements() {
         return array('content');
     }
-    
+
     /**
      * Returns array of ids of entry which contain a certain content
      * as specified in the passed sql.
@@ -811,13 +808,13 @@ abstract class dataformfield {
      */
     public function get_entry_ids_for_content($sql, $params) {
         global $DB;
-        
+
         $searchtable = $this->get_search_from_sql();
-        $sql = " 
-            SELECT 
+        $sql = "
+            SELECT
                 e.id
             FROM
-                {dataform_entries} e 
+                {dataform_entries} e
                 $searchtable
             WHERE
                 $sql
@@ -829,5 +826,5 @@ abstract class dataformfield {
         }
         return null;
     }
-    
+
 }

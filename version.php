@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -31,4 +31,4 @@ $module->release  = '2.7alpha (Build: 20140418)';
 $module->version  = 2014041800;
 $module->requires = 2014041700;
 $module->maturity = MATURITY_ALPHA;
-//$module->cron     = 60;
+// $module->cron     = 60;

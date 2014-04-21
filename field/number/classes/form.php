@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage number
@@ -26,24 +26,24 @@ class dataformfield_number_form extends mod_dataform\pluginbase\dataformfieldfor
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform =& $this->_form;
 
-    //-------------------------------------------------------------------------------
+        // ---------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
-        // decimals
-        $options = array('' => 0) + array_combine(range(1,10), range(1,10));
+
+        // Decimals
+        $options = array('' => 0) + array_combine(range(1, 10), range(1, 10));
         $mform->addElement('select', 'param1', get_string('decimals', 'dataformfield_number'), $options);
 
-        // field width
-        $fieldwidthgrp=array();
-        $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size'=>'8'));
+        // Field width
+        $fieldwidthgrp = array();
+        $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
         $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
         $mform->addGroup($fieldwidthgrp, 'fieldwidthgrp', get_string('fieldwidth', 'dataform'), array(' '), false);
         $mform->setType('param2', PARAM_INT);
-        $mform->addGroupRule('fieldwidthgrp', array('param2' => array(array(null, 'numeric', null, 'client'))));        
+        $mform->addGroupRule('fieldwidthgrp', array('param2' => array(array(null, 'numeric', null, 'client'))));
         $mform->disabledIf('param3', 'param2', 'eq', '');
         $mform->setDefault('param2', '');
         $mform->setDefault('param3', 'px');

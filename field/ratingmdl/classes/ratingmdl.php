@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage ratingmdl
@@ -56,7 +56,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
      */
     public function validation($params) {
         global $DB, $USER;
-        
+
         // Check the component is mod_dataform
         if ($params['component'] != 'mod_dataform') {
             throw new rating_exception('invalidcomponent');
@@ -74,8 +74,8 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
                 throw new rating_exception('nopermissiontorate');
             }
         }
-            
-        // if the supplied context doesnt match the item's context
+
+        // If the supplied context doesnt match the item's context
         if ($params['context']->id != $this->df->context->id) {
             throw new rating_exception('invalidcontext');
         }
@@ -85,14 +85,14 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             throw new rating_exception('invalidratingarea');
         }
 
-        // vaildate entry scale and rating range
+        // Vaildate entry scale and rating range
         if ($params['scaleid'] != $this->_scaleid) {
             throw new rating_exception('invalidscaleid');
         }
-        
-        // upper limit
+
+        // Upper limit
         if ($this->_scaleid < 0) {
-            //its a custom scale
+            // Its a custom scale
             $scalerecord = $DB->get_record('scale', array('id' => -$this->_scaleid));
             if ($scalerecord) {
                 $scalearray = explode(',', $scalerecord->scale);
@@ -103,33 +103,33 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
                 throw new rating_exception('invalidscaleid');
             }
         } else if ($params['rating'] > $this->_scaleid) {
-            //if its numeric and submitted rating is above maximum
+            // If its numeric and submitted rating is above maximum
             throw new rating_exception('invalidnum');
         }
 
-        // lower limit
+        // Lower limit
         if ($params['rating'] < 0  and $params['rating'] != RATING_UNSET_RATING) {
             throw new rating_exception('invalidnum');
         }
 
-        // check the item we're rating was created in the assessable time window
-        //if (!empty($info->assesstimestart) && !empty($info->assesstimefinish)) {
-        //    if ($info->timecreated < $info->assesstimestart || $info->timecreated > $info->assesstimefinish) {
-        //        throw new rating_exception('notavailable');
+        // Check the item we're rating was created in the assessable time window
+        // If (!empty($info->assesstimestart) && !empty($info->assesstimefinish)) {
+        // If ($info->timecreated < $info->assesstimestart || $info->timecreated > $info->assesstimefinish) {
+        // Throw new rating_exception('notavailable');
         //    }
-        //}
+        // }
 
         // Make sure groups allow this user to see the item they're rating
         $groupid = $this->df->currentgroup;
-        if ($groupid > 0 and $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course)) {  
+        if ($groupid > 0 and $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course)) {
             // Groups are being used
             if (!groups_group_exists($groupid)) {
                 // Can't find group
-                throw new rating_exception('cannotfindgroup');//something is wrong
+                throw new rating_exception('cannotfindgroup');
             }
 
             if (!groups_is_member($groupid) and !has_capability('moodle/site:accessallgroups', $this->df->context)) {
-                // do not allow rating of posts from other groups when in SEPARATEGROUPS or VISIBLEGROUPS
+                // Do not allow rating of posts from other groups when in SEPARATEGROUPS or VISIBLEGROUPS
                 throw new rating_exception('notmemberofgroup');
             }
         }
@@ -161,7 +161,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
      */
     public function get_select_sql() {
         $alias = $this->get_sql_alias();
-        
+
         $elements = array(
             'itemid',
             'component',
@@ -177,7 +177,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             'scaleid',
             'usersrating'
         );
-        
+
         $aliasedelements = array();
         foreach ($elements as $element) {
             $aliasedelements[] = "$alias.$element AS {$alias}_$element";
@@ -193,19 +193,19 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         global $USER;
 
         $params = array();
-        //$params['ruserid']    = $USER->id;
-        //$params['rcontextid'] = $this->df->context->id;
-        //$params['rcomponent'] = 'mod_dataform';
-        //$params['ratingarea'] = $this->name;
+        // $params['ruserid']    = $USER->id;
+        // $params['rcontextid'] = $this->df->context->id;
+        // $params['rcomponent'] = 'mod_dataform';
+        // $params['ratingarea'] = $this->name;
         $userid = $USER->id;
         $contextid = $this->df->context->id;
         $component = 'mod_dataform';
         $ratingarea = $this->name;
 
         $alias = $this->get_sql_alias();
-        
+
         $sql = "LEFT JOIN (
-                    SELECT 
+                    SELECT
                         r.itemid,
                         r.component,
                         r.ratingarea,
@@ -227,7 +227,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
                                                 AND ur.ratingarea = r.ratingarea
                                                 AND ur.userid = $userid
                     WHERE
-                        r.contextid = $contextid 
+                        r.contextid = $contextid
                         AND r.component = '$component'
                         AND r.ratingarea = '$ratingarea'
                     GROUP BY
@@ -268,8 +268,8 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     /**
      * Return array of sort options menu as
      * $fieldid,element => name, for the filter form.
-     * 
-     * 
+     *
+     *
      * @return null|array
      */
     public function get_sort_options_menu() {
@@ -315,7 +315,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     public function get_entry_ids_for_content($sql, $params) {
         return null;
     }
-    
+
     /**
      *
      * @param array
@@ -325,7 +325,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return implode(' ', $searchparams);
     }
 
-    // parent::get_sql_compare_text($element = 'content')
+    // Parent::get_sql_compare_text($element = 'content')
 
     /**
      *
@@ -339,15 +339,15 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         }
 
         global $CFG;
-        
+
         $rm = new ratingmdl_rating_manager();
-        
+
         $context = $this->df->context;
         $fieldname = $this->name;
-        
+
         // Get entry rating objects
         $scaleid = $this->get_scaleid($entry);
-        
+
         $options = new object;
         $options->context = $context;
         $options->component = 'mod_dataform';
@@ -360,7 +360,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         $rec->component = 'mod_dataform';
         $rec->ratingarea = $fieldname;
         $rec->settings = $rm->get_rating_settings_object($options);
-        $rec->aggregate = array_keys($rm->get_aggregate_types());     
+        $rec->aggregate = array_keys($rm->get_aggregate_types());
         $rec->scaleid = $scaleid;
         $rec->userid = $this->get_entry_rating_element($entry, 'ratinguserid');
         $rec->id = $this->get_entry_rating_element($entry, 'ratingid');
@@ -372,7 +372,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         $rec->minratings = $this->get_entry_rating_element($entry, 'minratings');
 
         $rating = $rm->get_rating_object($entry, $rec);
-        
+
         if ($addrecords) {
             if ($rating->records = $this->get_rating_records(array('itemid' => $entry->id))) {
                 $rating->records = array();
@@ -380,7 +380,6 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         }
         return $rating;
     }
-
 
     /**
      *
@@ -394,7 +393,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         if (!$options) {
             return $allrecords;
         }
-        
+
         $itemid = !empty($options['itemid']) ? $options['itemid'] : 0;
         $rating = !empty($options['rating']) ? $options['rating'] : null;
 
@@ -407,16 +406,16 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             if ($raterecord->itemid > $itemid) {
                 break;
             }
-            
+
             // Limit to specified rating value
             if ($rating !== null and $raterecord->rating != $rating) {
                 continue;
             }
-            
-            $raterecords[$recordid] = $raterecord;
-        }   
 
-        return $raterecords;        
+            $raterecords[$recordid] = $raterecord;
+        }
+
+        return $raterecords;
     }
 
     /**
@@ -425,7 +424,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
      */
     protected function get_all_rating_records() {
         global $DB;
-        
+
         if ($this->_allratings === null) {
             $rm = new ratingmdl_rating_manager();
 
@@ -434,24 +433,24 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             $options->component = 'mod_dataform';
             $options->ratingarea = $this->name;
 
-            list($sql, $params) = $rm->get_sql_all($options, false); 
-            
+            list($sql, $params) = $rm->get_sql_all($options, false);
+
             $this->_allratings = $DB->get_records_sql($sql, $params);
         }
         return $this->_allratings;
     }
-    
+
     // GRADING
     public function get_user_values($pattern, $userid = 0) {
         global $CFG;
-        
+
         if (!$aggrs = $this->renderer->get_aggregations(array($pattern))) {
             return null;
         }
-        
+
         $fieldname = $this->name;
         $aggregation = reset($aggrs);
-        
+
         $options = new stdClass;
         $options->component = 'mod_dataform';
         $options->ratingarea = $fieldname;
@@ -462,9 +461,9 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         $options->moduleid   = $this->df->id;
         $options->userid = $userid;
         $options->scaleid = $this->get_scaleid();
-        
+
         $rm = new ratingmdl_rating_manager();
-        return $rm->get_user_grades($options);       
+        return $rm->get_user_grades($options);
     }
 
     /**
@@ -476,10 +475,10 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return 'param1';
     }
     // GETTERS
-    
+
     /**
      * Returns the effective scaleid, either from the entry or from the field settings.
-     * 
+     *
      * @param stdClass $entry
      * @return int
      */
@@ -493,7 +492,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     }
 
     /**
-     * 
+     *
      */
     public function get_entry_rating_element($entry, $element) {
         $aliasedelem = $this->get_sql_alias(). "_$element";
@@ -503,7 +502,6 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return null;
     }
 
-    
-    
-    
+
+
 }

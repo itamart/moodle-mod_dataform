@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrygroup
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 
 class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataformfield_internal {
@@ -53,7 +52,7 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
         global $DB;
-        
+
         $groupid = 0;
 
         // Group id
@@ -83,15 +82,15 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
             }
             return $data;
         }
-        
+
         return $data;
     }
 
     /**
      * Return array of sort options menu as
      * $fieldid,element => name, for the filter form.
-     * 
-     * 
+     *
+     *
      * @return null|array
      */
     public function get_sort_options_menu() {
@@ -111,5 +110,4 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
         return 'g';
     }
 
-    
 }

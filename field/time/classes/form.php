@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage time
@@ -26,13 +26,13 @@ class dataformfield_time_form extends mod_dataform\pluginbase\dataformfieldform 
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform =& $this->_form;
 
-    //-------------------------------------------------------------------------------
+        // ---------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
+
         // Date
         $mform->addElement('checkbox', 'param1', get_string('dateonly', 'dataformfield_time'));
         $mform->addHelpButton('param1', 'dateonly', 'dataformfield_time');
@@ -40,7 +40,7 @@ class dataformfield_time_form extends mod_dataform\pluginbase\dataformfieldform 
         // Masked
         $mform->addElement('checkbox', 'param5', get_string('masked', 'dataformfield_time'));
         $mform->addHelpButton('param5', 'masked', 'dataformfield_time');
-        
+
         // Start year
         $mform->addElement('text', 'param2', get_string('startyear', 'dataformfield_time'));
         $mform->setType('param2', PARAM_INT);

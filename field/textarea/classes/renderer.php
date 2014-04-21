@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -21,7 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
-
 
 /**
  *
@@ -47,7 +46,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                     $replacements[$pattern] = '';
                     continue;
                 }
-                $replacements[$pattern] = array(array($this,'display_edit'), array($entry, array('required' => $required)));
+                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
                 break;
             }
 
@@ -58,12 +57,12 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                         $replacements[$pattern] = $this->display_browse($entry);
                         break;
 
-                    // plain text, no links
+                    // Plain text, no links
                     case "[[$fieldname:text]]":
                         $replacements[$pattern] = html_to_text($this->display_browse($entry, array('text' => true)));
                         break;
 
-                    // plain text, with links
+                    // Plain text, with links
                     case "[[$fieldname:textlinks]]":
                         $replacements[$pattern] = $this->display_browse($entry, array('text' => true, 'links' => true));
                         break;
@@ -133,7 +132,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
 
-        // editor
+        // Editor
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
 
         $attr = array();
@@ -151,7 +150,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                 $mform->addRule($fieldname, null, 'required', null, 'client');
             }
         } else {
-            // format
+            // Format
             $data->{"{$fieldname}format"} = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
 
             $data = file_prepare_standard_editor($data, $fieldname, $field->get_editoroptions(), $field->get_df()->context, 'mod_dataform', 'content', $contentid);
@@ -220,11 +219,11 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         // Only [[fieldname]] can be imported
         if ($patternname != $this->_field->name) {
             return array(array(), array());
-        }            
-        
+        }
+
         return parent::get_pattern_import_settings($mform, $patternname, $header);
     }
-    
+
     /**
      * Array of patterns this field supports
      */

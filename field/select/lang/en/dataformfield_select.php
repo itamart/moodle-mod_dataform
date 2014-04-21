@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage select
@@ -24,5 +24,3 @@ $string['pluginname'] = 'Select';
 $string['allowaddoption'] = 'Allow adding options';
 $string['optionsdefault'] = 'Default value';
 $string['options'] = 'Options';
-
-

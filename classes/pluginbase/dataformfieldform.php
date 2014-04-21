@@ -12,15 +12,15 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
-namespace mod_dataform\pluginbase; 
+
+namespace mod_dataform\pluginbase;
 
 defined('MOODLE_INTERNAL') or die;
 
@@ -34,28 +34,28 @@ class dataformfieldform extends \moodleform {
 
     public function __construct($field, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
         $this->_field = $field;
-        
-        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
+
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);
     }
-    
-    function definition() {        
+
+    public function definition() {
         $mform = &$this->_form;
 
-        // buttons
-        //-------------------------------------------------------------------------------
+        // Buttons
+        // -------------------------------------------------------------------------------
         $this->add_action_buttons();
 
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // name
-        $mform->addElement('text', 'name', get_string('name'), array('size'=>'32'));
+        // Name
+        $mform->addElement('text', 'name', get_string('name'), array('size' => '32'));
         $mform->addRule('name', null, 'required', null, 'client');
-        
-        // description
-        $mform->addElement('text', 'description', get_string('description'), array('size'=>'64'));
 
-        // visible
+        // Description
+        $mform->addElement('text', 'description', get_string('description'), array('size' => '64'));
+
+        // Visible
         $options = array(
             dataformfield::VISIBLE_NONE => get_string('fieldvisiblenone', 'dataform'),
             dataformfield::VISIBLE_OWNER => get_string('fieldvisibleowner', 'dataform'),
@@ -65,9 +65,9 @@ class dataformfieldform extends \moodleform {
         $mform->setDefault('visible', dataformfield::VISIBLE_ALL);
 
         // Editable
-        //$options = array(-1 => get_string('unlimited'), 0 => get_string('none'));
+        // $options = array(-1 => get_string('unlimited'), 0 => get_string('none'));
         $options = array(-1 => get_string('yes'), 0 => get_string('no'));
-        //$options = $options + array_combine(range(1,50), range(1,50));
+        // $options = $options + array_combine(range(1, 50), range(1, 50));
         $mform->addElement('select', 'editable', get_string('fieldeditable', 'dataform'), $options);
         $mform->setDefault('editable', -1);
 
@@ -86,32 +86,32 @@ class dataformfieldform extends \moodleform {
             $mform->setType('label', PARAM_CLEANHTML);
         }
 
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $this->field_definition();
 
-        // buttons
-        //-------------------------------------------------------------------------------
+        // Buttons
+        // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
 
     /**
      *
      */
-    function field_definition() {
-    }    
-    
+    public function field_definition() {
+    }
+
     /**
      *
      */
-    function add_action_buttons($cancel = true, $submit = null){
+    public function add_action_buttons($cancel = true, $submit = null) {
         $mform = &$this->_form;
 
-        $buttonarray=array();
-        // save and display
+        $buttonarray = array();
+        // Save and display
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        // save and continue
+        // Save and continue
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savecont', 'dataform'));
-        // cancel
+        // Cancel
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
@@ -120,19 +120,19 @@ class dataformfieldform extends \moodleform {
     /**
      *
      */
-    function get_data() {
+    public function get_data() {
         return parent::get_data();
     }
 
     /**
      *
      */
-    function validation($data, $files) {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         $df = \mod_dataform_dataform::instance($this->_field->dataid);
 
         if ($df->name_exists('fields', $data['name'], $this->_field->id)) {
-            $errors['name'] = get_string('invalidname','dataform', get_string('field', 'dataform'));
+            $errors['name'] = get_string('invalidname', 'dataform', get_string('field', 'dataform'));
         }
 
         return $errors;

@@ -12,29 +12,29 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/** 
+/**
  * Definition of log events
  */
 
 defined('MOODLE_INTERNAL') or die;
 
 $logs = array(
-    array('module'=>'dataform', 'action'=>'view', 'mtable'=>'dataform', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'add', 'mtable'=>'dataform', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'update', 'mtable'=>'dataform', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'record delete', 'mtable'=>'dataform', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'fields add', 'mtable'=>'dataform_fields', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'fields update', 'mtable'=>'dataform_fields', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'views add', 'mtable'=>'dataform_views', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'views update', 'mtable'=>'dataform_views', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'filters add', 'mtable'=>'dataform_filters', 'field'=>'name'),
-    array('module'=>'dataform', 'action'=>'filters update', 'mtable'=>'dataform_filters', 'field'=>'name')
+    array('module' => 'dataform', 'action' => 'view', 'mtable' => 'dataform', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'add', 'mtable' => 'dataform', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'update', 'mtable' => 'dataform', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'record delete', 'mtable' => 'dataform', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'fields add', 'mtable' => 'dataform_fields', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'fields update', 'mtable' => 'dataform_fields', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'views add', 'mtable' => 'dataform_views', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'views update', 'mtable' => 'dataform_views', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'filters add', 'mtable' => 'dataform_filters', 'field' => 'name'),
+    array('module' => 'dataform', 'action' => 'filters update', 'mtable' => 'dataform_filters', 'field' => 'name')
 );

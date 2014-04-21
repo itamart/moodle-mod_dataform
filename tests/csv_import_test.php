@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ class mod_dataform_import_testcase extends advanced_testcase {
     /**
      * Test 1: Number of imported entries and contents.
      */
-    function test_csv_import() {
+    public function test_csv_import() {
         global $DB;
 
         $df = $this->get_a_dataform();
@@ -96,8 +96,8 @@ class mod_dataform_import_testcase extends advanced_testcase {
         $importview->param2 = "EAU:id\n". $importview->param2;
         $importview->update($importview->data);
 
-        $this->assertEquals(0, $DB->count_records('dataform_entries'));        
-        
+        $this->assertEquals(0, $DB->count_records('dataform_entries'));
+
         // Import entries
         $eaufieldid = dataformfield_entryauthor_entryauthor::INTERNALID;
         $options = array(
@@ -112,7 +112,7 @@ class mod_dataform_import_testcase extends advanced_testcase {
             '2,Hello,Oh my god',
             '2,World,It wasn\'t me',
         );
-        
+
         $data = new stdClass;
         $data->eids = array();
         $data->errors = array();
@@ -122,7 +122,7 @@ class mod_dataform_import_testcase extends advanced_testcase {
 
         $this->assertEquals(2, $DB->count_records('dataform_entries'));
         $this->assertEquals(4, $DB->count_records('dataform_contents'));
-        
+
         // Text content
         $contents = array_values($DB->get_records_menu('dataform_contents', array('fieldid' => $text->id), 'id', 'id,content'));
         $this->assertEquals('Hello', $contents[0]);
@@ -134,6 +134,6 @@ class mod_dataform_import_testcase extends advanced_testcase {
         $this->assertEquals('It wasn\'t me', $contents[1]);
 
         $df->delete();
-        $this->assertEquals(0, $DB->count_records('dataform_entries'));        
+        $this->assertEquals(0, $DB->count_records('dataform_entries'));
     }
 }

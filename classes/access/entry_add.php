@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,27 +36,26 @@ defined('MOODLE_INTERNAL') || die();
 class entry_add extends base {
 
 
-
     /**
      * @return bool
      */
-    public static function validate($params) {       
+    public static function validate($params) {
         $dataformid = $params['dataformid'];
 
         $df = \mod_dataform_dataform::instance($dataformid);
-        
-        // Cannot add in a view that does not allow submission 
+
+        // Cannot add in a view that does not allow submission
         if (!empty($params['viewid'])) {
             $view = $df->view_manager->get_view_by_id($params['viewid']);
             if (!$view or !$view->allows_submission()) {
                 return false;;
             }
-        }        
+        }
         // User at max entries (per interval)
         if ($df->user_at_max_entries(true)) {
-            return false;    // no more entries for you (come back next interval or so)
-        }        
-        
+            return false;    // No more entries for you (come back next interval or so)
+        }
+
         // Early entries
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlyadd');
@@ -72,7 +71,7 @@ class entry_add extends base {
                 return false;
             }
         }
-        
+
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
 
         // Own entry
@@ -103,7 +102,7 @@ class entry_add extends base {
             $params['capabilities'] = array('mod/dataform:entryanyadd');
             return parent::validate($params);
         }
-        
+
         return false;
     }
 
@@ -112,10 +111,10 @@ class entry_add extends base {
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $viewid = $params['viewid'];
-        
+
         return $man->get_type_rules('entry');
     }
- 
+
     /**
      * @return array
      */

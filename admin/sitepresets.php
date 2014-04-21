@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
  * @category admin
@@ -26,9 +26,9 @@ require_once("$CFG->libdir/adminlib.php");
 
 $urlparams = new stdClass;
 
-// presets list actions
-$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // ids of presets to delete
-$urlparams->download =  optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
+// Presets list actions
+$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // Ids of presets to delete
+$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);     // Ids of presets to download in one zip
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 admin_externalpage_setup('moddataform_sitepresets');
@@ -38,13 +38,12 @@ $pm = new mod_dataform_preset_manager(0);
 // DATA PROCESSING
 $pm->process_presets($urlparams);
 
-
 echo $OUTPUT->header();
 
-// print the preset form
+// Print the preset form
 $pm->print_preset_form();
 
-// if there are presets print admin style list of them
+// If there are presets print admin style list of them
 echo html_writer::tag('h4', get_string('presetavailableinsite', 'dataform'));
 $presets = $pm->get_user_presets($pm::PRESET_SITEAREA);
 echo $pm->get_site_presets_list($presets);

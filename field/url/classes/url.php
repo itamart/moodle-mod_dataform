@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage url
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
     /**
@@ -29,7 +28,7 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
     protected function content_names() {
         return array('', 'alt');
     }
-    
+
     /**
      *
      */
@@ -37,12 +36,12 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
         $fieldid = $this->id;
         $oldcontents = array();
         $contents = array();
-        // old contents
+        // Old contents
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = isset($entry->{"c$fieldid". '_content'}) ? $entry->{"c$fieldid". '_content'} : null;
             $oldcontents[] = isset($entry->{"c$fieldid". '_content1'}) ? $entry->{"c$fieldid". '_content1'} : null;
         }
-        // new contents
+        // New contents
         $url = $alttext = null;
         if (!empty($values)) {
             foreach ($values as $name => $value) {
@@ -64,7 +63,7 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
         }
         return array($contents, $oldcontents);
     }
-    
+
     /**
      *
      */

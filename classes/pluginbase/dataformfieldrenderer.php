@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -20,8 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
- 
+namespace mod_dataform\pluginbase;
+
 defined('MOODLE_INTERNAL') or die;
 
 /**
@@ -56,17 +56,17 @@ abstract class dataformfieldrenderer {
         $fieldname = $this->_field->name;
 
         $found = array();
-        
+
         // Capture label patterns
         if (strpos($text, "[[$fieldname@]]") !== false and !empty($this->_field->label)) {
             $found["[[$fieldname@]]"] = "[[$fieldname@]]";
-            
+
             $text = str_replace("[[$fieldname@]]", $this->_field->label, $text);
         }
-        
+
         // Search and collate field patterns
         $patterns = $patterns ? $patterns : array_keys($this->patterns());
-        
+
         foreach ($patterns as $pattern) {
             if (strpos($text, $pattern) !== false) {
                 $found[$pattern] = $pattern;
@@ -139,20 +139,19 @@ abstract class dataformfieldrenderer {
         $field = $this->_field;
         $fieldid = $field->id;
         $fieldname = $field->name;
-        
+
         $patternpart = trim(str_replace($fieldname, '', $patternname), ':');
         $name = "f_{$fieldid}_$patternpart";
 
         $grp = array();
-        $grp[] = &$mform->createElement('text', "{$name}_name", null, array('size'=>'16'));
-        
+        $grp[] = &$mform->createElement('text', "{$name}_name", null, array('size' => '16'));
+
         $mform->setType("{$name}_name", PARAM_TEXT);
         $mform->setDefault("{$name}_name", $header);
 
-
         return array($grp, array());
     }
-    
+
     /**
      * Generates and returns the field patterns menu by category from
      * the field's patterns list.
@@ -161,21 +160,21 @@ abstract class dataformfieldrenderer {
      * @return array Associative array of associative arrays
      */
     public final function get_menu($showall = false) {
-        // the default menu category for fields
+        // The default menu category for fields
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // which category
+                // Which category
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('fields', 'dataform');
                 }
-                // prepare array
+                // Prepare array
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // add tag
+                // Add tag
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -185,10 +184,10 @@ abstract class dataformfieldrenderer {
     /**
      * Returns the list of replacements for the specified field patterns.
      *
-     * @param array $patterns 
+     * @param array $patterns
      * @param stdClass $entry
      * @param array $options
-     * @return array pattern => replacement 
+     * @return array pattern => replacement
      */
     public function get_replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -202,7 +201,7 @@ abstract class dataformfieldrenderer {
         $patterns = $this->add_clean_pattern_keys($patterns);
         $replacements = $this->replacements($patterns, $entry, $options);
 
-        // Do we need to set the template pattern? 
+        // Do we need to set the template pattern?
         if (!in_array("[[$fieldname@]]", $patterns) or !$field->label) {
             return $replacements;
         }
@@ -210,7 +209,7 @@ abstract class dataformfieldrenderer {
         // Set the template pattern
         $templaterep = array();
         if ($editing) {
-            $templaterep["[[$fieldname@]]"] = array(array($this ,'parse_label'), array($replacements));
+            $templaterep["[[$fieldname@]]"] = array(array($this, 'parse_label'), array($replacements));
         } else {
             $template = $field->label;
             foreach ($replacements as $pattern => $replacement) {
@@ -247,7 +246,7 @@ abstract class dataformfieldrenderer {
         $field = $this->_field;
         $patterns = array_keys($definitions);
         $delims = implode('|', $patterns);
-        
+
         // Escape [ and ] and the pattern rule character *
         $delims = quotemeta($delims);
 
@@ -262,7 +261,7 @@ abstract class dataformfieldrenderer {
                             $htmlparts = '';
                         }
                         list($func, $params) = $def;
-                        call_user_func_array($func, array_merge(array($mform),$params));
+                        call_user_func_array($func, array_merge(array($mform), $params));
                     }
                 } else {
                     $htmlparts .= $def;
@@ -286,10 +285,10 @@ abstract class dataformfieldrenderer {
     /**
      * Returns list of replacements for the specified field patterns.
      *
-     * @param array $patterns 
+     * @param array $patterns
      * @param stdClass $entry
      * @param array $options
-     * @return array pattern => replacement 
+     * @return array pattern => replacement
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         return array_fill_keys($patterns, '');
@@ -298,27 +297,27 @@ abstract class dataformfieldrenderer {
     /**
      * Array of patterns this field supports
      * The label pattern should always be first where applicable
-     * so that it is processed first in view templates 
+     * so that it is processed first in view templates
      * so that in turn patterns it may contain could be processed.
      *
-     * @return array pattern => array(visible in menu, category) 
+     * @return array pattern => array(visible in menu, category)
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
 
         $patterns = array();
         $patterns["[[$fieldname@]]"] = array(true, $fieldname);
-        
+
         return $patterns;
     }
-    
+
     /**
      * Array of patterns this field supports in the view template
      * (that is, outside an entry). These patterns will be listed
      * in the view patterns selector in the view configuration form.
      * These patterns must start with fieldname: and then a specific tag.
      *
-     * @return array pattern => array(visible in menu, category) 
+     * @return array pattern => array(visible in menu, category)
      */
     protected function view_patterns() {
         return array();

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrystate
@@ -38,5 +38,3 @@ $string['transition_help'] = 'A list of states that can be advanced to from this
 $string['incorrectstate'] = 'The entry ({$a}) is already in the requested state.';
 $string['instatingdenied'] = 'You are not permitted to change the state of this entry.';
 $string['statechanged'] = 'The state of entry id {$a->id} has changed from {$a->old} to {$a->new}.';
-
-

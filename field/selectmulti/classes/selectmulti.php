@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage selectmulti
@@ -21,10 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\dataformfield {
     protected $_options = array();
-    
+
     /**
      * Returns list of seprators.
      *
@@ -46,7 +45,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
      */
     public function get_separator() {
         $separatortypes = $this->separator_types;
-        
+
         $selected = (int) $this->param3;
         return $separatortypes[$selected]['chr'];
     }
@@ -56,14 +55,14 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
      */
     public function format_search_value($searchparams) {
         list($not, $operator, $value) = $searchparams;
-        if (is_array($value)){
+        if (is_array($value)) {
             $selected = implode(', ', $value['selected']);
             $allrequired = '('. ($value['allrequired'] ? get_string('requiredall') : get_string('requirednotall', 'dataform')). ')';
             return $not. ' '. $operator. ' '. $selected. ' '. $allrequired;
         } else {
             return false;
         }
-    }  
+    }
 
     /**
      * Overriding parent to adjust search value. The search value is expected to be
@@ -71,7 +70,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
      * Searching a value is searching for the index: '#n#'.
      * Equal is simple, e.g. '#1#3#' where the searched options are 1 and 3.
      * Like requires a disjunction of each option. e.g. '%#1#%' OR '%#3#%'
-     * or 
+     * or
      */
     public function get_search_sql($search) {
         list($element, $not, $operator, $value) = $search;
@@ -80,27 +79,27 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         if (!$options = $this->options_menu()) {
             return null;
         }
-        
+
         $optionkeys = array_keys($options);
-        
+
         // Search with all required
         if ($value == '-000-') {
             $value = '#'. implode('#', $optionkeys). '#';
             $search = array($element, $not, $operator, $value);
             return parent::get_search_sql($search);
         }
-        
+
         $searchedvalues = array_map('trim', explode('|', $value));
 
         // Search equal to given list
-        if ($operator == '=') {        
+        if ($operator == '=') {
             $searchedoptions = array_intersect($options, $searchedvalues);
             // If we are searching for a value that is not in options, search for the impossible
             if (count($searchedoptions) != count($searchedvalues)) {
                 $search = array($element, $not, $operator, '##');
                 return parent::get_search_sql($search);
             }
-            
+
             // All searched values are there
             $value = '#'. implode('#', array_keys($searchedoptions)). '#';
             $search = array($element, $not, $operator, $value);
@@ -113,10 +112,10 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         $params = array();
         if ($operator == 'LIKE') {
             $searchsqls = array();
-        
+
             $optionsstr = implode('#', $options);
 
-            foreach ($searchedvalues as $searched) {               
+            foreach ($searchedvalues as $searched) {
                 if ($pos = strpos($optionsstr, $searched) or $pos !== false) {
                     $key = substr_count($optionsstr, '#', 0, $pos + 1) + 1;
                     $value = '#'. $key. '#';
@@ -144,7 +143,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     protected function content_names() {
         return array('selected', 'newvalue');
     }
-    
+
     /**
      *
      */
@@ -153,16 +152,16 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         $oldcontents = array();
         $contents = array();
 
-        // old contents
+        // Old contents
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
 
-        // parse values
+        // Parse values
         $selected = !empty($values['selected']) ? $values['selected'] : array();
         $newvalues = !empty($values['newvalue']) ? explode('#', $values['newvalue']) : array();
 
-        // update new values in field type
+        // Update new values in field type
         if ($newvalues) {
             $options = $this->options_menu();
             $update = false;
@@ -180,7 +179,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
             }
         }
 
-        // new contents
+        // New contents
         if (!empty($selected)) {
             $contents[] = '#'. implode('#', $selected). '#';
         }
@@ -189,12 +188,12 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     }
 
     /**
-     * 
+     *
      */
     public function options_menu($forceget = false) {
         if (!$this->_options or $forceget) {
             if ($this->param1) {
-                $rawoptions = explode("\n",$this->param1);
+                $rawoptions = explode("\n", $this->param1);
                 foreach ($rawoptions as $key => $option) {
                     $option = trim($option);
                     if ($option != '') {
@@ -207,10 +206,10 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     }
 
     /**
-     * 
+     *
      */
     public function default_values() {
-        $rawdefaults = explode("\n",$this->param2);
+        $rawdefaults = explode("\n", $this->param2);
         $options = $this->options_menu();
 
         $defaults = array();
@@ -222,20 +221,20 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         }
         return $defaults;
     }
-    
+
     // IMPORT EXPORT
     /**
-     * 
+     *
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
-        // import only from csv
+        // Import only from csv
         if (!$csvrecord) {
             return $data;
         }
-        
+
         // There is only one import pattern for this field
         $importsetting = reset($importsettings);
-        
+
         $fieldid = $this->id;
         $csvname = $importsetting['name'];
         $allownew = $importsetting['allownew'];
@@ -252,7 +251,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
                         $selected[] = count($options) + count($newvalues);
                     }
                 } else {
-                    $selected[] = $optionkey;                    
+                    $selected[] = $optionkey;
                 }
             }
             if ($selected) {
@@ -262,7 +261,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
                 $data->{"field_{$fieldid}_{$entryid}_newvalue"} = implode('#', $newvalues);
             }
         }
-    
+
         return $data;
     }
 

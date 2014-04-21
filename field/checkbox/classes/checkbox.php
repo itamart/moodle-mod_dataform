@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage checkbox
@@ -27,7 +27,7 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
      *
      */
     protected function content_names() {
-        $optioncount = count(explode("\n",$this->param1));
+        $optioncount = count(explode("\n", $this->param1));
         $contentnames = array('newvalue');
         foreach (range(1, $optioncount) as $key) {
             $contentnames[] = "selected_$key";
@@ -37,7 +37,7 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
 
         return $contentnames;
     }
-    
+
     /**
      *
      */
@@ -53,7 +53,7 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
         // When called by form submission collate the selected to one array
         $selected = array();
         if (!empty($values)) {
-            $optioncount = count(explode("\n",$this->param1));
+            $optioncount = count(explode("\n", $this->param1));
             foreach (range(1, $optioncount) as $key) {
                 if (!empty($values["selected_$key"])) {
                     $selected[] = $key;
@@ -64,5 +64,5 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
 
         return parent::format_content($entry, $values);
     }
-    
+
 }

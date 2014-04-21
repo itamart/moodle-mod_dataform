@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrytime
@@ -25,4 +25,3 @@ $string['fieldname'] = 'ETM';
 $string['pluginname'] = 'Entry time (Internal)';
 $string['timecreated'] = 'Time created';
 $string['timemodified'] = 'Time modified';
-

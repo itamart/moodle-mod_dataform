@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage ratingmdl
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */ 
+ */
 
 $capabilities = array(
     // Own Entry - Rate
@@ -34,7 +34,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:manageratings'
+        'clonepermissionsfrom' => 'mod/dataform:manageratings'
     ),
 
     // Own Entry View Aggregates
@@ -48,7 +48,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
+        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
     // Own Entry View Ratings
@@ -61,7 +61,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
+        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
     // Any Entry - Rate
@@ -77,7 +77,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:manageratings'
+        'clonepermissionsfrom' => 'mod/dataform:manageratings'
     ),
 
     // Any Entry View Aggregates
@@ -91,7 +91,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
+        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
     // Any Entry View Ratings
@@ -104,7 +104,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
+        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
 );

@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/. 
+ * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
  * @package dataformview
  * @subpackage csv
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,36 +36,35 @@ class dataformview_csv_importform extends moodleform {
 
     public function __construct($view, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
         $this->_view = $view;
-        
-        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
-    }
-    
 
-    function definition() {
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);
+    }
+
+    public function definition() {
 
         $view = $this->_view;
         $mform = &$this->_form;
 
-        // field settings
-        //-------------------------------------------------------------------------------
+        // Field settings
+        // -------------------------------------------------------------------------------
         $this->field_settings();
-        
-        // csv settings
-        //-------------------------------------------------------------------------------
+
+        // Csv settings
+        // -------------------------------------------------------------------------------
         $this->csv_settings();
-        
-        // action buttons
-        //-------------------------------------------------------------------------------
+
+        // Action buttons
+        // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
 
     /**
      *
      */
-    public function add_action_buttons($cancel = true, $submit = null){
+    public function add_action_buttons($cancel = true, $submit = null) {
         $mform = &$this->_form;
 
-        $grp=array();
+        $grp = array();
         // Test
         $grp[] = &$mform->createElement('submit', 'submitbutton_test', get_string('test', 'dataformview_csv'));
         // Import
@@ -75,7 +74,7 @@ class dataformview_csv_importform extends moodleform {
         $mform->addGroup($grp, 'buttongrp', '', ' ', false);
         $mform->closeHeaderBefore('buttongrp');
     }
-    
+
     /**
      *
      */
@@ -87,8 +86,8 @@ class dataformview_csv_importform extends moodleform {
         $mform->addElement('header', 'fieldsettingshdr', get_string('importfields', 'dataformview_csv'));
         $columns = $view->get_columns();
         foreach ($columns as $column) {
-            list($pattern, $header,) = $column;
-            $patternname = trim($pattern,'[]');
+            list($pattern, $header, ) = $column;
+            $patternname = trim($pattern, '[]');
             $header = $header ? $header : $patternname;
 
             if (!$fieldid = $view->get_pattern_fieldid($pattern)) {
@@ -98,13 +97,13 @@ class dataformview_csv_importform extends moodleform {
             if (!$field = $df->field_manager->get_field_by_id($fieldid)) {
                 continue;
             }
-            
+
             list($grp, $labels) = $field->renderer->get_pattern_import_settings($mform, $patternname, $header);
             if ($grp) {
                 $mform->addGroup($grp, "grp$patternname", $header, $labels, false);
             }
         }
-    }    
+    }
 
     /**
      *
@@ -115,38 +114,38 @@ class dataformview_csv_importform extends moodleform {
 
         $mform->addElement('header', 'csvsettingshdr', get_string('csvsettings', 'dataformview_csv'));
 
-        // delimiter
+        // Delimiter
         $delimiters = csv_import_reader::get_delimiter_list();
         $mform->addElement('select', 'delimiter', get_string('csvdelimiter', 'dataform'), $delimiters);
 
-        // enclosure
-        $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size'=>'10'));
+        // Enclosure
+        $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size' => '10'));
         $mform->setType('enclosure', PARAM_NOTAGS);
 
-        // encoding
+        // Encoding
         $choices = textlib::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
 
         // CSV content header
         $mform->addElement('header', 'csvcontenthdr', get_string('csvcontent', 'dataformview_csv'));
 
-        // upload file
+        // Upload file
         $mform->addElement('filepicker', 'importfile', get_string('uploadfile', 'dataformview_csv'));
-        
-        // upload text
+
+        // Upload text
         $mform->addElement('textarea', 'csvtext', get_string('uploadtext', 'dataformview_csv'), array('wrap' => 'virtual', 'rows' => '5', 'style' => 'width:100%;'));
-        
-        // update existing entries
+
+        // Update existing entries
         // $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_csv'));
-        
-        // edit after import
-        //$mform->addElement('selectyesno', 'editafter', get_string('importeditimported', 'dataformview_csv'));
+
+        // Edit after import
+        // $mform->addElement('selectyesno', 'editafter', get_string('importeditimported', 'dataformview_csv'));
     }
 
     /**
      *
      */
-    function data_preprocessing(&$data){
+    public function data_preprocessing(&$data) {
         $view = $this->_view;
         // CSV settings
         $csvsettings = $view->param1 ? $view->param1 : $view->get_default_csv_settings();
@@ -156,14 +155,13 @@ class dataformview_csv_importform extends moodleform {
             $data->encoding
         ) = explode(',', $csvsettings);
     }
-    
+
     /**
      *
      */
-    function set_data($data) {
+    public function set_data($data) {
         $this->data_preprocessing($data);
         parent::set_data($data);
     }
-
 
 }

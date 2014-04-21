@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ class entry_delete extends base {
         if (empty($params['entry'])) {
             return self::has_capability('mod/dataform:entryanydelete', $params);
         }
-        
+
         // Early entries
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlydelete');
@@ -55,7 +55,7 @@ class entry_delete extends base {
                 return false;
             }
         }
-        
+
         // Late entries
         if ($df->is_past_due()) {
             $params['capabilities'] = array('mod/dataform:entrylatedelete');
@@ -63,9 +63,9 @@ class entry_delete extends base {
                 return false;
             }
         }
-        
+
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
-       
+
         // Own entry
         if (\mod_dataform\pluginbase\dataformentry::is_own($entry)) {
             $params['capabilities'] = array('mod/dataform:entryowndelete');
@@ -103,10 +103,10 @@ class entry_delete extends base {
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $viewid = $params['viewid'];
-        
+
         return $man->get_type_rules('entry');
     }
- 
+
     /**
      * @return array
      */

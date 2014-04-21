@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage aligned
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +40,7 @@ class dataformview_aligned_form extends mod_dataform\pluginbase\dataformviewform
     /**
      *
      */
-    function definition_entry_template() {
+    protected function definition_entry_template() {
         $mform = &$this->_form;
 
         // Header
@@ -52,6 +52,5 @@ class dataformview_aligned_form extends mod_dataform\pluginbase\dataformviewform
         $mform->addHelpButton('param2', 'entrytemplate', 'dataformview_aligned');
         $this->add_patterns_selectors('param2', array('view', 'field'));
     }
-
 
 }

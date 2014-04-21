@@ -3,10 +3,10 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
     function RATER(config) {
         RATER.superclass.constructor.apply(this, arguments);
     }
-    
-    RATER.NAME = 'moodle-dataformfield_ratingmdl-rater';    
+
+    RATER.NAME = 'moodle-dataformfield_ratingmdl-rater';
     RATER.ATTRS = {
-        api: {value: M.cfg.wwwroot+'/mod/dataform/field/ratingmdl/rate_ajax.php'},
+        api: {value: M.cfg.wwwroot + '/mod/dataform/field/ratingmdl/rate_ajax.php'},
         fieldid: {value: 0},
         entryid: {value: 0}
     };
@@ -24,26 +24,26 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
             var fieldid = this.get('fieldid');
             var entryid = this.get('entryid');
 
-            this.form = Y.one('#ratingpost_'+fieldid+'_'+entryid);
+            this.form = Y.one('#ratingpost_' + fieldid + '_' + entryid);
             if (!this.form) {
                 Y.log('Could not locate the rating form', 'debug');
                 return;
             }
-            
-            this.selector = Y.one('#ratingmenu_'+fieldid+'_'+entryid);
+
+            this.selector = Y.one('#ratingmenu_' + fieldid + '_' + entryid);
             if (!this.selector) {
                 Y.log('Could not locate the rating selector', 'debug');
                 return;
             }
             this.selector.on('change', this.submit_rating, this);
             // Hide the submit buttons
-            Y.one('#ratingpostsubmit_'+fieldid+'_'+entryid).setStyle('display', 'none');
-            
-            this.ratingcount = Y.one('#ratingcount_'+fieldid+'_'+entryid);
-            this.ratingavg = Y.one('#ratingavg_'+fieldid+'_'+entryid);
-            this.ratingmax = Y.one('#ratingmax_'+fieldid+'_'+entryid);
-            this.ratingmin = Y.one('#ratingmin_'+fieldid+'_'+entryid);
-            this.ratingsum = Y.one('#ratingsum_'+fieldid+'_'+entryid);           
+            Y.one('#ratingpostsubmit_' + fieldid + '_' + entryid).setStyle('display', 'none');
+
+            this.ratingcount = Y.one('#ratingcount_' + fieldid + '_' + entryid);
+            this.ratingavg = Y.one('#ratingavg_' + fieldid + '_' + entryid);
+            this.ratingmax = Y.one('#ratingmax_' + fieldid + '_' + entryid);
+            this.ratingmin = Y.one('#ratingmin_' + fieldid + '_' + entryid);
+            this.ratingsum = Y.one('#ratingsum_' + fieldid + '_' + entryid);
         },
 
         submit_rating : function(e) {
@@ -51,8 +51,9 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
             var thedata = [];
 
             var inputssize = theinputs.size();
-            for (var i=0; i<inputssize; i++ ) {
-                if (theinputs.item(i).get("name")!="returnurl") {//dont include return url for ajax requests
+            for (var i = 0; i < inputssize; i++) {
+                if (theinputs.item(i).get("name") != "returnurl") {
+                    // Dont include return url for ajax requests
                     thedata[theinputs.item(i).get("name")] = theinputs.item(i).get("value");
                 }
             }
@@ -87,7 +88,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
                                         }
                                         if (scope.ratingsum) {
                                             scope.ratingsum.set('innerHTML', data.ratingsum);
-                                        }                                        
+                                        }
                                     }
                                 }
                                 return true;
@@ -96,7 +97,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
                                 alert(data.error);
                             }
                         } catch(e) {
-                            alert(e.message+" "+outcome.responseText);
+                            alert(e.message + " " + outcome.responseText);
                         }
                         return false;
                     }
@@ -111,7 +112,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
             Y.io(this.get('api'), cfg);
         }
     });
-    
+
     // Define a name space to call
     M.dataformfield_ratingmdl = M.dataformfield_ratingmdl || {};
     M.dataformfield_ratingmdl.rater = M.dataformfield_ratingmdl.rater || {};

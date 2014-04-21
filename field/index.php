@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @copyright 2011 Itamar Tzadok
@@ -30,16 +30,16 @@ require_once("$CFG->libdir/tablelib.php");
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
-$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // update field id
+$urlparams->d = optional_param('d', 0, PARAM_INT);             // Dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);            // Course module id
+$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // Update field id
 
-// fields list actions
-$urlparams->new        = optional_param('new', 0, PARAM_ALPHA);     // type of the new field
-$urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // ids (comma delimited) of fields to delete
-$urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // ids (comma delimited) of fields to duplicate
-$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // id of field to hide/(show to owner)/show to all
-$urlparams->editable    = optional_param('editable', 0, PARAM_INT);     // id of field to set editing
+// Fields list actions
+$urlparams->new        = optional_param('new', 0, PARAM_ALPHA);     // Type of the new field
+$urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of fields to delete
+$urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of fields to duplicate
+$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // Id of field to hide/(show to owner)/show to all
+$urlparams->editable    = optional_param('editable', 0, PARAM_INT);     // Id of field to set editing
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
@@ -50,23 +50,27 @@ $df->require_manage_permission('fields');
 $df->set_page('field/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
 $fieldman = $df->field_manager;
-// Duplicate requested fields
+
 if ($urlparams->duplicate and confirm_sesskey()) {
+    // Duplicate requested fields
     $fieldman->process_fields('duplicate', $urlparams->duplicate, $urlparams->confirmed);
-// Delete requested fields
+
 } else if ($urlparams->delete and confirm_sesskey()) {
+    // Delete requested fields
     $fieldman->process_fields('delete', $urlparams->delete, $urlparams->confirmed);
-// Set field visibility
+
 } else if ($urlparams->visible and confirm_sesskey()) {
-    $fieldman->process_fields('visible', $urlparams->visible, true);    // confirmed by default
-// Set field editability
+    // Set field visibility (confirmed by default)
+    $fieldman->process_fields('visible', $urlparams->visible, true);
+
 } else if ($urlparams->editable and confirm_sesskey()) {
-    $fieldman->process_fields('editable', $urlparams->editable, true);    // confirmed by default
+    // Set field editability (confirmed by default)
+    $fieldman->process_fields('editable', $urlparams->editable, true);
 }
 
 // Get the fields

@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package    dataformtool
@@ -34,7 +34,7 @@ class dataformtool_entryperuser {
         if (!$users = $df->get_gradebook_users()) {
             return;
         }
-        
+
         // Construct entries data
         $data = (object) array('eids' => array());
         $entryid = -1;
@@ -46,13 +46,13 @@ class dataformtool_entryperuser {
         // Add entries
         $em = new mod_dataform_entry_manager($df->id);
         $processed = $em->process_entries('update', $data->eids, $data, true);
-        
+
         if (is_array($processed)) {
             list($strnotify, $processedeids) = $processed;
             if ($entriesprocessed = ($processedeids ? count($processedeids) : 0)) {
-               return array('success', $strnotify);
+                return array('success', $strnotify);
             }
         }
-        return array('problem', get_string('entriesupdated', 'dataform', get_string('no')));                     
+        return array('problem', get_string('entriesupdated', 'dataform', get_string('no')));
     }
 }

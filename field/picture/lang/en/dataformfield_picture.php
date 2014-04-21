@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage picture
@@ -28,5 +28,3 @@ $string['pluginname'] = 'Picture';
 $string['resizingimages'] = 'Resizing image thumbnails...';
 $string['thumbdimensions'] = 'Thumb size';
 $string['thumbdimensions_help'] = 'The thumb size (in pixels of the stored images. If not specified, thumbs are not generated.';
-
-

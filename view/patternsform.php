@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/. 
+ * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
  * @package dataform
  * @category view
- * @copyright 2014 Itamar Tzadok 
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,20 +31,20 @@ require_once("$CFG->libdir/formslib.php");
  *
  */
 class mod_dataform_view_patternsform extends moodleform {
-    
-    function definition() {
+
+    public function definition() {
 
         $patterns = $this->_customdata['patterns'];
         $mform = &$this->_form;
 
         // Patterns
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         foreach ($patterns as $key => $pattern) {
             $this->definition_pattern_replacement($key, $pattern);
         }
-        
-        // action buttons
-        //-------------------------------------------------------------------------------
+
+        // Action buttons
+        // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
 
@@ -59,37 +59,37 @@ class mod_dataform_view_patternsform extends moodleform {
 
         $mform->addElement('hidden', "pattern$i", $name);
         $mform->setType("pattern$i", PARAM_TEXT);
-        
+
         $grp = array();
-        $grp[] = &$mform->createElement('advcheckbox', "enable$i");                   
-        $grp[] = &$mform->createElement('text', "replacement$i", null, array('size'=>'16'));                   
+        $grp[] = &$mform->createElement('advcheckbox', "enable$i");
+        $grp[] = &$mform->createElement('text', "replacement$i", null, array('size' => '16'));
         $mform->addGroup($grp, "grp$i", $name, ' ', false);
-                            
+
         $mform->setType("replacement$i", PARAM_TEXT);
         $mform->setDefault("replacement$i", $replacement);
         $mform->disabledIf("replacement$i", "enable$i", 'notchecked');
-    }    
+    }
 
     /**
      *
      */
-    function get_data() {
+    public function get_data() {
         if ($data = parent::get_data()) {
             // Collate pattern replacements
             $replacements = array();
             $i = 0;
-            
+
             while (isset($data->{"enable$i"})) {
                 if (!$data->{"enable$i"}) {
                     $i++;
                     continue;
                 }
-                
+
                 $replacements[$data->{"pattern$i"}] = $data->{"replacement$i"};
                 $i++;
             }
-            
-            $data->replacements = $replacements ? $replacements : null;            
+
+            $data->replacements = $replacements ? $replacements : null;
         }
         return $data;
     }

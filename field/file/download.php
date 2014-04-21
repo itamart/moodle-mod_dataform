@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage file
@@ -33,4 +33,3 @@ $count = $DB->get_field('dataform_contents', 'content2', array('id' => $cid));
 $count++;
 $DB->set_field('dataform_contents', 'content2', $count, array('id' => $cid));
 redirect(new moodle_url("/pluginfile.php/$context/mod_dataform/content/$cid/$file"));
-

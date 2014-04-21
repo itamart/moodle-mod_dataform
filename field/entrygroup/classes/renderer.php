@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrygroup
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die();
 
-
 /**
  *
  */
 class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -37,7 +36,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
 
         // Set the group object
         $group = new stdClass;
-        if ($entry->id < 0) { // new record (0)
+        if ($entry->id < 0) { // New record (0)
             $entry->groupid = $field->df->currentgroup;
             $group->id = $entry->groupid;
             $group->idnumber = null;
@@ -75,9 +74,9 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
                     $replacements[$pattern] = $group->name;
                     break;
 
-//                    case 'description':
-//                        $replacements[$pattern] = $group->description;
-//                        break;
+                // Case 'description':
+                    // $replacements[$pattern] = $group->description;
+                    // Break;
 
                 case 'picture':
                     $replacements[$pattern] = print_group_picture($group, $field->get_df()->course->id, false, true);
@@ -89,7 +88,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
 
                 case 'edit':
                     if ($edit and has_capability('mod/dataform:manageentries', $field->get_df()->context)) {
-                        $replacements[$pattern] = array(array($this,'display_edit'), array($entry));
+                        $replacements[$pattern] = array(array($this, 'display_edit'), array($entry));
                     } else {
                         $replacements[$pattern] = $group->name;
                     }
@@ -101,7 +100,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
     }
 
     /**
-     * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()} 
+     * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()}
      * to return import settings only for id, idnumber.
      *
      * @param moodleform $mform
@@ -110,16 +109,16 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
      */
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
         $allowedpatternparts = array('id', 'idnumber');
-        
+
         $fieldname = $this->_field->name;
         $patternpart = trim(str_replace($fieldname, '', $patternname), ':');
-        
+
         if (!in_array($patternpart, $allowedpatternparts)) {
             return array(array(), array());
         }
         return parent::get_pattern_import_settings($mform, $patternname, $header);
     }
-    
+
     /**
      *
      */
@@ -132,7 +131,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $selected = $entry->groupid;
         static $groupsmenu = null;
         if (is_null($groupsmenu)) {
-            $groupsmenu = array(0 => get_string('choosedots'));        
+            $groupsmenu = array(0 => get_string('choosedots'));
             if ($groups = groups_get_activity_allowed_groups($field->df->cm)) {
                 foreach ($groups as $groupid => $group) {
                     $groupsmenu[$groupid] = $group->name;
@@ -145,7 +144,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -155,11 +154,11 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $patterns["[[$fieldname:id]]"] = array(true, $cat);
         $patterns["[[$fieldname:name]]"] = array(true, $cat);
         $patterns["[[$fieldname:idnumber]]"] = array(true, $cat);
-        //$patterns["[[$fieldname:description]]"] = array(true, $cat);
+        // $patterns["[[$fieldname:description]]"] = array(true, $cat);
         $patterns["[[$fieldname:picture]]"] = array(true, $cat);
         $patterns["[[$fieldname:picturelarge]]"] = array(false, $cat);
         $patterns["[[$fieldname:edit]]"] = array(true, $cat);
 
-        return $patterns; 
+        return $patterns;
     }
 }

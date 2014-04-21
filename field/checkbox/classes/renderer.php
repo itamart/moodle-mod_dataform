@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage checkbox
@@ -23,7 +23,7 @@
 defined('MOODLE_INTERNAL') or die;
 
 /**
- * 
+ *
  */
 class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer {
 
@@ -41,17 +41,17 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
                 $cb->setChecked(true);
             }
         }
-        // add checkbox controller
-        
+        // Add checkbox controller
+
         return array($grp, array($field->separator));
     }
-    
+
     /**
      *
      */
     protected function set_required(&$mform, $fieldname, $selected) {
         global $PAGE;
-        
+
         $mform->addRule($fieldname, null, 'required', null, 'client');
         // JS Error message
         $options = array(
@@ -62,10 +62,10 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
         $module = array(
             'name' => 'M.dataformfield_checkbox_required',
             'fullpath' => '/mod/dataform/field/checkbox/checkbox.js',
-            'requires' => array('base','node')
+            'requires' => array('base', 'node')
         );
 
-        $PAGE->requires->js_init_call('M.dataformfield_checkbox_required.init', array($options), false, $module);            
+        $PAGE->requires->js_init_call('M.dataformfield_checkbox_required.init', array($options), false, $module);
     }
 
     /**
@@ -78,7 +78,7 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
 
         $formfieldname = "field_{$fieldid}_{$entryid}_selected";
 
-        // only [[$fieldname]] is editable so check it if exists
+        // Only [[$fieldname]] is editable so check it if exists
         if (in_array("[[*$fieldname]]", $tags)) {
             $emptyfield  = true;
             foreach ($field->options_menu() as $key => $unused) {
@@ -94,5 +94,5 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
         }
         return null;
     }
-    
+
 }

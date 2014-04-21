@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ class behat_mod_dataform extends behat_base {
      * @Given /^I start afresh with dataform "(?P<dataform_name_string>(?:[^"]|\\")*)"$/
      * @param string $name
      */
-    public function i_start_afresh_with_dataform($name) {       
+    public function i_start_afresh_with_dataform($name) {
         $steps = $this->start_afresh_steps();
 
         // Test dataform
@@ -87,12 +87,12 @@ class behat_mod_dataform extends behat_base {
            '| activity | course | idnumber | name                 | intro                       |',
            "| dataform   | C1     | dataform1  | $name | Test dataform description |",
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
-        $steps[] = new Given('the following "activities" exist:', $table); 
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "activities" exist:', $table);
 
         return $steps;
     }
-        
+
     /**
      * Creates dataform fields.
      *
@@ -103,7 +103,7 @@ class behat_mod_dataform extends behat_base {
     public function the_following_dataform_exist($elementname, TableNode $data) {
         // Now that we need them require the data generators.
         require_once(__DIR__ . '/../generator/lib.php');
-        
+
         $this->datagenerator = testing_util::get_data_generator()->get_plugin_generator('mod_dataform');
 
         $elementdatagenerator = self::$elements[$elementname]['datagenerator'];
@@ -148,13 +148,13 @@ class behat_mod_dataform extends behat_base {
             } else {
                 throw new Exception($elementname . ' data generator is not implemented');
             }
-        }        
+        }
     }
 
     // ACTIVITY SETUP STEPS
 
     /**
-     * Adds a dataform as teacher 1 in course 1 and displays the dataform. 
+     * Adds a dataform as teacher 1 in course 1 and displays the dataform.
      * The step begins in a new test site.
      *
      * @Given /^I add a dataform with "(?P<dataform_url_string>(?:[^"]|\\")*)"$/
@@ -169,14 +169,14 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I expand all fieldsets');
 
         $steps = array_merge($steps, $this->dataform_form_fill_steps($data));
-       
+
         $steps[] = new Given('I press "Save and return to course"');
-        
+
         return $steps;
     }
 
     /**
-     * Validates dataform activity settings. 
+     * Validates dataform activity settings.
      * The step begins in the activity form.
      *
      * @Then /^the dataform settings should match "(?P<form_data_string>(?:[^"]|\\")*)"$/
@@ -187,7 +187,7 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
-     * Adds a test dataform as teacher 1 in course 1 and displays the dataform. 
+     * Adds a test dataform as teacher 1 in course 1 and displays the dataform.
      * The step begins in a new test site.
      *
      * @Given /^I add a test dataform$/
@@ -204,11 +204,11 @@ class behat_mod_dataform extends behat_base {
         $data = array(
             'Name | Test Dataform',
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('I set the following fields to these values:', $table);
-        
+
         $steps[] = new Given('I press "Save and display"');
-        
+
         return $steps;
     }
 
@@ -221,17 +221,17 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_delete_this_dataform() {
         $steps = array();
-       
+
         $steps[] = new Given('I follow "Delete activity"');
         $steps[] = new Given('I see "Are you absolutely sure you want to completely delete Dataform"');
         $steps[] = new Given('I press "Yes"');
-        $steps[] = new Given('I wait to be redirected');       
-        
+        $steps[] = new Given('I wait to be redirected');
+
         return $steps;
     }
 
     /**
-     * Go to the specified manage tab of the current dataform. 
+     * Go to the specified manage tab of the current dataform.
      * The step begins from the dataform's course page.
      *
      * @Given /^I go to manage dataform "(?P<tab_name_string>(?:[^"]|\\")*)"$/
@@ -243,9 +243,9 @@ class behat_mod_dataform extends behat_base {
             new Given('I follow "'. get_string($tabname, 'dataform'). '"'),
         );
     }
-    
+
     /**
-     * Adds a field of the specified type to the current dataform with the provided table data (usually Name). 
+     * Adds a field of the specified type to the current dataform with the provided table data (usually Name).
      * The step begins from the dataform's course page.
      *
      * @Given /^I add a dataform field "(?P<field_type_string>(?:[^"]|\\")*)" with "(?P<form_data_string>(?:[^"]|\\")*)"$/
@@ -265,16 +265,16 @@ class behat_mod_dataform extends behat_base {
         $func = "field_form_fill_steps_$type";
         $func = method_exists($this, $func) ? $func : "field_form_fill_steps_base";
         $steps = array_merge($steps, $this->$func($data));
-        
+
         // Save
         $steps[] = new Given('I press "' . get_string('savechanges') . '"');
         $steps[] = new Given('I wait to be redirected');
-        
+
         return $steps;
     }
 
     /**
-     * Adds a view of the specified type to the current dataform with the provided table data (usually Name). 
+     * Adds a view of the specified type to the current dataform with the provided table data (usually Name).
      * The step begins in the dataform's Manage | Views tab.
      *
      * @Given /^I add a dataform view "(?P<view_type_string>(?:[^"]|\\")*)" with "(?P<form_data_string>(?:[^"]|\\")*)"$/
@@ -308,19 +308,19 @@ class behat_mod_dataform extends behat_base {
             'param8',
             'param9',
             'param10',
-        );        
+        );
         $table = $this->convert_data_to_table($formfields, $data);
         $steps[] = new Given('I set the following fields to these values:', $table);
-        
+
         // Save
         $steps[] = new Given('I press "' . get_string('savechanges') . '"');
         $steps[] = new Given('I wait to be redirected');
-        
+
         return $steps;
     }
 
     /**
-     * Sets a view as the default view of a dataform instance. 
+     * Sets a view as the default view of a dataform instance.
      * The step begins in the dataform's Manage | Views tab
      * with the designated view (by name) already added.
      *
@@ -331,14 +331,13 @@ class behat_mod_dataform extends behat_base {
         // Click the Default button of the view
         $idsetdefault = 'id_'. str_replace(' ', '_', $name). '_set_default';
         $steps[] = new Given('I follow "' . $idsetdefault. '"');
-        
+
         return $steps;
     }
 
 
-
     /**
-     * Adds a filter with the specified data to the current dataform. 
+     * Adds a filter with the specified data to the current dataform.
      * The step begins in the dataform's Manage | Filters tab.
      *
      * @Given /^I add a dataform filter with "(?P<form_data_string>(?:[^"]|\\")*)"$/
@@ -379,17 +378,17 @@ class behat_mod_dataform extends behat_base {
             'searchnot2',
             'searchoperator2',
             'searchvalue2',
-        );            
+        );
         $table = $this->convert_data_to_table($formfields, $data);
         $steps[] = new Given('I set the following fields to these values:', $table);
-        
+
         // Save
         $steps[] = new Given('I press "' . get_string('savechanges') . '"');
         $steps[] = new Given('I wait to be redirected');
-        
+
         return $steps;
     }
-    
+
     /**
      * Sets a sort criterion in the dataform filter.
      * The step begins in the dataform filter form.
@@ -406,13 +405,13 @@ class behat_mod_dataform extends behat_base {
         $i = (int) $number - 1;
         $sortfield = "sortfield$i";
         $sortdir = "sortdir$i";
-        
+
         $steps[] = new Given('I set the field "'. $sortfield. '" to "'. $fieldelement. '"');
         $steps[] = new Given('I set the field "'. $sortdir. '" to "'. $direction. '"');
-        
+
         return $steps;
     }
-    
+
     /**
      * Sets a search criterion in the dataform filter.
      * The step begins in the dataform filter form.
@@ -433,21 +432,20 @@ class behat_mod_dataform extends behat_base {
         $searchfield = "searchfield$i";
         $searchnot = "searchnot$i";
         $searchoperator = "searchoperator$i";
-        $searchvalue = "searchvalue$i"; 
+        $searchvalue = "searchvalue$i";
 
         $steps[] = new Given('I set the field "'. $searchandor. '" to "'. $andor. '"');
         $steps[] = new Given('I set the field "'. $searchfield. '" to "'. $field. '"');
         $steps[] = new Given('I set the field "'. $searchnot. '" to "'. $not. '"');
         $steps[] = new Given('I set the field "'. $searchoperator. '" to "'. $operator. '"');
         $steps[] = new Given('I set the field "'. $searchvalue. '" to "'. $value. '"');
-        
+
         return $steps;
     }
-    
-    
+
 
     /**
-     * Prepends text to the field's content. 
+     * Prepends text to the field's content.
      * The step begins in a form.
      *
      * @Given /^I prepend "(?P<text_string>(?:[^"]|\\")*)" to field "(?P<field_string>(?:[^"]|\\")*)"$/
@@ -467,7 +465,7 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
-     * Appends text to the field's content. 
+     * Appends text to the field's content.
      * The step begins in a form.
      *
      * @Given /^I apppend "(?P<text_string>(?:[^"]|\\")*)" to field "(?P<field_string>(?:[^"]|\\")*)"$/
@@ -482,7 +480,7 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
-     * Replaces text in the field's content. 
+     * Replaces text in the field's content.
      * The step begins in a form.
      *
      * @Given /^I replace in field "(?P<field_string>(?:[^"]|\\")*)" "(?P<text_string>(?:[^"]|\\")*)" with "(?P<replacement_string>(?:[^"]|\\")*)"$/
@@ -495,17 +493,17 @@ class behat_mod_dataform extends behat_base {
         $field = behat_field_manager::get_form_field($node, $this->getSession());
         $value = $field->get_value();
         $value = str_replace($text, $replacement, $value);
-        
+
         // Hack to remove new line characters from editor field value
         if (get_class($field) == 'behat_form_editor') {
-            $value = str_replace(array("\n", "\r"), '', $value);        
+            $value = str_replace(array("\n", "\r"), '', $value);
         }
-        
+
         $field->set_value($value);
     }
 
     /**
-     * Sets a dataform field setting to the given content. 
+     * Sets a dataform field setting to the given content.
      * The step begins in the Fields manage tab.
      *
      * @Given /^I set dataform field "(?P<field_name_string>(?:[^"]|\\")*)" options to "(?P<options_string>(?:[^"]|\\")*)"$/
@@ -514,14 +512,14 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_set_dataform_field_options_to($name, $content) {
         $steps = array();
-        
+
         $steps[] = new Given('I follow "'. $name. '"');
         $steps[] = new Given('I expand all fieldsets');
 
-        $content = implode("\n", explode('\n', $content));        
+        $content = implode("\n", explode('\n', $content));
         $steps[] = new Given('I set the field "Options" to "'. $content. '"');
         $steps[] = new Given('I press "Save changes"');
-        
+
         return $steps;
     }
 
@@ -539,7 +537,7 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
-     * Fills a textarea with the specified text replacing \n with new lines. 
+     * Fills a textarea with the specified text replacing \n with new lines.
      * The step begins in a form.
      *
      * @Given /^I fill textarea "(?P<field_string>(?:[^"]|\\")*)" with "(?P<text_string>(?:[^"]|\\")*)"$/
@@ -549,7 +547,7 @@ class behat_mod_dataform extends behat_base {
     public function i_fill_textarea_with($name, $content) {
 
         $content = implode("\n", explode('\n', $content));
-        
+
         return array(new Given('I set the field "'. $name. '" to "'. $content. '"'));
     }
 
@@ -568,7 +566,6 @@ class behat_mod_dataform extends behat_base {
         $node->keyPress(13);
     }
 
-
     // ACTIVITY PARTICIPATION STEPS
 
     /**
@@ -581,7 +578,7 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
-     * Verifies that a new entry cannot be added neither via button nor via url. 
+     * Verifies that a new entry cannot be added neither via button nor via url.
      *
      * @Given /^I cannot add a new entry in dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" view "(?P<view_id_string>(?:[^"]|\\")*)"$/
      * @param string $dataformid
@@ -589,17 +586,17 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_cannot_add_a_new_entry_in_dataform_view($dataformid, $viewid) {
         $steps = array();
-        
+
         $steps[] = new Given('I do not see "Add a new entry"');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&editentries=-1"');
         $steps[] = new Given('I do not see "Save"');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '"');
-        
+
         return $steps;
     }
 
     /**
-     * Verifies that an entry cannot be edited neither via edit link nor via url. 
+     * Verifies that an entry cannot be edited neither via edit link nor via url.
      *
      * @Given /^I cannot edit entry "(?P<entry_id_string>(?:[^"]|\\")*)" in dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" view "(?P<view_id_string>(?:[^"]|\\")*)"$/
      * @param string $entryid
@@ -608,17 +605,17 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_cannot_edit_entry_in_dataform_view($entryid, $dataformid, $viewid) {
         $steps = array();
-        
+
         $steps[] = new Given('"Edit Entry '. $entryid. '" "link" does not exist');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&editentries='. $entryid. '"');
         $steps[] = new Given('"Save" "button" does not exist');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '"');
-        
+
         return $steps;
     }
 
     /**
-     * Verifies that an entry cannot be deleted neither via delete link nor via url. 
+     * Verifies that an entry cannot be deleted neither via delete link nor via url.
      *
      * @Given /^I cannot delete entry "(?P<entry_id_string>(?:[^"]|\\")*)" with content "(?P<text_string>(?:[^"]|\\")*)" in dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" view "(?P<view_id_string>(?:[^"]|\\")*)"$/
      * @param string $entryid
@@ -628,17 +625,16 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_cannot_delete_entry_with_content_in_dataform_view($entryid, $content, $dataformid, $viewid) {
         $steps = array();
-        
+
         $steps[] = new Given('"Delete Entry '. $entryid. '" "link" does not exist');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&delete='. $entryid. '&sesskey='. sesskey(). '"');
         $steps[] = new Given('I see "'. $content. '"');
-        
+
         return $steps;
     }
 
-
     // REPHRASES
-    
+
     /**
      * Checks, that page contains specified text. It also checks if the text is visible when running Javascript tests.
      *
@@ -689,9 +685,8 @@ class behat_mod_dataform extends behat_base {
         return (array(new Given('"'. $element. '" "'. $selectortype. '" should not exist')));
     }
 
-    
-    
-    
+
+
     /**
      * Returns list of steps for filling a dataform mod_form settings.
      *
@@ -722,20 +717,20 @@ class behat_mod_dataform extends behat_base {
             'Grading method',
             'Calculation',
         );
-            
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         foreach ($names as $key => $name) {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             $steps[] = new Given('I set the field "' . $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
+
     /**
      * Returns list of steps for filling a dataform mod_form settings.
      *
@@ -766,14 +761,14 @@ class behat_mod_dataform extends behat_base {
             'Grading method',
             'Calculation',
         );
-            
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         foreach ($names as $key => $name) {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             if ($name == 'Description') {
                 $steps[] = new Given('the field "'. $name. '" matches value "<p>'. $val. '</p>"');
                 continue;
@@ -781,10 +776,9 @@ class behat_mod_dataform extends behat_base {
 
             $steps[] = new Given('the field "'. $name. '" matches value "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
 
     /**
      * Returns list of steps for filling a dataformfield general form settings.
@@ -802,7 +796,7 @@ class behat_mod_dataform extends behat_base {
             'Editable',
             'Template',
         );
-            
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         $tabledata = array();
@@ -810,13 +804,13 @@ class behat_mod_dataform extends behat_base {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
+
     /**
      * Returns list of steps for filling a dataformfield selectmulti specific form settings.
      *
@@ -825,18 +819,18 @@ class behat_mod_dataform extends behat_base {
      */
     protected function field_form_fill_steps_selectmulti($data) {
         $steps = $this->field_form_fill_steps_base($data);
-        
+
         if (!$data = $this->truncate_data_vals($data, 5)) {
             return $steps;
         }
-        
+
         $formfields = array(
             'Options',
             'Default values',
             'Options separator',
             'Allow adding options'
         );
-        
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         $tabledata = array();
@@ -844,18 +838,18 @@ class behat_mod_dataform extends behat_base {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             // Fix value for text area
             if ($name == 'Options' or $name == 'Default values' and $val) {
-                $val = implode("\n", explode('\n', $val)); 
+                $val = implode("\n", explode('\n', $val));
             }
-                
+
             $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
+
     /**
      * Returns list of steps for filling a dataformfield selectmulti form.
      *
@@ -865,7 +859,7 @@ class behat_mod_dataform extends behat_base {
     protected function field_form_fill_steps_checkbox($data) {
         return $this->field_form_fill_steps_selectmulti($data);
     }
-        
+
     /**
      * Returns list of steps for filling a dataformfield select specific form settings.
      *
@@ -874,17 +868,17 @@ class behat_mod_dataform extends behat_base {
      */
     protected function field_form_fill_steps_select($data) {
         $steps = $this->field_form_fill_steps_base($data);
-        
+
         if (!$data = $this->truncate_data_vals($data, 5)) {
             return $steps;
         }
-        
+
         $formfields = array(
             'Options',
             'Default value',
             'Allow adding options'
         );
-        
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         $tabledata = array();
@@ -892,18 +886,18 @@ class behat_mod_dataform extends behat_base {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             // Fix value for text area
             if ($name == 'Options' and $val) {
-                $val = implode("\n", explode('\n', $val)); 
+                $val = implode("\n", explode('\n', $val));
             }
-                
+
             $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
+
     /**
      * Returns list of steps for filling a dataformfield text specific form settings.
      *
@@ -912,21 +906,21 @@ class behat_mod_dataform extends behat_base {
      */
     protected function field_form_fill_steps_text($data) {
         $steps = $this->field_form_fill_steps_base($data);
-        
+
         if (!$data = $this->truncate_data_vals($data, 5)) {
             return $steps;
         }
-        
+
         $formfields = array(
             'Auto link', // Auto link
             'param2', // Width
             'param3', // Width unit
-            'Format', // alphanumeric|lettersonly|numeric|email|nopunctuation
+            'Format', // Alphanumeric|lettersonly|numeric|email|nopunctuation
             'param5', // Number of character (minlength|maxlength|rangelength)
             'param6', // Min (integer)
             'param7', // Nax (integer)
         );
-        
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         $tabledata = array();
@@ -934,13 +928,13 @@ class behat_mod_dataform extends behat_base {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
+
     /**
      * Returns list of steps for filling a dataformfield number specific form settings.
      *
@@ -949,17 +943,17 @@ class behat_mod_dataform extends behat_base {
      */
     protected function field_form_fill_steps_number($data) {
         $steps = $this->field_form_fill_steps_base($data);
-        
+
         if (!$data = $this->truncate_data_vals($data, 5)) {
             return $steps;
         }
-        
+
         $formfields = array(
             'Decimals',
             'param2', // Width
             'param3', // Width unit
         );
-        
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         $tabledata = array();
@@ -967,13 +961,13 @@ class behat_mod_dataform extends behat_base {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
+
     /**
      * Returns list of steps for filling a dataformfield radiobutton specific form settings.
      *
@@ -982,18 +976,18 @@ class behat_mod_dataform extends behat_base {
      */
     protected function field_form_fill_steps_radiobutton($data) {
         $steps = $this->field_form_fill_steps_base($data);
-        
+
         if (!$data = $this->truncate_data_vals($data, 5)) {
             return $steps;
         }
-        
+
         $formfields = array(
             'Options',
             'Default value',
             'Options separator',
             'Allow adding options'
         );
-        
+
         $vals = explode("\t", trim($data));
         $names = array_slice($formfields, 0, count($vals));
         $tabledata = array();
@@ -1001,18 +995,17 @@ class behat_mod_dataform extends behat_base {
             if (!$val = trim($vals[$key])) {
                 continue;
             }
-            
+
             // Fix value for text area
             if ($name == 'Options' and $val) {
-                $val = implode("\n", explode('\n', $val)); 
+                $val = implode("\n", explode('\n', $val));
             }
-                
+
             $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
         }
-        
+
         return $steps;
     }
-    
 
     /**
      * Returns the data with first n values truncated.
@@ -1025,7 +1018,7 @@ class behat_mod_dataform extends behat_base {
         $truncated = array_slice(explode("\t", trim($data)), $num);
         return implode("\t", $truncated);
     }
-        
+
     /**
      * Converts filter data from string to Behat\Gherkin\Node\TableNode.
      *
@@ -1035,10 +1028,12 @@ class behat_mod_dataform extends behat_base {
     protected function convert_data_to_table($formfields, $data, $delimiter = "\t") {
         $vals = explode($delimiter, trim($data));
         $names = array_slice($formfields, 0, count($vals));
-        $tabledata = array_map(function($name, $val) {return "$name|$val";}, $names, $vals);
-        return new Behat\Gherkin\Node\TableNode(implode("\n",$tabledata));
+        $tabledata = array_map(function($name, $val) {
+            return "$name|$val";
+        }, $names, $vals);
+        return new Behat\Gherkin\Node\TableNode(implode("\n", $tabledata));
     }
- 
+
     /**
      * Resets (truncates) all dataform tables to remove any records and reset sequences.
      * This step is essential for any standalone scenario that adds entries with content
@@ -1049,7 +1044,7 @@ class behat_mod_dataform extends behat_base {
      */
     protected function start_afresh_steps() {
         global $DB;
-        
+
         $steps = array();
 
         // Clean up tables
@@ -1061,19 +1056,19 @@ class behat_mod_dataform extends behat_base {
             'dataform_filters',
             'dataform_views',
         );
-       
+
         $prefix = $DB->get_prefix();
         foreach ($tables as $table) {
             $DB->execute("TRUNCATE TABLE {$prefix}{$table}");
         }
-        
+
         // Course
         $data = array(
             '| fullname | shortname | category |',
             '| Course 1 | C1 | 0 |',
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
-        $steps[] = new Given('the following "courses" exist:', $table); 
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "courses" exist:', $table);
 
         // Users
         $data = array(
@@ -1084,9 +1079,9 @@ class behat_mod_dataform extends behat_base {
             '| student2 | Student | 2 | student2@asd.com |',
             '| student3 | Student | 3 | student3@asd.com |',
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "users" exist:', $table);
-        
+
         // Enrollments
         $data = array(
             '| user | course | role |',
@@ -1095,7 +1090,7 @@ class behat_mod_dataform extends behat_base {
             '| student1 | C1 | student |',
             '| student2 | C1 | student |',
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "course enrolments" exist:', $table);
 
         // Groups
@@ -1104,18 +1099,18 @@ class behat_mod_dataform extends behat_base {
            '| Group 1 | Anything    | C1 | G1   |',
            '| Group 2 | Anything    | C1 | G2   |',
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "groups" exist:', $table);
-        
+
         // Group members
         $data = array(
            '| user     | group  |',
-           '| student1 | G1 |',        
-           '| student2 | G2 |',        
+           '| student1 | G1 |',
+           '| student2 | G2 |',
         );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n",$data));
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "group members" exist:', $table);
-        
+
         return $steps;
     }
 
@@ -1162,7 +1157,7 @@ class behat_mod_dataform extends behat_base {
      */
     protected function get_group_id($idnumber) {
         global $DB;
-        
+
         if (empty($idnumber)) {
             return 0;
         }
@@ -1172,7 +1167,6 @@ class behat_mod_dataform extends behat_base {
         }
         return $id;
     }
-
 
 
 }

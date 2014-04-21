@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,4 +23,3 @@
 
 $string['pluginname'] = 'Entry per user';
 $string['pluginname_help'] = 'Adds one blank entry for each gradable user in the course';
-
