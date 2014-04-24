@@ -598,7 +598,7 @@ class mod_dataform_view_manager {
         }
 
         // Heading
-        echo html_writer::tag('h3', get_string('patternsrelacement', 'dataform'));
+        echo html_writer::tag('h3', get_string('patternsreplacement', 'dataform'));
 
         // Display the form
         $actionurl = new moodle_url($PAGE->url, array('patternscleanup' => $viewid));
