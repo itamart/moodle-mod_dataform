@@ -304,16 +304,8 @@ class mod_dataform_entry_manager {
                               FROM $sql->from
                               WHERE $sql->where $andwhereeid $sql->sortorder";
 
-                if ($entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams))) {
-                    // If one entry was requested get its position
-                    if (!is_array($filter->eids) or count($filter->eids) == 1) {
-                        $sqlcount = $sql->countfiltered ? $sql->countfiltered : $sql->countmax;
-                        $sqlselect = "$sqlcount AND e.id $ineids $sql->sortorder";
-                        $eidposition = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
-
-                        $filter->page = key($eidposition) - 1;
-                    }
-                }
+                $entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
+                
             } else if (!$filter->groupby and $perpage = $filter->perpage) {
                 // Get perpage subset
                 // A random set (filter->selection == 1)
@@ -430,6 +422,35 @@ class mod_dataform_entry_manager {
         }
         // No filter so return total count
         return $DB->count_records('dataform_entries', array('dataid' => $this->dataformid));
+    }
+
+    /**
+     * Returns the position of the specified entryid in the list of filtered entries.
+     *
+     * @param int $entryid
+     * @param dataformfilter $filter
+     * @return int
+     */
+    public function get_entry_position($entryid, $filter) {
+        global $DB;
+
+        if (!$entryid or $entryid < 0) {
+            return 0;
+        }
+
+        if (!$filter or !$sql = $this->get_sql_query($filter)) {
+            return 0;
+        }
+
+        $sqlselect = "SELECT $sql->what $sql->whatcontent
+                      FROM $sql->from
+                      WHERE $sql->where $sql->sortorder";
+
+        if ($entries = $DB->get_records_sql($sqlselect, $sql->allparams)) {
+            return (int) array_search($entryid, array_keys($entries));
+        }
+
+        return 0;
     }
 
     /**
