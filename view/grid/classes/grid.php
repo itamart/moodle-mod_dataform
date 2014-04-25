@@ -128,9 +128,6 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
         if ($name) {
             array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
         }
-        // Wrap with entriesview
-        array_unshift($elements, html_writer::start_tag('div', array('class' => 'entriesview')));
-        array_push($elements, html_writer::end_tag('div'));
 
         return $elements;
     }
