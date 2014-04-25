@@ -327,7 +327,7 @@ class dataformview {
      *
      */
     protected function compile_view_template($options) {
-        $formatoptions = array('para' => false, 'allowid' => true, 'trusted' => true);
+        $formatoptions = array('para' => false, 'allowid' => true, 'trusted' => true, 'noclean' => true);
         $html = format_text($this->section, FORMAT_HTML, $formatoptions);
 
         // Replace view patterns including entry field patterns
