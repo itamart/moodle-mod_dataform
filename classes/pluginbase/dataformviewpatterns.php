@@ -33,6 +33,7 @@ class dataformviewpatterns {
     const PATTERN_CATEGORY = 1;
 
     protected $_view = null;
+    protected $_patterns;
 
     /**
      * Constructor
@@ -51,31 +52,32 @@ class dataformviewpatterns {
     public function search($text, array $patterns = null) {
         $viewid = $this->_view->id;
 
+        if (!$patterns and !$patterns = array_keys($this->patterns())) {
+            return array();
+        }
+
         $found = array();
 
-        if ($patterns) {
-            foreach ($patterns as $pattern) {
-                if (strpos($text, $pattern) !== false) {
-                    $found[] = $pattern;
-                }
+        // Prepare for regexp patterns
+        $regexppatterns = array();
+        foreach ($this->patterns() as $tag => $attrs) {
+            if (!empty($attrs[2])) {
+                $regexppatterns[$tag] = $tag;
             }
-        } else {
-            // Fixed patterns
-            $patterns = array_keys($this->patterns());
-            foreach ($patterns as $pattern) {
-                if (strpos($text, $pattern) !== false) {
-                    $found[] = $pattern;
-                }
-            }
+        }
 
-            // Regexp patterns
-            if ($patterns = array_keys($this->regexp_patterns())) {
-                foreach ($patterns as $pattern) {
-                    if (preg_match_all("/$pattern/", $text, $matches)) {
-                        foreach ($matches[0] as $match) {
-                            $found[$match] = $match;
-                        }
+        foreach ($patterns as $pattern) {
+            if (in_array($pattern, $regexppatterns)) {
+                // Regexp pattern
+                if (preg_match_all("%$pattern%", $text, $matches)) {
+                    foreach ($matches[0] as $match) {
+                        $found[$match] = $match;
                     }
+                }
+            } else {
+                // Fixed string pattern
+                if (strpos($text, $pattern) !== false) {
+                    $found[$pattern] = $pattern;
                 }
             }
         }
@@ -177,8 +179,6 @@ class dataformviewpatterns {
         foreach ($patterns as $pattern) {
             if (in_array($pattern, $info)) {
                 $replacements[$pattern] = $this->get_info_replacement($pattern, $entry, $options);
-            } else if (in_array($pattern, $ref)) {
-                $replacements[$pattern] = $this->get_ref_replacement($pattern, $entry, $options);
             } else if (in_array($pattern, $userpref)) {
                 $replacements[$pattern] = $this->get_userpref_replacement($pattern, $entry, $options);
             } else if (in_array($pattern, $actions)) {
@@ -187,28 +187,12 @@ class dataformviewpatterns {
                 $replacements[$pattern] = $this->get_paging_replacement($pattern, $entry, $options);
             } else if (in_array($pattern, $fieldview)) {
                 $replacements[$pattern] = $this->get_fieldview_replacement($pattern, $entry, $options);
-            } else if ($this->is_regexp_pattern($pattern)) {
-                $replacements[$pattern] = $this->get_regexp_replacement($pattern, $entry, $options);
+            } else if (in_array($pattern, $ref) or $this->is_regexp_pattern($pattern, $this->ref_patterns())) {
+                $replacements[$pattern] = $this->get_ref_replacement($pattern, $entry, $options);
             }
         }
 
         return $replacements;
-    }
-
-    /**
-     *
-     */
-    protected function get_regexp_replacement($tag, $entry = null, array $options = null) {
-        global $OUTPUT;
-
-        if (strpos($tag, '#{{viewlink:') === 0) {
-            return $this->get_viewlink_replacement(str_replace('#{{viewlink:', '', $tag));
-        }
-        if (strpos($tag, '#{{viewsesslink:') === 0) {
-            return $this->get_viewlink_replacement(str_replace('#{{viewsesslink:', '', $tag), true);
-        }
-
-        return '';
     }
 
     /**
@@ -300,17 +284,30 @@ class dataformviewpatterns {
             return $output->render_filters_menu($this->_view);
         }
 
-        // View url
+        // This view url
         if ($tag == '##viewurl##') {
             return $this->get_viewurl_replacement($this->_view->name);
         }
 
+        // Named view url
         if (strpos($tag, '##viewurl:') === 0) {
             list(, $viewname) = explode(':', trim($tag, '#'));
             return $this->get_viewurl_replacement($viewname);
         }
 
-        // View content
+        // Named view link
+        if (strpos($tag, '##viewlink:') === 0) {
+            list(, $args) = explode(':', trim($tag, '#'), 2);
+            return $this->get_viewlink_replacement($args);
+        }
+
+        // Named view session link
+        if (strpos($tag, '##viewsesslink:') === 0) {
+            list(, $args) = explode(':', trim($tag, '#'), 2);
+            return $this->get_viewlink_replacement($args, true);
+        }
+
+        // Named view content
         if (strpos($tag, '##viewcontent:') === 0) {
             list(, $viewname) = explode(':', trim($tag, '#'));
             return $this->get_viewcontent_replacement($viewname);
@@ -447,14 +444,14 @@ class dataformviewpatterns {
     /**
      *
      */
-    protected function get_viewlink_replacement($linkpattern, $sess = false) {
+    protected function get_viewlink_replacement($args, $sess = false) {
         global $OUTPUT;
 
         $thisview = $this->_view;
         $view = null;
         static $views = array();
 
-        list($viewname, $linktext, $urlquery, ) = explode(';', $linkpattern);
+        list($viewname, $linktext, $urlquery, ) = array_merge(explode(';', $args), array(null, null, null));
         // Return this view's url
         if ($viewname == $thisview->name) {
             $view = $thisview;
@@ -463,23 +460,43 @@ class dataformviewpatterns {
                 if ($view = $thisview->df->view_manager->get_view_by_name($viewname)) {
                     $views[$view->name] = $view;
                 }
+            } else {
+                $view = $views[$viewname];
             }
         }
 
         if ($view) {
-            // Pix icon for text
-            if (strpos($linktext, '_pixicon:') === 0) {
-                list(, $icon, $titletext) = explode(':', $linktext);
-                $linktext = $OUTPUT->pix_icon($icon, $titletext);
-            }
-            // Replace pipes in urlquery with &
-            $urlquery = str_replace('|', '&', $urlquery);
             $linkparams = array();
+
+            // Link text
+            if ($linktext) {
+                if (strpos($linktext, '_pixicon:') === 0) {
+                    list(, $icon, $titletext) = explode(':', $linktext);
+                    $linktext = $OUTPUT->pix_icon($icon, $titletext);
+                }
+            } else {
+                $linktext = $view->name;
+            }
+
+            // Link query
+            if ($urlquery) {
+                foreach (explode('|', $urlquery) as $urlparam) {
+                    list($key, $value) = explode('=', $urlparam, 2);
+                    $linkparams[$key] = $value;
+                }
+            }
+
             if ($sess) {
                 $linkparams['sesskey'] = sesskey();
+            } else {
+                unset($linkparams['sesskey']);
             }
-            $viewlink = new \moodle_url($view->get_baseurl(), $linkparams);
-            return \html_writer::link($viewlink->out(false). "&$urlquery", $linktext);
+
+            unset($linkparams['d']);
+            unset($linkparams['view']);
+
+            $viewlink = new \moodle_url($view->baseurl, $linkparams);
+            return \html_writer::link($viewlink, $linktext);
         }
 
         return '';
@@ -514,15 +531,17 @@ class dataformviewpatterns {
      *
      */
     protected function patterns() {
-        $patterns = array_merge(
-            $this->info_patterns(),
-            $this->ref_patterns(),
-            $this->userpref_patterns(),
-            $this->action_patterns(),
-            $this->paging_patterns(),
-            $this->fieldview_patterns()
-        );
-        return $patterns;
+        if (!$this->_patterns) {
+            $this->_patterns = array_merge(
+                $this->info_patterns(),
+                $this->ref_patterns(),
+                $this->userpref_patterns(),
+                $this->action_patterns(),
+                $this->paging_patterns(),
+                $this->fieldview_patterns()
+            );
+        }
+        return $this->_patterns;
     }
 
     /**
@@ -563,6 +582,9 @@ class dataformviewpatterns {
             foreach ($views as $viewname) {
                 $patterns["##viewurl:$viewname##"] = array(false);
                 $patterns["##viewcontent:$viewname##"] = array(false);
+                $patterns["##viewlink:$viewname##"] = array(false);
+                $patterns["##viewlink:$viewname;[^;]*;[^;]*;##"] = array(false, $cat, true); // Third arg: Regexp pattern identifier
+                $patterns["##viewsesslink:$viewname;[^;]*;[^;]*;##"] = array(false, $cat, true); // Third arg: Regexp pattern identifier
             }
         }
 
@@ -629,43 +651,20 @@ class dataformviewpatterns {
 
 
     /**
-     * Returns a list of regexp patterns.
-     * Not included in the view patterns menu.
+     * Returns true if the specified pattern is a regexp pattern of the specified patterns group.
      *
-     * @return array
+     * @param string $pattern
+     * @retrun array $group Patterns group
+     * @retrun bool
      */
-    protected function regexp_patterns() {
-        $patterns = array();
-        // Get list of views
-        if ($views = $this->_view->df->view_manager->get_views_menu()) {
-            // View link
-            $cat = get_string('reference', 'dataform');
-            foreach ($views as $viewname) {
-                $patterns["#{{viewlink:$viewname;[^;]*;[^;]*;}}#"] = array(true, $cat);
-                $patterns["#{{viewsesslink:$viewname;[^;]*;[^;]*;}}#"] = array(true, $cat);
+    protected function is_regexp_pattern($pattern, array $group) {
+        foreach ($group as $tag => $attrs) {
+            if (empty($attrs[2])) {
+                continue;
             }
-        }
-        return $patterns;
-    }
 
-    /**
-     *
-     */
-    protected function is_regexp_pattern($pattern) {
-        static $views = null;
-
-        if ($views === null) {
-            $views = $this->_view->df->view_manager->get_views_menu();
-        }
-
-        if ($views) {
-            foreach ($views as $viewname) {
-                if (strpos($pattern, "#{{viewlink:$viewname;") === 0) {
-                    return true;
-                }
-                if (strpos($pattern, "#{{viewsesslink:$viewname;") === 0) {
-                    return true;
-                }
+            if (preg_match("%^$tag%", $pattern)) {
+                return true;
             }
         }
         return false;

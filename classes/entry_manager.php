@@ -226,7 +226,7 @@ class mod_dataform_entry_manager {
         ) = $filter->get_sql($fields);
 
         $count = ' COUNT(e.id) ';
-        $whatsql = " DISTINCT $whatentry,$whatuser,$whatgroup $contentwhat $joinwhat";
+        $whatsql = " DISTINCT $whatentry, $whatuser, $whatgroup $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
 
@@ -304,32 +304,22 @@ class mod_dataform_entry_manager {
                               FROM $sql->from
                               WHERE $sql->where $andwhereeid $sql->sortorder";
 
-                if ($entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams))) {
-                    // If one entry was requested get its position
-                    if (!is_array($filter->eids) or count($filter->eids) == 1) {
-                        $sqlcount = $sql->countfiltered ? $sql->countfiltered : $sql->countmax;
-                        $sqlselect = "$sqlcount AND e.id $ineids $sql->sortorder";
-                        $eidposition = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
-
-                        $filter->page = key($eidposition) - 1;
-                    }
-                }
-
+                $entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
+                
             } else if (!$filter->groupby and $perpage = $filter->perpage) {
                 // Get perpage subset
                 // A random set (filter->selection == 1)
                 if (!empty($filter->selection)) {
-                    // get ids of found entries
+                    // Get ids of found entries
                     $sqlselect = "SELECT DISTINCT e.id FROM $sql->from WHERE $sql->where";
                     $entryids = $DB->get_records_sql($sqlselect, $sql->allparams);
-                    // get a random subset of ids
+                    // Get a random subset of ids
                     $randids = array_rand($entryids, min($perpage, count($entryids)));
-                    // get the entries
+                    // Get the entries
                     list($insql, $paramids) = $DB->get_in_or_equal($randids);
                     $andwhereids = " AND e.id $insql ";
                     $sqlselect = "SELECT $sql->what FROM $sql->from WHERE $sql->where $andwhereids";
                     $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
-
                 } else {
                     // By page
                     $page = isset($filter->page) ? $filter->page : 0;
@@ -337,26 +327,23 @@ class mod_dataform_entry_manager {
 
                     if (isset($filter->onpage)) {
                         if ($filter->onpage == self::SELECT_FIRST_PAGE) {
-                            // first page
+                            // First page
                             $page = 0;
-
                         } else if ($filter->onpage == self::SELECT_LAST_PAGE) {
-                            // last page
+                            // Last page
                             $page = $numpages - 1;
-
                         } else if ($filter->onpage == self::SELECT_NEXT_PAGE) {
-                            // next page
+                            // Next page
                             $page = $filter->page = ($page % $numpages);
-
                         } else if ($filter->onpage == self::SELECT_RANDOM_PAGE) {
-                            // random page
+                            // Random page
                             $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
                         }
                     }
                     $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams, $page * $perpage, $perpage);
                 }
             } else {
-                // get everything
+                // Get everything
                 $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams);
             }
 
@@ -381,7 +368,7 @@ class mod_dataform_entry_manager {
                 $view = $this->view_manager->get_view_by_id($this->viewid);
                 $fields = $view->get_fields();
 
-                // Get the node content of the requested entries
+                // Get the node content of the requested entries.
                 list($eids, $eparams) = $DB->get_in_or_equal(array_keys($entries->entries));
                 list($fids, $fparams) = $DB->get_in_or_equal($sql->dataformcontent);
                 $params = array_merge($eparams, $fparams);
@@ -438,6 +425,35 @@ class mod_dataform_entry_manager {
     }
 
     /**
+     * Returns the position of the specified entryid in the list of filtered entries.
+     *
+     * @param int $entryid
+     * @param dataformfilter $filter
+     * @return int
+     */
+    public function get_entry_position($entryid, $filter) {
+        global $DB;
+
+        if (!$entryid or $entryid < 0) {
+            return 0;
+        }
+
+        if (!$filter or !$sql = $this->get_sql_query($filter)) {
+            return 0;
+        }
+
+        $sqlselect = "SELECT $sql->what $sql->whatcontent
+                      FROM $sql->from
+                      WHERE $sql->where $sql->sortorder";
+
+        if ($entries = $DB->get_records_sql($sqlselect, $sql->allparams)) {
+            return (int) array_search($entryid, array_keys($entries));
+        }
+
+        return 0;
+    }
+
+    /**
      * Returns number of entries according to specified scope.
      * COUNT_ALL: Total number of entries in the activity.
      * COUNT_VIEWABLE: viewable by the user without search filters.
@@ -490,11 +506,11 @@ class mod_dataform_entry_manager {
             $fs = get_file_storage();
             foreach ($this->entries as $entry) {
                 foreach ($fids as $fieldid) {
-                    // get the content id of the requested field
+                    // Get the content id of the requested field
                     $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-                    // the field may not hold any content
+                    // The field may not hold any content
                     if ($contentid) {
-                        // retrieve the files (no dirs) from file area
+                        // Retrieve the files (no dirs) from file area
                         $files = array_merge($files, $fs->get_area_files(
                             $df->context->id,
                             'mod_dataform',
@@ -698,7 +714,6 @@ class mod_dataform_entry_manager {
                 $contents[$entryid]['info'][$var] = $value;
 
             } else if (strpos($name, 'field_') === 0) {
-
                 // Assuming only field names contain field_
                 list(, $fieldid, $entryid) = explode('_', $name);
                 if (!empty($fields[$fieldid])) {
@@ -868,12 +883,12 @@ class mod_dataform_entry_manager {
             }
 
             // Entry group sanity checks
-            // if (isset($data['groupid'])) {
+            // If (isset($data['groupid'])) {
                 // Currently no check that user belong to that group
             // }
         }
 
-        // update existing entry (only authenticated users)
+        // Update existing entry (only authenticated users)
         if ($entry->id > 0) {
             if ($updatetime) {
                 $entry->timemodified = time();
@@ -901,7 +916,7 @@ class mod_dataform_entry_manager {
         }
 
         // Add new entry (authenticated or anonymous (if enabled))
-        // identify non-logged-in users (in anonymous entries) as guests
+        // Identify non-logged-in users (in anonymous entries) as guests
         $userid = empty($USER->id) ? $CFG->siteguest : $USER->id;
 
         $entry->dataid = $df->id;

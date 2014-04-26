@@ -1057,23 +1057,6 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
         $filter = $view->get_filter();
         $baseurl = $view->get_baseurl();
 
-        // Typical entry 'more' request. If not single view (1 per page) show return to list instead of paging bar
-        if ($filter->eids) {
-            $url = new moodle_url($baseurl);
-            // Add page
-            if ($filter->page) {
-                $url->param('page', $filter->page);
-            }
-            // Change view to caller
-            if ($ret = optional_param('ret', 0, PARAM_INT)) {
-                $url->param('view', $ret);
-            }
-            // Remove eids so that we return to list
-            $url->remove_params('eids');
-            // Make the link
-            return html_writer::link($url->out(false), get_string('viewreturntolist', 'dataform'));
-        }
-
         // Typical groupby, one group per page case. show paging bar as per number of groups
         if (isset($filter->pagenum)) {
             $pagingbar = new paging_bar($filter->pagenum,
@@ -1092,7 +1075,15 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             $entryman = $view->entry_manager;
             $filteredcount = $entryman->entries ? $entryman->get_count(mod_dataform_entry_manager::COUNT_FILTERED) : 0;
             $displayedcount = $entryman->entries ? $entryman->get_count(mod_dataform_entry_manager::COUNT_DISPLAYED) : 0;
-
+            
+            // Adjust filter page if needed.
+            // This may be needed if redirecting from entry form to paged view
+            if ($filter->eids and !$filter->page) {
+                if ($entryid = (is_array($filter->eids) ? reset($filter->eids) : $filter->eids) and $entryid > 0) {
+                    $filter->page = $entryman->get_entry_position($entryid, $filter);
+                }
+            }
+            
             if ($filteredcount and $displayedcount and $filteredcount != $displayedcount) {
                 $url = new moodle_url($baseurl, array('filter' => $filter->id));
 

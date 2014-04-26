@@ -272,6 +272,9 @@ class dataformview {
             $timeout = !empty($submission['timeout']) ? $submission['timeout'] : 0;
             if (!empty($submission['redirect'])) {
                 $redirecturl->param('view', $submission['redirect']);
+                if ($processedeids) {
+                    $redirecturl->param('eids', implode(',', $processedeids));
+                }
             }
 
             // Submission response
