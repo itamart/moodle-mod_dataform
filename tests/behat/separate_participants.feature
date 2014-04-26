@@ -97,13 +97,11 @@ Feature: Dataform activity individualized
         And I do not see "student2"
 
         # Try accessing student1's entry
-        Given I go to dataform page "view.php?d=1&view=1&eids=2"
-        Then I see "Return to list"
+        Then I go to dataform page "view.php?d=1&view=1&eids=2"
         And I see "student1"
         
         # Try viewing student2's entry
-        Given I go to dataform page "view.php?d=1&view=1&eids=4"
-        Then I see "Return to list"
+        Then I go to dataform page "view.php?d=1&view=1&eids=4"
         And I do not see "student2"
         
         # Try editing student2's entry
