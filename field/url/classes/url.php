@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage url
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
     /**
@@ -29,7 +28,7 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
     protected function content_names() {
         return array('', 'alt');
     }
-    
+
     /**
      *
      */
@@ -64,7 +63,7 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
         }
         return array($contents, $oldcontents);
     }
-    
+
     /**
      *
      */

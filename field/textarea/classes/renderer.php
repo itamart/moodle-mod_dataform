@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -21,7 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
-
 
 /**
  *
@@ -47,7 +46,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                     $replacements[$pattern] = '';
                     continue;
                 }
-                $replacements[$pattern] = array(array($this,'display_edit'), array($entry, array('required' => $required)));
+                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
                 break;
             }
 
@@ -220,11 +219,11 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         // Only [[fieldname]] can be imported
         if ($patternname != $this->_field->name) {
             return array(array(), array());
-        }            
-        
+        }
+
         return parent::get_pattern_import_settings($mform, $patternname, $header);
     }
-    
+
     /**
      * Array of patterns this field supports
      */

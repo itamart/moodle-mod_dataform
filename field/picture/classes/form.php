@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage picture
@@ -33,7 +33,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
         // Appearance
         $mform->addElement('header', 'appearancehdr', get_string('appearance'));
         $mform->setExpanded('appearancehdr');
-        
+
         // Files separator (param4)
         $options = array(
             '' => get_string('none'),
@@ -44,11 +44,11 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->setDefault('separator', $field->appearance->separator);
 
         // Display WxH
-        $grp=array();
-        $grp[] = &$mform->createElement('text', 'dispw', null, array('size'=>'4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('text', 'disph', null, array('size'=>'4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('select', 'dispu', null, array('px'=>'px','em'=>'em','%'=>'%'));
-        $mform->addGroup($grp, 'dispdim', get_string('displaydimensions', 'dataformfield_picture'), array(' x ',' '), false);
+        $grp = array();
+        $grp[] = &$mform->createElement('text', 'dispw', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('text', 'disph', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('select', 'dispu', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
+        $mform->addGroup($grp, 'dispdim', get_string('displaydimensions', 'dataformfield_picture'), array(' x ', ' '), false);
         $mform->setType('dispw', PARAM_INT);
         $mform->setType('disph', PARAM_INT);
         $mform->addGroupRule('dispdim', array('dispw' => array(array(null, 'numeric', null, 'client'))));
@@ -56,11 +56,11 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->setDefault('dispw', $field->appearance->dispw);
         $mform->setDefault('disph', $field->appearance->disph);
         $mform->setDefault('dispu', $field->appearance->dispu);
-        
+
         // Max pic dimensions (crop if needed)
-        $grp=array();
-        $grp[] = &$mform->createElement('text', 'maxw', null, array('size'=>'4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('text', 'maxh', null, array('size'=>'4', 'style' => 'width:inherit;'));
+        $grp = array();
+        $grp[] = &$mform->createElement('text', 'maxw', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('text', 'maxh', null, array('size' => '4', 'style' => 'width:inherit;'));
         $mform->addGroup($grp, 'maxpicdim', get_string('maxdimensions', 'dataformfield_picture'), ' x ', false);
         $mform->setType('maxw', PARAM_INT);
         $mform->setType('maxh', PARAM_INT);
@@ -68,11 +68,11 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->addGroupRule('maxpicdim', array('maxh' => array(array(null, 'numeric', null, 'client'))));
         $mform->setDefault('maxw', $field->appearance->maxw);
         $mform->setDefault('maxh', $field->appearance->maxh);
-        
+
         // Thumbnail dimensions (crop if needed)
-        $grp=array();
-        $grp[] = &$mform->createElement('text', 'thumbw', null, array('size'=>'4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('text', 'thumbh', null, array('size'=>'4', 'style' => 'width:inherit;'));
+        $grp = array();
+        $grp[] = &$mform->createElement('text', 'thumbw', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('text', 'thumbh', null, array('size' => '4', 'style' => 'width:inherit;'));
         $mform->addGroup($grp, 'thumbgrp', get_string('thumbdimensions', 'dataformfield_picture'), ' x ', false);
         $mform->setType('thumbw', PARAM_INT);
         $mform->setType('thumbh', PARAM_INT);
@@ -85,16 +85,16 @@ class dataformfield_picture_form extends dataformfield_file_form {
     /**
      *
      */
-    function get_data() {
+    public function get_data() {
         if ($data = parent::get_data()) {
             // Set appearance (param4)
             $appearance = array();
-            
+
             // Separator
             if (!empty($data->separator)) {
                 $appearance['separator'] = $data->separator;
             }
-                
+
             // Display dimensions
             if (!empty($data->dispw) or !empty($data->disph)) {
                 if (!empty($data->dispw)) {
@@ -107,7 +107,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
                     $appearance['dispu'] = $data->dispu;
                 }
             }
-                
+
             // Max size
             if (!empty($data->maxw)) {
                 $appearance['maxw'] = $data->maxw;
@@ -115,7 +115,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
             if (!empty($data->maxh)) {
                 $appearance['maxh'] = $data->maxh;
             }
-                
+
             // Thumb size
             if (!empty($data->thumbw)) {
                 $appearance['thumbw'] = $data->thumbw;
@@ -123,7 +123,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
             if (!empty($data->thumbh)) {
                 $appearance['thumbh'] = $data->thumbh;
             }
-                
+
             // Set param4
             $data->param4 = $appearance ? base64_encode(serialize((object) $appearance)) : null;
         }
@@ -146,5 +146,5 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->addElement('select', 'param3', get_string('filetypes', 'dataform'), $options);
 
     }
-    
+
 }

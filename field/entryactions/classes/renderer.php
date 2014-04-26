@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entryactions
@@ -21,7 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
-
 
 /**
  *
@@ -32,7 +31,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
     protected $_viewsmenu = null;
 
     /**
-     * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()} 
+     * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()}
      * to return no import settings.
      *
      * @param moodleform $mform
@@ -42,9 +41,9 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
         return array(array(), array());
     }
-    
+
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $fieldname = $this->_field->name;
@@ -70,29 +69,57 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                 // edit for each view
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_edit($entry, array('view' => $viewname));
-            } else {    
+            } else {
                 switch ($pattern) {
                     // reference
-                    case "[[$fieldname:more]]": $str = !$editing ? $this->display_more($entry) : ''; break;
-                    case "[[$fieldname:moreurl]]": $str = $this->display_more($entry, array('url' => 1)); break;
-                    case "[[$fieldname:anchor]]": $str = html_writer::tag('a', '', array('name' => "entry$entry->id")); break;    
-                    
+                    case "[[$fieldname:more]]":
+                        $str = !$editing ? $this->display_more($entry) : '';
+                        break;
+                    case "[[$fieldname:moreurl]]":
+                        $str = $this->display_more($entry, array('url' => 1));
+                        break;
+                    case "[[$fieldname:anchor]]":
+                        $str = html_writer::tag('a', '', array('name' => "entry$entry->id"));
+                        break;
+
                     // Actions
-                    case "[[$fieldname:actionmenu]]": $str = !$editing ? $this->display_action_menu($entry) : ''; break;
-                    case "[[$fieldname:select]]": $str = !$editing ? $this->display_select($entry) : ''; break;
-                    case "[[$fieldname:edit]]": $str = !$editing ? $this->display_edit($entry): ''; break;
-                    case "[[$fieldname:delete]]": $str = !$editing ? $this->display_delete($entry): ''; break;
-                    case "[[$fieldname:export]]": $str = !$editing ? $this->display_export($entry): ''; break;
-                    case "[[$fieldname:duplicate]]": $str = !$editing ? $this->display_duplicate($entry): ''; break;
-                    
+                    case "[[$fieldname:actionmenu]]":
+                        $str = !$editing ? $this->display_action_menu($entry) : '';
+                        break;
+                    case "[[$fieldname:select]]":
+                        $str = !$editing ? $this->display_select($entry) : '';
+                        break;
+                    case "[[$fieldname:edit]]":
+                        $str = !$editing ? $this->display_edit($entry) : '';
+                        break;
+                    case "[[$fieldname:delete]]":
+                        $str = !$editing ? $this->display_delete($entry) : '';
+                        break;
+                    case "[[$fieldname:export]]":
+                        $str = !$editing ? $this->display_export($entry) : '';
+                        break;
+                    case "[[$fieldname:duplicate]]":
+                        $str = !$editing ? $this->display_duplicate($entry) : '';
+                        break;
+
                     // Bulk action
-                    case "[[$fieldname:selectallnone]]": $str = $this->display_select_all_none($options); break;
-                    case "[[$fieldname:bulkedit]]": $str = $this->display_bulk_edit($options); break;
-                    case "[[$fieldname:bulkduplicate]]": $str = $this->display_bulk_duplicate($options); break;
-                    case "[[$fieldname:bulkdelete]]": $str = $this->display_bulk_delete($options); break;
-                    case "[[$fieldname:bulkexport]]": $str = $this->display_bulk_export($options); break;
-                    
-                    default: $str = '';                   
+                    case "[[$fieldname:selectallnone]]":
+                        $str = $this->display_select_all_none($options);
+                        break;
+                    case "[[$fieldname:bulkedit]]":
+                        $str = $this->display_bulk_edit($options);
+                        break;
+                    case "[[$fieldname:bulkduplicate]]":
+                        $str = $this->display_bulk_duplicate($options);
+                        break;
+                    case "[[$fieldname:bulkdelete]]":
+                        $str = $this->display_bulk_delete($options);
+                        break;
+                    case "[[$fieldname:bulkexport]]":
+                        $str = $this->display_bulk_export($options);
+                        break;
+
+                    default: $str = '';
                 }
             }
             $replacements[$pattern] = $str;
@@ -115,7 +142,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
      */
     protected function display_bulk_duplicate($options = null) {
         global $PAGE, $OUTPUT;
-        
+
         if (!$showentryactions = empty($options['entryactions'])) {
             return '';
         }
@@ -132,7 +159,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
      */
     protected function display_bulk_edit($options = null) {
         global $PAGE, $OUTPUT;
-        
+
         if (!$showentryactions = empty($options['entryactions'])) {
             return '';
         }
@@ -149,7 +176,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
      */
     protected function display_bulk_delete($options = null) {
         global $PAGE, $OUTPUT;
-        
+
         if (!$showentryactions = empty($options['entryactions'])) {
             return '';
         }
@@ -166,7 +193,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
      */
     protected function display_bulk_export($options = null) {
         global $PAGE, $OUTPUT, $CFG;
-        
+
         if (!$showentryactions = empty($options['entryactions'])) {
             return '';
         }
@@ -174,7 +201,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         if (empty($CFG->enableportfolios)) {
             return '';
         }
-        
+
         $url = !empty($options['baseurl']) ? $options['baseurl'] : $PAGE->url;
         if (!empty($format)) {
             $url->param('format', $format);
@@ -194,13 +221,13 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_select_allnone', array('entry'));
         return html_writer::checkbox('entryselectallnone', null, false, null, array('id' => 'id_entryselectallnone'));
     }
-    
+
     /**
      *
      */
     protected function display_action_menu($entry, array $options = null) {
         global $OUTPUT;
-        
+
         $menu = new action_menu();
         $menu->set_menu_trigger($OUTPUT->pix_icon('t/contextmenu', ''));
         // Edit
@@ -211,21 +238,21 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         if ($action = $this->display_more($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
-        
+
         // Duplicate
         if ($action = $this->display_duplicate($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
-               
+
         // Export
         if ($action = $this->display_export($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
-        
+
         // Delete
         if ($action = $this->display_delete($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
-        }        
+        }
 
         return $OUTPUT->render_action_menu($menu);
     }
@@ -235,16 +262,16 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
      */
     protected function display_edit($entry, array $options = null) {
         global $OUTPUT;
-        
+
         $field = $this->_field;
         $params = array(
             'editentries' => $entry->id,
-        );       
-        $url = new moodle_url($entry->baseurl, $params); 
+        );
+        $url = new moodle_url($entry->baseurl, $params);
 
         $views = $this->get_views_menu();
         $viewname = null;
-        
+
         if ($currentview = $field->df->currentview) {
             $viewname = $currentview->name;
         }
@@ -256,8 +283,8 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             }
         } else if (!empty($entry->baseurl)) {
             $viewid = $entry->baseurl->param('view');
-        }   
-        
+        }
+
         // Check update permissions for target view
         $accessparams = array('dataformid' => $field->dataid, 'viewid' => $viewid, 'entry' => $entry);
         if (!mod_dataform\access\entry_update::validate($accessparams)) {
@@ -279,11 +306,11 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
      */
     protected function display_more($entry, array $options = null) {
         global $OUTPUT;
-        
+
         $field = $this->_field;
         $params = array(
             'eids' => $entry->id
-        );       
+        );
         $url = new moodle_url($entry->baseurl, $params);
         if (!empty($options['view'])) {
             // Designated view from pattern
@@ -302,7 +329,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         if (!empty($options['url'])) {
             return $url->out(false);
         }
-        
+
         $str = get_string('more', 'dataform'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
         $attributes = array('id' => "id_moreentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('i/search', $str), $str, true, $attributes);
@@ -323,8 +350,8 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $params = array(
             'duplicate' => $entry->id,
             'sesskey' => sesskey()
-        );       
-        $url = new moodle_url($entry->baseurl, $params);         
+        );
+        $url = new moodle_url($entry->baseurl, $params);
         $str = get_string('copy'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
         $attributes = array('id' => "id_duplicateentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('t/copy', $str), $str, true, $attributes);
@@ -342,19 +369,19 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         global $OUTPUT;
 
         $field = $this->_field;
-        
+
         // Check delete permissions for target view
         $viewid = !empty($entry->baseurl) ? $entry->baseurl->param('view') : 0;
         $accessparams = array('dataformid' => $field->dataid, 'viewid' => $viewid, 'entry' => $entry);
         if (!mod_dataform\access\entry_delete::validate($accessparams)) {
             return '';
-        }        
-        
+        }
+
         $params = array(
             'delete' => $entry->id,
             'sesskey' => sesskey()
-        );       
-        $url = new moodle_url($entry->baseurl, $params);         
+        );
+        $url = new moodle_url($entry->baseurl, $params);
         $str = get_string('delete'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
         $attributes = array('id' => "id_deleteentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('t/delete', $str), $str, true, $attributes);
@@ -379,7 +406,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         if (!$aman->can_export_entry($entry)) {
             return '';
         }
-        
+
         $field = $this->_field;
         $url = new moodle_url($entry->baseurl, array('export' => $entry->id, 'sesskey' => sesskey()));
         $str = get_string('export', 'dataform'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
@@ -398,7 +425,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
     protected function display_select($entry, array $options = null) {
         return html_writer::checkbox('entryselector', $entry->id, false, null, array('class' => 'entryselector'));
     }
-    
+
     /**
      *
      */
@@ -411,14 +438,14 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         return $this->_viewsmenu;
     }
-    
+
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
         $patterns = array();
-     
+
         $cat = get_string('pluginname', 'dataformfield_entryactions');
 
         // actions
@@ -428,7 +455,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $patterns["[[$fieldname:select]]"] = array(true, $cat);
         $patterns["[[$fieldname:export]]"] = array(true, $cat);
         $patterns["[[$fieldname:duplicate]]"] = array(true, $cat);
-        
+
         // reference
         $patterns["[[$fieldname:anchor]]"] = array(true, $cat);
         $patterns["[[$fieldname:more]]"] = array(true, $cat);
@@ -442,17 +469,17 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                 $patterns["[[$fieldname:edit:$viewname]]"] = array(false);
             }
         }
-               
-        return $patterns; 
+
+        return $patterns;
     }
-    
+
     /**
      * Array of patterns this field supports in the view template
      * (that is, outside an entry). These patterns will be listed
      * in the view patterns selector in the view configuration form.
      * These patterns must start with fieldname: and then a specific tag.
      *
-     * @return array pattern => array(visible in menu, category) 
+     * @return array pattern => array(visible in menu, category)
      */
     protected function view_patterns() {
         $fieldname = $this->_field->name;

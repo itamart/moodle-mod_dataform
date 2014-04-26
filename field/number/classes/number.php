@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage number
@@ -25,12 +25,11 @@ class dataformfield_number_number extends dataformfield_text_text {
     /**
      * Returns sql cast to real.
      *
-     * @return string 
+     * @return string
      */
     protected function get_sql_compare_text($column = 'content') {
-        global $DB;    
+        global $DB;
         return $DB->sql_cast_char2real("c{$this->id}.$column", true);
     }
 
 }
-

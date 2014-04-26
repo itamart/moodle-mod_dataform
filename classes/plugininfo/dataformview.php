@@ -27,10 +27,9 @@ use core\plugininfo\base;
 
 defined('MOODLE_INTERNAL') || die();
 
-
 class dataformview extends base {
     public function is_uninstall_allowed() {
         global $DB;
-        return !$DB->record_exists('dataform_views', array('type'=>$this->name));
+        return !$DB->record_exists('dataform_views', array('type' => $this->name));
     }
 }

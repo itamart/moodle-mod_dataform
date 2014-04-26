@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage picture
@@ -32,7 +32,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
         if (!empty($this->_field->param4)) {
             if (!is_object($this->_field->param4)) {
                 $appearance = unserialize(base64_decode($this->_field->param4));
-            
+
                 // Add defaults
                 foreach ($this->appearance_defaults as $key => $default) {
                     if (!isset($appearance->$key)) {
@@ -43,7 +43,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
             }
             return $this->_field->param4;
         }
-        
+
         return (object) $this->appearance_defaults;
     }
 
@@ -76,7 +76,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
         if (!parent::update($data)) {
             echo $OUTPUT->notification('updating of new field failed!');
             return false;
-        }       
+        }
 
         // Have the dimensions changed?
         $updatefile = ($oldappearance->maxw != $this->appearance->maxw or $oldappearance->maxh != $this->appearance->maxh);
@@ -115,12 +115,12 @@ class dataformfield_picture_picture extends dataformfield_file_file {
 
         // update dimensions and regenerate thumbs
         foreach ($files as $file) {
-            
+
             if ($file->is_valid_image() and strpos($file->get_filename(), 'thumb_') === false) {
                 // original first
                 if ($updatefile) {
-                    $maxwidth  = $this->appearance->maxw ? $this->appearance->maxw: 0;
-                    $maxheight = $this->appearance->maxh ? $this->appearance->maxh: 0;
+                    $maxwidth  = $this->appearance->maxw ? $this->appearance->maxw : 0;
+                    $maxheight = $this->appearance->maxh ? $this->appearance->maxh : 0;
 
                     // If either width or height try to (re)generate
                     if ($maxwidth or $maxheight) {
@@ -132,7 +132,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
                                 'filearea' => 'conversion',
                                 'itemid' => $contentid,
                                 'filepath' => $file->get_filepath(),
-                                'userid'=>$file->get_userid()
+                                'userid' => $file->get_userid()
                             );
                             $tempfile = $fs->convert_image($filerec, $file, $maxwidth, $maxheight, true);
                             // Delete the original file
@@ -161,13 +161,13 @@ class dataformfield_picture_picture extends dataformfield_file_file {
                     if ($thumbwidth or $thumbheight) {
 
                         $filerec = array(
-                            'contextid'=>$this->df->context->id,
-                            'component'=>'mod_dataform',
-                            'filearea'=>'content',
-                            'itemid'=>$contentid,
-                            'filepath'=> '/',
-                            'filename'=>$thumbname,
-                            'userid'=>$file->get_userid()
+                            'contextid' => $this->df->context->id,
+                            'component' => 'mod_dataform',
+                            'filearea' => 'content',
+                            'itemid' => $contentid,
+                            'filepath' => '/',
+                            'filename' => $thumbname,
+                            'userid' => $file->get_userid()
                         );
 
                         try {

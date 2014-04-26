@@ -106,9 +106,9 @@ Feature: Add dataform entries
         
     Examples:
 | result | fielddata |
-#|	Option 1	|	Field 01	Field description 01	0	1		Option 1\nOption 2\nOption 3\nOption 4	Option 1	1	|
-#|	Today	|	Field 02	Field description 02	1	0		Yesterday\nToday\nTomorrow	Today	1	|
-#|	8	|	Field 03	Field description 03	2	1		1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12	8	1	|
-#|	One option	|	Field 04	Field description 04	0	0		One option	One option	0	|
-#|	Two	|	Field 05	Field description 05	1	1		Two\nTwo	Two	0	|
-#|	Useful	|	Field 06	Field description 06	2	0		Useful	Useful	0	|
+#|    Option 1    |    Field 01    Field description 01    0    1        Option 1\nOption 2\nOption 3\nOption 4    Option 1    1    |
+#|    Today    |    Field 02    Field description 02    1    0        Yesterday\nToday\nTomorrow    Today    1    |
+#|    8    |    Field 03    Field description 03    2    1        1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12    8    1    |
+#|    One option    |    Field 04    Field description 04    0    0        One option    One option    0    |
+#|    Two    |    Field 05    Field description 05    1    1        Two\nTwo    Two    0    |
+#|    Useful    |    Field 06    Field description 06    2    0        Useful    Useful    0    |

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -30,8 +29,8 @@ require_once('../../../../config.php');
 
 $result = new stdClass;
 
-//if session has expired and its an ajax request so we cant do a page redirect
-if( !isloggedin() ){
+// if session has expired and its an ajax request so we cant do a page redirect
+if ( !isloggedin() ) {
     $result->error = get_string('sessionerroruser', 'error');
     echo json_encode($result);
     die();

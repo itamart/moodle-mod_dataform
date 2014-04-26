@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage duration
@@ -21,7 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
-
 
 /**
  *
@@ -44,7 +43,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
                 $noedit = $this->is_noedit($pattern);
                 if (!$firstinput and !$noedit and $cleanpattern != "[[$fieldname:unit]]") {
                     $required = $this->is_required($pattern);
-                    $replacements[$pattern] = array(array($this,'display_edit'), array($entry, array('required' => $required)));
+                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
                     $firstinput = true;
                 } else {
                     $replacements[$pattern] = '';
@@ -52,7 +51,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
             }
             return $replacements;
         }
-        
+
         // Browse mode
         foreach ($patterns as $pattern => $cleanpattern) {
             switch ($cleanpattern) {
@@ -84,17 +83,17 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
      */
     public function display_edit(&$mform, $entry, array $options = null) {
         global $PAGE;
-        
+
         $field = $this->_field;
         $fieldid = $field->id;
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
 
         $number = '';
-        if ($entryid > 0 and isset($entry->{"c{$fieldid}_content"})){
+        if ($entryid > 0 and isset($entry->{"c{$fieldid}_content"})) {
             $number = $entry->{"c{$fieldid}_content"};
         }
-        
+
         // Field width
         $fieldattr = array();
         if ($field->param2) {
@@ -115,10 +114,10 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
             $module = array(
                 'name' => 'M.dataformfield_duration_required',
                 'fullpath' => '/mod/dataform/field/duration/duration.js',
-                'requires' => array('base','node')
+                'requires' => array('base', 'node')
             );
 
-            $PAGE->requires->js_init_call('M.dataformfield_duration_required.init', array($options), false, $module);            
+            $PAGE->requires->js_init_call('M.dataformfield_duration_required.init', array($options), false, $module);
         }
     }
 
@@ -133,31 +132,36 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
         } else {
             $duration = '';
         }
-        
+
         $format = !empty($params['format']) ? $params['format'] : '';
         if ($duration) {
             list($value, $unit) = $field->seconds_to_unit($duration);
             $units = $field->get_units();
             switch ($format) {
                 case 'unit':
-                    return $units[$unit]; break;
-                    
+                    return $units[$unit];
+                    break;
+
                 case 'value':
-                    return $value; break;
-                    
+                    return $value;
+                    break;
+
                 case 'seconds':
-                    return $duration; break;
-                    
+                    return $duration;
+                    break;
+
                 case 'interval':
-                    return format_time($duration); break;
-                    
+                    return format_time($duration);
+                    break;
+
                 default:
-                    return $value. ' '. $units[$unit]; break;
+                    return $value. ' '. $units[$unit];
+                    break;
             }
         }
         return '';
     }
-    
+
     /**
      *
      */
@@ -194,4 +198,3 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
         return $patterns;
     }
 }
-

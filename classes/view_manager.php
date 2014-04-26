@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
@@ -37,13 +37,12 @@ class mod_dataform_view_manager {
      */
     public static function instance($dataformid) {
         static $instances = array();
-        
+
         if (empty($instances[$dataformid])) {
             $instances[$dataformid] = new mod_dataform_view_manager($dataformid);
         }
         return $instances[$dataformid];
     }
-
 
     /**
      * constructor
@@ -52,7 +51,7 @@ class mod_dataform_view_manager {
         $this->_dataformid = $dataformid;
         $this->_items = array();
     }
-   
+
     /**
      * Magic property method
      *
@@ -84,7 +83,6 @@ class mod_dataform_view_manager {
         return null;
     }
 
-
     /**
      * Returns true if max views as set by admin has been reached.
      *
@@ -92,7 +90,7 @@ class mod_dataform_view_manager {
      */
     public function is_at_max_views() {
         global $DB, $CFG;
-        
+
         if ($CFG->dataform_maxviews) {
             if ($count = $DB->count_records('dataform_views', array('dataid' => $this->_dataformid))) {
                 if ($count >= $CFG->dataform_maxviews) {
@@ -160,13 +158,13 @@ class mod_dataform_view_manager {
                 }
             }
         }
-    
+
         // Either no view or forceget so get the view from DB
         if ($view = $DB->get_record('dataform_views', array('dataid' => $this->_dataformid, 'name' => $viewname))) {
             $this->_items[$view->id] = $view;
             return $this->get_view($view);
         }
-        
+
         return false;
     }
 
@@ -175,12 +173,12 @@ class mod_dataform_view_manager {
      * If no spcific view is requested or the requested view is not found,
      * tries to return the default view.
      * This method does not check access permission.
-     * 
+     *
      * @return dataformview|false
      */
     public function get_view_by_id($viewid = 0) {
         global $DB;
-        
+
         if (!$viewid and !$viewid = $df->defaultview) {
             return false;
         }
@@ -188,7 +186,7 @@ class mod_dataform_view_manager {
         if (!empty($this->_items[$viewid])) {
             return $this->get_view($this->_items[$viewid]);
         }
-        
+
         // Not stored so get the view from DB
         if ($view = $DB->get_record('dataform_views', array('id' => $viewid))) {
             $this->_items[$view->id] = $view;
@@ -211,7 +209,7 @@ class mod_dataform_view_manager {
         }
         return $views;
     }
-    
+
     /**
      * returns a view subclass object given a view record or view type
      * invoke plugin methods
@@ -230,7 +228,7 @@ class mod_dataform_view_manager {
                 $obj->type = $type;
                 $obj->dataid = $this->_dataformid;
             }
-            
+
             $objclass = "dataformview_{$type}_$type";
             $view = new $objclass($obj, $active);
             return $view;
@@ -248,7 +246,7 @@ class mod_dataform_view_manager {
         }
 
         $typeviews = array();
-        foreach  ($views as $viewid => $view) {
+        foreach ($views as $viewid => $view) {
             $typeviews[$viewid] = $this->get_view($view);
         }
         return $typeviews;
@@ -263,7 +261,7 @@ class mod_dataform_view_manager {
             return false;
         }
 
-        foreach ($views as $viewid => $view){
+        foreach ($views as $viewid => $view) {
             if ($view instanceof $parentclass) {
                 continue;
             }
@@ -278,8 +276,8 @@ class mod_dataform_view_manager {
      */
     public function get_views(array $options = null) {
         $forceget = !empty($options['forceget']);
-        $sort = !empty($options['sort'])? $options['sort'] : '';
-        
+        $sort = !empty($options['sort']) ? $options['sort'] : '';
+
         if (!$this->get_view_records($forceget, null, $sort)) {
             return false;
         }
@@ -290,7 +288,7 @@ class mod_dataform_view_manager {
             if ($exclude and in_array($viewid, $exclude)) {
                 continue;
             }
-            $views[$viewid]= $this->get_view($view);
+            $views[$viewid] = $this->get_view($view);
         }
         return $views;
     }
@@ -300,15 +298,15 @@ class mod_dataform_view_manager {
      */
     public function get_views_menu() {
         global $DB;
-        
+
         static $menu;
-        
-        if (!isset($menu)) {       
+
+        if (!isset($menu)) {
             $menu = array();
-            
+
             $params = array('dataid' => $this->_dataformid);
             $views = $DB->get_records('dataform_views', $params, '', 'id,name,visible');
-            
+
             // Check access to the view
             $df = mod_dataform_dataform::instance($this->_dataformid);
             $manager = has_capability('mod/dataform:manageviews', $df->context);
@@ -356,12 +354,12 @@ class mod_dataform_view_manager {
         $df = mod_dataform_dataform::instance($this->_dataformid);
 
         require_capability('mod/dataform:manageviews', $df->context);
-        
+
         // Get array of ids
         if (!is_array($vids)) {
             $vids = explode(',', $vids);
         }
-        
+
         $views = $this->get_views_by_id($vids);
 
         $processedvids = array();
@@ -393,7 +391,7 @@ class mod_dataform_view_manager {
                         $updateview = new stdClass;
                         foreach ($views as $vid => $view) {
                             if ($vid == $df->defaultview) {
-                                // Nothing to do: should already be visible and cannot be hidden. 
+                                // Nothing to do: should already be visible and cannot be hidden.
                                 continue;
                             } else {
                                 // Switch visibility
@@ -428,7 +426,7 @@ class mod_dataform_view_manager {
                     case 'reset':
                         foreach ($views as $vid => $view) {
                             // Generate default view and update
-                            $view->generate_default_view();                            
+                            $view->generate_default_view();
 
                             // Update
                             if ($view->update($view->data)) {
@@ -451,7 +449,7 @@ class mod_dataform_view_manager {
                                 $i++;
                             }
                             $viewname = $view->name. "_$i";
-                            
+
                             // Update
                             if ($view->duplicate($viewname)) {
                                 $processedvids[] = $vid;
@@ -529,7 +527,7 @@ class mod_dataform_view_manager {
         }
 
         require_once("$CFG->dirroot/mod/dataform/view/patternsform.php");
-        
+
         // Get the Dataforms
         if ($dataformid == -1) {
             if (!$dataformids = $DB->get_records('dataform', array(), '', 'id')) {
@@ -555,7 +553,7 @@ class mod_dataform_view_manager {
                 }
                 $views = array($view);
             }
-                    
+
             foreach ($views as $view) {
                 if ($updates = $view->patterns_check()) {
                     $brokenpatterns = array_merge($brokenpatterns, $updates);
@@ -569,26 +567,26 @@ class mod_dataform_view_manager {
 
         // Get the form
         $mform = new mod_dataform_view_patternsform(null, array('patterns' => $brokenpatterns));
-        
+
         // Cancelled
-        if ($mform->is_cancelled()){
+        if ($mform->is_cancelled()) {
             redirect($PAGE->url);
         }
 
-        // Clean up   
+        // Clean up
         if ($data = $mform->get_data()) {
             if (!empty($data->replacements)) {
                 $patterns = array_keys($data->replacements);
                 $replacements = $data->replacements;
-                
+
                 if ($viewid and $viewid != -1) {
-                    $df = mod_dataform_dataform::instance($dataformid);               
+                    $df = mod_dataform_dataform::instance($dataformid);
                     $view = $df->view_manager->get_view_by_id($viewid);
                     $view->replace_patterns_in_view($patterns, $replacements);
-                
-                } else {           
+
+                } else {
                     foreach ($dataformids as $dfid) {
-                        $df = mod_dataform_dataform::instance($dfid);               
+                        $df = mod_dataform_dataform::instance($dfid);
                         $df->view_manager->replace_patterns_in_views($patterns, $replacements);
                     }
                 }
@@ -596,12 +594,12 @@ class mod_dataform_view_manager {
             // Redirect to refresh the form
             $url = new moodle_url($PAGE->url, array('patternscleanup' => $viewid));
             redirect($url);
-            
+
         }
-        
+
         // Heading
         echo html_writer::tag('h3', get_string('patternsrelacement', 'dataform'));
-        
+
         // Display the form
         $actionurl = new moodle_url($PAGE->url, array('patternscleanup' => $viewid));
         $customdata = array('patterns' => $brokenpatterns);

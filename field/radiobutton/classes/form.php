@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage radiobutton
@@ -26,7 +26,7 @@ class dataformfield_radiobutton_form extends dataformfield_select_form {
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
         parent::field_definition();
 
         $mform = &$this->_form;

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * The mod_dataform dataform notification observer.
  *
@@ -35,7 +35,7 @@ class notification {
      */
     public static function observers() {
         global $CFG;
-        
+
         $noteobservers = array();
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/event") as $filename) {
             if (strpos($filename, '_base.php') !== false) {
@@ -47,7 +47,7 @@ class notification {
                 'callback'    => '\mod_dataform\observer\notification::notify',
             );
         }
-        
+
         return $noteobservers;
     }
 
@@ -66,7 +66,7 @@ class notification {
      * @return array
      */
     public static function notify(\core\event\base $event) {
-        $dataformid = $event->other['dataid'];        
+        $dataformid = $event->other['dataid'];
         $man = \mod_dataform_notification_manager::instance($dataformid);
 
         $result = false;
@@ -104,7 +104,7 @@ class notification {
     public function send_message($data) {
         global $SITE;
         $res = array();
-        
+
         $message = new \stdClass;
         $message->siteshortname   = format_string($SITE->fullname);
         $message->component       = 'mod_dataform';
@@ -116,33 +116,33 @@ class notification {
         $message->fullmessagehtml = !empty($data['contenthtml']) ? $data['contenthtml'] : $message->fullmessage;
         $message->smallmessage    = $data['subject'];
         $message->notification    = (int) !empty($data['notification']);
-        
+
         // Send message
         if ($recipients = $data['recipients']) {
             $res['method'] = 'message';
-            
+
             // Message provider name
             if (!empty($data['name'])) {
                 $message->name = $data['name'];
             }
-            
+
             foreach ($recipients as $recipient) {
                 $message->userto = $recipient;
-                
+
                 if (!empty($recipient->mailformat) and $recipient->mailformat == FORMAT_HTML) {
                     $message->fullmessagehtml = format_text($message->fullmessagehtml, FORMAT_HTML);
-                }               
-                
+                }
+
                 $res[$recipient->id] = message_send($message);
             }
         }
-        
+
         // Send email
         if ($recipients = $data['recipientemails']) {
             $res['method'] = 'email';
             foreach ($recipients as $recipient) {
                 $message->recipient = $recipient;
-                //directly email rather than using the messaging system to ensure its not routed to a popup or jabber
+                // Email directly rather than using the messaging system to ensure its not routed to a popup or jabber
                 $res[$recipient] = email_to_user(
                     $message->userto,
                     $message->siteshortname,
@@ -156,10 +156,9 @@ class notification {
                 );
             }
         }
-        
-                    
+
         return $res;
-    } 
+    }
 
     /**
      *
@@ -171,7 +170,7 @@ class notification {
             if ($data->sender == 'author' and $event->relateduserid) {
                 $data->sender = $event->relateduserid;
             }
-            
+
             // Get event user id for sender where applicable
             if ($data->sender == 'event' and $event->userid) {
                 $data->sender = $event->userid;
@@ -182,8 +181,8 @@ class notification {
         if (!empty($data->recipientauthor) and $event->relateduserid) {
             $data->recipientauthor = $event->relateduserid;
         }
-        
-        $message= array();
+
+        $message = array();
         $message['subject'] = $this->get_subject($event, $data);
         $message['content'] = $this->get_content($event, $data);
         $message['contentformat'] = $this->get_content_format($data);
@@ -194,7 +193,7 @@ class notification {
         $message['notification'] = (int) empty($data->messagetype);
 
         return $message;
-    }   
+    }
 
     /**
      *
@@ -237,8 +236,7 @@ class notification {
         return $contenthtml;
     }
 
-    
-       
+
     /**
      * Returns sender user by id specified in $data->sender.
      *
@@ -247,28 +245,28 @@ class notification {
      */
     protected function get_sender_user($data) {
         global $DB, $USER;
-        
+
         // No reply
         if (empty($data->sender)) {
             $data->sender = \core_user::NOREPLY_USER;
         }
-        
+
         return \core_user::get_user($data->sender);
     }
 
     /**
-     * Returns list of recipient users. 
+     * Returns list of recipient users.
      *
      * @param stdClass $data
      * @return array user objects
      */
     protected function get_recipient_users($data, $context) {
         $recipients = array();
-        
+
         // Admin
         if (!empty($data->recipientadmin)) {
-            $user = get_admin();               
-            $recipients[$user->id] = $user;               
+            $user = get_admin();
+            $recipients[$user->id] = $user;
         }
 
         // Support
@@ -304,7 +302,7 @@ class notification {
 
         return $recipients;
     }
-    
+
     /**
      *
      *
@@ -313,18 +311,18 @@ class notification {
      */
     protected function get_recipient_email_users($data) {
         $recipients = array();
-        
+
         if (!empty($data->recipientemail)) {
             $emails = explode(',', $data->recipientemail);
             foreach ($emails as $email) {
                 if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
                     $user = new \stdClass;
-                    $user->email = $email;    
-                    $user->firstname = 'emailuser';    
-                    $user->lastname = '';    
-                    $user->maildisplay = true;    
-                    $user->mailformat = $this->get_content_format();    
-                    $recipients[] = $user; 
+                    $user->email = $email;
+                    $user->firstname = 'emailuser';
+                    $user->lastname = '';
+                    $user->maildisplay = true;
+                    $user->mailformat = $this->get_content_format();
+                    $recipients[] = $user;
                 }
             }
         }

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformaccess
  * @copyright 2013 Itamar Tzadok
@@ -37,7 +37,7 @@ $urlparams->enable = optional_param('enable', 0, PARAM_INT);     // Enable conte
 $urlparams->disable = optional_param('disable', 0, PARAM_INT);     // Disable context (hide block)
 $urlparams->delete = optional_param('delete', 0, PARAM_INT);   // Delete context (delete block)
 
-$urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);    
+$urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);

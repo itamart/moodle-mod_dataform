@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
@@ -33,33 +33,33 @@ class restore_dataform_activity_task extends restore_activity_task {
     protected $ownerid = 0; // user id of designated owner of content
 
     /**
-     * 
+     *
      */
     public function get_old_moduleid() {
         return $this->oldmoduleid;
     }
 
     /**
-     * 
+     *
      */
     public function set_ownerid($ownerid) {
         $this->ownerid = $ownerid;
     }
 
     /**
-     * 
+     *
      */
     public function get_ownerid() {
         return $this->ownerid;
     }
 
     /**
-     * 
+     *
      */
     public function get_comment_mapping_itemname($commentarea) {
         return 'dataform_entry';
         // TODO Implement comment mapping itemname for non-dataformfield comments
-        //$itemname = parent::get_comment_mapping_itemname($commentarea);
+        // $itemname = parent::get_comment_mapping_itemname($commentarea);
     }
 
     /**
@@ -176,7 +176,7 @@ class restore_dataform_activity_task extends restore_activity_task {
         $rules = array();
 
         $rules[] = new restore_decode_rule('DFINDEX', '/mod/dataform/index.php?id=$1', 'course');
-        
+
         $rules[] = new restore_decode_rule('DFVIEWBYID', '/mod/dataform/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('DFEMBEDBYID', '/mod/dataform/embed.php?id=$1', 'course_module');
 

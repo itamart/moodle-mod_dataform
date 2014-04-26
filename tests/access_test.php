@@ -43,32 +43,32 @@ class mod_dataform_access_testcase extends advanced_testcase {
      */
     public function setUp() {
         global $DB;
-        
+
         $this->resetAfterTest();
 
         // Create a course we are going to add a data module to.
         $this->course = $this->getDataGenerator()->create_course();
         $courseid = $this->course->id;
-        
+
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
-        
+
         // Teacher
-        $user = $this->getDataGenerator()->create_user(array('username'=>'teacher'));
+        $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
         $this->teacher = $user;
-        
+
         // Assistant
-        $user = $this->getDataGenerator()->create_user(array('username'=>'assistant'));
+        $user = $this->getDataGenerator()->create_user(array('username' => 'assistant'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['teacher']);
         $this->assistant = $user;
-        
+
         // Student
-        $user = $this->getDataGenerator()->create_user(array('username'=>'student'));
+        $user = $this->getDataGenerator()->create_user(array('username' => 'student'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
         $this->student = $user;
-        
+
         // Guest
-        $user = $DB->get_record('user', array('username'=>'guest'));
+        $user = $DB->get_record('user', array('username' => 'guest'));
         $this->guest = $user;
     }
 
@@ -102,17 +102,16 @@ class mod_dataform_access_testcase extends advanced_testcase {
         } else if ($username == 'guest') {
             $this->setGuestUser();
         } else {
-           $this->setUser($this->$username);
+            $this->setUser($this->$username);
         }
     }
-
 
     /**
      * Test view events for standard types.
      */
     public function test_access() {
         $df = $this->get_a_dataform();
-        $view = $df->view_manager->add_view('aligned');        
+        $view = $df->view_manager->add_view('aligned');
         $entry = (object) array(
             'dataid' => $df->id,
             'userid' => 0,
@@ -120,11 +119,11 @@ class mod_dataform_access_testcase extends advanced_testcase {
         );
         $params = array('dataformid' => $df->id, 'viewid' => $view->id, 'entry' => $entry);
 
-        $dataset = $this->createCsvDataSet(array('cases'=>__DIR__.'/fixtures/test_cases_access.csv'), "\t");
+        $dataset = $this->createCsvDataSet(array('cases' => __DIR__.'/fixtures/test_cases_access.csv'));
         $cases = $dataset->getTable('cases');
         $columns = $dataset->getTableMetaData('cases')->getColumns();
 
-        for($r=0; $r<$cases->getRowCount(); $r++) {
+        for ($r = 0; $r < $cases->getRowCount(); $r++) {
             $case = (object) array_combine($columns, $cases->getRow($r));
 
             // Set teacher user for initial setup
@@ -148,13 +147,12 @@ class mod_dataform_access_testcase extends advanced_testcase {
             }
             if ($entrygroup = $case->entrygroup) {
                 $params['entry']->gropuid = $entrygroup;
-            }            
-            
+            }
+
             // Set the user
             $this->set_user($case->user);
-            
+
             // Check access
-            print_object($case->event. ' - '. $case->user. ' - '. $case->description);
             $access = "mod_dataform\access\\$case->event";
             $result = $access::validate($params);
             $this->assertEquals(filter_var($case->expected, FILTER_VALIDATE_BOOLEAN), $result);

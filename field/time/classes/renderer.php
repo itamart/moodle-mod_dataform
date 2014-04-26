@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage time
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die();
 
-
 /**
  *
  */
 class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -37,7 +36,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $edit = !empty($options['edit']);
 
         $replacements = array_fill_keys(array_keys($patterns), '');
-        
+
         if ($edit) {
             foreach ($patterns as $pattern => $cleanpattern) {
                 if ($this->is_noedit($pattern)) {
@@ -47,49 +46,65 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
                 // Determine whether date only selector
                 $date = (($cleanpattern == "[[$fieldname:date]]") or $field->date_only);
                 $options = array('required' => $required, 'date' => $date);
-                $replacements[$pattern] = array(array($this,'display_edit'), array($entry, $options));
+                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $options));
                 break;
             }
             return $replacements;
         }
-            
+
         // Browse mod
         foreach ($patterns as $pattern => $cleanpattern) {
             // Determine display format
             $format = (strpos($pattern, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($pattern, '[]')) : $field->display_format);
             // For specialized patterns convert format to the userdate format string
-            switch ($format) {            
-                case 'date': $format = get_string('strftimedate', 'langconfig'); break; 
-                case 'minute': $format = '%M'; break; 
-                case 'hour': $format = '%H'; break; 
-                case 'day': $format = '%a'; break; 
-                case 'week': $format = '%W'; break; 
-                case 'month': $format = '%b'; break; 
-                case 'm': $format = '%m'; break; 
+            switch ($format) {
+                case 'date':
+                    $format = get_string('strftimedate', 'langconfig');
+                    break;
+                case 'minute':
+                    $format = '%M';
+                    break;
+                case 'hour':
+                    $format = '%H';
+                    break;
+                case 'day':
+                    $format = '%a';
+                    break;
+                case 'week':
+                    $format = '%W';
+                    break;
+                case 'month':
+                    $format = '%b';
+                    break;
+                case 'm':
+                    $format = '%m';
+                    break;
                 case 'year':
-                case 'Y': $format = '%Y'; break;
+                case 'Y':
+                    $format = '%Y';
+                    break;
                 default:
                     if (!$format and $field->date_only) {
                         $format = get_string('strftimedate', 'langconfig');
                     }
             }
             $replacements[$pattern] = $this->display_browse($entry, array('format' => $format));
-        }    
+        }
 
         return $replacements;
     }
 
     /**
-     * 
+     *
      */
     public function display_edit(&$mform, $entry, array $options = null) {
         $field = $this->_field;
         $fieldid = $field->id;
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
-       
+
         $content = 0;
-        if ($entryid > 0 and !empty($entry->{"c{$fieldid}_content"})){
+        if ($entryid > 0 and !empty($entry->{"c{$fieldid}_content"})) {
             $content = $entry->{"c{$fieldid}_content"};
         }
 
@@ -99,7 +114,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
             $this->render_standard_selector($mform, $entry, $content, $options);
         }
     }
-    
+
     /**
      *
      */
@@ -114,23 +129,23 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
                 $strtime = userdate($content, $format);
             }
         }
-        
+
         return $strtime;
     }
 
     /**
-     * 
+     *
      */
     protected function render_standard_selector(&$mform, $entry, $content, array $options = null) {
         $field = $this->_field;
         $fieldid = $field->id;
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
-       
+
         $includetime = empty($options['date']) ? true : false;
 
         // If date only don't add time to selector
-        $time = $includetime ? 'time_' : '';      
+        $time = $includetime ? 'time_' : '';
         $tmoptions = array();
         // Optional
         $tmoptions['optional'] = (!empty($options['required']) ? false : true);
@@ -143,19 +158,19 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
             $tmoptions['stopyear'] = $field->stop_year;
         }
         $mform->addElement("date_{$time}selector", $fieldname, null, $tmoptions);
-        //$mform->addRule($fieldname, null, 'required', null, 'client');
-        $mform->setDefault($fieldname, $content);      
+        // $mform->addRule($fieldname, null, 'required', null, 'client');
+        $mform->setDefault($fieldname, $content);
     }
-    
+
     /**
-     * 
+     *
      */
     protected function render_masked_selector(&$mform, $entry, $content, array $options = null) {
         $field = $this->_field;
         $entryid = $entry->id;
         $fieldid = $field->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
-        
+
         $includetime = empty($options['date']) ? true : false;
 
         $step = 5;
@@ -164,13 +179,13 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $maskday = get_string('day', 'dataformfield_time');
         $maskmonth = get_string('month', 'dataformfield_time');
         $maskyear = get_string('year', 'dataformfield_time');
-       
+
         $days = array();
-        for ($i=1; $i<=31; $i++) {
+        for ($i = 1; $i <= 31; $i++) {
             $days[$i] = $i;
         }
         $months = array();
-        for ($i=1; $i<=12; $i++) {
+        for ($i = 1; $i <= 12; $i++) {
             $months[$i] = userdate(mktime(0, 0, 0, $i, 10), "%B");
         }
         $years = array();
@@ -179,9 +194,9 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         }
 
         $grp = array();
-        $grp[] = &$mform->createElement('select', "{$fieldname}[day]", null, array(0 => $maskday) + $days);                   
-        $grp[] = &$mform->createElement('select', "{$fieldname}[month]", null, array(0 => $maskmonth) + $months);                   
-        $grp[] = &$mform->createElement('select', "{$fieldname}[year]", null, array(0 => $maskyear) + $years);                   
+        $grp[] = &$mform->createElement('select', "{$fieldname}[day]", null, array(0 => $maskday) + $days);
+        $grp[] = &$mform->createElement('select', "{$fieldname}[month]", null, array(0 => $maskmonth) + $months);
+        $grp[] = &$mform->createElement('select', "{$fieldname}[year]", null, array(0 => $maskyear) + $years);
 
         // If time add hours and minutes
         if ($includetime) {
@@ -189,16 +204,16 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
             $maskminute = get_string('minute', 'dataformfield_time');
 
             $hours = array();
-            for ($i=0; $i<=23; $i++) {
-                $hours[$i] = sprintf("%02d",$i);
+            for ($i = 0; $i <= 23; $i++) {
+                $hours[$i] = sprintf("%02d", $i);
             }
             $minutes = array();
-            for ($i=0; $i<60; $i+=$step) {
-                $minutes[$i] = sprintf("%02d",$i);
+            for ($i = 0; $i < 60; $i += $step) {
+                $minutes[$i] = sprintf("%02d", $i);
             }
-            
-            $grp[] = &$mform->createElement('select', "{$fieldname}[hour]", null, array(0 => $maskhour) + $hours);                   
-            $grp[] = &$mform->createElement('select', "{$fieldname}[minute]", null, array(0 => $maskminute) + $minutes);                   
+
+            $grp[] = &$mform->createElement('select', "{$fieldname}[hour]", null, array(0 => $maskhour) + $hours);
+            $grp[] = &$mform->createElement('select', "{$fieldname}[minute]", null, array(0 => $maskminute) + $minutes);
         }
 
         $mform->addGroup($grp, "grp$fieldname", null, '', false);
@@ -218,9 +233,9 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $mform->addElement('hidden', "{$fieldname}[enabled]", 1);
         $mform->setType("{$fieldname}[enabled]", PARAM_INT);
     }
-    
+
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -244,6 +259,6 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $patterns["[[$fieldname:year]]"] = array(false);
         $patterns["[[$fieldname:Y]]"] = array(false);
 
-        return $patterns; 
+        return $patterns;
     }
 }

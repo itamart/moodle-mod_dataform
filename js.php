@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -38,17 +38,17 @@ if ($urlparams->jsedit) {
 
     class mod_dataform_js_form extends moodleform {
 
-        function definition() {
+        public function definition() {
             global $CFG, $COURSE;
 
             $mform = &$this->_form;
 
             // buttons
-            //-------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------
             $this->add_action_buttons(true);
 
             // js
-            //-------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------
             $mform->addElement('header', 'generalhdr', get_string('headerjs', 'dataform'));
 
             // includes
@@ -67,9 +67,9 @@ if ($urlparams->jsedit) {
                 'accepted_types' => array('*.js')
             );
             $mform->addElement('filemanager', 'jsupload', get_string('jsupload', 'dataform'), null, $options);
-            
+
             // buttons
-            //-------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------
             $this->add_action_buttons(true);
         }
 
@@ -84,16 +84,14 @@ if ($urlparams->jsedit) {
     // activate navigation node
     navigation_node::override_active_url(new moodle_url('/mod/dataform/js.php', array('id' => $df->cm->id, 'jsedit' => 1)));
 
-    $mform = new mod_dataform_js_form(new moodle_url('/mod/dataform/js.php', array('d' => $df->id, 'jsedit' => 1))); 
+    $mform = new mod_dataform_js_form(new moodle_url('/mod/dataform/js.php', array('d' => $df->id, 'jsedit' => 1)));
 
-    if ($mform->is_cancelled()) {
-    
-    } else if ($data = $mform->get_data()){
+    if ($data = $mform->get_data()) {
         $rec = new stdClass;
         $rec->js = $data->js;
-        $rec->jsincludes = $data->jsincludes;        
+        $rec->jsincludes = $data->jsincludes;
         $df->update($rec, get_string('jssaved', 'dataform'));
-        
+
         // add uploaded files
         $options = array(
             'subdirs' => 0,
@@ -120,7 +118,7 @@ if ($urlparams->jsedit) {
 
     $mform->set_data($data);
     $mform->display();
-    
+
     echo $output->footer();
 
 } else {
@@ -128,8 +126,8 @@ if ($urlparams->jsedit) {
     defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true); // session not used here
 
     $lifetime  = 600;                                   // Seconds to cache this stylesheet
-    
-    $PAGE->set_url('/mod/dataform/js.php', array('d'=>$urlparams->d));
+
+    $PAGE->set_url('/mod/dataform/js.php', array('d' => $urlparams->d));
 
     if ($jsdata = $DB->get_field('dataform', 'js', array('id' => $urlparams->d))) {
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');

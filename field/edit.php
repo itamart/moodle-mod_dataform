@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -25,8 +25,8 @@ require_once('../../../config.php');
 $urlparams = new stdClass;
 $urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
 
-$urlparams->type       = optional_param('type','' ,PARAM_ALPHA);   // type of a field to edit
-$urlparams->fid        = optional_param('fid',0 ,PARAM_INT);       // field id to edit
+$urlparams->type       = optional_param('type', '', PARAM_ALPHA);   // type of a field to edit
+$urlparams->fid        = optional_param('fid', 0, PARAM_INT);       // field id to edit
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d);
@@ -42,23 +42,21 @@ if ($urlparams->fid) {
 
 $mform = $field->get_form();
 
-if ($mform->is_cancelled()){
+if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id)));
+}
 
-// no submit buttons    
-} else if ($mform->no_submit_button_pressed()) {
+// Process validated
+if ($data = $mform->get_data()) {
 
-// process validated    
-} else if ($data = $mform->get_data()) { 
-
-   // add new field
     if (!$field->id) {
+        // add new field
         $field->create($data);
 
-    // update field
     } else {
+        // update field
         $data->id = $field->id;
-        
+
         // Prepare for replacing patterns
         $oldname = $field->name;
         $oldpatterns = $field->renderer->get_patterns();
@@ -69,13 +67,13 @@ if ($mform->is_cancelled()){
         if ($oldname != $field->name) {
             $newpatterns = $field->renderer->get_patterns();
             $df->view_manager->replace_patterns_in_views($oldpatterns, $newpatterns);
-        }       
+        }
     }
 
     if ($data->submitbutton != get_string('savecont', 'dataform')) {
         redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id)));
     }
-    
+
     // continue to edit so refresh the form
     $mform = $field->get_form();
 }

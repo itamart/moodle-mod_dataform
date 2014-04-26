@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataform
  * @copyright 2013 Itamar Tzadok
@@ -32,7 +32,7 @@ class mod_dataform_observers_helper {
      */
     public static function observers() {
         global $CFG;
-        
+
         $observers = array();
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/observer") as $filename) {
             $observer = '\mod_dataform\observer\\'. basename($filename, '.php');

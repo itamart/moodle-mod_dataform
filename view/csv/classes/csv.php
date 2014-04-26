@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage csv
@@ -36,7 +36,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     /**
      *
      */
-    public function __construct($view) {       
+    public function __construct($view) {
         parent::__construct($view);
         // Set user define csv settings
         if ($this->param1) {
@@ -53,19 +53,19 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         global $CFG;
 
         // Proces csv export request
-        $exportcsv = optional_param('exportcsv','', PARAM_ALPHA);
+        $exportcsv = optional_param('exportcsv', '', PARAM_ALPHA);
         if ($exportcsv and $this->param4 and confirm_sesskey()) {
             $this->process_export($exportcsv);
             return;
         }
-        
+
         // proces csv import request
-        $importcsv = optional_param('importcsv',0, PARAM_INT);
+        $importcsv = optional_param('importcsv', 0, PARAM_INT);
         if ($importcsv and $this->param5 and confirm_sesskey()) {
             $this->process_import();
             return;
         }
-        
+
         parent::process_data();
     }
 
@@ -75,20 +75,20 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     public function display(array $params = array()) {
         global $OUTPUT;
 
-        if ($this->_showimportform and $this->param5) {          
+        if ($this->_showimportform and $this->param5) {
             // Print import form
             $mform = $this->get_import_form();
             $mform->set_data($this->data);
-        
+
             $dataformviewtype = "dataformview-$this->type";
             $viewname = str_replace(' ', '_', $this->name);
             $report = $this->print_report();
             return html_writer::tag('div', $mform->render(). $report, array('class' => "$dataformviewtype $viewname"));
-            
+
         } else {
             // Print the view
             return parent::display($params);
-        }    
+        }
     }
 
     /**
@@ -119,14 +119,14 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             $adjustments[] = '&#' . ord($delimiter) . ';';
         }
         $returnstr = '';
-        foreach($csvcontent as $row) {
-            foreach($row as $key => $column) {
+        foreach ($csvcontent as $row) {
+            foreach ($row as $key => $column) {
                 $value = str_replace($patterns, $adjustments, $column);
                 $row[$key] = $this->_enclosure. $value. $this->_enclosure;
             }
             $returnstr .= implode($delimiter, $row) . "\n";
         }
-        
+
         // Convert encoding
         $returnstr = mb_convert_encoding($returnstr, $this->_encoding);
 
@@ -147,23 +147,23 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         global $CFG;
 
         $this->results = array();
-        
+
         $mform = $this->get_import_form();
-        
+
         if ($mform->is_cancelled()) {
             return null;
         }
-        
+
         $this->_showimportform = true;
-        if ($formdata = $mform->get_data()) {            
+        if ($formdata = $mform->get_data()) {
 
             $data = new stdClass;
             $data->eids = array();
             $data->errors = array();
-            
+
             $fieldsettings = array();
             // collect field import settings from formdata by field, pattern and element
-            foreach ($formdata as $name => $value){
+            foreach ($formdata as $name => $value) {
                 if (strpos($name, 'f_') !== false) {   // assuming only field settings start with f_
                     list(, $fieldid, $pattern, $setting) = explode('_', $name);
                     if (!array_key_exists($fieldid, $fieldsettings)) {
@@ -174,12 +174,12 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                     $fieldsettings[$fieldid][$pattern][$setting] = $value;
                 }
             }
-            
+
             // If no field settings, there is nothing to do
             if (!$fieldsettings) {
                 return;
             }
-            
+
             // Get the csv content
             if (!empty($formdata->csvtext)) {
                 // upload from text
@@ -188,7 +188,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 // upload from file
                 $csvcontent = $mform->get_file_content('importfile');
             }
-            
+
             // If no csv content, nothing to do
             if (empty($csvcontent)) {
                 return;
@@ -216,7 +216,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 $result = array(get_string('noerrorsfound', 'dataformview_csv'), 'success');
                 $this->results = $this->results + array($result);
             }
-            
+
             // Execute
             if (empty($formdata->submitbutton_test)) {
                 $result = $this->execute_import($data);
@@ -232,10 +232,10 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         if ($data->eids) {
             list($strnotify, $processedeids) = $this->entry_manager->process_entries('update', $data->eids, $data, true);
             if ($processedeids) {
-               $result = array($strnotify, 'success');
+                $result = array($strnotify, 'success');
             } else if ($strnotify) {
-                // Nothing processed but there may still be some notifications   
-               $result = array($strnotify, 'problem');
+                // Nothing processed but there may still be some notifications
+                $result = array($strnotify, 'problem');
             }
         } else {
             $result = array(get_string('nothingimported', 'dataformview_csv'), 'problem');
@@ -250,7 +250,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         // Set content
         $filter = clone($this->filter);
         if ($range == self::EXPORT_ALL) {
-            $filter->perpage = 0;            
+            $filter->perpage = 0;
         }
 
         // Get the entries
@@ -280,19 +280,19 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         $csvheader = array();
         $columns = $this->get_columns();
         foreach ($columns as $column) {
-            list($pattern, $header,) = $column;
+            list($pattern, $header, ) = $column;
             $columnpatterns[] = $pattern;
-            $csvheader[] = $header ? $header : trim($pattern,'[#]');
+            $csvheader[] = $header ? $header : trim($pattern, '[#]');
         }
 
-        $csvcontent = array();       
+        $csvcontent = array();
         $csvcontent[] = $csvheader;
-        
+
         // Get the field definitions
         // array(array(pattern => value,...)...)
         foreach ($entryvalues as $entryid => $patternvalues) {
             $row = array();
-            foreach ($columnpatterns as  $pattern) {
+            foreach ($columnpatterns as $pattern) {
                 if (isset($patternvalues[$pattern])) {
                     $row[] = $patternvalues[$pattern];
                 } else {
@@ -310,15 +310,15 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
      */
     public function process_csv($data, $csvcontent, $options = null) {
         global $CFG;
-    
+
         require_once("$CFG->libdir/csvlib.class.php");
-        
+
         @set_time_limit(0);
         raise_memory_limit(MEMORY_EXTRA);
-    
+
         $iid = \csv_import_reader::get_new_iid('moddataform');
         $cir = new \csv_import_reader($iid, 'moddataform');
-    
+
         $delimiter = !empty($options['delimiter']) ? $options['delimiter'] : $this->_delimiter;
         $enclosure = !empty($options['enclosure']) ? $options['enclosure'] : $this->_enclosure;
         $encoding = !empty($options['encoding']) ? $options['encoding'] : $this->_encoding;
@@ -327,7 +327,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
 
         $readcount = $cir->load_csv_content($csvcontent, $encoding, $delimiter);
 
-        if (empty($readcount)) { 
+        if (empty($readcount)) {
             $data->errors[] = $cir->get_error();
             return $data;
         }
@@ -358,7 +358,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
             }
             // Register entry id
-            $data->eids[$entryid] = $entryid;            
+            $data->eids[$entryid] = $entryid;
         }
         $cir->cleanup(true);
         $cir->close();
@@ -372,7 +372,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     public function get_import_form() {
         global $CFG;
 
-        $actionurl = new \moodle_url($this->get_baseurl(), array('importcsv' => 1)); 
+        $actionurl = new \moodle_url($this->get_baseurl(), array('importcsv' => 1));
         return new dataformview_csv_importform($this, $actionurl);
     }
 
@@ -381,7 +381,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
      */
     public function get_default_view_template() {
         // Notifications
-        $notifications = \html_writer::tag('div', '##notifications##', array('class' => '')); 
+        $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
         // Export/import
         $expimp = \html_writer::tag('div', '##exportall## | ##exportpage## | ##import##', array('class' => ''));
@@ -390,17 +390,17 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
 
         // Filtering
-        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));       
+        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
 
         // Paging bar
         $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
         // Entries
         $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
-        
+
         // Set the view template
         $exporthide = \html_writer::tag('div', $expimp. $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
         $this->section = \html_writer::tag('div', $exporthide. $entries);
-    }    
+    }
 
     // GETTERS
     /**
@@ -446,19 +446,19 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
      * @return string
      */
     public function get_default_csv_settings() {
-        return 'comma,,UTF-8';
+        return 'comma, ,UTF-8';
     }
 
     /**
-     * Returns display list of import results if any. 
+     * Returns display list of import results if any.
      *
      * @return string HTML fragment
      */
     public function print_report() {
         global $OUTPUT;
-        
+
         $html = '';
-        
+
         if ($this->results) {
             $html .= \html_writer::tag('h4', get_string('report'));
             foreach ($this->results as $result) {

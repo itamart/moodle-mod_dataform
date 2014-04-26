@@ -105,9 +105,9 @@ Feature: Add dataform entries
         
     Examples:
 | input | result | fielddata |
-#|	455552.3	|	455552	|	Field 01	Field description 01	0	1		0	100	px	|
-#|	1005.5	|	1005	|	Field 02	Field description 02	1	0		0	240	px	|
-#|	14	|	14.0	|	Field 03	Field description 03	2	1		1	100	%	|
-#|	1000.3335	|	1000.33	|	Field 04	Field description 04	0	0		2	50	%	|
-#|	99.999	|	99.99900	|	Field 05	Field description 05	1	1		5	60	em	|
-#|	0.12345678	|	0.123457	|	Field 06	Field description 06	2	0		6	100	em	|
+#|    455552.3    |    455552    |    Field 01    Field description 01    0    1        0    100    px    |
+#|    1005.5    |    1005    |    Field 02    Field description 02    1    0        0    240    px    |
+#|    14    |    14.0    |    Field 03    Field description 03    2    1        1    100    %    |
+#|    1000.3335    |    1000.33    |    Field 04    Field description 04    0    0        2    50    %    |
+#|    99.999    |    99.99900    |    Field 05    Field description 05    1    1        5    60    em    |
+#|    0.12345678    |    0.123457    |    Field 06    Field description 06    2    0        6    100    em    |

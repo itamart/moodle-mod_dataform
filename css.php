@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -38,17 +38,17 @@ if ($urlparams->cssedit) {
 
     class mod_dataform_css_form extends moodleform {
 
-        function definition() {
+        public function definition() {
             global $CFG, $COURSE;
 
             $mform = &$this->_form;
 
             // buttons
-            //-------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------
             $this->add_action_buttons(true);
 
             // css
-            //-------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------
             $mform->addElement('header', 'generalhdr', get_string('headercss', 'dataform'));
 
             // includes
@@ -67,9 +67,9 @@ if ($urlparams->cssedit) {
                 'accepted_types' => array('*.css')
             );
             $mform->addElement('filemanager', 'cssupload', get_string('cssupload', 'dataform'), null, $options);
-            
+
             // buttons
-            //-------------------------------------------------------------------------------
+            // -------------------------------------------------------------------------------
             $this->add_action_buttons(true);
         }
 
@@ -84,17 +84,15 @@ if ($urlparams->cssedit) {
     // activate navigation node
     navigation_node::override_active_url(new moodle_url('/mod/dataform/css.php', array('id' => $df->cm->id, 'cssedit' => 1)));
 
-    $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id, 'cssedit' => 1))); 
+    $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id, 'cssedit' => 1)));
 
-    if ($mform->is_cancelled()) {
-    
-    } else if ($data = $mform->get_data()){
+    if ($data = $mform->get_data()) {
         // update the dataform
         $rec = new stdClass;
         $rec->css = $data->css;
-        $rec->cssincludes = $data->cssincludes;        
+        $rec->cssincludes = $data->cssincludes;
         $df->update($rec, get_string('csssaved', 'dataform'));
-        
+
         // add uploaded files
         $options = array(
             'subdirs' => 0,
@@ -128,10 +126,10 @@ if ($urlparams->cssedit) {
     defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true); // session not used here
 
     $lifetime  = 600;                                   // Seconds to cache this stylesheet
-    
-    $PAGE->set_url('/mod/dataform/css.php', array('d'=>$urlparams->d));
 
-    if ($cssdata = $DB->get_field('dataform', 'css', array('id'=>$urlparams->d))) {
+    $PAGE->set_url('/mod/dataform/css.php', array('d' => $urlparams->d));
+
+    if ($cssdata = $DB->get_field('dataform', 'css', array('id' => $urlparams->d))) {
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
         header('Expires: ' . gmdate("D, d M Y H:i:s", time() + $lifetime) . ' GMT');
         header('Cache-control: max_age = '. $lifetime);

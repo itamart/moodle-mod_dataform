@@ -25,7 +25,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
  * PHPUnit dataform generator testcase
  *
@@ -59,13 +58,12 @@ class mod_dataform_generator_testcase extends advanced_testcase {
 
         $course = $this->getDataGenerator()->create_course();
 
-        /** @var mod_dataform_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
         $this->assertInstanceOf('mod_dataform_generator', $generator);
         $this->assertEquals('dataform', $generator->get_modulename());
 
-        $data1 = $generator->create_instance(array('course'=>$course->id));
-        $data2 = $generator->create_instance(array('course'=>$course->id));
+        $data1 = $generator->create_instance(array('course' => $course->id));
+        $data2 = $generator->create_instance(array('course' => $course->id));
         $this->assertEquals(2, $DB->count_records('dataform'));
 
         $df1 = mod_dataform_dataform::instance($data1->id);
@@ -73,13 +71,12 @@ class mod_dataform_generator_testcase extends advanced_testcase {
 
         foreach (array($df1, $df2) as $df) {
             $this->assertEquals($df->course->id, $course->id);
-            
+
             $cm = get_coursemodule_from_instance('dataform', $df->id);
             $this->assertEquals($df->cm->id, $cm->id);
             $this->assertEquals($df->id, $cm->instance);
             $this->assertEquals('dataform', $cm->modname);
             $this->assertEquals($course->id, $cm->course);
-            
 
             $context = context_module::instance($cm->id);
             $this->assertEquals($df->context->id, $context->id);
@@ -87,13 +84,13 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         }
 
         // test gradebook integration using low level DB access - DO NOT USE IN PLUGIN CODE!
-        $data = $generator->create_instance(array('course'=>$course->id, 'grade'=>100));
-        $gitem = $DB->get_record('grade_items', array('courseid'=>$course->id, 'itemtype'=>'mod', 'itemmodule'=>'dataform', 'iteminstance'=>$data->id));
+        $data = $generator->create_instance(array('course' => $course->id, 'grade' => 100));
+        $gitem = $DB->get_record('grade_items', array('courseid' => $course->id, 'itemtype' => 'mod', 'itemmodule' => 'dataform', 'iteminstance' => $data->id));
         $this->assertNotEmpty($gitem);
         $this->assertEquals(100, $gitem->grademax);
         $this->assertEquals(0, $gitem->grademin);
         $this->assertEquals(GRADE_TYPE_VALUE, $gitem->gradetype);
-       
+
         $this->assertNotEquals(2, $DB->count_records('dataform'));
         $df2->delete();
         $this->assertEquals(2, $DB->count_records('dataform'));

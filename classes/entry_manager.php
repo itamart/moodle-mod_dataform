@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
@@ -29,7 +29,7 @@ class mod_dataform_entry_manager {
     const SELECT_LAST_PAGE = -1;
     const SELECT_NEXT_PAGE = -2;
     const SELECT_RANDOM_PAGE = -3;
-    
+
     const COUNT_ALL = 0;
     const COUNT_VIEWABLE = 1;
     const COUNT_FILTERED = 2;
@@ -60,14 +60,14 @@ class mod_dataform_entry_manager {
      */
     public static function instance($dataformid, $viewid) {
         global $DB;
-        
+
         static $instances = array();
         if (!$dataformid) {
             if (!$viewid or !$dataformid = $DB->get_field('dataform_views', 'dataid', array('id' => $viewid))) {
                 throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: $dataformid");
             }
         }
-        
+
         if (empty($instances["$dataformid-$viewid"])) {
             $instances["$dataformid-$viewid"] = new mod_dataform_entry_manager($dataformid, $viewid);
         }
@@ -83,7 +83,7 @@ class mod_dataform_entry_manager {
         if (empty($dataformid)) {
             throw new coding_exception('Dataform id or object must be passed to entries constructor.');
         }
-        
+
         $this->_dataformid = $dataformid;
         $this->_viewid = $viewid;
     }
@@ -120,7 +120,6 @@ class mod_dataform_entry_manager {
     }
 
 
-
     /**
      *
      */
@@ -129,10 +128,10 @@ class mod_dataform_entry_manager {
             $entriesset = $options['entriesset'];
         } else {
             $entriesset = $this->fetch_entries($options);
-        }            
+        }
 
         $this->entries = !empty($entriesset->entries) ? $entriesset->entries : array();
-        
+
         $entriescount = count($this->entries);
         $this->_countviewable = !empty($entriesset->max) ? $entriesset->max : $entriescount;
         $this->_countfiltered = !empty($entriesset->found) ? $entriesset->found : $entriescount;
@@ -144,21 +143,21 @@ class mod_dataform_entry_manager {
      */
     public function get_sql_query($filter) {
         global $DB, $USER;
-        
+
         $df = mod_dataform_dataform::instance($this->dataformid);
         if (!$view = $this->view_manager->get_view_by_id($this->viewid)) {
             return null;
         }
-        
+
         $fields = $view->get_fields();
 
         // Params array for the sql
-        $params = array();        
-        $params[] = $this->dataformid;      
+        $params = array();
+        $params[] = $this->dataformid;
 
         // Access base params: this dataform and this view
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
-        
+
         // USER FILTERING
         $whereuser = '';
         // Limit to requested users
@@ -197,16 +196,16 @@ class mod_dataform_entry_manager {
             $wheregroup .= " AND e.groupid = ? ";
             $params[] = $df->currentgroup;
         }
-        
+
         // Sql for fetching the entries
         $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid';
         $whatuser = user_picture::fields('u', array('idnumber', 'username'), 'uid ');
         $whatgroup = 'g.idnumber AS groupidnumber, g.name AS groupname, g.hidepicture AS grouphidepic, g.picture AS grouppic';
-        
+
         $tables = ' {dataform_entries} e
-                    JOIN {user} u ON u.id = e.userid 
+                    JOIN {user} u ON u.id = e.userid
                     LEFT JOIN {groups} g ON g.id = e.groupid ';
-        $wheredfid =  " e.dataid = ? ";
+        $wheredfid = " e.dataid = ? ";
 
         // Filter sql
         list(
@@ -225,12 +224,12 @@ class mod_dataform_entry_manager {
             $joinwhat,
             $jointables,
         ) = $filter->get_sql($fields);
-        
+
         $count = ' COUNT(e.id) ';
         $whatsql = " DISTINCT $whatentry,$whatuser,$whatgroup $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
-        
+
         $sqlselect  = "SELECT $whatsql FROM $fromsql WHERE $wheresql $sortorder";
 
         // Count total entries the user is authorized to view (without additional filtering)
@@ -240,7 +239,7 @@ class mod_dataform_entry_manager {
 
         $params = array_merge($params, $sortparams);
         $allparams = array_merge($params, $searchparams, $contentparams);
-        
+
         $sql = new stdClass;
         $sql->what = $whatsql;
         $sql->whatcontent = $contentwhat;
@@ -262,14 +261,14 @@ class mod_dataform_entry_manager {
      */
     public function fetch_entries(array $options = null) {
         global $DB;
-        
+
         // No filter no entries
         if (empty($options['filter'])) {
             return null;
         }
-        
+
         $filter = $options['filter'];
-        
+
         if (!$sql = $this->get_sql_query($filter)) {
             return null;
         }
@@ -294,71 +293,70 @@ class mod_dataform_entry_manager {
         $entries->entries = null;
 
         if ($searchcount) {
-            // Specific entries may be requested (eids)
             if (!empty($filter->eids)) {
+                // Specific entries may be requested (eids)
                 $entryids = !is_array($filter->eids) ? explode(',', $filter->eids) : $filter->eids;
 
                 list($ineids, $eidparams) = $DB->get_in_or_equal($entryids);
                 $andwhereeid = " AND e.id $ineids ";
 
-                $sqlselect = "SELECT $sql->what $sql->whatcontent                                  
+                $sqlselect = "SELECT $sql->what $sql->whatcontent
                               FROM $sql->from
                               WHERE $sql->where $andwhereeid $sql->sortorder";
 
-                if ($entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams,$eidparams))) {
-                    // if one entry was requested get its position
+                if ($entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams))) {
+                    // If one entry was requested get its position
                     if (!is_array($filter->eids) or count($filter->eids) == 1) {
                         $sqlcount = $sql->countfiltered ? $sql->countfiltered : $sql->countmax;
                         $sqlselect = "$sqlcount AND e.id $ineids $sql->sortorder";
                         $eidposition = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
-                        
+
                         $filter->page = key($eidposition) - 1;
                     }
                 }
 
-            // get perpage subset 
             } else if (!$filter->groupby and $perpage = $filter->perpage) {
-                
-                // a random set (filter->selection == 1) 
+                // Get perpage subset
+                // A random set (filter->selection == 1)
                 if (!empty($filter->selection)) {
                     // get ids of found entries
                     $sqlselect = "SELECT DISTINCT e.id FROM $sql->from WHERE $sql->where";
-                    $entryids = $DB->get_records_sql($sqlselect, $sql->allparams);                    
+                    $entryids = $DB->get_records_sql($sqlselect, $sql->allparams);
                     // get a random subset of ids
-                    $randids = array_rand($entryids, min($perpage, count($entryids)));                    
+                    $randids = array_rand($entryids, min($perpage, count($entryids)));
                     // get the entries
                     list($insql, $paramids) = $DB->get_in_or_equal($randids);
                     $andwhereids = " AND e.id $insql ";
                     $sqlselect = "SELECT $sql->what FROM $sql->from WHERE $sql->where $andwhereids";
                     $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
-                
-                // by page
+
                 } else {
+                    // By page
                     $page = isset($filter->page) ? $filter->page : 0;
                     $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
-                         
+
                     if (isset($filter->onpage)) {
-                        // first page
                         if ($filter->onpage == self::SELECT_FIRST_PAGE) {
+                            // first page
                             $page = 0;
 
-                        // last page
                         } else if ($filter->onpage == self::SELECT_LAST_PAGE) {
+                            // last page
                             $page = $numpages - 1;
-                        
-                        // next page
+
                         } else if ($filter->onpage == self::SELECT_NEXT_PAGE) {
+                            // next page
                             $page = $filter->page = ($page % $numpages);
-                        
-                        // random page
+
                         } else if ($filter->onpage == self::SELECT_RANDOM_PAGE) {
+                            // random page
                             $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
                         }
                     }
                     $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams, $page * $perpage, $perpage);
                 }
-            // get everything
             } else {
+                // get everything
                 $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams);
             }
 
@@ -374,16 +372,16 @@ class mod_dataform_entry_manager {
                     unset($entries->entries[$entryid]);
                     $entries->max--;
                     $entries->found--;
-               }
+                }
             }
 
             // Now get the contents if required and add it to the entry objects
             if ($entries->entries and $sql->dataformcontent) {
-                
+
                 $view = $this->view_manager->get_view_by_id($this->viewid);
                 $fields = $view->get_fields();
-                
-                //get the node content of the requested entries
+
+                // Get the node content of the requested entries
                 list($eids, $eparams) = $DB->get_in_or_equal(array_keys($entries->entries));
                 list($fids, $fparams) = $DB->get_in_or_equal($sql->dataformcontent);
                 $params = array_merge($eparams, $fparams);
@@ -408,25 +406,25 @@ class mod_dataform_entry_manager {
 
     /**
      * Counts the number of entries in the activity and returns the count.
-     * If filter is provided via options, returns count with filter applied. 
+     * If filter is provided via options, returns count with filter applied.
      * Otherwise returns total count.
      *
-     * @param array $options 
+     * @param array $options
      * @return int
      */
     public function count_entries(array $options = null) {
         global $DB;
-        
-        if (!empty($options['filter'])) {       
+
+        if (!empty($options['filter'])) {
             $filter = $options['filter'];
-            
+
             if (!$sql = $this->get_sql_query($filter)) {
                 return 0;
             }
 
             $sqlcount = $sql->countfiltered ? $sql->countfiltered : $sql->countmax;
             $params = $sql->allparams;
-            
+
             // If specific entries requested (eids)
             if (!empty($filter->eids)) {
                 list($ineids, $eidparams) = $DB->get_in_or_equal($filter->eids);
@@ -467,8 +465,8 @@ class mod_dataform_entry_manager {
 
     /**
      * Returns specific entry by id from fetched entries.
-     *     
-     * @return null|stdClass 
+     *
+     * @return null|stdClass
      */
     public function get_entry_by_id($entryid) {
         if (!empty($this->entries[$entryid])) {
@@ -496,7 +494,7 @@ class mod_dataform_entry_manager {
                     $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
                     // the field may not hold any content
                     if ($contentid) {
-                        // retrieve the files (no dirs) from file area 
+                        // retrieve the files (no dirs) from file area
                         $files = array_merge($files, $fs->get_area_files(
                             $df->context->id,
                             'mod_dataform',
@@ -509,23 +507,23 @@ class mod_dataform_entry_manager {
                 }
             }
         }
-        
+
         return $files;
     }
 
     /**
-     * @return array notification string, list of processed ids 
+     * @return array notification string, list of processed ids
      */
     public function process_entries($action, $eids, $data = null, $confirmed = false) {
         global $DB, $USER, $OUTPUT, $PAGE;
-        
+
         $entries = $this->get_entries_for_processing($eids, $action);
 
         // No entries scenario
         if (empty($entries)) {
-            return array(get_string("entrynoneforaction",'dataform'), '');
+            return array(get_string("entrynoneforaction", 'dataform'), '');
         }
-        
+
         // Require confirmation scenario
         if (!$confirmed) {
             $yesparams = array($action => implode(',', array_keys($entries)), 'sesskey' => sesskey(), 'confirmed' => true);
@@ -536,7 +534,7 @@ class mod_dataform_entry_manager {
             echo $OUTPUT->footer();
             exit(0);
         }
-        
+
         // Process requested entries
         switch ($action) {
             case 'update':
@@ -577,13 +575,13 @@ class mod_dataform_entry_manager {
      */
     protected function get_entries_for_processing($eids, $action) {
         global $DB, $USER;
-        
+
         if (empty($eids)) {
             return null;
         }
 
         $df = mod_dataform_dataform::instance($this->dataformid);
-        
+
         // Adding or updating entries
         if ($action == 'update') {
             $entries = array();
@@ -597,7 +595,7 @@ class mod_dataform_entry_manager {
                     $eids = explode(',', $eids);
                 }
             }
-            
+
             // Prepare the entries to process
             foreach ($eids as $eid) {
                 if ($eid > 0) {
@@ -617,7 +615,7 @@ class mod_dataform_entry_manager {
             }
             return $entries;
         }
-        
+
         // All other types of processing must refer to specific entry ids
         if ($action != 'update') {
             $eids = !is_array($eids) ? explode(',', $eids) : $eids;
@@ -627,7 +625,7 @@ class mod_dataform_entry_manager {
             return $entries;
         }
     }
-    
+
     /**
      * Delete entries of all or a specified user.
      * Shortcut for processing delete request.
@@ -637,7 +635,7 @@ class mod_dataform_entry_manager {
      */
     public function delete_entries($userid = null) {
         global $DB;
-        
+
         $params = array('dataid' => $this->dataformid);
         if ($userid !== null) {
             $params['userid'] = $userid;
@@ -671,13 +669,13 @@ class mod_dataform_entry_manager {
                 unset($entries[$entryid]);
             }
         }
-        
+
         // In case none remain for processing
         if (empty($entries)) {
             return array();
-        }        
-        
-        $processed = array();      
+        }
+
+        $processed = array();
 
         // First parse the data to collate content in an array for each recognized field
         $contents = array_fill_keys(array_keys($entries), array('info' => array(), 'fields' => array()));
@@ -686,19 +684,19 @@ class mod_dataform_entry_manager {
         $savetype = '';
 
         // Iterate the data and extract entry and fields content
-        foreach ($data as $name => $value){
+        foreach ($data as $name => $value) {
             // Which submit type
             if (strpos($name, 'submitbutton') === 0) {
-                list(, $savetype,) = explode('_', $name);
+                list(, $savetype, ) = explode('_', $name);
                 continue;
             }
-                                   
+
             if (strpos($name, 'entry_') === 0) {
-               // Entry info
-               // Assuming only entry info names start with entry_
+                // Entry info
+                // Assuming only entry info names start with entry_
                 list(, $entryid, $var) = explode('_', $name);
                 $contents[$entryid]['info'][$var] = $value;
-            
+
             } else if (strpos($name, 'field_') === 0) {
 
                 // Assuming only field names contain field_
@@ -710,7 +708,6 @@ class mod_dataform_entry_manager {
                 } else {
                     continue;
                 }
-                
 
                 // Entry content
                 if (!array_key_exists($fieldid, $contents[$entryid]['fields'])) {
@@ -738,7 +735,7 @@ class mod_dataform_entry_manager {
         }
         return $processed;
     }
-      
+
     /**
      * Duplicate entries
      *
@@ -753,7 +750,7 @@ class mod_dataform_entry_manager {
         }
 
         $df = mod_dataform_dataform::instance($this->dataformid);
-        
+
         $processed = array();
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
         foreach ($entries as $entryid => $entry) {
@@ -771,7 +768,6 @@ class mod_dataform_entry_manager {
 
             $newentry->id = $this->update_entry($newentry);
 
-
             $fields = $this->field_manager->get_fields();
             foreach ($fields as $field) {
                 $field->duplicate_content($entry, $newentry);
@@ -780,7 +776,7 @@ class mod_dataform_entry_manager {
         }
         return processed;
     }
-    
+
     /**
      * Delete entries
      *
@@ -789,13 +785,13 @@ class mod_dataform_entry_manager {
      */
     protected function process_delete_entries($entries) {
         global $DB;
-        
+
         if (empty($entries)) {
             return array();
         }
 
         $df = mod_dataform_dataform::instance($this->dataformid);
-        
+
         $processed = array();
         $entryusers = array();
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
@@ -804,7 +800,7 @@ class mod_dataform_entry_manager {
             if (!mod_dataform\access\entry_delete::validate($accessparams + array('entry' => $entry))) {
                 continue;
             }
-            
+
             $fields = $this->field_manager->get_fields();
             foreach ($fields as $field) {
                 $field->delete_content($entry->id);
@@ -812,7 +808,7 @@ class mod_dataform_entry_manager {
 
             $DB->delete_records('dataform_entries', array('id' => $entry->id));
             $processed[$entry->id] = $entry;
-    
+
             // Trigger event
             $eventparams = array(
                 'objectid' => $entry->id,
@@ -826,24 +822,23 @@ class mod_dataform_entry_manager {
             $event = \mod_dataform\event\entry_deleted::create($eventparams);
             $event->add_record_snapshot('dataform_entries', $entry);
             $event->trigger();
-            
+
             // Register user of deleted entries to update grades if needed.
             if ($entry->userid) {
                 $entryusers[$entry->userid] = $entry->userid;
             }
         }
-        
+
         // Update grades if grading on number of entries
         if ($df->is_grading_num_entries()) {
             foreach ($entryusers as $userid) {
                 dataform_update_grades($df->data, $userid);
             }
         }
-        
+
         return $processed;
     }
-    
-    
+
     /**
      * Adding/updating entry record.
      * Assumes that permissions check has already been done.
@@ -862,20 +857,20 @@ class mod_dataform_entry_manager {
             foreach ($data as $key => $value) {
                 if ($key == 'name') {
                     $entry->userid = $value;
-                } else {    
+                } else {
                     $entry->{$key} = $value;
                 }
             }
-            
+
             // Don't update time later if set from data
             if (isset($data['timemodified'])) {
                 $updatetime = false;
             }
-            
+
             // Entry group sanity checks
-            if (isset($data['groupid'])) {
+            // if (isset($data['groupid'])) {
                 // Currently no check that user belong to that group
-            }
+            // }
         }
 
         // update existing entry (only authenticated users)
@@ -884,7 +879,7 @@ class mod_dataform_entry_manager {
                 $entry->timemodified = time();
             }
 
-            if ($DB->update_record('dataform_entries',$entry)) {
+            if ($DB->update_record('dataform_entries', $entry)) {
                 // Trigger event
                 $eventparams = array(
                     'objectid' => $entry->id,
@@ -898,7 +893,7 @@ class mod_dataform_entry_manager {
                 $event = \mod_dataform\event\entry_updated::create($eventparams);
                 $event->add_record_snapshot('dataform_entries', $entry);
                 $event->trigger();
-                
+
                 return $entry->id;
             } else {
                 return false;
@@ -907,8 +902,8 @@ class mod_dataform_entry_manager {
 
         // Add new entry (authenticated or anonymous (if enabled))
         // identify non-logged-in users (in anonymous entries) as guests
-        $userid = empty($USER->id) ? $CFG->siteguest : $USER->id; 
-           
+        $userid = empty($USER->id) ? $CFG->siteguest : $USER->id;
+
         $entry->dataid = $df->id;
         $entry->userid = !empty($entry->userid) ? $entry->userid : $userid;
         $entry->groupid = !isset($entry->groupid) ? $df->currentgroup : $entry->groupid;
@@ -930,16 +925,15 @@ class mod_dataform_entry_manager {
         $event = \mod_dataform\event\entry_created::create($eventparams);
         $event->add_record_snapshot('dataform_entries', $entry);
         $event->trigger();
-        
+
         // Update grades if grading on number of entries
         if ($df->is_grading_num_entries()) {
             dataform_update_grades($df->data, $entry->userid);
         }
-        
+
         return $entry->id;
     }
 
-    
     // GETTERS
     /**
      * Returns the manager's dataformid.
@@ -966,7 +960,7 @@ class mod_dataform_entry_manager {
         return $this->_entries;
     }
 
-    /** 
+    /**
      * Returns the view manager of the Dataform this mannager works for.
      *
      * @return mod_dataform_view_manager
@@ -974,8 +968,8 @@ class mod_dataform_entry_manager {
     public function get_view_manager() {
         return mod_dataform_view_manager::instance($this->dataformid);
     }
-    
-    /** 
+
+    /**
      * Returns the field manager of the Dataform this mannager works for.
      *
      * @return mod_dataform_field_manager

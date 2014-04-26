@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage number
@@ -32,7 +32,7 @@ class dataformfield_number_renderer extends dataformfield_text_renderer {
      */
     public function display_edit(&$mform, $entry, array $options = null) {
         parent::display_edit($mform, $entry, $options);
-        
+
         $fieldid = $this->_field->id;
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_$entryid";
@@ -50,7 +50,7 @@ class dataformfield_number_renderer extends dataformfield_text_renderer {
         } else {
             $number = 0;
         }
-        
+
         $decimals = (int) trim($field->param1);
         // only apply number formatting if param1 contains an integer number >= 0:
         if ($decimals) {
@@ -59,7 +59,7 @@ class dataformfield_number_renderer extends dataformfield_text_renderer {
         } else {
             $str = (int) $number;
         }
-        
+
         return $str;
     }
 }

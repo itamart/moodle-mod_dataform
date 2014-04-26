@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package mod
@@ -29,7 +29,6 @@
 $string['modulename'] = 'Dataform';
 $string['modulename_help'] = 'The dataform module may be used for creating a wide range of activities/resources by allowing the instructor/manager to design and create a custom content form from various input elements (e.g.  texts, numbers, images, files, urls, etc.), and participants to submit content and view submitted content.';
 $string['modulenameplural'] = 'Dataforms';
-
 
 // GENERAL
     $string['dataformnone'] = 'No Dataforms found';
@@ -58,14 +57,14 @@ $string['modulenameplural'] = 'Dataforms';
     $string['intervalcount'] = 'Number of intervals';
     $string['intervalcount_help'] = 'If the activity is set to have more than 1 interval then the availability settings and the entry settings apply to each interval separately.';
 
-    //Completion
+    // Completion
     $string['completionentries'] = 'Participants must add entries:';
     $string['completionentriesgroup'] = 'Require entries';
-    $string['completionentrieshelp'] = 'requiring entries to complete';        
+    $string['completionentrieshelp'] = 'requiring entries to complete';
 
     // Entries
     $string['entriesmax'] = 'Maximum entries';
-    $string['entriesmax_help'] = 'The max number of entries a user without manageentries capability can add to the activity. 
+    $string['entriesmax_help'] = 'The max number of entries a user without manageentries capability can add to the activity.
     <ul>
     <li><b>-1:</b> Unlimited number of entries allowed.
     <li><b> 0:</b> No entries allowed.
@@ -74,8 +73,8 @@ $string['modulenameplural'] = 'Dataforms';
     If the activity has intervals this number applies to each interval, and the max number of entries for the whole activity is this number times the number of intervals.';
     $string['entriesrequired'] = 'Required entries';
     $string['entriesrequired_help'] = 'The number of entries a user without manageentries capability is required to add for the activity to be considered complete (before consideration of other completion criteria such as grade). If the activity has intervals this number applies to each interval, and the number of required entries for the whole activity is this number times the number of intervals.';
-    //$string['entriestoview'] = 'Entries required before viewing';
-    //$string['entriestoview_help'] = 'Entries required before viewing';
+    // $string['entriestoview'] = 'Entries required before viewing';
+    // $string['entriestoview_help'] = 'Entries required before viewing';
     $string['groupentries'] = 'Group entries';
     $string['groupentries_help'] = 'Entries will be added with group info but without author info. This settings requires group mode.';
     $string['anonymousentries'] = 'Anonymous entries';
@@ -91,7 +90,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['notapplicable'] = 'N/A';
     // Grading
     $string['grading'] = 'Grading';
-
 
     // ROLES
     $string['entriesmanager'] = 'Entries Manager';
@@ -184,7 +182,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['exportcontent'] = 'Export content';
     $string['export'] = 'Export';
 
-
     $string['firstdayofweek'] = 'Monday';
     $string['first'] = 'First';
     $string['formemptyadd'] = 'You did not fill out any fields!';
@@ -245,7 +242,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['nomaximum'] = 'No maximum';
     $string['notopenyet'] = 'Sorry, this activity is not available until {$a}';
 
-
 // EVENT
     $string['event'] = 'Event';
     $string['events'] = 'Events';
@@ -298,7 +294,7 @@ $string['modulenameplural'] = 'Dataforms';
     $string['dataform:managecss'] = 'Manage css';
     $string['dataform:managejs'] = 'Manage js';
     $string['dataform:managetools'] = 'Manage tools';
-    
+
     // Presets
     $string['dataform:managepresets'] = 'Manage presets';
     $string['dataform:presetsviewall'] = 'View presets from all users';
@@ -342,7 +338,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['dataform:entryanonymousadd'] = 'Anonymous Entry - Add';
     $string['dataform:entryanonymousupdate'] = 'Anonymous Entry - Update';
     $string['dataform:entryanonymousdelete'] = 'Anonymous Entry - Delete';
-
 
 // MESSAGE
     $string['messageprovider:dataform_notification'] = 'Dataform notifications';
@@ -406,10 +401,9 @@ $string['modulenameplural'] = 'Dataforms';
     $string['viewenabled'] = 'Enabled';
     $string['viewvisible'] = 'Visible';
 
-
     $string['wrongdataid'] = 'Wrong dataform id provided';
     $string['submission'] = 'Submission';
-    
+
     // VIEW SETTING
     $string['modeeditonly'] = 'Show only edited entries';
     $string['modeeditseparate'] = 'Show edited entries separated from other entries';
@@ -493,7 +487,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['filetypepng'] = 'png files';
     $string['filetypes'] = 'Accepted file types';
 
-
 // FILTER
     $string['filtersortfieldlabel'] = 'Sort field ';
     $string['filtersearchfieldlabel'] = 'Search field ';
@@ -533,7 +526,7 @@ $string['modulenameplural'] = 'Dataforms';
     $string['filtersavedreset'] = '* Reset saved filters';
     $string['filterquick'] = 'Quick filter';
     $string['filterquickreset'] = '* Reset quick filter';
-    
+
     // FILTER OPERATORS
     $string['empty'] = 'Empty';
     $string['equal'] = 'Equal';
@@ -574,7 +567,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['tools'] = 'Tools';
     $string['toolnoneindataform'] = 'There are no tools defined for this dataform.';
     $string['toolrun'] = 'Run';
-
 
     $string['patterns'] = 'Patterns';
     $string['patternsnonebroken'] = 'No broken patterns found';
@@ -644,7 +636,6 @@ $string['modulenameplural'] = 'Dataforms';
     $string['savecontnew'] = 'Save and start new';
     $string['cancel'] = 'Cancel';
 
-
     $string['search'] = 'Search';
     $string['sendinratings'] = 'Send in my latest ratings';
     $string['separateentries'] = 'Each entry in a separate file';
@@ -666,4 +657,3 @@ $string['modulenameplural'] = 'Dataforms';
     $string['type'] = 'Type';
     $string['unlock'] = 'Unlock';
     $string['userpref'] = 'User preferences';
-

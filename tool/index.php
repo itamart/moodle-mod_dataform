@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformtool
  * @copyright 2011 Itamar Tzadok
@@ -61,11 +61,11 @@ if ($urlparams->run and confirm_sesskey()) {  // Run selected tool
 $tools = array();
 foreach (array_keys(core_component::get_plugin_list('dataformtool')) as $subpluginname) {
     $tools[$subpluginname] = (object) array(
-        'name' => get_string('pluginname',"dataformtool_$subpluginname"),
-        'description' => get_string('pluginname_help',"dataformtool_$subpluginname")
+        'name' => get_string('pluginname', "dataformtool_$subpluginname"),
+        'description' => get_string('pluginname_help', "dataformtool_$subpluginname")
     );
 }
-ksort($tools);    //sort in alphabetical order
+ksort($tools);    // sort in alphabetical order
 
 // any notifications?
 if (!$tools) {
@@ -79,20 +79,20 @@ echo $output->header(array('tab' => 'tools', 'heading' => $df->name, 'urlparams'
 if ($tools) {
     $actionbaseurl = '/mod/dataform/tool/index.php';
     $linkparams = array('d' => $df->id, 'sesskey' => sesskey());
-                        
-    /// table headings
+
+    // table headings
     $strname = get_string('name');
     $strdesc = get_string('description');
-    $strrun = get_string('toolrun','dataform');;
+    $strrun = get_string('toolrun', 'dataform');
 
     $table = new html_table();
     $table->head = array($strname, $strdesc, $strrun);
     $table->align = array('left', 'left', 'center');
     $table->wrap = array(false, false, false);
     $table->attributes['align'] = 'center';
-    
+
     foreach ($tools as $dir => $tool) {
-        
+
         $runlink = html_writer::link(new moodle_url($actionbaseurl, $linkparams + array('run' => $dir)),
                         $OUTPUT->pix_icon('t/addgreen', $strrun));
 
@@ -100,10 +100,9 @@ if ($tools) {
             $tool->name,
             $tool->description,
             $runlink,
-       );
+        );
     }
     echo html_writer::table($table);
 }
 
 echo $output->footer();
-

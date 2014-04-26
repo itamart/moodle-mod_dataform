@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage radiobutton
@@ -23,16 +23,16 @@
 defined('MOODLE_INTERNAL') or die();
 
 /**
- * 
+ *
  */
 class dataformfield_radiobutton_renderer extends dataformfield_select_renderer {
 
     /**
-     * 
+     *
      */
     protected function render(&$mform, $fieldname, $options, $selected, $required = false) {
         $field = $this->_field;
-        
+
         $grp = array();
         $separators = array();
         foreach ($options as $key => $option) {
@@ -49,7 +49,7 @@ class dataformfield_radiobutton_renderer extends dataformfield_select_renderer {
      */
     protected function set_required(&$mform, $fieldname, $selected) {
         global $PAGE;
-        
+
         $mform->addRule($fieldname, null, 'required', null, 'client');
         // JS Error message
         $options = array(
@@ -60,10 +60,10 @@ class dataformfield_radiobutton_renderer extends dataformfield_select_renderer {
         $module = array(
             'name' => 'M.dataformfield_radiobutton_required',
             'fullpath' => '/mod/dataform/field/radiobutton/radiobutton.js',
-            'requires' => array('base','node')
+            'requires' => array('base', 'node')
         );
 
-        $PAGE->requires->js_init_call('M.dataformfield_radiobutton_required.init', array($options), false, $module);            
+        $PAGE->requires->js_init_call('M.dataformfield_radiobutton_required.init', array($options), false, $module);
     }
 
 }

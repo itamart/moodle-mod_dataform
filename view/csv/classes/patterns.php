@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformview
@@ -38,7 +38,7 @@ class dataformview_csv_patterns extends mod_dataform\pluginbase\dataformviewpatt
         $viewid = $this->_view->id;
 
         $found = parent::search($text, $patterns);
-        
+
         if (!$patterns) {
             // Regexp patterns
             if ($patterns = array_keys($this->patterns_expimp_label())) {
@@ -62,7 +62,7 @@ class dataformview_csv_patterns extends mod_dataform\pluginbase\dataformviewpatt
         global $CFG, $OUTPUT;
 
         $replacements = parent::get_replacements($patterns, $entry, $options);
-        
+
         $view = $this->_view;
         $df = $view->get_df();
         $filter = $view->get_filter();
@@ -115,12 +115,12 @@ class dataformview_csv_patterns extends mod_dataform\pluginbase\dataformviewpatt
         $patterns = parent::patterns();
         $cat = get_string('pluginname', 'dataformview_csv');
         $patterns['##exportall##'] = array(true, $cat);
-        $patterns['##exportpage##'] =  array(true, $cat);
+        $patterns['##exportpage##'] = array(true, $cat);
         $patterns['##import##'] = array(true, $cat);
 
         return $patterns;
     }
-    
+
     /**
      * Import/export with label patterns. Not included in menu.
      *

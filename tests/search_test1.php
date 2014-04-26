@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') or die;
 global $CFG;
 require_once($CFG->dirroot . '/lib/csvlib.class.php');
 
-
 /**
  * Unit tests for {@see data_get_all_recordids()}.
  *                {@see data_get_advanced_search_ids()}
@@ -89,15 +88,14 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
 
         $this->resetAfterTest(true);
 
-
         // we already have 2 users, we need 98 more - let's ignore the fact that guest can not post anywhere
-        for($i=3;$i<=100;$i++) {
+        for ($i = 3; $i <= 100; $i++) {
             $this->getDataGenerator()->create_user();
         }
 
         // create dataform module - there should be more of these I guess
         $course = $this->getDataGenerator()->create_course();
-        $data = $this->getDataGenerator()->create_module('dataform', array('course'=>$course->id));
+        $data = $this->getDataGenerator()->create_module('dataform', array('course' => $course->id));
         $this->recorddata = $data;
 
         // Set up data for the test database.
@@ -125,7 +123,7 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
         $fieldinfo['4']->id = 9;
         $fieldinfo['4']->data = 'VIC';
 
-        foreach($fieldinfo as $field) {
+        foreach ($fieldinfo as $field) {
             $searchfield = data_get_field_by_id($field->id, $data);
             if ($field->id == 2) {
                 $searchfield->param1 = 'Hahn Premium';
@@ -135,14 +133,14 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
             } else {
                 $val = $field->data;
             }
-            $search_array[$field->id] = new stdClass();
-            list($search_array[$field->id]->sql, $search_array[$field->id]->params) = $searchfield->generate_sql('c' . $field->id, $val);
+            $searcharray[$field->id] = new stdClass();
+            list($searcharray[$field->id]->sql, $searcharray[$field->id]->params) = $searchfield->generate_sql('c' . $field->id, $val);
         }
 
-        $this->recordsearcharray = $search_array;
+        $this->recordsearcharray = $searcharray;
 
         // Setting up the comparison stdClass for the last test.
-        $user = $DB->get_record('user', array('id'=>6));
+        $user = $DB->get_record('user', array('id' => 6));
         $this->finalrecord[6] = new stdClass();
         $this->finalrecord[6]->id = 6;
         $this->finalrecord[6]->state = 1;
@@ -169,7 +167,7 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
      * to the user when they use the advanced search criteria and the parameters that go with the sql statement. This test
      * takes that information and does a search on the database, returning a record.
      */
-    function test_advanced_search_sql_section() {
+    public function test_advanced_search_sql_section() {
         global $DB;
 
         // Test 1

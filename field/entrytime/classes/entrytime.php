@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrytime
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\dataformfield_internal {
 
@@ -44,7 +43,7 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
         );
         return $field;
     }
-    
+
     /**
      * Overrides {@link dataformfield::prepare_import_content()}
      * to set import into entry::timecreated and entry::timemodified.
@@ -68,19 +67,19 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
                 }
             }
         }
-        
+
         if ($timecreated) {
             $data->{"entry_{$entryid}_timecreated"} = $timecreated;
             if ($timemodified and $timemodified > $timecreated) {
                 $data->{"entry_{$entryid}_timemodified"} = $timemodified;
             }
         }
-        
+
         return $data;
     }
 
     /**
-     * 
+     *
      */
     public function get_search_sql($search) {
         list($element, $not, $operator, $value) = $search;
@@ -91,7 +90,7 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
         } else {
             $value = strtotime($value);
         }
-        
+
         return parent::get_search_sql(array($element, $not, $operator, $value));
     }
 
@@ -108,8 +107,8 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
     /**
      * Return array of sort options menu as
      * $fieldid,element => name, for the filter form.
-     * 
-     * 
+     *
+     *
      * @return null|array
      */
     public function get_sort_options_menu() {
@@ -129,10 +128,10 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
      */
     public function get_distinct_content($element, $sortdir = 0) {
         global $DB;
-        
+
         $sortdir = $sortdir ? 'DESC' : 'ASC';
         $contentfull = $this->get_sort_sql();
-        
+
         $sql = "SELECT DISTINCT $contentfull
                     FROM {dataform_entries} e
                     WHERE $contentfull IS NOT NULL'.
@@ -156,7 +155,7 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
      */
     public function format_search_value($searchparams) {
         list($not, $operator, $value) = $searchparams;
-        if (is_array($value)){
+        if (is_array($value)) {
             $from = userdate($value[0]);
             $to = userdate($value[1]);
         } else {
@@ -168,7 +167,7 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
         } else {
             return $not. ' '. $operator. ' '. $from. ' and '. $to;
         }
-    }  
+    }
 
     /**
      * Converts a valid time string to a unix timestamp.
@@ -177,14 +176,14 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
      */
     protected function str_to_time($timestr) {
         if ($timestr) {
-            if (((string) (int) $timestr === $timestr) 
+            if (((string) (int) $timestr === $timestr)
                     && ($timestr <= PHP_INT_MAX)
                     && ($timestr >= ~PHP_INT_MAX)) {
                 // It's a timestamp
                 return $timestr;
-                
-            // It's a valid time string
+
             } else if ($timestr = strtotime($timestr)) {
+                // It's a valid time string
                 return $timestr;
             }
         }

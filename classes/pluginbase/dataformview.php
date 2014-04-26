@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformview
@@ -20,8 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
- 
+namespace mod_dataform\pluginbase;
+
 /**
  * A base class for dataform views
  * (see view/<view type>/<view type>.php)
@@ -55,7 +55,6 @@ class dataformview {
         return array('section');
     }
 
-
     /**
      * Class constructor
      *
@@ -66,7 +65,7 @@ class dataformview {
         if (empty($view)) {
             throw new coding_exception('View object must be passed to dataformview constructor.');
         }
-        
+
         $this->_view = $view;
         $this->prepare_editors();
     }
@@ -107,20 +106,19 @@ class dataformview {
     }
 
 
-
     /**
      *
      */
     public function set_viewfilter(array $options = null) {
-        $fm = \mod_dataform_filter_manager::instance($this->dataid);       
+        $fm = \mod_dataform_filter_manager::instance($this->dataid);
 
         $fid = !empty($options['id']) ? $options['id'] : 0;
-        
+
         $eids = !empty($options['eids']) ? $options['eids'] : null;
         $users = !empty($options['users']) ? $options['users'] : null;
         $groups = !empty($options['groups']) ? $options['groups'] : null;
         $page = !empty($options['page']) ? $options['page'] : 0;
-        
+
         $perpage = !empty($options['perpage']) ? $options['perpage'] : $this->perpage;
         $groupby = !empty($options['groupby']) ? $options['groupby'] : $this->groupby;
         $customsort = !empty($options['customsort']) ? $options['customsort'] : null;
@@ -128,7 +126,7 @@ class dataformview {
         $customsearch = !empty($options['customsearch']) ? $options['customsearch'] : null;
         $csort = !empty($options['csort']) ? $options['csort'] : null;
         $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
-        
+
         // Url options
         if ($urloptions = ($this->is_active() ? $fm::get_filter_options_from_url() : null)) {
             // Options that do not require permission
@@ -138,15 +136,15 @@ class dataformview {
             $page = $page ? $page : (!empty($urloptions['page']) ? $urloptions['page'] : 0);
 
             // Options that require permission
-            //$params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
-            //if (\mod_dataform\access\view_filter_override::validate($params)) {
-            //}
+            // $params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
+            // if (\mod_dataform\access\view_filter_override::validate($params)) {
+            // }
         }
 
         if ($this->filterid) {
             $fid = $this->filterid;
         }
-        
+
         $filter = $fm->get_filter_by_id($fid, array('view' => $this));
 
         // set specific entry id
@@ -193,19 +191,17 @@ class dataformview {
         // Append custom search options
         if ($csearch) {
             $filter->append_search_options($csearch);
-        }        
+        }
 
         // content fields
-        if ($patternfields = $this->get_pattern_set('field')) { 
+        if ($patternfields = $this->get_pattern_set('field')) {
             $filter->contentfields = array_keys($patternfields);
         }
 
         $this->_filter = $filter;
     }
 
-    ////////////////////////////////////
     // VIEW DISPLAY
-    ////////////////////////////////////
     /**
      * Sets the view filter and any page settings before output.
      *
@@ -226,7 +222,7 @@ class dataformview {
         global $CFG;
 
         // proces export requests
-        $export = optional_param('export','', PARAM_TAGLIST);  // comma delimited entry ids or -1 for all entries in view
+        $export = optional_param('export', '', PARAM_TAGLIST);  // comma delimited entry ids or -1 for all entries in view
         if ($export and confirm_sesskey()) {
             if (!empty($CFG->enableportfolios)) {
                 require_once("$CFG->libdir/portfoliolib.php");
@@ -245,10 +241,10 @@ class dataformview {
             }
         }
     }
-    
+
     /**
      * Processes any view specific actions and entry actions.
-     * The view will remember processed entry ids for later use. 
+     * The view will remember processed entry ids for later use.
      *
      * @return void
      */
@@ -261,35 +257,35 @@ class dataformview {
             $this->editentries = $editentries;
             return;
         }
-        
+
         // Process entries data
         if ($processed = $this->process_entries_data()) {
             list($strnotify, $processedeids) = $processed;
 
             // Redirect base url
-            $redirecturl = $this->baseurl;            
+            $redirecturl = $this->baseurl;
             $redirecturl->remove_params('eids');
             $redirecturl->remove_params('editentries');
-            
+
             // Submission time out and target view
             $submission = $this->submission_settings;
             $timeout = !empty($submission['timeout']) ? $submission['timeout'] : 0;
             if (!empty($submission['redirect'])) {
                 $redirecturl->param('view', $submission['redirect']);
             }
-            
+
             // Submission response
             if ($processedeids) {
                 $response = !empty($submission['message']) ? $submission['message'] : $strnotify;
             } else {
                 $response = $strnotify;
             }
-            
+
             // Return to form if needed (editentries is set in continue_editing() as needed)
             if ($processedeids and $editentries = $this->editentries) {
                 $redirecturl->param('editentries', $editentries);
             }
-            
+
             redirect($redirecturl, $response, $timeout);
         }
     }
@@ -318,7 +314,7 @@ class dataformview {
         // Rewrite plugin file url
         $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
         $this->rewrite_pluginfile_urls($pluginfileurl);
-        
+
         // Complie the view template
         $viewhtml = $this->compile_view_template($options);
         return $viewhtml;
@@ -330,29 +326,27 @@ class dataformview {
     protected function compile_view_template($options) {
         $formatoptions = array('para' => false, 'allowid' => true, 'trusted' => true);
         $html = format_text($this->section, FORMAT_HTML, $formatoptions);
-        
+
         // Replace view patterns including entry field patterns
         if ($patterns = $this->get_pattern_set('view')) {
             $replacements = $this->renderer->get_replacements($patterns, null, $options);
             $html = str_replace(array_keys($replacements), $replacements, $html);
         }
-               
+
         // Process calculations
         $html = $this->process_calculations($html);
-        
+
         $dataformviewtype = "dataformview-$this->type";
         $viewname = str_replace(' ', '_', $this->name);
         return \html_writer::tag('div', $html, array('class' => "$dataformviewtype $viewname"));
-        
+
     }
 
-    ////////////////////////////////////
     // GETTERS
-    ////////////////////////////////////
 
     /**
      * Returns the view instance (DB) data.
-     * 
+     *
      * @return stdClass
      */
     public function get_data() {
@@ -433,7 +427,7 @@ class dataformview {
      */
     public function get_baseurl() {
         $filter = $this->filter;
-        
+
         if (!$this->_baseurl) {
             $baseurlparams = array();
             $baseurlparams['d'] = $this->dataid;
@@ -478,7 +472,7 @@ class dataformview {
             'style' => 'width:100%',
             'maxfiles' => EDITOR_UNLIMITED_FILES,
             'maxbytes' => $this->df->course->maxbytes,
-            'context'=> $this->df->context
+            'context' => $this->df->context
         );
     }
 
@@ -498,10 +492,10 @@ class dataformview {
      */
     public function get_renderer() {
         global $CFG;
-        
+
         if (!$this->_renderer) {
             $type = $this->type;
-            
+
             $patternsclass = "dataformview_{$type}_patterns";
             if (!class_exists($patternsclass)) {
                 $patternsclass = 'mod_dataform\pluginbase\dataformviewpatterns';
@@ -567,10 +561,8 @@ class dataformview {
             )
         );
     }
-    
-    ////////////////////////////////////
+
     // ATTRIBUTES
-    ////////////////////////////////////
 
     /**
      *
@@ -578,7 +570,7 @@ class dataformview {
     public function is_active() {
         return (optional_param('view', 0, PARAM_INT) == $this->id);
     }
-    
+
     /**
      *
      */
@@ -593,7 +585,7 @@ class dataformview {
         if ($this->editentries and $this->allows_submission()) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -606,9 +598,9 @@ class dataformview {
         if (!$submission = $this->submission_settings) {
             return false;
         }
-        
+
         $allowed = false;
-        
+
         // Save buttons
         foreach ($this->submission_buttons as $name) {
             if ($name == 'cancel') {
@@ -618,7 +610,7 @@ class dataformview {
                 $allowed = true;
                 break;
             }
-        }        
+        }
 
         return $allowed;
     }
@@ -670,19 +662,17 @@ class dataformview {
         return null;
     }
 
-    ////////////////////////////////////
     // HELPERS
-    ////////////////////////////////////
     /**
      * Returns a list of fields registered in the view templates.
      * Fields may be excluded from the returned list by passing
-     * an array of field ids to exclude via option 'exclude'. 
+     * an array of field ids to exclude via option 'exclude'.
      *
      * @param array $options
      * @return array
      */
     public function get_fields(array $options = null) {
-        
+
         if ($fieldpatterns = $this->get_pattern_set('field')) {
             $fieldids = array_keys($fieldpatterns);
             if (!empty($options['exclude'])) {
@@ -717,8 +707,7 @@ class dataformview {
     public function patterns_check() {
         $patterns = $this->get_patterns_from_templates();
         $storedpatterns = $this->patterns;
-        
-        
+
         // View patterns
         $viewupdates = array();
         if (!empty($patterns['view']) or !empty($storedpatterns['view'])) {
@@ -734,7 +723,7 @@ class dataformview {
                     );
                 }
             }
-                
+
             if (!$viewupdates and empty($patterns['view']) and !empty($storedpatterns['view'])) {
                 foreach ($storedpatterns['view'] as $pattern) {
                     $viewupdates[] = array(
@@ -746,7 +735,7 @@ class dataformview {
                     );
                 }
             }
-                
+
             if (!$viewupdates and $notstored = array_diff($patterns['view'], $storedpatterns['view'])) {
                 foreach ($notstored as $pattern) {
                     $viewupdates[] = array(
@@ -759,7 +748,7 @@ class dataformview {
                 }
             }
         }
-            
+
         // Field patterns
         $fieldupdates = array();
         if (!empty($patterns['field']) or !empty($storedpatterns['field'])) {
@@ -776,7 +765,7 @@ class dataformview {
                     }
                 }
             }
-                
+
             if (!$fieldupdates and empty($patterns['field']) and !empty($storedpatterns['field'])) {
                 foreach ($storedpatterns['field'] as $fieldid => $fieldpatterns) {
                     foreach ($fieldpatterns as $pattern) {
@@ -790,7 +779,7 @@ class dataformview {
                     }
                 }
             }
-                
+
             if (!$fieldupdates) {
                 foreach ($patterns['field'] as $fieldid => $fieldpatterns) {
                     if (empty($storedpatterns['field'][$fieldid])) {
@@ -816,9 +805,9 @@ class dataformview {
                     }
                 }
             }
-            
+
         }
-            
+
         // Anything else that looks like a pattern
         $otherupdates = array();
         // Get the templates text
@@ -826,7 +815,7 @@ class dataformview {
         // Remove found patterns from text
         if (!empty($patterns['view'])) {
             $text = str_replace($patterns['view'], '', $text);
-        }       
+        }
         if (!empty($patterns['field'])) {
             foreach ($patterns['field'] as $fieldpatterns) {
                 $text = str_replace($fieldpatterns, '', $text);
@@ -845,11 +834,11 @@ class dataformview {
                 );
             }
         }
-        
+
         if ($updates = array_merge($viewupdates, $fieldupdates, $otherupdates)) {
             return $updates;
         }
-        
+
         return null;
     }
 
@@ -880,13 +869,13 @@ class dataformview {
         if (!$patterns = $this->patterns) {
             return null;
         }
-        
+
         // BC convert internal field ids where needed
         if (!empty($patterns['field'])) {
             $patterns['field'] = $this->convert_internal_field_pattern_ids($patterns['field']);
             $this->patterns = $patterns;
         }
-        
+
         if (is_null($set)) {
             return $patterns;
         } else if (array_key_exists($set, $patterns)) {
@@ -950,13 +939,12 @@ class dataformview {
         return $files;
     }
 
-
     // TEMPLATES //
-    
+
     /**
      * Generates a default view for a new view instance or when reseting an existing instance.
      * View subtypes may need to override.
-     * 
+     *
      * @return void
      */
     public function generate_default_view() {
@@ -985,19 +973,19 @@ class dataformview {
      */
     protected function get_default_view_template() {
         // Notifications
-        $notifications = \html_writer::tag('div', '##notifications##', array('class' => '')); 
+        $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
         // Add new entry
         $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
 
         // Filtering
-        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));       
+        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
 
         // Paging bar
         $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
         // Entries
         $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
-        
+
         // Set the view template
         $exporthide = \html_writer::tag('div', $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
         $this->section = \html_writer::tag('div', $exporthide. $entries);
@@ -1016,24 +1004,23 @@ class dataformview {
      * @return string HTML fragment
      */
     protected function get_default_filtering_template() {
-        $filtersmenulabel = \html_writer::label(get_string('filtercurrent','dataform'), 'filterbrowse_jump');
+        $filtersmenulabel = \html_writer::label(get_string('filtercurrent', 'dataform'), 'filterbrowse_jump');
         $filtersmenu = \html_writer::tag('div', "$filtersmenulabel ##filtersmenu##", array('class' => 'quickfilter'));
-        $quicksearchlabel = \html_writer::label(get_string('search','dataform'), 'usearch');
+        $quicksearchlabel = \html_writer::label(get_string('search', 'dataform'), 'usearch');
         $quicksearch = \html_writer::tag('div', "$quicksearchlabel ##quicksearch##", array('class' => 'quickfilter'));
-        $quickperpagelabel = \html_writer::label(get_string('filterperpage','dataform'), 'perpage_jump');
+        $quickperpagelabel = \html_writer::label(get_string('filterperpage', 'dataform'), 'perpage_jump');
         $quickperpage = \html_writer::tag('div', "$quickperpagelabel ##quickperpage##", array('class' => 'quickfilter'));
         $clearfix = \html_writer::tag('div', null, array('class' => 'clearfix'));
         return $filtersmenu. $quicksearch. $quickperpage. $clearfix;
     }
 
-    
     /**
      *
      */
     protected function get_field_definitions($entry, $options) {
         $fields = $this->get_fields();
         $entry->baseurl = new \moodle_url($this->baseurl);
-        
+
         if (!$fieldpatterns = $this->get_pattern_set('field')) {
             return array();
         }
@@ -1043,7 +1030,7 @@ class dataformview {
         foreach ($fieldpatterns as $fieldid => $patterns) {
             if (!isset($fields[$fieldid])) {
                 continue;
-            } 
+            }
             $field = $fields[$fieldid];
             if ($fielddefinitions = $field->get_definitions($patterns, $entry, $options)) {
                 $definitions = array_merge($definitions, $fielddefinitions);
@@ -1065,18 +1052,16 @@ class dataformview {
         return $elements;
     }
 
-    ////////////////////////////////////
     // VIEW ENTRIES
-    ////////////////////////////////////
     /**
      *
      */
     public function process_entries_data() {
         $strnotify = '';
         $processedeids = null;
-        
+
         $entryman = $this->entry_manager;
-        
+
         // Direct url params; not from form
         // The following actions may require confirmation
         $confirmed = optional_param('confirmed', 0, PARAM_BOOL);
@@ -1088,9 +1073,9 @@ class dataformview {
             }
             return null;
         }
-        
+
         // Delete any requested entries (comma delimited eids)
-        if ($delete = optional_param('delete', '', PARAM_SEQUENCE)) {    
+        if ($delete = optional_param('delete', '', PARAM_SEQUENCE)) {
             if (confirm_sesskey()) {
                 return $entryman->process_entries('delete', $delete, null, $confirmed);
             }
@@ -1116,7 +1101,7 @@ class dataformview {
                     $elements = $this->get_entries_definition($entryman->entries);
                 } else {
                     $elements = $this->get_entries_definition(array());
-                }   
+                }
 
                 // Get the form
                 $entriesform = $this->get_entries_form(array('elements' => $elements));
@@ -1151,7 +1136,7 @@ class dataformview {
         $html = '';
         $entryman = $this->entry_manager;
         $editing = $this->user_is_editing();
-        
+
         if ($editing) {
             if ($this->in_edit_display_mode(self::EDIT_SEPARATE)) {
                 // Extract the edited and non-edited entries from the set
@@ -1166,7 +1151,7 @@ class dataformview {
                         $nonedited[$entryid] = $entry;
                     }
                 }
-                    
+
                 // Get the form html for the edited entries
                 if ($elements = $this->get_entries_definition($edited)) {
                     if ($this->editentries) {
@@ -1177,11 +1162,11 @@ class dataformview {
                         $html .= implode('', $elements);
                     }
                 }
-                    
+
                 // Add the rest
                 $elements = $this->get_entries_definition($nonedited, false);
                 $html .= implode('', $elements);
-                    
+
             } else {
                 // Get the form html for all entries
                 if ($elements = $this->get_entries_definition($entryman->entries)) {
@@ -1194,14 +1179,14 @@ class dataformview {
                     }
                 }
             }
-            
+
             return $html;
         }
 
         // Not editing so fetch the entries and display html
         $elements = $this->get_entries_definition($entryman->entries, false);
         $html .= implode('', $elements);
-            
+
         // RM ??? Replace pluginfile urls if needed (e.g. in export)
         $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
         if ($pluginfileurl) {
@@ -1236,7 +1221,7 @@ class dataformview {
 
             // Existing entries set
             foreach ($entriesset as $entryid => $editthisone) {
-                if (!empty($entries[$entryid])) { 
+                if (!empty($entries[$entryid])) {
                     $options = $allowedit ? array('edit' => $editthisone) : null;
                     $fielddefinitions = $this->get_field_definitions($entries[$entryid], $options);
                     $definitions[$entryid] = $this->entry_definition($fielddefinitions, $options);
@@ -1247,7 +1232,7 @@ class dataformview {
         // Free up memory
         unset($definitions);
         unset($entrieset);
-        
+
         // Flatten the elements
         $elements = array();
         foreach ($groupedelements as $group) {
@@ -1255,7 +1240,7 @@ class dataformview {
             // Free up memory
             unset($group);
         }
-        
+
         return $elements;
     }
 
@@ -1270,12 +1255,12 @@ class dataformview {
      */
     public function get_entries_form(array $options = null) {
         global $CFG;
-        
+
         $filter = $this->filter;
         $editentries = !empty($options['editentries']) ? $options['editentries'] : $this->editentries;
 
         // prepare params for form
-        $actionparams = array(            
+        $actionparams = array(
             'd' => $this->dataid,
             'view' => $this->id,
             'filtid' => $filter->id,
@@ -1285,21 +1270,21 @@ class dataformview {
         if (!empty($filter->eids)) {
             $actionparams['eids'] = $editentries;
         }
-        
+
         $pagefile = $this->df->pagefile;
         $actionurl = new \moodle_url("/mod/dataform/$pagefile.php", $actionparams);
-        $custom_data = array(
+        $customdata = array(
             'view' => $this,
             'update' => $editentries
         );
-        
+
         // Pass elements if given
         if (!empty($options['elements'])) {
-            $custom_data['elements'] = $options['elements'];
+            $customdata['elements'] = $options['elements'];
         }
 
         $formclass = $this->get_entries_form_class();
-        return new $formclass($actionurl, $custom_data);
+        return new $formclass($actionurl, $customdata);
     }
 
     /**
@@ -1316,13 +1301,13 @@ class dataformview {
         $options = array('elements' => $elements, 'editentries' => -1);
         return $this->get_entries_form($options);
     }
-    
+
     /**
      *
      */
     protected function process_calculations($text) {
         global $CFG;
-        
+
         if (preg_match_all("/%%F\d*:=[^%]+%%/", $text, $matches)) {
             require_once("$CFG->libdir/mathslib.php");
             sort($matches[0]);
@@ -1373,12 +1358,12 @@ class dataformview {
                 if (strpos($formula, ';')) {
                     list($formula, $decimals) = explode(';', $formula);
                 }
-            
+
                 $calc = new calc_formula("=$formula");
                 $result = $calc->evaluate();
                 // false as result indicates some problem
                 if ($result === false) {
-                    $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;')); //get_string('errorcalculationunknown', 'grades');
+                    $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;')); // get_string('errorcalculationunknown', 'grades');
                 } else {
                     // Set decimals
                     if (is_numeric($decimals)) {
@@ -1391,7 +1376,7 @@ class dataformview {
         }
         return $text;
     }
-            
+
     /**
      *
      */
@@ -1452,7 +1437,7 @@ class dataformview {
                         unset($editentries[$entryid]);
                     }
                 }
-                
+
                 // Add to the current entries group
                 $groupdefinition[$entryid] = $editthisone;
 
@@ -1460,7 +1445,7 @@ class dataformview {
             // collect remaining definitions (all of it if no groupby)
             $displaydefinition[$groupname] = $groupdefinition;
         }
-        
+
         $this->editentries = $editentries ? implode(',', $editentries) : $editnewentries;
 
         return $displaydefinition;
@@ -1492,7 +1477,7 @@ class dataformview {
     }
 
     // HELPERS and BACKWARD COMPATIBILITY
-    
+
     /**
      *
      */
@@ -1536,9 +1521,7 @@ class dataformview {
         return $newfieldpatterns;
     }
 
-    ////////////////////////////////////
     // VIEW TYPE
-    ////////////////////////////////////
 
     /**
      * Insert a new view into the database
@@ -1549,12 +1532,12 @@ class dataformview {
 
         $this->set_view($data);
 
-        if (!$viewid = $DB->insert_record('dataform_views', $this->data)){
+        if (!$viewid = $DB->insert_record('dataform_views', $this->data)) {
             return false;
         }
 
         $this->id = $viewid;
-        
+
         // update item id of files area
         $fs = get_file_storage();
         $contextid = $this->df->context->id;
@@ -1575,7 +1558,7 @@ class dataformview {
         $event = \mod_dataform\event\view_created::create($this->default_event_params);
         $event->add_record_snapshot('dataform_views', $this->data);
         $event->trigger();
-        
+
         return $this->id;
     }
 
@@ -1594,7 +1577,7 @@ class dataformview {
             $event = \mod_dataform\event\view_updated::create($this->default_event_params);
             $event->add_record_snapshot('dataform_views', $this->data);
             $event->trigger();
-        
+
             return $this->id;
         }
         return false;
@@ -1614,7 +1597,7 @@ class dataformview {
             }
 
             $DB->delete_records('dataform_views', array('id' => $this->id));
-            
+
             // Trigger an event for deleting this view.
             $event = \mod_dataform\event\view_deleted::create($this->default_event_params);
             $event->add_record_snapshot('dataform_views', $this->data);
@@ -1641,7 +1624,7 @@ class dataformview {
             $data->patterns = serialize($data->patterns);
         }
 
-        if (!$viewid = $DB->insert_record('dataform_views', $data)){
+        if (!$viewid = $DB->insert_record('dataform_views', $data)) {
             return false;
         }
 
@@ -1666,7 +1649,7 @@ class dataformview {
         $event = \mod_dataform\event\view_created::create($eventparams);
         $event->add_record_snapshot('dataform_views', $data);
         $event->trigger();
-        
+
         return $viewid;
     }
 
@@ -1683,7 +1666,7 @@ class dataformview {
             'type' => $this->type
         );
         $actionurl = new \moodle_url('/mod/dataform/view/edit.php', $formparams);
-                                    
+
         return new $formclass($this, $actionurl);
     }
 
@@ -1692,7 +1675,7 @@ class dataformview {
      */
     public function to_form($data = null) {
         $data = $data ? $data : $this->data;
-        
+
         // Prepare view editors
         $data = $this->prepare_view_editors($data);
 
@@ -1745,8 +1728,8 @@ class dataformview {
                 $editor,
                 $this->id
             );
-        } 
-        
+        }
+
         return $data;
     }
 
@@ -1774,7 +1757,7 @@ class dataformview {
     public function supports_feature($feature) {
         return null;
     }
-    
+
     /**
      * Sets the view data from form data.
      *
@@ -1791,23 +1774,23 @@ class dataformview {
         $this->filterid = !empty($data->filterid) ? $data->filterid : 0;
         $this->section = !empty($data->section) ? $data->section : null;
 
-        for ($i=1; $i<=10; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $this->{"param$i"} = (!empty($data->{"param$i"}) ? $data->{"param$i"} : null);
         }
-        
+
         // Compile view and field patterns.
         $this->patterns = null;
         if ($patterns = $this->get_patterns_from_templates()) {
             $this->patterns = serialize($patterns);
         }
-        
+
         // Compile submission settings
         if (empty($data->submission)) {
             $this->submission = null;
         } else if (is_array($data->submission)) {
             $this->submission = base64_encode(serialize($data->submission));
         }
-        
+
         return true;
     }
 
@@ -1846,7 +1829,7 @@ class dataformview {
 
             // replace \n in non text format
             if ($format != FORMAT_PLAIN) {
-                $text = str_replace("\n","",$text);
+                $text = str_replace("\n", "", $text);
             }
 
             if (!empty($text)) {
@@ -1889,7 +1872,7 @@ class dataformview {
         }
 
         return $patterns;
-    }    
+    }
 
     /**
      * Returns all templates text in one string.

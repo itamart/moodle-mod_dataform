@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package mod
@@ -55,7 +55,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     }
 
     /**
-     *  @return string
+     * @return string
      */
     public static function display_name() {
         return get_string('modulename', 'dataform');
@@ -66,10 +66,10 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      */
     public static function base_supported_formats() {
         return array(
-//            PORTFOLIO_FORMAT_SPREADSHEET,
-//            PORTFOLIO_FORMAT_RICHHTML,
-//            PORTFOLIO_FORMAT_DOCUMENT,
-//            PORTFOLIO_FORMAT_LEAP2A
+            // PORTFOLIO_FORMAT_SPREADSHEET,
+            // PORTFOLIO_FORMAT_RICHHTML,
+            // PORTFOLIO_FORMAT_DOCUMENT,
+            // PORTFOLIO_FORMAT_LEAP2A
         );
     }
 
@@ -78,7 +78,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      *
      * @global object $DB
      */
-    public function load_data() {        
+    public function load_data() {
         if (!$this->cm = get_coursemodule_from_id('dataform', $this->id)) {
             throw new portfolio_caller_exception('invalidid', 'dataform');
         }
@@ -98,11 +98,11 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         } else {
             $dbtime = PORTFOLIO_TIME_HIGH;
         }
-        
+
         // (only if export includes embedded files but this is in config and not
         // yet accessible here ...)
         $filetime = PORTFOLIO_TIME_HIGH;
-        
+
         return ($filetime > $dbtime) ? $filetime : $dbtime;
     }
 
@@ -112,7 +112,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      * @return string
      */
     public function get_sha1() {
-        return sha1(serialize(array($this->id,$this->vid,$this->fid,$this->eids)));
+        return sha1(serialize(array($this->id, $this->vid, $this->fid, $this->eids)));
     }
 
     /**
@@ -134,7 +134,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             $this->exporter->write_new_file($content, $filename);
             return;
         }
-        
+
         // export to html
         if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_RICHHTML) {
             $exportfiles = $this->get_export_config('contentformat');
@@ -147,7 +147,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
                     }
                 }
             }
-            
+
             // export content
             if ($exportfiles != self::CONTENT_FILESONLY) {
                 $content = $view->display(array('controls' => false,
@@ -157,11 +157,11 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             }
             return;
         }
-        
+
         // export to leap2a
-        //if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_LEAP2A) {
-        //}
-        
+        // if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_LEAP2A) {
+        // }
+
     }
 
     /**
@@ -191,7 +191,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
 
         // spreadsheet selection
         $types = array('csv', 'ods', 'xls');
-        $options = array_combine($types, $types); 
+        $options = array_combine($types, $types);
         $mform->addElement('select', 'caller_spreadsheettype', get_string('spreadsheettype', 'dataform'), $options);
         $mform->setDefault('caller_spreadsheettype', 'csv');
         $mform->disabledIf('caller_spreadsheettype', 'format', 'neq', PORTFOLIO_FORMAT_SPREADSHEET);
@@ -203,15 +203,17 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         $mform->addElement('select', 'caller_contentformat', get_string('exportcontent', 'dataform'), $options);
         $mform->setDefault('caller_contentformat', self::CONTENT_NOFILES);
         $mform->disabledIf('caller_contentformat', 'format', 'neq', PORTFOLIO_FORMAT_RICHHTML);
-/*
+
+        /*
         // document selection
         $types = array('htm', 'txt');
-        $options = array_combine($types, $types); 
+        $options = array_combine($types, $types);
         $mform->addElement('select', 'caller_documenttype', get_string('documenttype', 'dataform'), $options);
         $mform->setDefault('caller_documenttype', 'htm');
         $mform->disabledIf('caller_documenttype', 'format', 'neq', PORTFOLIO_FORMAT_DOCUMENT);
         $mform->disabledIf('caller_documenttype', 'caller_content', 'eq', self::CONTENT_FILESONLY);
-*/
+        */
+
         // each entry in a separate file
         $mform->addElement('selectyesno', 'caller_separateentries', get_string('separateentries', 'dataform'));
 
@@ -223,16 +225,16 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     public function get_allowed_export_config() {
         return array('spreadsheettype', 'documenttype', 'contentformat', 'separateentries');
     }
-    
+
     /**
      *
      */
     public function get_return_url() {
         global $CFG;
-        
-        $returnurl = new moodle_url('/mod/dataform/view.php', array('id' =>$this->id, 'view' => $this->vid, 'filter' => $this->fid));;
-        return $returnurl->out(false);                                                        
-    }   
+
+        $returnurl = new moodle_url('/mod/dataform/view.php', array('id'  => $this->id, 'view' => $this->vid, 'filter' => $this->fid));;
+        return $returnurl->out(false);
+    }
 }
 
 /**
@@ -359,7 +361,7 @@ class dataform_calendar_helper {
      */
     public static function update_event_timeavailable($data) {
         global $DB;
-        
+
         if (!empty($data->timeavailable)) {
             $event = new stdClass;
             $event->name        = $data->name;

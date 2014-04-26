@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataform
  * @category filter
@@ -21,12 +21,11 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
+namespace mod_dataform\pluginbase;
 
 defined('MOODLE_INTERNAL') or die;
 
 require_once("$CFG->libdir/formslib.php");
-
 
 /*
  *
@@ -39,17 +38,16 @@ abstract class dataformfilterform extends \moodleform {
      */
     public function __construct($filter, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
         $this->_filter = $filter;
-        
-        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);       
+
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable);
     }
-    
 
     /*
      *
      */
     protected function custom_sort_definition($customsort, $fields, $showlabel = false) {
         $mform = &$this->_form;
-        
+
         $fieldoptions = $this->get_field_sort_options_menu($fields);
 
         $diroptions = array(
@@ -63,7 +61,7 @@ abstract class dataformfilterform extends \moodleform {
         $count = 0;
 
         // Add current options
-        if ($customsort) {        
+        if ($customsort) {
             $sortfields = unserialize($customsort);
             foreach ($sortfields as $sortelement => $sortdir) {
                 $sortelement = explode(',', $sortelement) + array(null);
@@ -84,7 +82,7 @@ abstract class dataformfilterform extends \moodleform {
             list($fieldid, $element, $sortdir) = $criterion;
             $i = $count + 1;
             $label = $showlabel ? "$fieldlabel$i" : '';
-                
+
             $optionsarr = array();
             $optionsarr[] = &$mform->createElement('selectgroups', "sortfield$count", null, $fieldoptions);
             $optionsarr[] = &$mform->createElement('select', "sortdir$count", null, $diroptions);
@@ -94,11 +92,11 @@ abstract class dataformfilterform extends \moodleform {
             $mform->setDefault("sortdir$count", $sortdir);
 
             $mform->disabledIf("sortdir$count", "sortfield$count", 'eq', '');
-            
+
             if ($count) {
                 $prev = $count - 1;
                 $mform->disabledIf("sortoptionarr$count", "sortfield$prev", 'eq', '');
-            }   
+            }
             $count++;
         }
     }
@@ -114,7 +112,7 @@ abstract class dataformfilterform extends \moodleform {
             'AND' => get_string('and', 'dataform'),
             'OR' => get_string('or', 'dataform'),
         );
-        
+
         $fieldoptions = $this->get_field_search_options_menu($fields);
 
         $isnotoptions = array(
@@ -139,7 +137,7 @@ abstract class dataformfilterform extends \moodleform {
 
             $searchfields = unserialize($customsearch);
             // If not from form then the searchfields is aggregated and we need
-            // to flatten them. An aggregated array should have a non-zero key 
+            // to flatten them. An aggregated array should have a non-zero key
             // (fieldid) in the first element.
             if (key($searchfields)) {
                 foreach ($searchfields as $fieldid => $searchfield) {
@@ -175,7 +173,7 @@ abstract class dataformfilterform extends \moodleform {
 
             $i = $count + 1;
             $label = $showlabel ? "$fieldlabel$i" : '';
-            
+
             list($fieldid, $andor, $not, $operator, $value) = $searchcriterion;
 
             $arr = array();
@@ -183,11 +181,11 @@ abstract class dataformfilterform extends \moodleform {
             $arr[] = &$mform->createElement('selectgroups', "searchfield$count", null, $fieldoptions);
             $arr[] = &$mform->createElement('select', "searchnot$count", null, $isnotoptions);
             $arr[] = &$mform->createElement('select', "searchoperator$count", '', $operatoroptions);
-            $arr[] = &$mform->createElement('text', "searchvalue$count", '');                            
+            $arr[] = &$mform->createElement('text', "searchvalue$count", '');
             $mform->addGroup($arr, "customsearcharr$count", $label, ' ', false);
 
             $mform->setType("searchvalue$count", PARAM_TEXT);
-            
+
             $mform->setDefault("searchandor$count", $andor);
             $mform->setDefault("searchfield$count", $fieldid);
             $mform->setDefault("searchnot$count", $not);
@@ -198,11 +196,11 @@ abstract class dataformfilterform extends \moodleform {
             $mform->disabledIf("searchnot$count", "searchfield$count", 'eq', '');
             $mform->disabledIf("searchoperator$count", "searchfield$count", 'eq', '');
             $mform->disabledIf("searchvalue$count", "searchoperator$count", 'eq', '');
-            
+
             if ($count) {
                 $prev = $count - 1;
                 $mform->disabledIf("customsearcharr$count", "searchfield$prev", 'eq', '');
-            }   
+            }
 
             $count++;
         }
@@ -221,7 +219,7 @@ abstract class dataformfilterform extends \moodleform {
         }
         return $menu;
     }
-    
+
     /*
      *
      */
@@ -241,13 +239,13 @@ abstract class dataformfilterform extends \moodleform {
      */
     protected function get_url_query($fields) {
         global $OUTPUT;
-        
+
         $filter = $this->_filter;
-        
+
         // parse custom settings
         $sorturlquery = '';
         $searchurlquery = '';
-        
+
         if ($filter->customsort or $filter->customsearch) {
             // CUSTOM SORT
             if ($filter->customsort) {
@@ -258,7 +256,7 @@ abstract class dataformfilterform extends \moodleform {
                         if (empty($fields[$fieldid])) {
                             continue;
                         }
-                        
+
                         // Sort url query
                         $sorturlarr[] = "$fieldid $sortdir";
                     }
@@ -267,7 +265,7 @@ abstract class dataformfilterform extends \moodleform {
                     }
                 }
             }
-            
+
             // CUSTOM SEARCH
             if ($filter->customsearch) {
                 if ($searchfields = unserialize($filter->customsearch)) {
@@ -307,7 +305,7 @@ abstract class dataformfilterform extends \moodleform {
                 }
             }
         }
-        
+
         return $sorturlquery. $searchurlquery;
     }
 }

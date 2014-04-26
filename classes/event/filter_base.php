@@ -20,8 +20,8 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type string filtername the name of the filter.
- *      @type int dataid the id of the dataform activity.
+ *      string filtername the name of the filter.
+ *      int dataid the id of the dataform activity.
  * }
  *
  * @package    mod_dataform
@@ -41,7 +41,7 @@ abstract class filter_base extends \core\event\base {
      * @return string
      */
     public static function get_event_name() {
-        list(,,$eventname) = explode('\\', get_called_class());
+        list(, , $eventname) = explode('\\', get_called_class());
         return $eventname;
     }
 

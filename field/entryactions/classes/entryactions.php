@@ -12,27 +12,26 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
-/** 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
  * @package dataformfield
  * @subpackage entryactions
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 class dataformfield_entryactions_entryactions extends \mod_dataform\pluginbase\dataformfield_internal {
 
     const INTERNALID = -1;
-    
+
     /**
      *
      */
     public function get_target_view($action) {
         return null;
     }
-    
+
     /**
      * Returns instance defaults for for the field
      * (because internal fields do not have DB record).
@@ -54,10 +53,10 @@ class dataformfield_entryactions_entryactions extends \mod_dataform\pluginbase\d
 
     /**
      * Overriding parent to return no sort/search options.
-     * 
+     *
      * @return array
      */
     public function get_sort_options_menu() {
         return array();
-    }    
+    }
 }

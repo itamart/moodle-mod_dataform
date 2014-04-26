@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @copyright 2011 Itamar Tzadok
@@ -55,17 +55,17 @@ navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.p
 
 // DATA PROCESSING
 $fieldman = $df->field_manager;
-// Duplicate requested fields
 if ($urlparams->duplicate and confirm_sesskey()) {
+    // Duplicate requested fields
     $fieldman->process_fields('duplicate', $urlparams->duplicate, $urlparams->confirmed);
-// Delete requested fields
 } else if ($urlparams->delete and confirm_sesskey()) {
+    // Delete requested fields
     $fieldman->process_fields('delete', $urlparams->delete, $urlparams->confirmed);
-// Set field visibility
 } else if ($urlparams->visible and confirm_sesskey()) {
+    // Set field visibility
     $fieldman->process_fields('visible', $urlparams->visible, true);    // confirmed by default
-// Set field editability
 } else if ($urlparams->editable and confirm_sesskey()) {
+    // Set field editability
     $fieldman->process_fields('editable', $urlparams->editable, true);    // confirmed by default
 }
 

@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformview
@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
+namespace mod_dataform\pluginbase;
 
 require_once("$CFG->libdir/formslib.php");
 
@@ -29,18 +29,18 @@ require_once("$CFG->libdir/formslib.php");
  */
 class entriesform extends \moodleform {
 
-    function definition() {
+    public function definition() {
 
         // buttons
-        //-------------------------------------------------------------------------------
-        //$this->add_action_buttons();
+        // -------------------------------------------------------------------------------
+        // $this->add_action_buttons();
 
         // entries
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $this->definition_entries();
 
         // buttons again
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
 
@@ -71,7 +71,7 @@ class entriesform extends \moodleform {
                     }
                     // If the element is an array, it contains a function
                     list($func, $params) = $element;
-                    call_user_func_array($func, array_merge(array($mform),$params));
+                    call_user_func_array($func, array_merge(array($mform), $params));
                 }
             }
         }
@@ -83,10 +83,10 @@ class entriesform extends \moodleform {
     /**
      *
      */
-    function add_action_buttons($cancel = true, $submit = null) {
+    public function add_action_buttons($cancel = true, $submit = null) {
         $view = $this->_customdata['view'];
         $mform = &$this->_form;
-        
+
         static $i = 0;
         $i++;
 
@@ -113,10 +113,10 @@ class entriesform extends \moodleform {
     /**
      *
      */
-    function validation($data, $files) {
+    public function validation($data, $files) {
         if (!$errors = parent::validation($data, $files)) {
             $errors = array();
-            
+
             // field validations
             $view = $this->_customdata['view'];
             $patterns = $view->get_pattern_set('field');
@@ -142,12 +142,12 @@ class entriesform extends \moodleform {
     }
 
     /**
-     * Overriding parent to replace the class namespace with some normal string, 
+     * Overriding parent to replace the class namespace with some normal string,
      * because the validate javascript gets confused by namespaces class name.
      *
      * @return string form identifier.
      */
     protected function get_form_identifier() {
         return 'mod_dataform_entriesform';
-    }    
+    }
 }

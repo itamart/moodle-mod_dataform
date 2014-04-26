@@ -41,40 +41,39 @@ class view_access extends base {
     public static function validate($params) {
         $dataformid = $params['dataformid'];
         $viewid = $params['viewid'];
-       
+
         $df = \mod_dataform_dataform::instance($dataformid);
         $view = $df->view_manager->get_view_by_id($viewid);
-        
+
         // Views manager can access any view in any mode
         if (view_capability::has_capability('mod/dataform:manageviews', $params)) {
             return true;
         }
-        
+
         // Visible view
         $params['capabilities'] = array('mod/dataform:viewaccess');
         if ($view->visible and !parent::validate($params)) {
             return false;
         }
-        
+
         // Hidden view
         $params['capabilities'] = array('mod/dataform:viewaccesshidden');
         if (!$view->visible and !parent::validate($params)) {
             return false;
         }
-        
+
         // Early access
         $params['capabilities'] = array('mod/dataform:viewaccessearly');
         if ($df->is_early() and !parent::validate($params)) {
             return false;
         }
-        
+
         // Late access
         $params['capabilities'] = array('mod/dataform:viewaccesslate');
         if ($df->is_past_due() and !parent::validate($params)) {
             return false;
         }
-        
-        
+
         return true;
     }
 
@@ -83,10 +82,10 @@ class view_access extends base {
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $viewid = $params['viewid'];
-        
+
         return $man->get_type_rules('view');
     }
- 
+
     /**
      * @return array
      */
@@ -95,7 +94,7 @@ class view_access extends base {
             'mod/dataform:viewaccess',
             'mod/dataform:viewaccesshidden',
             'mod/dataform:viewaccessearly',
-            'mod/dataform:viewaccesslate',        
+            'mod/dataform:viewaccesslate',
         );
     }
 }

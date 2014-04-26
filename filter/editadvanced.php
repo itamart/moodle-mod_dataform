@@ -12,11 +12,11 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
- * @category filter 
+ * @category filter
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,10 +32,10 @@ $urlparams->fid = optional_param('fid', mod_dataform_filter_manager::USER_FILTER
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d);
 $df->set_page($urlparams->pagefile, array('urlparams' => $urlparams));
-//require_capability('mod/dataform:advancedfilter', $df->context);
+// require_capability('mod/dataform:advancedfilter', $df->context);
 
 // activate navigation node
-//navigation_node::override_active_url(new moodle_url('/mod/dataform/filter/editadvanced.php', array('d' => $df->id)));
+// navigation_node::override_active_url(new moodle_url('/mod/dataform/filter/editadvanced.php', array('d' => $df->id)));
 
 $fm = mod_dataform_filter_manager::instance($df->id);
 
@@ -45,12 +45,12 @@ $filter = $fm->get_filter_by_id($urlparams->fid, array('view' => $view));
 
 $mform = $fm->get_advanced_filter_form($filter, $view, $pagefile);
 
-if ($mform->is_cancelled()){
+if ($mform->is_cancelled()) {
     redirect(new moodle_url("/mod/dataform/$pagefile.php", array('d' => $df->id, 'view' => $view->id)));
 }
 
-// process validated    
-if ($data = $mform->get_data()) { 
+// process validated
+if ($data = $mform->get_data()) {
 
     $filter = (object) $fm->get_filter_from_form($filter, $data, true);
 
@@ -58,7 +58,7 @@ if ($data = $mform->get_data()) {
 
     if ($filter = $fm->set_advanced_filter($filter, $view, $newfilter)) {
         $mform = $fm->get_advanced_filter_form($filter, $view, $pagefile);
-    }    
+    }
 }
 
 $output = $df->get_renderer();

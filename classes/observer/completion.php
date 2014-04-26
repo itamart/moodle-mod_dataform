@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * The mod_dataform dataform notification observer.
  *
@@ -40,12 +40,12 @@ class completion {
             'eventname'   => '\mod_dataform\event\entry_created',
             'callback'    => '\mod_dataform\observer\completion::update',
         );
-        
+
         $observers[] = array(
             'eventname'   => '\mod_dataform\event\entry_deleted',
             'callback'    => '\mod_dataform\observer\completion::update',
         );
-        
+
         return $observers;
     }
 
@@ -56,12 +56,12 @@ class completion {
      */
     public static function update(\core\event\base $event) {
         global $DB;
-        
-        $dataformid = $event->other['dataid'];        
-        $entryuserid = $event->relateduserid;        
+
+        $dataformid = $event->other['dataid'];
+        $entryuserid = $event->relateduserid;
 
         $df = \mod_dataform_dataform::instance($dataformid);
-        
+
         $completion = new \completion_info($df->course);
         if ($completion->is_enabled($df->cm) != COMPLETION_TRACKING_AUTOMATIC) {
             return;

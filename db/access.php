@@ -12,17 +12,17 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */ 
+ */
 
 $capabilities = array_merge(
-    mod_dataform_capabilities_dataform(), 
-    mod_dataform_capabilities_dataform_view(), 
+    mod_dataform_capabilities_dataform(),
+    mod_dataform_capabilities_dataform_view(),
     mod_dataform_capabilities_dataform_entry(),
     mod_dataform_capabilities_dataform_entry_early(),
     mod_dataform_capabilities_dataform_entry_late(),
@@ -33,12 +33,12 @@ $capabilities = array_merge(
     mod_dataform_capabilities_dataform_preset(),
     mod_dataform_capabilities_dataform_depracated()
 );
-    
+
 /**
  * Returns the list of dataform capabilities for an activity
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform() {
     return array(
         // Add instance
@@ -200,12 +200,12 @@ function mod_dataform_capabilities_dataform() {
  * Returns the list of dataform capabilities for a view
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_view() {
     return array(
         // Access view
         'mod/dataform:viewaccess' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -221,7 +221,7 @@ function mod_dataform_capabilities_dataform_view() {
 
         // Access hidden views
         'mod/dataform:viewaccesshidden' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -234,7 +234,7 @@ function mod_dataform_capabilities_dataform_view() {
 
         // Access views before activity available from
         'mod/dataform:viewaccessearly' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -248,7 +248,7 @@ function mod_dataform_capabilities_dataform_view() {
 
         // Access views after activity is due
         'mod/dataform:viewaccesslate' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -262,7 +262,7 @@ function mod_dataform_capabilities_dataform_view() {
 
         // Apply filters to views with view-filter
         'mod/dataform:viewfilteroverride' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -279,7 +279,7 @@ function mod_dataform_capabilities_dataform_view() {
  * Returns the list of dataform capabilities for an entry
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry() {
     return array(
         // manage entries: view, write, delete, export etc.
@@ -305,7 +305,7 @@ function mod_dataform_capabilities_dataform_entry() {
  * - Delete
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry_early() {
     return array(
         // View
@@ -324,7 +324,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
 
         // Add
         'mod/dataform:entryearlyadd' => array(
-        
+
             'riskbitmask' => RISK_SPAM | RISK_XSS,
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
@@ -337,7 +337,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
 
         // Update
         'mod/dataform:entryearlyupdate' => array(
-        
+
             'riskbitmask' => RISK_SPAM,
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
@@ -370,7 +370,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
  * - Delete
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry_late() {
     return array(
         // View
@@ -389,7 +389,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
 
         // Add
         'mod/dataform:entrylateadd' => array(
-        
+
             'riskbitmask' => RISK_SPAM | RISK_XSS,
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
@@ -402,7 +402,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
 
         // Update
         'mod/dataform:entrylateupdate' => array(
-        
+
             'riskbitmask' => RISK_SPAM,
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
@@ -436,7 +436,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
  * - Delete
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry_own() {
     return array(
         // View
@@ -465,12 +465,12 @@ function mod_dataform_capabilities_dataform_entry_own() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:exportownentry'        
+            'clonepermissionsfrom' => 'mod/dataform:exportownentry'
         ),
 
         // Add
         'mod/dataform:entryownadd' => array(
-        
+
             'riskbitmask' => RISK_SPAM | RISK_XSS,
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
@@ -481,12 +481,12 @@ function mod_dataform_capabilities_dataform_entry_own() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:writeentry'        
+            'clonepermissionsfrom' => 'mod/dataform:writeentry'
         ),
 
         // Update
         'mod/dataform:entryownupdate' => array(
-        
+
             'riskbitmask' => RISK_SPAM,
             'captype' => 'write',
             'contextlevel' => CONTEXT_MODULE,
@@ -524,12 +524,12 @@ function mod_dataform_capabilities_dataform_entry_own() {
  * - Delete
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry_group() {
     return array(
         // View
         'mod/dataform:entrygroupview' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -544,7 +544,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
 
         // Export
         'mod/dataform:entrygroupexport' => array(
-        
+
             'riskbitmask' => RISK_PERSONAL,
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
@@ -555,7 +555,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:exportownentry'        
+            'clonepermissionsfrom' => 'mod/dataform:exportownentry'
         ),
 
         // Add
@@ -613,7 +613,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
  * - Delete
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry_any() {
     return array(
         // View
@@ -630,7 +630,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:viewentry'        
+            'clonepermissionsfrom' => 'mod/dataform:viewentry'
         ),
 
         // Export
@@ -647,7 +647,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:exportallentries'        
+            'clonepermissionsfrom' => 'mod/dataform:exportallentries'
         ),
 
         // Add
@@ -661,7 +661,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:manageentries'        
+            'clonepermissionsfrom' => 'mod/dataform:manageentries'
         ),
 
         // Update
@@ -675,7 +675,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:manageentries'        
+            'clonepermissionsfrom' => 'mod/dataform:manageentries'
         ),
 
         // Delete
@@ -688,7 +688,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:manageentries'        
+            'clonepermissionsfrom' => 'mod/dataform:manageentries'
         ),
     );
 }
@@ -702,7 +702,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
  * - Delete
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_entry_anonymous() {
     return array(
         // View
@@ -718,7 +718,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' => 'mod/dataform:viewanonymousentry'        
+            'clonepermissionsfrom' => 'mod/dataform:viewanonymousentry'
         ),
 
         // Export
@@ -781,7 +781,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
  * - View all
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_preset() {
     return array(
         // manage user presets
@@ -814,10 +814,10 @@ function mod_dataform_capabilities_dataform_preset() {
  * Returns the list of dataform capabilities which have been depracated
  *
  * @return array
- */ 
+ */
 function mod_dataform_capabilities_dataform_depracated() {
     return array(
-        
+
     // DEPRACATED
 
         // view entries
@@ -994,7 +994,7 @@ function mod_dataform_capabilities_dataform_depracated() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
+            'clonepermissionsfrom' => 'mod/dataform:ratingsview'
         ),
 
         // ???
@@ -1008,7 +1008,7 @@ function mod_dataform_capabilities_dataform_depracated() {
                 'editingteacher' => CAP_ALLOW,
                 'manager' => CAP_ALLOW
             ),
-            'clonepermissionsfrom' =>  'mod/dataform:ratingsview'
+            'clonepermissionsfrom' => 'mod/dataform:ratingsview'
         ),
     );
 }

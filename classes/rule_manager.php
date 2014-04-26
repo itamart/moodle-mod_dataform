@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataform
  * @copyright 2013 Itamar Tzadok
@@ -42,9 +42,9 @@ abstract class mod_dataform_rule_manager {
     public function __construct($dataformid) {
         $this->_dataformid = $dataformid;
     }
-    
+
     // RULE MANAGEMENT
-    
+
     /**
      *
      *
@@ -66,7 +66,7 @@ abstract class mod_dataform_rule_manager {
             $rule = $this->_rules[$biid];
             $rule->delete();
             $this->get_rules();
-        }       
+        }
     }
 
     /**
@@ -84,13 +84,13 @@ abstract class mod_dataform_rule_manager {
                     if (!empty($this->_rules[$biid])) {
                         $rule = $this->_rules[$biid];
                         $rule->delete();
-                    
+
                         unset($this->_rules[$biid]);
                     }
                     unset($this->_typerules[$ruletype][key]);
                 }
             }
-        }       
+        }
     }
 
     /**
@@ -101,10 +101,10 @@ abstract class mod_dataform_rule_manager {
             $cat = $this->get_category();
             $component = "dataform$cat";
             $this->_ruletypes = array();
-            
+
             if ($blockplugins = \core\plugininfo\block::get_enabled_plugins()) {
                 ksort($blockplugins);
-                foreach($blockplugins as $name) {
+                foreach ($blockplugins as $name) {
                     if (strpos($name, $component) !== 0) {
                         if ($this->_ruletypes) {
                             // Found all candidates
@@ -149,7 +149,7 @@ abstract class mod_dataform_rule_manager {
         if (!$rules = $this->get_rules()) {
             return array();
         }
-        
+
         if ($type) {
             if (empty($this->_typerules[$type])) {
                 return array();
@@ -157,14 +157,14 @@ abstract class mod_dataform_rule_manager {
                 $rules = array_intersect_key($this->_rules, $this->_typerules[$type]);
             }
         }
-        
+
         foreach ($rules as $key => $rule) {
             if (!$rule->is_enabled()) {
                 unset($rules[$key]);
             }
-            
+
         }
-                
+
         return $rules;
     }
 
@@ -174,11 +174,11 @@ abstract class mod_dataform_rule_manager {
      */
     public function get_rules() {
         global $DB;
-        
+
         if ($this->_rules !== null) {
             return $this->_rules;
         }
-        
+
         // Get the list of rule subplugins
         if (!$ruletypes = $this->get_types()) {
             return null;
@@ -186,7 +186,7 @@ abstract class mod_dataform_rule_manager {
 
         $cat = $this->get_category();
         $component = "dataform$cat";
-        
+
         // Get the block instances
         $context = mod_dataform_dataform::instance($this->_dataformid)->context;
 
@@ -194,11 +194,11 @@ abstract class mod_dataform_rule_manager {
         $this->_typerules = array();
         $this->_viewrules = array();
         $this->_fieldrules = array();
-        
+
         foreach ($ruletypes as $blockname => $unused) {
             $typename = str_replace($component, '', $blockname);
             $this->_typerules[$typename] = array();
-            
+
             $params = array(
                 'blockname' => $blockname,
                 'parentcontextid' => $context->id,
@@ -207,13 +207,13 @@ abstract class mod_dataform_rule_manager {
             if (!$instances = $DB->get_records('block_instances', $params)) {
                 continue;
             }
-            
+
             foreach ($instances as $instanceid => $instance) {
                 $block = block_instance($blockname, $instance);
                 $rule = new \mod_dataform\pluginbase\dataformrule($this->_dataformid, $cat, $block);
                 $this->_rules[$instanceid] = $rule;
                 $this->_typerules[$typename][$instanceid] = $instanceid;
-                
+
                 // View rules
                 if ($views = $rule->get_applicable_views()) {
                     foreach ($views as $viewname) {
@@ -223,7 +223,7 @@ abstract class mod_dataform_rule_manager {
                         $this->_viewrules[$viewname][$instanceid] = $instanceid;
                     }
                 }
-                
+
                 // Field rules
                 if ($fields = $rule->get_applicable_fields()) {
                     foreach ($fields as $fieldname) {
@@ -236,7 +236,7 @@ abstract class mod_dataform_rule_manager {
             }
         }
 
-        return $this->_rules;       
+        return $this->_rules;
     }
 
     /**
@@ -245,7 +245,7 @@ abstract class mod_dataform_rule_manager {
      */
     public function get_view_rules($viewname) {
         $this->get_rules();
-        
+
         if (!empty($this->_viewrules[$viewname])) {
             $rules = array_intersect_key($this->_rules, $this->_viewrules[$viewname]);
             return $rules;
@@ -259,7 +259,7 @@ abstract class mod_dataform_rule_manager {
      */
     public function get_field_rules($fieldname) {
         $this->get_rules();
-        
+
         if (!empty($this->_fieldrules[$fieldname])) {
             $rules = array_intersect_key($this->_rules, $this->_fieldrules[$fieldname]);
             return $rules;
@@ -272,18 +272,18 @@ abstract class mod_dataform_rule_manager {
      * @return string
      */
     protected abstract function get_category();
-    
+
     /**
      *
      */
-    public function print_list($blocktype){
+    public function print_list($blocktype) {
         global $OUTPUT;
-        
+
         $cat = $this->get_category();
         $ruletype = str_replace("dataform$cat", '', $blocktype);
         $accesstypes = $this->get_types();
         $baseurl = "/mod/dataform/$cat/index.php";
-        
+
         // Add icon
         $params = array(
             'd' => $this->_dataformid,
@@ -296,7 +296,7 @@ abstract class mod_dataform_rule_manager {
         $addlink = html_writer::link($url, $pix);
 
         echo html_writer::tag('h3', $accesstypes[$blocktype]. "  $addlink");
-        
+
         // table headings
         $strname = get_string('name');
         $strdescription = get_string('description');
@@ -312,8 +312,8 @@ abstract class mod_dataform_rule_manager {
             array($strdescription, 'left', false),
             array($strapplyto, 'left', false),
             array('', 'center', false),
-        );            
-        
+        );
+
         $table = new html_table();
         foreach ($headers as $header) {
             list($table->head[], $table->align[], $table->wrap[]) = $header;
@@ -325,12 +325,12 @@ abstract class mod_dataform_rule_manager {
             $rule = $this->_rules[$ruleid];
             $block = $rule->get_block();
             $data = $rule->get_data();
-            
+
             $applicableviews = '';
             if ($views = $rule->get_applicable_views()) {
                 $applicableviews = \html_writer::alist($views);
             }
-            
+
             // Show/hide
             if (!empty($data->enabled)) {
                 $showhide = 'hide';
@@ -366,7 +366,7 @@ abstract class mod_dataform_rule_manager {
                 'contextid' => $block->context->id,
             );
             $editpermlink = html_writer::link(new moodle_url('/admin/roles/permissions.php', $params), $OUTPUT->pix_icon('i/edit', get_string('edit')));
-            
+
             // Delete
             $params = array(
                 'd' => $this->_dataformid,
@@ -383,7 +383,7 @@ abstract class mod_dataform_rule_manager {
                 "$showhidelink $editlink $editpermlink $deletelink",
             );
         }
-        
+
         echo html_writer::tag('div', html_writer::table($table), array('class' => 'itemslist'));
     }
 

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
@@ -36,13 +36,12 @@ class mod_dataform_pattern_manager {
      */
     public static function instance($dataformid) {
         static $instances = array();
-        
+
         if (empty($instances[$dataformid])) {
             $instances[$dataformid] = new mod_dataform_field_manager($dataformid);
         }
         return $instances[$dataformid];
     }
-
 
     /**
      * Constructor
@@ -50,7 +49,7 @@ class mod_dataform_pattern_manager {
     public function __construct($dataformid) {
         $this->_dataformid = $dataformid;
     }
-   
+
     /**
      * Magic property method
      *
@@ -83,7 +82,6 @@ class mod_dataform_pattern_manager {
     }
 
 
-
     /**
      * Returns a list view patterns for the specified view (by id) or all views.
      *
@@ -93,7 +91,7 @@ class mod_dataform_pattern_manager {
     public function get_view_patterns($viewid = 0) {
         $patterns = array();
         $views = array();
-        
+
         if ($viewid) {
             if ($view = $this->view_manager->get_view_by_id($viewid)) {
                 $views = array($view);
@@ -101,7 +99,7 @@ class mod_dataform_pattern_manager {
         } else {
             $views = $this->view_manager->views;
         }
-        
+
         if ($views) {
             foreach ($views as $view) {
                 if ($viewpatterns = $view->renderer->get_list(true)) {
@@ -121,7 +119,7 @@ class mod_dataform_pattern_manager {
     public function get_field_patterns($fieldid = 0) {
         $patterns = array();
         $fields = array();
-        
+
         if ($fieldid) {
             if ($field = $this->field_manager->get_field_by_id($fieldid)) {
                 $fields = array($field);
@@ -129,7 +127,7 @@ class mod_dataform_pattern_manager {
         } else {
             $fields = $this->field_manager->fields;
         }
-        
+
         if ($fields) {
             foreach ($fields as $field) {
                 if ($fieldpatterns = $field->renderer->get_list(true)) {
@@ -150,7 +148,7 @@ class mod_dataform_pattern_manager {
     public function get_field_patterns_menu($fieldid = 0) {
         $patterns = array();
         $fields = array();
-        
+
         if ($fieldid) {
             if ($field = $this->field_manager->get_field_by_id($fieldid)) {
                 $fields = array($field);
@@ -158,7 +156,7 @@ class mod_dataform_pattern_manager {
         } else {
             $fields = $this->field_manager->fields;
         }
-        
+
         if ($fields) {
             foreach ($fields as $field) {
                 if ($fieldpatterns = $field->renderer->get_menu()) {
@@ -169,9 +167,8 @@ class mod_dataform_pattern_manager {
         return $patterns;
     }
 
-    
-    
-    /** 
+
+    /**
      * Returns the view manager of the Dataform this mannager works for.
      *
      * @return mod_dataform_view_manager
@@ -179,8 +176,8 @@ class mod_dataform_pattern_manager {
     public function get_view_manager() {
         return mod_dataform_view_manager::instance($this->_dataformid);
     }
-    
-    /** 
+
+    /**
      * Returns the field manager of the Dataform this mannager works for.
      *
      * @return mod_dataform_field_manager

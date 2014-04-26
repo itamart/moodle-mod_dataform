@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage url
@@ -26,18 +26,18 @@ class dataformfield_url_form extends mod_dataform\pluginbase\dataformfieldform {
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform =& $this->_form;
 
-    //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
+
         // use url picker
         $mform->addElement('selectyesno', 'param1', get_string('usepicker', 'dataformfield_url'));
 
         // force link name
-        $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size'=>'32'));
+        $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size' => '32'));
         $mform->setType('param2', PARAM_TEXT);
     }
 

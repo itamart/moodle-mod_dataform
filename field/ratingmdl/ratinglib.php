@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
@@ -21,7 +21,7 @@
  */
 
 /**
- * A class representing a single dataform rating 
+ * A class representing a single dataform rating
  * Extends the core rating class
  */
 
@@ -40,7 +40,6 @@ class ratingmdl_rating extends rating {
 
     /** @var int The sum aggregate of the combined ratings for the associated item. */
     public $ratingsum = null;
-
 
     /**
      * Constructor.
@@ -61,7 +60,7 @@ class ratingmdl_rating extends rating {
      */
     public function __construct($options) {
         parent::__construct($options);
-        
+
         if (isset($options->avgratings)) {
             $this->ratingavg = $options->avgratings;
         }
@@ -87,7 +86,7 @@ class ratingmdl_rating extends rating {
 
         if ($aggregate and $aggregation != RATING_AGGREGATE_COUNT) {
             if ($aggregation != RATING_AGGREGATE_SUM and !$this->settings->scale->isnumeric) {
-                //round aggregate as we're using it as an index
+                // round aggregate as we're using it as an index
                 $aggregate = $this->settings->scale->scaleitems[round($aggregate)];
             } else {
                 // aggregation is SUM or the scale is numeric
@@ -100,7 +99,7 @@ class ratingmdl_rating extends rating {
 }
 
 /**
- * The ratingmdl_rating_manager class extends the rating_manager class 
+ * The ratingmdl_rating_manager class extends the rating_manager class
  * so as to retrieve sets of ratings from the database for sets of entries
  */
 class ratingmdl_rating_manager extends rating_manager {
@@ -145,12 +144,12 @@ class ratingmdl_rating_manager extends rating_manager {
         } else if (empty($options->items)) {
             return array();
         }
-        
+
         list($sql, $params) = $this->get_sql_aggregate($options);
         if ($ratingrecords = $DB->get_records_sql($sql, $params)) {
             foreach ($options->items as $itemid => $item) {
                 if (array_key_exists($itemid, $ratingrecords)) {
-                    
+
                     $rec = $ratingrecords[$itemid];
                     $rec->context = $options->context;
                     $rec->component = $options->component;
@@ -158,7 +157,7 @@ class ratingmdl_rating_manager extends rating_manager {
                     $rec->scaleid = $options->scaleid;
                     $rec->settings = $this->get_rating_settings_object($options);
                     $rec->aggregate = $options->aggregate;
-                    
+
                     $options->items[$itemid]->rating = $this->get_rating_object($item, $rec);
                 }
             }
@@ -191,7 +190,7 @@ class ratingmdl_rating_manager extends rating_manager {
             if (!is_array($options->aggregate)) {
                 $option->aggregate = array($option->aggregate);
             }
-            
+
             $aggregatessql = array();
             foreach ($options->aggregate as $aggregation) {
                 // Skip empty or count
@@ -215,7 +214,7 @@ class ratingmdl_rating_manager extends rating_manager {
         }
 
         $sql = "SELECT r.itemid, r.component, r.ratingarea, r.contextid,
-                       COUNT(r.rating) AS numratings, $aggregationsql 
+                       COUNT(r.rating) AS numratings, $aggregationsql
                        ur.id, ur.userid, ur.scaleid, ur.rating AS usersrating
                 FROM {rating} r
                         LEFT JOIN {rating} ur ON ur.contextid = r.contextid
@@ -223,16 +222,16 @@ class ratingmdl_rating_manager extends rating_manager {
                                                 AND ur.component = r.component
                                                 AND ur.ratingarea = r.ratingarea
                                                 AND ur.userid = :userid
-                WHERE r.contextid = :contextid 
+                WHERE r.contextid = :contextid
                         AND r.component = :component
                         AND r.ratingarea = :ratingarea
                         $andwhereitems
                 GROUP BY r.itemid, r.component, r.ratingarea, r.contextid, ur.id, ur.userid, ur.scaleid
                 ORDER BY r.itemid";
-                
+
         return array($sql, $params);
     }
-    
+
     /**
      * @return array the array of items with their ratings attached at $items[0]->rating
      */
@@ -264,31 +263,30 @@ class ratingmdl_rating_manager extends rating_manager {
 
         $sql = "SELECT r.id, r.itemid, r.component, r.ratingarea, r.contextid, r.scaleid,
                        r.rating, r.userid, r.timecreated, r.timemodified, ".
-                       user_picture::fields('u', array('idnumber', 'username'), 'uid ').
-               " FROM {rating} r 
-                    JOIN {user} u ON u.id = r.userid 
-                    
-                WHERE r.contextid = :contextid 
+                       user_picture::fields('u', array('idnumber', 'username'), 'uid '). "
+                FROM {rating} r
+                    JOIN {user} u ON u.id = r.userid
+
+                WHERE r.contextid = :contextid
                         AND r.component = :component
                         AND r.ratingarea = :ratingarea
                         $andwhereitems
                 ORDER BY r.itemid";
-                
+
         return array($sql, $params);
     }
-    
-    
+
     /**
      * @return array the array of items with their ratings attached at $items[0]->rating
      */
     public function get_rating_settings_object($options) {
         // Ugly hack to work around the exception in generate_settings
         if (empty($options->aggregate) or is_array($options->aggregate)) {
-            $options->aggregate = RATING_AGGREGATE_COUNT; 
+            $options->aggregate = RATING_AGGREGATE_COUNT;
         }
         return $this->generate_rating_settings_object($options);
     }
-    
+
     /**
      * @return array the array of items with their ratings attached at $items[0]->rating
      */
@@ -299,7 +297,7 @@ class ratingmdl_rating_manager extends rating_manager {
         $options = new object;
         $options->context = $rec->context;
         $options->component = 'mod_dataform';
-        $options->ratingarea = $rec->ratingarea; 
+        $options->ratingarea = $rec->ratingarea;
         $options->itemid = $item->id;
         $options->settings = $rec->settings;
         // Note: rec->scaleid = the id of scale at the time the rating was submitted

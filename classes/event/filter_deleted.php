@@ -20,8 +20,8 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type string filtername the name of the filter.
- *      @type int dataid the id of the dataform activity.
+ *      string filtername the name of the filter.
+ *      int dataid the id of the dataform activity.
  * }
  *
  * @package    mod_dataform

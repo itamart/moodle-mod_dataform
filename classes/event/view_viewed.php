@@ -20,8 +20,8 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type string viewname the name of the view.
- *      @type int dataid the id of the dataform activity.
+ *      string viewname the name of the view.
+ *      int dataid the id of the dataform activity.
  * }
  *
  * @package    mod_dataform

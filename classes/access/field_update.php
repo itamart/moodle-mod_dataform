@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  */
 class field_update extends base {
 
-        
     /**
      * @return bool
      */
@@ -46,23 +45,22 @@ class field_update extends base {
             return false;
         }
         $field = \mod_dataform_field_manager::instance($dataformid)->get_field_by_id($params['fieldid']);
-        
+
         if (!$field->editable and !has_capability('mod/dataform:manageentries', $field->df->context)) {
             return false;
         }
         return parent::validate($params);
     }
 
-
     /**
      * @return null|array
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $fieldid = $params['fieldid'];
-        
+
         return $man->get_type_rules('field');
     }
- 
+
     /**
      * @return array
      */

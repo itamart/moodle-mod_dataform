@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage interval
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +29,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
     protected $resetnext;
     protected $page;
     protected $cache = null;
-    
+
     /**
      * Returns the view html to display.
      *
@@ -41,7 +41,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
         if ($this->param4) {
              $this->selection = $this->filter->onpage = $this->param4;
         }
-        $this->interval = $this->param5 ? $this->param5 : 0; 
+        $this->interval = $this->param5 ? $this->param5 : 0;
         $this->custom = $this->param6 ? $this->param6 : 0;
         $this->resetnext = $this->param8 ? $this->param8 : 100;
 
@@ -59,7 +59,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
             foreach ($filteroptions as $option => $value) {
                 $this->filter->{$option} = $value;
             }
-        
+
             if (!$entriesset = $this->get_cache_content()) {
                 $entriesset = $this->entry_manager->fetch_entries(array('filter' => $this->filter));
                 $this->update_cache_content($entriesset);
@@ -70,7 +70,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
     }
 
     /**
-     * 
+     *
      */
     public function update_cache_content($entriesset) {
         $this->cache->content = $entriesset;
@@ -82,17 +82,17 @@ class dataformview_interval_interval extends dataformview_grid_grid {
      *
      */
     public function get_cache_filter_options() {
-        $options = array();        
+        $options = array();
         // setting the cache may change page number
         if ($this->page > 0) {
-            // next is used and page advances            
+            // next is used and page advances
             $options['page'] = $this->page;
-        }       
+        }
         return $options;
     }
 
     /**
-     * 
+     *
      */
     public function get_cache_content() {
         $refresh = $this->set_cache();
@@ -104,7 +104,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
     }
 
     /**
-     * 
+     *
      */
     protected function set_cache() {
 
@@ -126,19 +126,19 @@ class dataformview_interval_interval extends dataformview_grid_grid {
             case 'monthly':
                 $checktime = mktime(0, 0, 0, date('m'), 1, date('Y'));
                 break;
-        
+
             case 'weekly':
                 $checktime = strtotime('last '. get_string('firstdayofweek', 'dataform'));
                 break;
-                
+
             case 'daily':
                 $checktime = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
                 break;
-                
+
             case 'hourly':
                 $checktime = mktime(date('H'), 0, 0, date('m'), date('d'), date('Y'));
                 break;
-                
+
             case 'custom':
                 $checktime = $now - ($now % $this->custom);
                 break;
@@ -150,7 +150,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
 
         if ($checktime > $this->cache->time) {
             $this->cache->time = $checktime;
-            
+
             if ($this->selection == mod_dataform_entry_manager::SELECT_NEXT_PAGE) {
                 $this->cache->next++;
                 if ($this->cache->next > $this->resetnext) {

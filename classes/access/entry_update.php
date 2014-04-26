@@ -43,19 +43,19 @@ class entry_update extends base {
 
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // Cannot update in a view that does not allow submission 
+        // Cannot update in a view that does not allow submission
         if (!empty($params['viewid'])) {
             $view = $df->view_manager->get_view_by_id($params['viewid']);
             if (!$view or !$view->allows_submission()) {
                 return false;;
             }
-        }        
-        
+        }
+
         // Unspecified entry
-        //if (empty($params['entry'])) {
+        // if (empty($params['entry'])) {
         //    return self::has_capability('mod/dataform:entryanyupdate', $params);
-        //}
-        
+        // }
+
         // Early entries
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlyupdate');
@@ -63,7 +63,7 @@ class entry_update extends base {
                 return false;
             }
         }
-        
+
         // Late entries
         if ($df->is_past_due()) {
             $params['capabilities'] = array('mod/dataform:entrylateupdate');
@@ -71,9 +71,9 @@ class entry_update extends base {
                 return false;
             }
         }
-        
+
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
-       
+
         // Own entry
         if (\mod_dataform\pluginbase\dataformentry::is_own($entry)) {
             $params['capabilities'] = array('mod/dataform:entryownupdate');
@@ -111,8 +111,8 @@ class entry_update extends base {
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $viewid = $params['viewid'];
-        
+
         return $man->get_type_rules('entry');
     }
- 
+
 }

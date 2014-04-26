@@ -12,15 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrystate
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent {
 
@@ -49,11 +48,11 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
                         $transitions["$from $to"] = $transition;
                     }
                     $this->_field->param1['transitions'] = $transitions;
-                }                
+                }
             }
             return $this->_field->param1;
         }
-        
+
         return null;
     }
 
@@ -64,7 +63,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      */
     public function get_states() {
         $config = $this->param1;
-        
+
         if (!empty($config['states'])) {
             return $config['states'];
         }
@@ -78,26 +77,25 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      */
     public function get_transitions() {
         $config = $this->param1;
-        
+
         if (!empty($config['transitions'])) {
             return $config['transitions'];
         }
         return array();
     }
 
-
     /**
      * Validates state update request against the field configuration.
      *
      * @param stdClass $entry
      * @param int $newstate Target state
-     * @return null|string Error message on error or null on success 
+     * @return null|string Error message on error or null on success
      */
     public function update_state($entry, $newstate) {
         global $DB;
 
         // Any change at all?
-        $oldstate = $entry->state;        
+        $oldstate = $entry->state;
         if ($newstate == $oldstate) {
             return get_string('incorrectstate', 'dataformfield_entrystate');
         }
@@ -114,10 +112,10 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
 
         // All's good so update entry
         $DB->set_field('dataform_entries', 'state', $newstate, array('id' => $entry->id));
-        
+
         // Notify as required
         $this->send_notifications($entry, $newstate);
-        
+
         return null;
     }
 
@@ -130,7 +128,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      */
     public function can_instate($entry, $newstate) {
         global $USER;
-        
+
         $transitions = $this->transitions;
         $oldstate = $entry->state;
 
@@ -138,12 +136,17 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         if (empty($transitions["$oldstate $newstate"]['permission'])) {
             return has_capability('mod/dataform:manageentries', $this->df->context);
         }
-        
+
         $permissions = $transitions["$oldstate $newstate"]['permission'];
 
         $roleids = array();
         if ($userroles = get_user_roles($this->df->context)) {
-            $roleids = array_map(function($a) {return $a->roleid;}, $userroles);
+            $roleids = array_map(
+                function($a) {
+                    return $a->roleid;
+                },
+                $userroles
+            );
         }
 
         foreach ($permissions as $key) {
@@ -171,7 +174,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      */
     public function send_notifications($entry, $newstate) {
         global $DB, $USER;
-        
+
         $states = $this->states;
         $transitions = $this->transitions;
         $oldstate = $entry->state;
@@ -180,7 +183,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         if (empty($transitions["$oldstate $newstate"]['notification'])) {
             return;
         }
-        
+
         $notifications = $transitions["$oldstate $newstate"]['notification'];
 
         $recipients = array();
@@ -198,7 +201,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
                 $roleids[] = $key;
             }
         }
-        
+
         // Add role users if needed
         if ($roleids and $roleusers = get_role_users($roleids, $this->df->context)) {
             $recipients = $recipients + $roleusers;
@@ -224,23 +227,22 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      *
      * @param stdClass $entry
      * @param array $values An associative array of values (see {@link dataformfield::get_content_from_data()})
-     * @param bool $savenew Whether an existing entry is saved as a new one 
+     * @param bool $savenew Whether an existing entry is saved as a new one
      * @return bool|int
      */
     public function update_content($entry, array $values = null, $savenew = false) {
         $oldstate = !empty($entry->state) ? $entry->state : 0;
         $newstate = reset($values);
-        
+
         if ($newstate == $oldstate) {
             // Do nothing
             return false;
         }
-        
+
         $this->update_state($entry, $newstate);
-        
+
         return true;
     }
-    
 
     /**
      * Overrides {@link dataformfield::prepare_import_content()} to set import into entry::state.
@@ -249,7 +251,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
         global $DB;
-        
+
         // Only one imported pattern ''
         $settings = reset($importsettings);
 
@@ -263,7 +265,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
             }
         }
         return $data;
-    }    
+    }
 
     /**
      *
@@ -290,8 +292,8 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     /**
      * Return array of sort options menu as
      * $fieldid,element => name, for the filter form.
-     * 
-     * 
+     *
+     *
      * @return null|array
      */
     public function get_sort_options_menu() {
@@ -321,6 +323,5 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     protected function get_sql_alias($element = null) {
         return 'e';
     }
-
 
 }

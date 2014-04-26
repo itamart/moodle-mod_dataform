@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -42,7 +42,6 @@ $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
 $df->require_manage_permission('views');
-
 
 $df->set_page('view/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
@@ -74,9 +73,9 @@ if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested v
 // any notifications?
 $df->notifications = array('problem' => array('defaultview' => null));
 if (!$views = $viewman->get_views(array('forceget' => true))) {
-    $df->notifications = array('problem' => array('getstartedviews' => get_string('viewnoneindataform','dataform')));
+    $df->notifications = array('problem' => array('getstartedviews' => get_string('viewnoneindataform', 'dataform')));
 } else if (!$df->defaultview) {
-    $df->notifications = array('problem' => array('defaultview' => get_string('viewnodefault','dataform', '')));
+    $df->notifications = array('problem' => array('defaultview' => get_string('viewnodefault', 'dataform', '')));
 }
 
 $output = $df->get_renderer();
@@ -97,4 +96,3 @@ if (!$patternscleanup) {
 }
 
 echo $output->footer();
-

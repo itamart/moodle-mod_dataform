@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage selectmulti
@@ -26,14 +26,14 @@ class dataformfield_selectmulti_form extends mod_dataform\pluginbase\dataformfie
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform = &$this->_form;
         $field = $this->_field;
 
-    //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
+
         // options
         $mform->addElement('textarea', 'param1', get_string('options', 'dataformfield_selectmulti'), 'wrap="virtual" rows="10" cols="50"');
 

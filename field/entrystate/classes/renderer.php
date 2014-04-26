@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrystate
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die();
 
-
 /**
  *
  */
 class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -39,16 +38,16 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
         $replacements = array();
         $statenames = $field->states;
 
-        foreach ($patterns as $pattern) { 
+        foreach ($patterns as $pattern) {
             if ($pattern == "[[$fieldname]]") {
                 if (!$entry or $entry->id < 0 or  $edit) {
-                    $replacements[$pattern] = array(array($this,'display_edit'), array($entry));                
+                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry));
                 } else {
                     $replacements[$pattern] = $this->display_browse($entry);
                 }
                 continue;
             }
-            
+
             list(, $patternstate) = explode(':', trim($pattern, '[]'), 2);
             if ($patternstate == 'state') {
                 // Current state
@@ -80,11 +79,11 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
     }
 
     /**
-     * 
+     *
      */
     public function display_browse($entry, $options = null) {
         global $PAGE;
-                
+
         if ($html = $this->get_browse_content($entry)) {
             $field = $this->_field;
             // Initialize AJAX
@@ -95,22 +94,22 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
                 'sesskey' => sesskey()
             );
             $this->initialise_javascript($PAGE, array($config));
-            
+
             $elemid = "entrystates_{$entry->id}_$field->id";
             return html_writer::tag('div', $html, array('id' => $elemid, 'class' => 'entrystates-wrapper'));
         }
-        
+
         return null;
     }
 
     /**
-     * 
+     *
      */
     public function get_browse_content($entry) {
         $field = $this->_field;
-        
+
         $statedisplay = array();
-        
+
         if ($states = $field->states) {
             foreach ($states as $key => $state) {
                 if ($display = $this->get_state_display($entry, $key)) {
@@ -122,7 +121,7 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
     }
 
     /**
-     * 
+     *
      */
     public function get_state_display($entry, $statekey) {
         $field = $this->_field;
@@ -155,11 +154,11 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
         // Only [[fieldname]] can be imported
         if ($patternname != $this->_field->name) {
             return array(array(), array());
-        }            
-        
+        }
+
         return parent::get_pattern_import_settings($mform, $patternname, $header);
     }
-    
+
     /**
      * Initialises JavaScript to enable AJAX dis/approval on the provided page.
      *
@@ -176,12 +175,12 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
                 $config
             );
         }
-        
+
         return true;
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $field = $this->_field;
@@ -197,16 +196,16 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
             }
         }
 
-        return $patterns; 
+        return $patterns;
     }
-    
+
     /**
      * Array of patterns this field supports in the view template
      * (that is, outside an entry). These patterns will be listed
      * in the view patterns selector in the view configuration form.
      * These patterns must start with fieldname: and then a specific tag.
      *
-     * @return array pattern => array(visible in menu, category) 
+     * @return array pattern => array(visible in menu, category)
      */
     protected function view_patterns() {
         $fieldname = $this->_field->name;

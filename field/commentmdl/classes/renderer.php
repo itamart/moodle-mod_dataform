@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage commentmdl
@@ -22,25 +22,24 @@
  */
 defined('MOODLE_INTERNAL') or die;
 
-
 /**
  *
  */
 class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         global $CFG;
-        
+
         $field = $this->_field;
         $fieldname = $field->name;
 
         $replacements = array_fill_keys(array_keys($patterns), '');
 
         // no edit mode for this field so just return html
-        if ($entry->id > 0 and !empty($CFG->usecomments)) {            
+        if ($entry->id > 0 and !empty($CFG->usecomments)) {
             foreach ($patterns as $pattern) {
                 switch($pattern) {
                     case "[[$fieldname:count]]":
@@ -48,7 +47,7 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
                         $str = $this->display_browse($entry, $options);
                         break;
                     case "[[$fieldname:inline]]":
-                        $options = array('notoggle' => true,'autostart' => true);
+                        $options = array('notoggle' => true, 'autostart' => true);
                         $str = $this->display_browse($entry, $options);
                         break;
                     case "[[$fieldname]]":
@@ -59,8 +58,8 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
                         $str = '';
                 }
                 $replacements[$pattern] = $str;
-            }            
-        }                    
+            }
+        }
 
         return $replacements;
     }
@@ -79,7 +78,7 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
         if (!($entry->id > 0)) {
             return '';
         }
-        
+
         $str = '';
 
         require_once("$CFG->dirroot/comment/lib.php");
@@ -91,7 +90,7 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
         $cmt->component = 'mod_dataform';
         $cmt->area = $field->name;
         $cmt->showcount = isset($options['showcount']) ? $options['showcount'] : true;
-            
+
         if (!empty($options['count'])) {
             $comment = new comment($cmt);
             $str = $comment->count();
@@ -101,13 +100,13 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
             }
             $comment = new comment($cmt);
             $str = $comment->output(true);
-        }    
+        }
 
         return $str;
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -118,6 +117,6 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
         $patterns["[[$fieldname:inline]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:add]]"] = array(false, $fieldname);
 
-        return $patterns; 
+        return $patterns;
     }
 }

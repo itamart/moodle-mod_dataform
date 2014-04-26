@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -37,13 +36,13 @@ $ratingarea        = required_param('ratingarea', PARAM_AREA);
 $itemid            = required_param('itemid', PARAM_INT);
 $scaleid           = required_param('scaleid', PARAM_INT);
 $userrating        = required_param('rating', PARAM_INT);
-$rateduserid       = required_param('rateduserid', PARAM_INT);//which user is being rated. Required to update their grade
-$aggregationmethod = optional_param('aggregation', RATING_AGGREGATE_NONE, PARAM_SEQUENCE);//we're going to calculate the aggregate and return it to the client
+$rateduserid       = required_param('rateduserid', PARAM_INT); // which user is being rated. Required to update their grade
+$aggregationmethod = optional_param('aggregation', RATING_AGGREGATE_NONE, PARAM_SEQUENCE); // we're going to calculate the aggregate and return it to the client
 
 $result = new stdClass;
 
-//if session has expired and its an ajax request so we cant do a page redirect
-if( !isloggedin() ){
+// if session has expired and its an ajax request so we cant do a page redirect
+if ( !isloggedin() ) {
     $result->error = get_string('sessionerroruser', 'error');
     echo json_encode($result);
     die();
@@ -52,11 +51,11 @@ if( !isloggedin() ){
 list($context, $course, $cm) = get_context_info_array($contextid);
 require_login($course, false, $cm);
 
-$contextid = null;//now we have a context object throw away the id from the user
+$contextid = null; // now we have a context object throw away the id from the user
 $PAGE->set_context($context);
-$PAGE->set_url('/mod/dataform/field/ratingmdl/rate_ajax.php', array('contextid'=>$context->id));
+$PAGE->set_url('/mod/dataform/field/ratingmdl/rate_ajax.php', array('contextid' => $context->id));
 
-if (!confirm_sesskey() || !has_capability('moodle/rating:rate',$context)) {
+if (!confirm_sesskey() || !has_capability('moodle/rating:rate', $context)) {
     echo $OUTPUT->header();
     echo get_string('ratepermissiondenied', 'rating');
     echo $OUTPUT->footer();
@@ -65,8 +64,8 @@ if (!confirm_sesskey() || !has_capability('moodle/rating:rate',$context)) {
 
 $rm = new ratingmdl_rating_manager();
 
-//check the module rating permissions
-//doing this check here rather than within rating_manager::get_ratings() so we can return a json error response
+// check the module rating permissions
+// doing this check here rather than within rating_manager::get_ratings() so we can return a json error response
 $pluginpermissionsarray = $rm->get_plugin_permissions_array($context->id, $component, $ratingarea);
 
 if (!$pluginpermissionsarray['rate']) {
@@ -103,7 +102,8 @@ $ratingoptions->userid  = $USER->id;
 if ($userrating != RATING_UNSET_RATING) {
     $rating = new rating($ratingoptions);
     $rating->update_rating($userrating);
-} else { //delete the rating if the user set to Rate...
+} else {
+    // delete the rating if the user set to Rate...
     $options = new stdClass;
     $options->contextid = $context->id;
     $options->component = $component;
@@ -117,10 +117,10 @@ if ($userrating != RATING_UNSET_RATING) {
 // Future possible enhancement: add a setting to turn grade updating off for those who don't want them in gradebook
 // note that this would need to be done in both rate.php and rate_ajax.php
 if ($context->contextlevel == CONTEXT_MODULE) {
-    //tell the module that its grades have changed
+    // tell the module that its grades have changed
     $modinstance = $DB->get_record($cm->modname, array('id' => $cm->instance));
     if ($modinstance) {
-        $modinstance->cmidnumber = $cm->id; //MDL-12961
+        $modinstance->cmidnumber = $cm->id; // MDL-12961
         $functionname = $cm->modname.'_update_grades';
         require_once($CFG->dirroot."/mod/{$cm->modname}/lib.php");
         if (function_exists($functionname)) {
@@ -129,11 +129,11 @@ if ($context->contextlevel == CONTEXT_MODULE) {
     }
 }
 
-//need to retrieve the updated item to get its new aggregate value
+// need to retrieve the updated item to get its new aggregate value
 $item = new stdClass;
 $item->id = $itemid;
 
-//most of $ratingoptions variables were previously set
+// most of $ratingoptions variables were previously set
 $ratingoptions->items = array($itemid => $item);
 $ratingoptions->aggregate = array(
     RATING_AGGREGATE_AVERAGE,
@@ -146,7 +146,7 @@ $items = $rm->get_ratings($ratingoptions);
 $firstitem = reset($items);
 $firstrating = $firstitem->rating;
 $ratingcount = $firstrating->count;
-$ratingavg = ''; 
+$ratingavg = '';
 $ratingmax = '';
 $ratingmin = '';
 $ratingsum = '';
@@ -158,12 +158,12 @@ if ($firstrating->user_can_view_aggregate()) {
     $ratingmin = round($firstrating->ratingmin, 2);
     $ratingsum = round($firstrating->ratingsum, 2);
 
-    //for custom scales return text not the value
-    //this scales weirdness will go away when scales are refactored
+    // for custom scales return text not the value
+    // this scales weirdness will go away when scales are refactored
     if ($firstrating->settings->scale->id < 0) {
         $scalerecord = $DB->get_record('scale', array('id' => -$firstrating->settings->scale->id));
         $scalearray = explode(',', $scalerecord->scale);
-        
+
         $ratingavg = $scalearray[round($ratingavg) - 1];
         $ratingmax = $scalearray[round($ratingmax) - 1];
         $ratingmin = $scalearray[round($ratingmin) - 1];

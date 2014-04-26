@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage rss
@@ -48,7 +48,7 @@ class dataformview_rss_form extends mod_dataform\pluginbase\dataformviewform {
         $df = $view->get_df();
         $editoroptions = $view->editoroptions;
         $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
-        
+
         $mform = &$this->_form;
 
         // Header
@@ -62,18 +62,18 @@ class dataformview_rss_form extends mod_dataform\pluginbase\dataformviewform {
         }
         $mform->addElement('select', 'param5', get_string('feedview', 'dataformview_rss'), $options);
         $mform->addHelpButton('param5', 'feedview', 'dataformview_rss');
-        
+
         // Feed title (param4)
         $mform->addElement('text', 'param4', get_string('feedtitle', 'dataformview_rss'), array('size' => 64));
         $mform->setType('param4', $paramtext);
         $mform->addHelpButton('param4', 'feedtitle', 'dataformview_rss');
-        
+
         // Feed description (param6)
         $mform->addElement('editor', 'param6_editor', get_string('feeddescription', 'dataformview_rss'), null, $editoroptions);
         $mform->addHelpButton('param6_editor', 'feeddescription', 'dataformview_rss');
         $this->add_patterns_selectors('param6_editor', array('view'));
     }
-    
+
     /**
      *
      */
@@ -84,7 +84,7 @@ class dataformview_rss_form extends mod_dataform\pluginbase\dataformviewform {
         $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
 
         $mform = &$this->_form;
-        
+
         // Header
         $mform->addElement('header', 'entrytemplatehdr', get_string('itemtemplate', 'dataformview_rss'));
         $mform->addHelpButton('entrytemplatehdr', 'itemtemplate', 'dataformview_rss');
@@ -95,17 +95,17 @@ class dataformview_rss_form extends mod_dataform\pluginbase\dataformviewform {
             $options = $options + $viewsmenu;
         }
         $mform->addElement('select', 'param3', get_string('itemview', 'dataformview_rss'), $options);
-        $mform->addHelpButton('param3', 'itemview', 'dataformview_rss');       
-        
+        $mform->addHelpButton('param3', 'itemview', 'dataformview_rss');
+
         // Item title (param1)
         $mform->addElement('text', 'param1', get_string('itemtitle', 'dataformview_rss'), array('size' => 64));
         $mform->setType('param1', $paramtext);
         $mform->addHelpButton('param1', 'itemtitle', 'dataformview_rss');
-        
+
         // Item description (param2)
         $mform->addElement('editor', 'param2_editor', get_string('itemdescription', 'dataformview_rss'), null, $editoroptions);
         $mform->addHelpButton('param2_editor', 'itemdescription', 'dataformview_rss');
         $this->add_patterns_selectors('param2_editor', array('field'));
     }
-    
+
 }

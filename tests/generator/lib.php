@@ -46,7 +46,7 @@ class mod_dataform_generator extends testing_module_generator {
 
         return parent::create_instance($record, (array)$options);
     }
-    
+
     /**
      * Generates a dataform view.
      * @param array|stdClass $record
@@ -60,14 +60,14 @@ class mod_dataform_generator extends testing_module_generator {
         $view->generate_default_view();
         $view->name = $record->name;
         $view->add($view->data);
-        
+
         // Set as default if specified
         if (!empty($record->default)) {
             $df->view_manager->process_views('default', $view->id, true);
         }
         return $view->data;
     }
-    
+
     /**
      * Generates a dataform field.
      * @param array|stdClass $record
@@ -82,7 +82,7 @@ class mod_dataform_generator extends testing_module_generator {
         $field->create($field->data);
         return $field->data;
     }
-    
+
     /**
      * Generates a dataform entry.
      * @param array|stdClass $record
@@ -91,15 +91,15 @@ class mod_dataform_generator extends testing_module_generator {
      */
     public function create_entry($record, array $options = null) {
         global $DB;
-        
+
         // Convert timecreated and timemodified
         $record['timecreated'] = !empty($record['timecreated']) ? strtotime($record['timecreated']) : 0;
         $record['timemodified'] = !empty($record['timemodified']) ? strtotime($record['timemodified']) : 0;
-        
+
         $df = \mod_dataform_dataform::instance($record['dataid']);
         $entry = \mod_dataform\pluginbase\dataformentry::blank_instance($df, (object)(array)$record);
         $entry->id = $DB->insert_record('dataform_entries', $entry);
-        
+
         // Add content
         if ($fields = $df->field_manager->get_fields()) {
             foreach ($fields as $field) {
@@ -108,8 +108,8 @@ class mod_dataform_generator extends testing_module_generator {
                 }
             }
         }
-            
+
         return $entry;
     }
-    
+
 }

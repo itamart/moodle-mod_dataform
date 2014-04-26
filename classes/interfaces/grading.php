@@ -25,7 +25,6 @@ namespace mod_dataform\interfaces;
 
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
  * Interface for dataformfield grading support
  *
@@ -42,7 +41,7 @@ interface grading {
      * @return null|array Array of userid => value pairs.
      */
     public function get_user_values($pattern, $userid = 0);
-    
+
     /**
      * Returns the database column used to store the scale.
      *
@@ -51,4 +50,3 @@ interface grading {
     public static function get_scale_param();
 
 }
-

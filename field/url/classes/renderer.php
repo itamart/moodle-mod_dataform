@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage url
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die;
 
-
 /**
  *
  */
 class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -37,17 +36,17 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
         $edit = !empty($options['edit']);
 
         $replacements = array_fill_keys(array_keys($patterns), '');
-        
+
         if ($edit) {
             foreach ($patterns as $pattern => $cleanpattern) {
                 if ($noedit = $this->is_noedit($pattern)) {
                     continue;
                 }
                 $params = array('required' => $this->is_required($pattern));
-                $replacements[$pattern] = array(array($this,'display_edit'), array($entry, $params));
+                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $params));
             }
             return $replacements;
-        } 
+        }
 
         // Browse mode
         foreach ($patterns as $pattern => $cleanpattern) {
@@ -77,13 +76,13 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
         $url = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
         $alt = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
-        
+
         $url = empty($url) ? 'http://' : $url;
         $usepicker = !$field->param1 ? false : true;
         $foptions = array(
             'title' => s($field->description),
             'size' => 64
-        );        
+        );
         $mform->addElement('url', $fieldname, null, $foptions, array('usefilepicker' => $usepicker));
         $mform->setType($fieldname, PARAM_URL);
         $mform->setDefault($fieldname, s($url));
@@ -94,7 +93,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
 
         // add alt name if not forcing name
         if (!$field->param2) {
-            $mform->addElement('text', "{$fieldname}_alt", get_string('alttext','dataformfield_url'));
+            $mform->addElement('text', "{$fieldname}_alt", get_string('alttext', 'dataformfield_url'));
             $mform->setType("{$fieldname}_alt", PARAM_TEXT);
             $mform->setDefault("{$fieldname}_alt", s($alt));
         }
@@ -114,12 +113,12 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
             if (empty($url) or ($url == 'http://')) {
                 return '';
             }
-            
+
             // simple url text
             if (empty($type)) {
                 return $url;
             }
-            
+
             // param2 forces the text to something
             if ($field->param2) {
                 $alttext = s($field->param2);
@@ -131,7 +130,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
             if ($type == 'link') {
                 return html_writer::link($url, $alttext);
             }
-            
+
             // image
             if ($type == 'image') {
                 return html_writer::empty_tag('img', array('src' => $url));
@@ -149,7 +148,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
                 return $mpfilter->filter(html_writer::link($url, ''));
             }
         }
-        
+
         return '';
     }
 
@@ -176,7 +175,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -188,6 +187,6 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
         $patterns["[[$fieldname:imageflex]]"] = array(false);
         $patterns["[[$fieldname:media]]"] = array(false);
 
-        return $patterns; 
+        return $patterns;
     }
 }

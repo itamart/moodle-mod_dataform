@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage url
@@ -28,5 +28,3 @@ $string['makelink'] = 'Make the url a link';
 $string['makeimage'] = 'Make the url an image';
 $string['pluginname'] = 'Url';
 $string['usepicker'] = 'Use url picker when editing';
-
-

@@ -114,16 +114,16 @@ class mod_dataform_renderer extends plugin_renderer_base {
             if (!empty($options['exclude']) and in_array($subpluginname, $options['exclude'])) {
                 continue;
             }
-            $menu[$subpluginname] = get_string('pluginname',"{$subplugintype}_$subpluginname");
+            $menu[$subpluginname] = get_string('pluginname', "{$subplugintype}_$subpluginname");
         }
         if ($asort) {
-            asort($menu);//sort in alphabetical order
+            asort($menu); // sort in alphabetical order
         }
 
         $params = array('d' => $this->_dataformid, 'sesskey' => sesskey());
         $url = new moodle_url("/mod/dataform/$dir/edit.php", $params);
         $select = new single_select($url, 'type', $menu, null, array('' => 'choosedots'), $subplugintype.'form');
-        $select->set_label(get_string($dir. 'add','dataform'));
+        $select->set_label(get_string($dir. 'add', 'dataform'));
         return html_writer::tag('div', $this->output->render($select), array('class' => 'subplugin-selector mdl-align'));
     }
 
@@ -146,7 +146,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $actionbaseurl = new moodle_url('/mod/dataform/view/index.php', array('d' => $this->_dataformid));
         $sessparam = array('sesskey' => sesskey());
 
-        /// table headings
+        // table headings
         $strname = get_string('name');
         $strdescription = get_string('description');
         $strtype = get_string('type', 'dataform');
@@ -156,11 +156,11 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $stredit = get_string('edit');
         $strview = get_string('view', 'dataform');
         $strdelete = get_string('delete');
-        $strduplicate =  get_string('duplicate');
+        $strduplicate = get_string('duplicate');
         $strchoose = get_string('choose');
         $strhide = get_string('hide');
         $strshow = get_string('show');
-        $strreset =  get_string('reset');
+        $strreset = get_string('reset');
         $strpermissions = get_string('permissions', 'role');
         $strnotifications = get_string('notifications');
         $strpatternbroken = get_string('patternbroken', 'dataform');
@@ -242,7 +242,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             if ($visible = $view->visible) {
                 $visibleicon = $hideicon;
             } else {
-               $visibleicon = $showicon;
+                $visibleicon = $showicon;
             }
             $viewvisible = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('visible' => $viewid)), $visibleicon);
 
@@ -259,7 +259,8 @@ class mod_dataform_renderer extends plugin_renderer_base {
             if (!empty($filtersmenu)) {
                 $viewfilterid = $view->filterid;
                 if ($viewfilterid and !in_array($viewfilterid, array_keys($filtersmenu))) {
-                    $viewfilter = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('setfilter' => $viewid, 'fid' => -1)), $OUTPUT->pix_icon('i/risk_xss', $strreset));
+                    $url = new moodle_url($actionbaseurl, $sessparam + array('setfilter' => $viewid, 'fid' => -1));
+                    $viewfilter = html_writer::link($url, $OUTPUT->pix_icon('i/risk_xss', $strreset));
 
                 } else {
                     if ($viewfilterid) {
@@ -298,7 +299,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             // Permission rules
             if ($rulenames = $aman->get_view_rules($view->name)) {
                 $viewpermissions = $accessicon;
-                //html_writer::alist($rulenames);
+                // html_writer::alist($rulenames);
             } else {
                 $viewpermissions = $noaccessicon;
             }
@@ -333,7 +334,6 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $attributes = array('id' => "id_viewselector$viewid", 'class' => 'viewselector');
             $viewselector = html_writer::checkbox("viewselector", $viewid, false, null, $attributes);
             $viewactions = implode('&nbsp;&nbsp;&nbsp;', array($viewbrowse, $viewreset, $viewedit, $viewduplicate, $viewdelete, $viewselector));
-
 
             $data = array();
             foreach (array_keys($headers) as $key) {
@@ -387,7 +387,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $strdescription = get_string('description');
         $strtype = get_string('type', 'dataform');
         $stredit = get_string('edit');
-        $strduplicate =  get_string('duplicate');
+        $strduplicate = get_string('duplicate');
         $strdelete = get_string('delete');
         $strhide = get_string('hide');
         $strshow = get_string('show');
@@ -445,7 +445,6 @@ class mod_dataform_renderer extends plugin_renderer_base {
         // Notification manager
         $nman = mod_dataform_notification_manager::instance($this->_dataformid);
 
-
         if (!$fields) {
             $fields = array();
         }
@@ -471,14 +470,14 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 $visibleicon = $this->output->pix_icon('t/hide', $strhide);
                 $visibleicon = ($visible == 1 ? "($visibleicon)" : $visibleicon);
             } else {
-               $visibleicon = $this->output->pix_icon('t/show', $strshow);
+                $visibleicon = $this->output->pix_icon('t/show', $strshow);
             }
             $fieldvisible = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('visible' => $fieldid)), $visibleicon);
             // Editable
             if ($editable = $field->editable) {
                 $editableicon = $this->output->pix_icon('t/lock', $strlock);
             } else {
-               $editableicon = $this->output->pix_icon('t/unlock', $strunlock);
+                $editableicon = $this->output->pix_icon('t/unlock', $strunlock);
             }
             $fieldeditable = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('editable' => $fieldid)), $editableicon);
 
@@ -486,7 +485,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             // Access rules
             if ($rulenames = $aman->get_field_rules($field->name)) {
                 $fieldaccess = $accessicon;
-                //html_writer::alist($rulenames);
+                // html_writer::alist($rulenames);
             } else {
                 $fieldaccess = $noaccessicon;
             }
@@ -546,7 +545,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
      * @param array $fields List of available fields
      * @return string HTML fragment of html_table
      */
-    public function filters_admin_list(){
+    public function filters_admin_list() {
         global $OUTPUT, $PAGE;
 
         if (!$this->_dataformid) {
@@ -571,7 +570,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $strshow = get_string('show');
         $stredit = get_string('edit');
         $strdelete = get_string('delete');
-        $strduplicate =  get_string('duplicate');
+        $strduplicate = get_string('duplicate');
         $strdefault = get_string('default');
         $strchoose = get_string('choose');
 
@@ -583,7 +582,6 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $nodefaulticon = $this->output->pix_icon('i/completion-auto-n', $strchoose);
         $hideicon = $this->output->pix_icon('t/hide', $strhide);
         $showicon = $this->output->pix_icon('t/show', $strshow);
-
 
         $selectallnone = html_writer::checkbox('filterselectallnone', null, false, null, array('id' => 'id_filterselectallnone'));
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_select_allnone', array('filter'));
@@ -661,13 +659,12 @@ class mod_dataform_renderer extends plugin_renderer_base {
         }
 
         echo html_writer::empty_tag('br');
-        echo html_writer::start_tag('div', array('class'=>'fieldadd mdl-align'));
-        echo html_writer::link(new moodle_url('/mod/dataform/filter/edit.php', array('d' => $this->_dataformid)), get_string('filteradd','dataform'));
-        //echo $OUTPUT->help_icon('filteradd', 'dataform');
+        echo html_writer::start_tag('div', array('class' => 'fieldadd mdl-align'));
+        echo html_writer::link(new moodle_url('/mod/dataform/filter/edit.php', array('d' => $this->_dataformid)), get_string('filteradd', 'dataform'));
+        // echo $OUTPUT->help_icon('filteradd', 'dataform');
         echo html_writer::end_tag('div');
         echo html_writer::empty_tag('br');
     }
-
 
     /**
      *
@@ -881,7 +878,6 @@ class mod_dataform_renderer extends plugin_renderer_base {
     }
 }
 
-
 /**
  * A custom renderer class that extends the plugin_renderer_base and is used by the dataform module.
  *
@@ -966,7 +962,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
                                     'view' => $view->id);
 
             // Display the filter form jump list
-            $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'filter', $menufilters, $filter->id, array(''=>'choosedots'), 'filterbrowse_jump');
+            $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'filter', $menufilters, $filter->id, array('' => 'choosedots'), 'filterbrowse_jump');
             $select->attributes = array('id' => 'id_filtersmenu');
             $filterjump = $this->output->render($select);
         }
@@ -1040,11 +1036,13 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             $perpagevalue = 0;
         }
 
-        $perpage = array(1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,
-           20=>20,30=>30,40=>40,50=>50,100=>100,200=>200,300=>300,400=>400,500=>500,1000=>1000);
-
+        $options = array(
+            1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 15 => 15,
+            20 => 20, 30 => 30, 40 => 40, 50 => 50,
+            100 => 100, 200 => 200, 300 => 300, 400 => 400, 500 => 500, 1000 => 1000
+        );
         // Display the view form jump list
-        $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'uperpage', $perpage, $perpagevalue, array(''=>'choosedots'), 'perpage_jump');
+        $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'uperpage', $options, $perpagevalue, array('' => 'choosedots'), 'perpage_jump');
 
         return $this->output->render($select);
     }

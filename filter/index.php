@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -34,7 +34,7 @@ $urlparams->showhide    = optional_param('showhide', 0, PARAM_SEQUENCE);     // 
 $urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // filter ids (comma delim) to delete
 $urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // filter ids (comma delim) to duplicate
 
-$urlparams->confirmed  = optional_param('confirmed', 0, PARAM_INT);    
+$urlparams->confirmed  = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);

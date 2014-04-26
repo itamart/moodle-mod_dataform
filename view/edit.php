@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @copyright 2011 Itamar Tzadok
@@ -26,7 +26,7 @@ $urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
 
 $urlparams->type = optional_param('type', '', PARAM_ALPHA);   // type of a view to edit
 $urlparams->vedit = optional_param('vedit', 0, PARAM_INT);       // view id to edit
-//$urlparams->returnurl = optional_param('returnurl', '', PARAM_URL);
+// $urlparams->returnurl = optional_param('returnurl', '', PARAM_URL);
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d);
@@ -36,9 +36,9 @@ $df->require_manage_permission('views');
 
 if ($urlparams->vedit) {
     $view = $df->view_manager->get_view_by_id($urlparams->vedit);
-    if ($default = optional_param('resetdefault',0 ,PARAM_INT)) {
+    if ($default = optional_param('resetdefault', 0, PARAM_INT)) {
         $view->generate_default_view();
-    }    
+    }
 } else if ($urlparams->type) {
     $view = $df->view_manager->get_view($urlparams->type);
     $view->generate_default_view();
@@ -46,35 +46,35 @@ if ($urlparams->vedit) {
 
 $mform = $view->get_form();
 
-// for cancelled
-if ($mform->is_cancelled()){
+// Form cancelled
+if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
 }
 
-// No submit buttons: reset to default 
+// No submit buttons: reset to default
 if ($mform->no_submit_button_pressed() ) {
     // reset view to default
     $resettodefault = optional_param('resetdefaultbutton', '', PARAM_ALPHA);
     if ($resettodefault) {
         $urlparams->resetdefault = 1;
-        redirect(new moodle_url('/mod/dataform/view/edit.php', (array) $urlparams));        
+        redirect(new moodle_url('/mod/dataform/view/edit.php', (array) $urlparams));
     }
 
-// process validated    
 } else if ($data = $mform->get_data()) {
+    // Process validated
     $data = $view->from_form($data);
 
-    // add new view
     if (!$view->id) {
+        // add new view
         $view->add($data);
-        $notification = get_string('viewsadded','dataform');
+        $notification = get_string('viewsadded', 'dataform');
 
-    // update view
     } else {
+        // update view
         $view->update($data);
-        $notification = get_string('viewsupdated','dataform');
+        $notification = get_string('viewsupdated', 'dataform');
     }
-    
+
     $df->notifications = array('success' => array('' => $notification));
 
     if (!isset($data->submitreturnbutton)) {
@@ -82,7 +82,7 @@ if ($mform->no_submit_button_pressed() ) {
     }
 
     // Save and continue so refresh the form
-    $mform = $view->get_form();       
+    $mform = $view->get_form();
 }
 
 // activate navigation node

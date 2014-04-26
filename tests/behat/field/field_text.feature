@@ -105,9 +105,9 @@ Feature: Add dataform entries
         
     Examples:
 | result | fielddata |
-#|	Any thing goes	|	Field 01	Field description 01	Managers only	1		1	100	px					|
-#|	Alphanumeric123456	|	Field 02	Field description 02	Owner and managers	0		0	240	px	alphanumeric				|
-#|	Lettersonly	|	Field 03	Field description 03	Everyone	1		1	100	%	lettersonly				|
-#|	123456	|	Field 04	Field description 04	Managers only	0		0	50	%	numeric	minlength	2		|
-#|	email@email.com	|	Field 05	Field description 05	Owner and managers	1		1	60	em	email	maxlength		50	|
-#|	Nopunctuation	|	Field 06	Field description 06	Everyone	0		0	100	em	nopunctuation	rangelength	2	100	|
+#|    Any thing goes    |    Field 01    Field description 01    Managers only    1        1    100    px                    |
+#|    Alphanumeric123456    |    Field 02    Field description 02    Owner and managers    0        0    240    px    alphanumeric                |
+#|    Lettersonly    |    Field 03    Field description 03    Everyone    1        1    100    %    lettersonly                |
+#|    123456    |    Field 04    Field description 04    Managers only    0        0    50    %    numeric    minlength    2        |
+#|    email@email.com    |    Field 05    Field description 05    Owner and managers    1        1    60    em    email    maxlength        50    |
+#|    Nopunctuation    |    Field 06    Field description 06    Everyone    0        0    100    em    nopunctuation    rangelength    2    100    |

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
@@ -38,13 +38,12 @@ class mod_dataform_field_manager {
      */
     public static function instance($dataformid) {
         static $instances = array();
-        
+
         if (empty($instances[$dataformid])) {
             $instances[$dataformid] = new mod_dataform_field_manager($dataformid);
         }
         return $instances[$dataformid];
     }
-
 
     /**
      * constructor
@@ -53,7 +52,7 @@ class mod_dataform_field_manager {
         $this->_dataformid = $dataformid;
         $this->_items = array();
     }
-   
+
     /**
      * Magic property method
      *
@@ -84,7 +83,6 @@ class mod_dataform_field_manager {
         }
         return null;
     }
-
 
     /**
      * Initialize if needed and return the internal fields
@@ -137,7 +135,7 @@ class mod_dataform_field_manager {
      */
     public function is_at_max_fields() {
         global $DB, $CFG;
-        
+
         if ($CFG->dataform_maxfields) {
             if ($count = $DB->count_records('dataform_fields', array('dataid' => $this->_dataformid))) {
                 if ($count >= $CFG->dataform_maxfields) {
@@ -189,7 +187,7 @@ class mod_dataform_field_manager {
             $this->_items[$fieldid] = $field;
             return $this->get_field($field);
         }
-        
+
         return false;
     }
 
@@ -206,7 +204,7 @@ class mod_dataform_field_manager {
         }
         return $fields;
     }
-    
+
     /**
      * Given a field name return the field object
      *
@@ -217,7 +215,7 @@ class mod_dataform_field_manager {
         // Try first internal field
         if ($fieldid = array_search($fieldname, self::get_internal_field_types())) {
             return $this->get_field_by_id($fieldid, $forceget);
-        }            
+        }
 
         if (!$forceget) {
             foreach ($this->_items as $field) {
@@ -231,12 +229,12 @@ class mod_dataform_field_manager {
             $this->_items[$field->id] = $field;
             return $this->get_field($field);
         }
-        
+
         return false;
     }
 
     /**
-     * Given a field pattern, returns the field object. 
+     * Given a field pattern, returns the field object.
      * Applicable to user fields only ([[...]]).
      *
      * @param string $fieldpattern
@@ -245,7 +243,7 @@ class mod_dataform_field_manager {
      */
     public function get_field_by_pattern($fieldpattern, $forceget = false) {
         if (strpos($fieldpattern, '[[') === 0) {
-            list($fieldname,) = explode(':', trim($fieldpattern, '[]')) + array(null);
+            list($fieldname, ) = explode(':', trim($fieldpattern, '[]')) + array(null);
         }
 
         if (!empty($fieldname)) {
@@ -264,7 +262,7 @@ class mod_dataform_field_manager {
         }
 
         $typefields = array();
-        foreach  ($fields as $fieldid => $field) {
+        foreach ($fields as $fieldid => $field) {
             if ($menu) {
                 $typefields[$fieldid] = $field->name;
             } else {
@@ -304,7 +302,7 @@ class mod_dataform_field_manager {
     public function get_fields(array $options = null) {
         $forceget = !empty($options['forceget']) ? $options['forceget'] : null;
         $sort = !empty($options['sort']) ? $options['sort'] : '';
-        
+
         $this->get_field_records($forceget, null, $sort);
 
         $fields = array();
@@ -313,7 +311,7 @@ class mod_dataform_field_manager {
             if (!empty($exclude) and in_array($fieldid, $exclude)) {
                 continue;
             }
-            $fields[$fieldid]= $this->get_field($field);
+            $fields[$fieldid] = $this->get_field($field);
         }
         return $fields;
     }
@@ -336,12 +334,12 @@ class mod_dataform_field_manager {
     /**
      *
      */
-    public function get_fields_menu(array $options = null) {        
+    public function get_fields_menu(array $options = null) {
         $sort = !empty($options['sort']) ? $options['sort'] : null;
         $forceget = !empty($options['forceget']) ? $options['forceget'] : null;
-        
+
         $this->get_field_records($forceget, null, $sort);
-        //$this->get_field_records_internal();
+        // $this->get_field_records_internal();
         if (!$fieldrecs = $this->_items) {
             return array();
         }
@@ -352,7 +350,7 @@ class mod_dataform_field_manager {
             if (!empty($exclude) and in_array($fieldid, $exclude)) {
                 continue;
             }
-            $fields[$fieldid]= $field->name;
+            $fields[$fieldid] = $field->name;
         }
 
         return $fields;
@@ -377,11 +375,11 @@ class mod_dataform_field_manager {
         if (!is_array($fids)) {
             $fids = explode(',', $fids);
         }
-        
+
         $dffields = $this->get_fields();
         $fields = array();
         // collate the fields for processing
-         foreach ($fids as $fieldid) {
+        foreach ($fids as $fieldid) {
             if ($fieldid > 0 and isset($dffields[$fieldid])) {
                 $fields[$fieldid] = $dffields[$fieldid];
             }
@@ -467,7 +465,7 @@ class mod_dataform_field_manager {
                         break;
                 }
 
-                 if ($strnotify) {
+                if ($strnotify) {
                     $fieldsprocessed = $processedfids ? count($processedfids) : 'No';
                     $df->notifications = array('success' => array('' => get_string($strnotify, 'dataform', $fieldsprocessed)));
                 }

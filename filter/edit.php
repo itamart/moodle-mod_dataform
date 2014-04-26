@@ -12,11 +12,11 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
- * @category filter 
+ * @category filter
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,7 +46,7 @@ if ($urlparams->fid) {
 
 $mform = $fm->get_filter_form($filter);
 
-if ($mform->is_cancelled()){
+if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id)));
 }
 
@@ -58,12 +58,11 @@ if ($mform->no_submit_button_pressed() ) {
         $mform = $fm->get_filter_form($filter);
     }
 
-// process validated    
 } else if ($data = $mform->get_data()) {
     // Get clean filter from data
     $filter = $fm->get_filter_from_form($filter, $data, true);
     $filter->update();
-    
+
     if ($data->submitbutton != get_string('savecont', 'dataform')) {
         redirect(new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id)));
     }

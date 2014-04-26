@@ -12,19 +12,19 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage grid
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
 
     protected $_editors = array('section', 'param2');
-    
+
     /**
      *
      */
@@ -74,7 +74,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
      */
     protected function group_entries_definition($entriesset, $name = '') {
         global $OUTPUT;
-        
+
         $elements = array();
 
         // Prepare grid table if needed
@@ -86,14 +86,14 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                 $rows = 1;
             } else {
                 if ($rows) {
-                    $rows = ceil($entriescount/$cols);
+                    $rows = ceil($entriescount / $cols);
                 } else {
                     $rows = 1;
-                    $percol = ceil($entriescount/$cols) > 1 ? ceil($entriescount/$cols) : null;
+                    $percol = ceil($entriescount / $cols) > 1 ? ceil($entriescount / $cols) : null;
                 }
             }
 
-            $table = $this->make_table($cols, $rows);                    
+            $table = $this->make_table($cols, $rows);
             $grouphtml = html_writer::table($table);
             // now split $tablehtml to cells by ##begintablecell##
             $cells = explode('##begintablecell##', $grouphtml);
@@ -103,8 +103,8 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
 
         // flatten the set to a list of elements
         $count = 0;
-        foreach ($entriesset as $entry_definitions) {
-            $elements = array_merge($elements, $entry_definitions);
+        foreach ($entriesset as $entrydefinitions) {
+            $elements = array_merge($elements, $entrydefinitions);
             if (!empty($cells)) {
                 if (empty($percol) or $count >= $percol - 1) {
                     $count = 0;
@@ -112,7 +112,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
 
                 } else {
                     $count++;
-                }                
+                }
             }
         }
 
@@ -120,10 +120,10 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
         if (!empty($cells)) {
             foreach ($cells as $cell) {
                 $elements[] = $cell;
-            }                
+            }
         }
 
-        // Add group heading 
+        // Add group heading
         $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
         if ($name) {
             array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
@@ -139,7 +139,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
      *
      */
     protected function entry_definition($fielddefinitions, array $options = null) {
-        $elements = array();        
+        $elements = array();
 
         // If not editing, do simple replacement and return the html
         if (empty($options['edit'])) {
@@ -150,7 +150,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
         // Editing so split the entry template to tags and html
         $tags = array_keys($fielddefinitions);
         $parts = $this->split_tags($tags, $this->param2);
-        
+
         foreach ($parts as $part) {
             if (in_array($part, $tags)) {
                 if ($def = $fielddefinitions[$part]) {
@@ -160,7 +160,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                 $elements[] = $part;
             }
         }
-        return $elements;      
+        return $elements;
     }
 
     /**
@@ -168,7 +168,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
      */
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
-        
+
         // get patterns definitions
         $fields = $this->get_fields();
         $tags = array();
@@ -186,7 +186,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                 $tags = array_merge($tags, $patterns);
             }
         }
-            
+
         // split the entry template to tags and html
         $parts = $this->split_tags($tags, $this->param2);
 
@@ -199,7 +199,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                 $elements[] = $part;
             }
         }
-        
+
         return $elements;
     }
 
@@ -209,7 +209,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
     protected function make_table($cols, $rows) {
         $table = new html_table();
         $table->align = array_fill(0, $cols, 'center');
-        //$table->wrap = array_fill(0, $cols, 'false');
+        // $table->wrap = array_fill(0, $cols, 'false');
         $table->attributes['align'] = 'center';
         for ($r = 0; $r < $rows; $r++) {
             $row = new html_table_row();
@@ -218,11 +218,10 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                 $cell->text = '##begintablecell##';
                 $row->cells[] = $cell;
             }
-            $table->data[] =  $row;
+            $table->data[] = $row;
         }
-        
+
         return $table;
     }
-
 
 }

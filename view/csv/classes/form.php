@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage csv
@@ -51,16 +51,16 @@ class dataformview_csv_form extends dataformview_aligned_form {
         $mform->addElement('header', 'expimpsettingshdr', get_string('expimpsettings', 'dataformview_csv'));
 
         // Enable import  (param4)
-        $mform->addElement('advcheckbox', 'param4',  get_string('export', 'grades'), get_string('enable'), null, array(0, 1));        
+        $mform->addElement('advcheckbox', 'param4',  get_string('export', 'grades'), get_string('enable'), null, array(0, 1));
         $mform->setDefault('param4', 1);
-        
+
         // Enable import  (param4)
-        $mform->addElement('advcheckbox', 'param5',  get_string('import'), get_string('enable'), null, array(0, 1));        
+        $mform->addElement('advcheckbox', 'param5',  get_string('import'), get_string('enable'), null, array(0, 1));
         $mform->setDefault('param5', 1);
-        
+
         // Allow update existing entries  (param4)
-        //$mform->addElement('advcheckbox', 'updateexisting',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));        
-        //$mform->disabledIf('updateexisting', 'importenable', 'eq', 0);
+        // $mform->addElement('advcheckbox', 'updateexisting',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));
+        // $mform->disabledIf('updateexisting', 'importenable', 'eq', 0);
 
         // delimiter
         $delimiters = csv_import_reader::get_delimiter_list();
@@ -68,7 +68,7 @@ class dataformview_csv_form extends dataformview_aligned_form {
         $mform->setDefault('delimiter', 'comma');
 
         // enclosure
-        $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size'=>'10'));
+        $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size' => '10'));
         $mform->setType('enclosure', PARAM_NOTAGS);
         $mform->setDefault('enclosure', '');
 
@@ -76,13 +76,13 @@ class dataformview_csv_form extends dataformview_aligned_form {
         $choices = textlib::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
-        
+
     }
 
     /**
      *
      */
-    function data_preprocessing(&$data){
+    public function data_preprocessing(&$data) {
         parent::data_preprocessing($data);
         // CSV settings
         $csvsettings = !empty($data->param1) ? $data->param1 : $this->_view->get_default_csv_settings();
@@ -91,7 +91,7 @@ class dataformview_csv_form extends dataformview_aligned_form {
             $data->enclosure,
             $data->encoding
         ) = explode(',', $csvsettings);
-        
+
         // BC for exporttype stored in param3
         if (!empty($data->param3)) {
             $data->exportto = $data->param3;
@@ -101,7 +101,7 @@ class dataformview_csv_form extends dataformview_aligned_form {
     /**
      *
      */
-    function set_data($data) {
+    public function set_data($data) {
         $this->data_preprocessing($data);
         parent::set_data($data);
     }
@@ -109,7 +109,7 @@ class dataformview_csv_form extends dataformview_aligned_form {
     /**
      *
      */
-    function get_data() {
+    public function get_data() {
         if ($data = parent::get_data()) {
             // CSV settings
             $defaultsettings = $this->_view->get_default_csv_settings();
@@ -121,5 +121,5 @@ class dataformview_csv_form extends dataformview_aligned_form {
             }
         }
         return $data;
-    }    
+    }
 }

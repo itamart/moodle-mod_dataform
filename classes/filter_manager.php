@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -33,19 +33,18 @@ class mod_dataform_filter_manager {
     const USER_FILTER_ADVANCED = -4;
     const USER_FILTER_ADVANCED_RESET_ALL = -5;
     const USER_FILTER_ID_START = -10;
-    
+
     protected $_dataformid;
     protected $_filters;
 
     public static function instance($dataformid) {
         static $instances = array();
-        
+
         if (empty($instances[$dataformid])) {
             $instances[$dataformid] = new mod_dataform_filter_manager($dataformid);
         }
         return $instances[$dataformid];
     }
-
 
     /**
      * constructor
@@ -54,7 +53,7 @@ class mod_dataform_filter_manager {
         $this->_dataformid = $dataformid;
         $this->_filters = array();
     }
-   
+
     /**
      * Returns true if max filters as set by admin has been reached.
      *
@@ -62,7 +61,7 @@ class mod_dataform_filter_manager {
      */
     public function is_at_max_filters() {
         global $DB, $CFG;
-        
+
         if ($CFG->dataform_maxfilters) {
             if ($count = $DB->count_records('dataform_filters', array('dataid' => $this->_dataformid))) {
                 if ($count >= $CFG->dataform_maxfilters) {
@@ -78,10 +77,10 @@ class mod_dataform_filter_manager {
      */
     public function get_filter_by_id($filterid = 0, array $options = null) {
         global $DB;
-        
+
         $df = mod_dataform_dataform::instance($this->_dataformid);
         $dfid = $this->_dataformid;
-        
+
         // URL FILTER
         if ($filterid == self::USER_FILTER_URL and $view and $view->is_active()) {
             if ($foptions = self::get_filter_options_from_url()) {
@@ -108,7 +107,7 @@ class mod_dataform_filter_manager {
                 $quickfilterid = self::USER_FILTER_QUICK;
                 unset_user_preference("dataform-filter-$dfid-$viewid-$quickfilterid");
             }
-            
+
             // Reset all user advanced filters for view
             if ($filterid == self::USER_FILTER_ADVANCED_RESET_ALL and $view and $view->is_active()) {
                 if ($afilters = $this->get_user_filters_menu($viewid)) {
@@ -118,7 +117,7 @@ class mod_dataform_filter_manager {
                     unset_user_preference("dataform-filter-$dfid-$viewid-userfilters");
                 }
             }
-            
+
             // Retrieve existing user filter
             if (($filterid <= self::USER_FILTER_ID_START) and $view and $view->is_active()) {
                 if ($filter = get_user_preferences("dataform-filter-$dfid-$viewid-$filterid", null)) {
@@ -129,7 +128,7 @@ class mod_dataform_filter_manager {
             }
             $filterid = 0;
         }
-                           
+
         // For all cases try default
         if (!$filterid and $df->defaultfilter) {
             $filterid = $df->defaultfilter;
@@ -139,7 +138,7 @@ class mod_dataform_filter_manager {
         if ($filterid > 0 and $this->get_filters() and isset($this->_filters[$filterid])) {
             return clone($this->_filters[$filterid]);
         }
-        
+
         return $this->get_filter_blank();
     }
 
@@ -160,18 +159,17 @@ class mod_dataform_filter_manager {
      */
     public function get_filter_from_url($url, $raw = false) {
         global $DB;
-        
+
         $df = mod_dataform_dataform::instance($this->_dataformid);
         $dfid = $this->_dataformid;
 
         if ($options = self::get_filter_options_from_url($url)) {
             $options['dataid'] = $dfid;
-            
+
             // Get the filter if exists and add options to it
-            
-            
+
             $filter = new mod_dataform\pluginbase\dataformfilter((object) $options);
-            
+
             if ($raw) {
                 return $filter->instance;
             } else {
@@ -210,7 +208,7 @@ class mod_dataform_filter_manager {
                             $filters[$filterid] = $filter->name;
                         }
                     } else {
-                        $filters[$filterid]= $filter;
+                        $filters[$filterid] = $filter;
                     }
                 }
                 return $filters;
@@ -293,7 +291,7 @@ class mod_dataform_filter_manager {
                         foreach ($filters as $filter) {
                             $filter->visible = (int) !$filter->visible;
                             $filter->update();
- 
+
                             $this->_filters[$filter->id] = $filter;
                             $processedfids[] = $filter->id;
                         }
@@ -344,7 +342,7 @@ class mod_dataform_filter_manager {
      */
     public function delete_advanced_filters() {
         global $DB;
-        
+
         // Clean up dataform user preference
         $select = $DB->sql_like('name', '?');
         $params = array("dataform-filter-{$this->_dataformid}-%");
@@ -359,12 +357,12 @@ class mod_dataform_filter_manager {
      */
     public function get_filter_form($filter) {
         global $CFG;
-        
+
         $formparams = array('d' => $this->_dataformid, 'fid' => $filter->id, 'update' => 1);
         $formurl = new moodle_url('/mod/dataform/filter/edit.php', $formparams);
-            
+
         $mform = new mod_dataform\pluginbase\dataformfilterform_standard($filter, $formurl);
-        return $mform;        
+        return $mform;
     }
 
     /**
@@ -460,15 +458,15 @@ class mod_dataform_filter_manager {
     }
 
     // ADVANCED FILTER
-    
+
     /**
      *
      */
-    public function get_advanced_filter_form($filter, $view, $pagefile = 'view') {       
+    public function get_advanced_filter_form($filter, $view, $pagefile = 'view') {
         $urlparams = array('d' => $this->_dataformid, 'view' => $view->id, 'pagefile' => $pagefile, 'fid' => $filter->id);
         $formurl = new moodle_url('/mod/dataform/filter/editadvanced.php', $urlparams);
         $mform = new mod_dataform\pluginbase\dataformfilterform_advanced($filter, $formurl, array('view' => $view));
-        return $mform;        
+        return $mform;
     }
 
     /**
@@ -476,7 +474,7 @@ class mod_dataform_filter_manager {
      */
     public function get_user_filters_menu($viewid) {
         $filters = array();
-        
+
         $df = mod_dataform_dataform::instance($this->_dataformid);
         $dfid = $df->id;
         // Add last quick filter
@@ -500,7 +498,7 @@ class mod_dataform_filter_manager {
         if ($filternames) {
             $filters[self::USER_FILTER_ADVANCED_RESET_ALL] = get_string('filtersavedreset', 'dataform');
         }
-            
+
         return $filters;
     }
 
@@ -538,20 +536,20 @@ class mod_dataform_filter_manager {
                     $instance->search = '';
                     continue;
                 }
-                
+
                 $instance->$option = $val;
             }
-            
+
             $instance->dataid = $dfid;
-            set_user_preference("dataform-filter-$dfid-$viewid-$filterid", base64_encode(serialize($instance)));        
+            set_user_preference("dataform-filter-$dfid-$viewid-$filterid", base64_encode(serialize($instance)));
             return $instance;
         }
-        
-        // New options only        
+
+        // New options only
         $filteroptions->id = $filterid;
         $filteroptions->dataid = $dfid;
-        set_user_preference("dataform-filter-$dfid-$viewid-$filterid", base64_encode(serialize($filteroptions)));        
-        return $filteroptions;        
+        set_user_preference("dataform-filter-$dfid-$viewid-$filterid", base64_encode(serialize($filteroptions)));
+        return $filteroptions;
     }
 
     /**
@@ -570,7 +568,7 @@ class mod_dataform_filter_manager {
                 $userfilters[$fid] = $name;
             }
         }
-        
+
         // If max number of user filters pop the last
         $maxfilters = $newfilter ? self::USER_FILTER_MAX_NUM - 1 : self::USER_FILTER_MAX_NUM;
         if (count($userfilters) >= $maxfilters) {
@@ -583,7 +581,7 @@ class mod_dataform_filter_manager {
         }
 
         $newfilter = ($newfilter or $filterid > self::USER_FILTER_ID_START or !$userfilters or !array_key_exists($filterid, $userfilters));
-        
+
         if ($newfilter) {
             $filterid = $userfilters ? min(array_keys($userfilters)) - 1 : self::USER_FILTER_ID_START;
         }
@@ -596,30 +594,30 @@ class mod_dataform_filter_manager {
         }
 
         set_user_preference("dataform-filter-$dfid-$viewid-$filterid", base64_encode(serialize($filter->instance)));
-        
+
         // Add the new filter to the beginning of the userfilters
         if ($newfilter) {
             $userfilters = array($filterid => $filter->name) + $userfilters;
         } else {
             $userfilters[$filterid] = $filter->name;
         }
-        
+
         foreach ($userfilters as $filterid => $name) {
             $userfilters[$filterid] = "$filterid $name";
         }
         set_user_preference("dataform-filter-$dfid-$viewid-userfilters", implode(';', $userfilters));
 
-        return $filter;        
+        return $filter;
     }
 
     // HELPERS
-    
+
     /**
      *
      */
     public static function get_filter_url_query($filter) {
         $urlquery = array();
-        
+
         if ($filter->customsort) {
             $urlquery[] = 'usort='. self::get_sort_url_query(unserialize($filter->customsort));
         }
@@ -635,7 +633,7 @@ class mod_dataform_filter_manager {
         }
         return '';
     }
-    
+
     /**
      *
      */
@@ -649,7 +647,7 @@ class mod_dataform_filter_manager {
         }
         return '';
     }
-    
+
     /**
      *
      */
@@ -657,11 +655,16 @@ class mod_dataform_filter_manager {
         $usort = null;
         if ($query) {
             $usort = urldecode($query);
-            $usort = array_map(function($a) {return explode(' ', $a);}, explode(',', $usort));
+            $usort = array_map(
+                function($a) {
+                    return explode(' ', $a);
+                },
+                explode(',', $usort)
+            );
         }
         return $usort;
     }
-    
+
     /**
      *
      */
@@ -689,7 +692,7 @@ class mod_dataform_filter_manager {
         }
         return $ucsearch;
     }
-    
+
     /**
      *
      */
@@ -700,14 +703,19 @@ class mod_dataform_filter_manager {
             $searchies = explode('@', $ucsearch);
             foreach ($searchies as $key => $searchy) {
                 list($fieldid, $andor, $options) = explode(':', $searchy);
-                $soptions[$fieldid] = array($andor => array_map(function($a) {return explode(',', $a);}, explode('#', $options)));
+                $soptions[$fieldid] = array($andor => array_map(
+                    function($a) {
+                        return explode(',', $a);
+                    },
+                    explode('#', $options))
+                );
             }
         }
         return $soptions;
     }
-    
+
     /**
-     * 
+     *
      */
     public static function get_filter_options_from_url($url = null) {
         $filteroptions = array(
@@ -725,12 +733,12 @@ class mod_dataform_filter_manager {
         );
 
         $options = array();
-        
+
         // Url provided
         if ($url) {
             if ($url instanceof moodle_url) {
                 foreach ($filteroptions as $option => $args) {
-                    list($name, ,) = $args;
+                    list($name, , ) = $args;
                     if ($val = $url->get_param($name)) {
                         if ($option == 'customsort') {
                             $options[$option] = self::get_sort_options_from_query($val);
@@ -766,5 +774,5 @@ class mod_dataform_filter_manager {
             }
         }
         return $options;
-    }    
+    }
 }

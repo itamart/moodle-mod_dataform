@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage dataform
@@ -45,7 +45,7 @@ $pageparams = array(
         'completion' => true,
         'comments' => true,
         'pagelayout' => 'embedded',
-        'urlparams' => $urlparams);        
+        'urlparams' => $urlparams);
 $df->set_page('embed', $pageparams);
 
 // Activate navigation node

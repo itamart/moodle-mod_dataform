@@ -20,8 +20,8 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type int dataid the id of the dataform activity.
- *      @type int viewid the id of the view where the event occured.
+ *      int dataid the id of the dataform activity.
+ *      int viewid the id of the view where the event occured.
  * }
  *
  * @package    mod_dataform
@@ -41,7 +41,7 @@ abstract class entry_base extends \core\event\base {
      * @return string
      */
     public static function get_event_name() {
-        list(,,$eventname) = explode('\\', get_called_class());
+        list(, , $eventname) = explode('\\', get_called_class());
         return $eventname;
     }
 
@@ -76,11 +76,11 @@ abstract class entry_base extends \core\event\base {
         if (!isset($this->other['dataid'])) {
             throw new \coding_exception('The dataid must be set in $other.');
         }
-        
+
         if (!isset($this->other['viewid'])) {
             throw new \coding_exception('The viewid must be set in $other.');
         }
-        
+
         if (!isset($this->relateduserid)) {
             throw new \coding_exception('The relateduserid must be set.');
         }

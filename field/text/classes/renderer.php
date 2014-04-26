@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -21,7 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
-
 
 /**
  *
@@ -37,14 +36,14 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         $edit = !empty($options['edit']);
 
         $replacements = array();
-        
+
         // Edit mode: display edit the first editable pattern and display browse the rest
         if ($edit) {
             $firstinput = false;
             foreach ($patterns as $pattern => $cleanpattern) {
                 if (!$firstinput and !$noedit = $this->is_noedit($pattern)) {
                     $required = $this->is_required($pattern);
-                    $replacements[$pattern] = array(array($this,'display_edit'), array($entry, array('required' => $required)));
+                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
                     $firstinput = true;
                 } else {
                     $replacements[$pattern] = $this->display_browse($entry, array('pattern' => $cleanpattern));
@@ -52,10 +51,10 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
             }
             return $replacements;
         }
-        
+
         // Browse mode
         foreach ($patterns as $pattern => $cleanpattern) {
-            //$noshow = $this->is_noshow($pattern);
+            // $noshow = $this->is_noshow($pattern);
             $replacements[$pattern] = $this->display_browse($entry, array('pattern' => $cleanpattern));
         }
         return $replacements;
@@ -90,7 +89,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         $entryid = $entry->id;
 
         $content = '';
-        if ($entryid > 0 and !empty($entry->{"c{$fieldid}_content"})){
+        if ($entryid > 0 and !empty($entry->{"c{$fieldid}_content"})) {
             $content = $entry->{"c{$fieldid}_content"};
         }
 
@@ -107,8 +106,8 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
             $classes .= ' '. s($field->param4);
         }
 
-        $fieldattr['class'] = $classes;      
-        
+        $fieldattr['class'] = $classes;
+
         $fieldname = "field_{$fieldid}_{$entryid}";
         $mform->addElement('text', $fieldname, null, $fieldattr);
         $mform->setType($fieldname, PARAM_TEXT);
@@ -122,24 +121,38 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
             $mform->addRule($fieldname, null, $format, null, 'client');
             // Adjust type
             switch($format) {
-                case 'alphanumeric': $mform->setType($fieldname, PARAM_ALPHANUM); break;
-                case 'lettersonly': $mform->setType($fieldname, PARAM_ALPHA); break;
-                case 'numeric': $mform->setType($fieldname, PARAM_INT); break;
-                case 'email': $mform->setType($fieldname, PARAM_EMAIL); break;            
+                case 'alphanumeric':
+                    $mform->setType($fieldname, PARAM_ALPHANUM);
+                    break;
+                case 'lettersonly':
+                    $mform->setType($fieldname, PARAM_ALPHA);
+                    break;
+                case 'numeric':
+                    $mform->setType($fieldname, PARAM_INT);
+                    break;
+                case 'email':
+                    $mform->setType($fieldname, PARAM_EMAIL);
+                    break;
             }
         }
         // length rule
         if ($length = $field->param5) {
             ($min = $field->param6) or ($min = 0);
             ($max = $field->param7) or ($max = 64);
-            
+
             switch ($length) {
-                case 'minlength': $val = $min; break;
-                case 'maxlength': $val = $max; break;
-                case 'rangelength': $val = array($min, $max); break;
-            }                
+                case 'minlength':
+                    $val = $min;
+                    break;
+                case 'maxlength':
+                    $val = $max;
+                    break;
+                case 'rangelength':
+                    $val = array($min, $max);
+                    break;
+            }
             $mform->addRule($fieldname, null, $length, $val, 'client');
-        }        
+        }
     }
 
     /**
@@ -178,11 +191,11 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         // Only [[fieldname]] can be imported
         if ($patternname != $this->_field->name) {
             return array(array(), array());
-        }            
-        
+        }
+
         return parent::get_pattern_import_settings($mform, $patternname, $header);
     }
-    
+
     /**
      * Array of patterns this field supports
      */
@@ -192,6 +205,6 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         $patterns = parent::patterns();
         $patterns["[[$fieldname]]"] = array(true, $fieldname);
 
-       return $patterns;
+        return $patterns;
     }
 }

@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @package dataformfield
@@ -20,8 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\pluginbase; 
- 
+namespace mod_dataform\pluginbase;
+
 /**
  * Base class for Dataform field types that require no content
  */
@@ -62,7 +62,7 @@ abstract class dataformfield_nocontent extends dataformfield {
 
     /**
      * Returns a list of elements to which quick search may be applied.
-     * 
+     *
      * @return array
      */
     public function get_simple_search_elements() {

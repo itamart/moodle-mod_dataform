@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage selectmulti
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die();
 
-
 /**
  *
  */
 class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -46,7 +45,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
                 if ($cleanpattern == "[[$fieldname:addnew]]") {
                     $params['addnew'] = true;
                 }
-                $replacements[$pattern] = array(array($this ,'display_edit'), array($entry, $params));
+                $replacements[$pattern] = array(array($this , 'display_edit'), array($entry, $params));
                 $editonce = true;
             } else {
                 if ($cleanpattern == "[[$fieldname:options]]") {
@@ -72,22 +71,22 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         $required = !empty($options['required']);
 
         $content = !empty($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
-        
-        if ($entryid > 0 and $content){
+
+        if ($entryid > 0 and $content) {
             $selected = explode('#', trim($content, '#'));
         } else {
             $selected = array();
         }
-        
+
         // check for default values
         if (!$selected and $field->param2) {
             $selected = $field->default_values();
         }
 
         // Add a fake element so that the field is processed
-        //$mform->addElement('hidden', $fieldname, 1);
-        //$mform->setType($fieldname, PARAM_INT);
-        
+        // $mform->addElement('hidden', $fieldname, 1);
+        // $mform->setType($fieldname, PARAM_INT);
+
         // Add selector only if there are menu options
         if ($menuoptions) {
             list($elem, $separators) = $this->render($mform, "{$fieldname}_selected", $menuoptions, $selected, $required);
@@ -97,7 +96,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
             } else {
                 $mform->addElement($elem);
             }
-        
+
             // Required rule
             if ($required) {
                 $this->set_required($mform, $fieldname, $selected);
@@ -131,7 +130,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
 
             $contents = explode('#', trim($content, '#'));
 
-            $str = array();           
+            $str = array();
             foreach ($options as $key => $option) {
                 $selected = (int) in_array($key, $contents);
                 if ($showalloptions) {
@@ -144,10 +143,10 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         } else {
             $str = '';
         }
-        
+
         return $str;
     }
-    
+
     /**
      *
      */
@@ -158,41 +157,41 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         if (!isset($entry->{"c{$fieldid}_content"})) {
             return '';
         }
-        
+
         $content = $entry->{"c{$fieldid}_content"};
         $contents = explode('#', trim($content, '#'));
 
-        $str = array();           
+        $str = array();
         $options = $field->options_menu();
         foreach ($options as $key => $option) {
             $selected = (int) in_array($key, $contents);
             $str[] = "$selected $option";
         }
-        
+
         return implode($field->separator, $str);
     }
-    
+
     /**
      * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()}
-     * to add a setting for 'allow add option'.     
+     * to add a setting for 'allow add option'.
      */
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
         $field = $this->_field;
         $fieldid = $field->id;
         $fieldname = $field->name;
-        
+
         // Only [[fieldname]] can be imported
         if ($patternname != $fieldname) {
             return array(array(), array());
-        }            
-        
+        }
+
         $name = "f_{$fieldid}_";
 
         list($grp, $labels) = parent::get_pattern_import_settings($mform, $patternname, $header);
-        
+
         $grp[] = &$mform->createElement('selectyesno', "{$name}_allownew");
         $labels = array_merge($labels, array(' '. get_string('allowaddoption', 'dataformfield_selectmulti'). ': '));
-        
+
         return array($grp, $labels);
     }
 
@@ -213,9 +212,8 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         $mform->addRule("{$fieldname}_selected", null, 'required', null, 'client');
     }
 
-
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -225,7 +223,6 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         $patterns["[[$fieldname:addnew]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:options]]"] = array(false);
 
-        return $patterns; 
+        return $patterns;
     }
 }
-

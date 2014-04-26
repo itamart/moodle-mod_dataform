@@ -12,10 +12,10 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
-namespace mod_dataform\pluginbase; 
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace mod_dataform\pluginbase;
+
 /**
  * @package dataformentry
  * @copyright 2013 Itamar Tzadok
@@ -23,7 +23,7 @@ namespace mod_dataform\pluginbase;
  */
 
 class dataformentry {
-    
+
     /**
      *
      * @return stdClass
@@ -32,39 +32,39 @@ class dataformentry {
         global $USER, $CFG;
 
         $currentuserid = empty($USER->id) ? $CFG->siteguest : $USER->id;
-        $now = time();        
-        
+        $now = time();
+
         $entry = new \stdClass;
         $entry->dataid = $df->id;
         $entry->userid = !empty($data->userid) ? $data->userid : $currentuserid;
-        $entry->groupid = !empty($data->groupid) ?  $data->groupid : $df->currentgroup;
+        $entry->groupid = !empty($data->groupid) ? $data->groupid : $df->currentgroup;
         $entry->timecreated = !empty($data->timecreated) ? $data->timecreated : $now;
         $entry->timemodified = !empty($data->timemodified) ? $data->timemodified : $now;
 
         return $entry;
     }
-        
+
     /**
      *
      * @return bool
      */
     public static function is_own($entry, $userid = null) {
         global $USER;
-        
+
         if (!isloggedin() or isguestuser()) {
             return false;
         }
-        
+
         if (empty($entry->userid)) {
             return false;
         }
-        
+
         if (empty($userid)) {
             $userid = $USER->id;
         }
         return ($entry->userid == $userid);
     }
-        
+
     /**
      *
      * @return bool
@@ -72,43 +72,41 @@ class dataformentry {
     public static function is_grouped($entry) {
         return !empty($entry->groupid);
     }
-    
+
     /**
      *
      * @return bool
      */
     public static function is_anonymous($entry) {
         global $CFG;
-        
+
         // Call isguestuser to make sure the $CFG->siteguest is set
-        isguestuser();               
+        isguestuser();
         if (!empty($entry->userid) and $entry->userid == $CFG->siteguest) {
             return true;
         }
-        
+
         return (empty($entry->userid) and empty($entry->groupid));
     }
-        
+
     /**
      *
      * @return bool
      */
     public static function is_others($entry, $userid = null) {
         global $USER;
-        
+
         if (empty($entry->userid)) {
             return true;
         }
-        
+
         if (empty($USER->id)) {
             return true;
         }
-        
+
         if (empty($userid)) {
             $userid = $USER->id;
         }
         return ($entry->userid != $userid);
     }
 }
-        
- 

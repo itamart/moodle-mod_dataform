@@ -20,8 +20,8 @@
  * @property-read array $other {
  *      Extra information about event.
  *
- *      @type string viewname the name of the view.
- *      @type int dataid the id of the dataform activity.
+ *      string viewname the name of the view.
+ *      int dataid the id of the dataform activity.
  * }
  *
  * @package    mod_dataform
@@ -41,7 +41,7 @@ abstract class view_base extends \core\event\base {
      * @return string
      */
     public static function get_event_name() {
-        list(,,$eventname) = explode('\\', get_called_class());
+        list(, , $eventname) = explode('\\', get_called_class());
         return $eventname;
     }
 
@@ -77,7 +77,7 @@ abstract class view_base extends \core\event\base {
         if (!isset($this->other['dataid'])) {
             throw new \coding_exception('The dataid must be set in $other.');
         }
-        
+
         if (!isset($this->other['viewid'])) {
             throw new \coding_exception('The viewid must be set in $other.');
         }

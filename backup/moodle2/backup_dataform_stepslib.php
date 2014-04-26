@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
@@ -43,11 +43,11 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             'maxentries', 'entriesrequired', 'individualized', 'grouped', 'anonymous', 'timelimit',
             'css', 'cssincludes', 'js', 'jsincludes',
             'defaultview', 'defaultfilter', 'completionentries'));
- 
+
         $fields = new backup_nested_element('fields');
         $field = new backup_nested_element('field', array('id'), array(
             'type', 'name', 'description', 'visible', 'editable', 'label',
-            'param1', 'param2', 'param3', 'param4', 'param5', 
+            'param1', 'param2', 'param3', 'param4', 'param5',
             'param6', 'param7', 'param8', 'param9', 'param10'));
 
         $filters = new backup_nested_element('filters');
@@ -60,7 +60,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $view = new backup_nested_element('view', array('id'), array(
             'type', 'name', 'description',
             'visible', 'perpage', 'filterid', 'patterns', 'submission', 'section',
-            'param1', 'param2', 'param3', 'param4', 'param5', 
+            'param1', 'param2', 'param3', 'param4', 'param5',
             'param6', 'param7', 'param8', 'param9', 'param10'));
 
         $entries = new backup_nested_element('entries');
@@ -130,12 +130,12 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         // Return the root element (data), wrapped into standard activity structure
         return $this->prepare_activity_structure($dataform);
     }
-    
+
     protected function annotate_dataformplugin_files($plugintype, backup_nested_element $bne) {
         global $CFG;
-        
+
         $plugins = core_component::get_plugin_list($plugintype);
-        foreach ($plugins as $type => $path){
+        foreach ($plugins as $type => $path) {
             $pluginclass = $plugintype. "_$type";
             require_once("$path/$type.php");
             foreach ($pluginclass::get_file_areas() as $filearea) {

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage file
@@ -26,5 +26,3 @@ $string['pluginname'] = 'File';
 $string['newline'] = 'New line';
 $string['filesseparator'] = 'Separator';
 $string['filesseparator_help'] = 'Select New line to display multiple files in separate lines.';
-
-

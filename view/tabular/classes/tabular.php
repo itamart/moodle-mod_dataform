@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * This file is part of the Dataform module for Moodle - http://moodle.org/. 
+ * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
  * @package dataformview
  * @subpackage tabular
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,7 +34,7 @@
 class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview {
 
     protected $_editors = array('section', 'param2');
-    
+
     /**
      *
      */
@@ -52,7 +52,7 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
         if (!$fields = $this->df->field_manager->get_fields()) {
             return; // you shouldn't get that far if there are no user fields
         }
-        
+
         $entryactions = get_string('fieldname', 'dataformfield_entryactions');
         $entryauthor = get_string('fieldname', 'dataformfield_entryauthor');
 
@@ -62,11 +62,11 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
         $table->attributes['cellpadding'] = '2';
         $header = array();
         $entry = array();
-        $align = array();        
+        $align = array();
         // author picture
         $header[] = '';
         $entry[] = "[[$entryauthor:picture]]";
-        $align[] = 'center';        
+        $align[] = 'center';
         // author name
         $header[] = '';
         $entry[] = "[[$entryauthor:name]]";
@@ -83,7 +83,7 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
         $header[] = "[[$entryactions:bulkedit]]&nbsp;[[$entryactions:bulkdelete]]&nbsp;[[$entryactions:selectallnone]]";
         $entry[] = "[[$entryactions:edit]]&nbsp;[[$entryactions:delete]]&nbsp;[[$entryactions:select]]";
         $align[] = 'center';
-        
+
         // construct the table
         $table->head = $header;
         $table->align = $align;
@@ -91,18 +91,18 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
         $this->param2 = html_writer::table($table);
 
     }
-    
+
     /**
      *
      */
     protected function group_entries_definition($entriesset, $name = '') {
-        global $CFG, $OUTPUT, $GLOBALS;
+        global $CFG, $OUTPUT;
 
         $tablehtml = trim($this->param2);
         $opengroupdiv = html_writer::start_tag('div', array('class' => 'entriesview'));
         $closegroupdiv = html_writer::end_tag('div');
         if ($name) {
-            $name = ($name == 'newentry' ? get_string('entrynew', 'dataform') : $name); 
+            $name = ($name == 'newentry' ? get_string('entrynew', 'dataform') : $name);
         }
         $groupheading = $OUTPUT->heading($name, 3, 'main');
 
@@ -111,38 +111,38 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
         // if there are no field definition just return everything as html
         if (empty($entriesset)) {
             $elements[] = $opengroupdiv. $groupheading. $tablehtml. $closegroupdiv;
-        
+
         } else {
 
             // clean any prefix and get the open table tag
-            //$tablehtml = preg_replace('/^[\s\S]*<table/i', '<table', $tablehtml);        
+            // $tablehtml = preg_replace('/^[\s\S]*<table/i', '<table', $tablehtml);
             $tablepattern = '/^<table[^>]*>/i';
             preg_match($tablepattern, $tablehtml, $match); // must be there
             $tablehtml = trim(preg_replace($tablepattern, '', $tablehtml));
             $opentable = reset($match);
             // clean any suffix and get the close table tag
             $tablehtml = trim(preg_replace('/<\/table>$/i', '', $tablehtml));
-            $closetable = '</table>'; 
+            $closetable = '</table>';
 
             // get the header row if required
             $headerrow = '';
-            if ($require_headerrow = $this->param3) {
+            if ($requireheaderrow = $this->param3) {
                 if (strpos($tablehtml, '<thead>') === 0) {
                     // get the header row and remove from subject
                     $theadpattern = '/^<thead>[\s\S]*<\/thead>/i';
                     preg_match($theadpattern, $tablehtml, $match);
                     $tablehtml = trim(preg_replace($theadpattern, '', $tablehtml));
-                    $headerrow = reset($match);             
+                    $headerrow = reset($match);
                 }
             }
-            // we may still need to get the header row 
+            // we may still need to get the header row
             // but first remove tbody tags
             if (strpos($tablehtml, '<tbody>') === 0) {
                 $tablehtml = trim(preg_replace('/^<tbody>|<\/tbody>$/i', '', $tablehtml));
             }
             // assuming a simple two rows structure for now
             // if no theader the first row should be the header
-            if ($require_headerrow and empty($headerrow)) {
+            if ($requireheaderrow and empty($headerrow)) {
                 // assuming header row does not contain nested tables
                 $trpattern = '/^<tr>[\s\S]*<\/tr>/i';
                 preg_match($trpattern, $tablehtml, $match);
@@ -154,7 +154,7 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
             // construct elements
             // first everything before the entrytemplate as html
             $elements[] = $opengroupdiv. $groupheading. $opentable. $headerrow. '<tbody>';
-            
+
             // do the entries
             // get tags from the first item in the entry set
             $tagsitem = reset($entriesset);
@@ -165,7 +165,7 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
             foreach ($entriesset as $fielddefinitions) {
                 $definitions = reset($fielddefinitions);
                 $parts = $this->split_tags($tags, $entrytemplate);
-                
+
                 foreach ($parts as $part) {
                     if (in_array($part, $tags)) {
                         if ($definitions[$part]) {
@@ -180,32 +180,32 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
                     }
                 }
             }
-            
+
             // finish the table
             $elements[] = "$htmlparts </tbody> $closetable $closegroupdiv";
-            
+
         }
 
         return $elements;
     }
 
     /**
-     * 
+     *
      */
     protected function entry_definition($fielddefinitions, array $options = null) {
         $elements = array();
         // just store the fefinitions
         //   and group_entries_definition will process them
-        $elements[] = $fielddefinitions; 
+        $elements[] = $fielddefinitions;
         return $elements;
     }
-    
+
     /**
-     * 
+     *
      */
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
-        
+
         // get patterns definitions
         $fields = $this->get_fields();
         $fielddefinitions = array();
@@ -221,8 +221,8 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
                 }
             }
         }
-            
-        $elements[] = $fielddefinitions; 
+
+        $elements[] = $fielddefinitions;
         return $elements;
     }
 }

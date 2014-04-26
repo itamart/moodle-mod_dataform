@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage file
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die();
 
-
 /**
  *
  */
 class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -44,7 +43,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
                 $noedit = $this->is_noedit($pattern);
                 if (!$firstinput and !$noedit and $cleanpattern == "[[$fieldname]]") {
                     $required = $this->is_required($pattern);
-                    $replacements[$pattern] = array(array($this,'display_edit'), array($entry, array('required' => $required)));
+                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
                     $firstinput = true;
                 } else {
                     $replacements[$pattern] = '';
@@ -52,35 +51,35 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             }
             return $replacements;
         }
-        
+
         // Browse mode
         foreach ($patterns as $pattern => $cleanpattern) {
             $displaybrowse = '';
             if ($cleanpattern == "[[$fieldname]]") {
                 $displaybrowse = $this->display_browse($entry);
-            // url    
             } else if ($cleanpattern == "[[{$fieldname}:url]]") {
+                // url
                 $displaybrowse = $this->display_browse($entry, array('url' => 1));
-            // alt
             } else if ($cleanpattern == "[[{$fieldname}:alt]]") {
+                // alt
                 $displaybrowse = $this->display_browse($entry, array('alt' => 1));
-            // size
             } else if ($cleanpattern == "[[{$fieldname}:size]]") {
+                // size
                 $displaybrowse = $this->display_browse($entry, array('size' => 1));
-            // download
             } else if ($cleanpattern == "[[{$fieldname}:download]]") {
+                // download
                 $displaybrowse = $this->display_browse($entry, array('download' => 1));
-            // download count
             } else if ($cleanpattern == "[[{$fieldname}:downloadcount]]") {
+                // download count
                 $displaybrowse = $this->display_browse($entry, array('downloadcount' => 1));
             }
-            
+
             if (!empty($displaybrowse)) {
                 $replacements[$pattern] = $displaybrowse;
             } else {
                 $replacements[$pattern] = '';
             }
-        }           
+        }
 
         return $replacements;
     }
@@ -90,7 +89,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
      */
     public function display_edit(&$mform, $entry, array $options = null) {
         global $PAGE;
-        
+
         $field = $this->_field;
         $fieldid = $field->id;
 
@@ -98,7 +97,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
         $content = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
         $content1 = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
-        
+
         $fieldname = "field_{$fieldid}_{$entryid}";
         $fmoptions = array('subdirs' => 0,
                             'maxbytes' => $field->param1,
@@ -117,9 +116,9 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         }
 
         // alt text
-        //$altoptions = array();
-        //$mform->addElement('text', "{$fieldname}_alttext", get_string('alttext','dataformfield_file'), $altoptions);
-        //$mform->setDefault("{$fieldname}_alttext", s($content1));
+        // $altoptions = array();
+        // $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext', 'dataformfield_file'), $altoptions);
+        // $mform->setDefault("{$fieldname}_alttext", s($content1));
     }
 
     /**
@@ -135,7 +134,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $content1 = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
         $content2 = isset($entry->{"c{$fieldid}_content2"}) ? $entry->{"c{$fieldid}_content2"} : null;
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-        
+
         if (empty($content)) {
             return '';
         }
@@ -169,7 +168,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         }
         return implode($field->appearance->separator, $strfiles);
     }
-                
+
     /**
      *
      */
@@ -178,19 +177,19 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
 
         $filename = $file->get_filename();
         $pluginfileurl = '/pluginfile.php';
-        
+
         if (!empty($params['url'])) {
             return moodle_url::make_file_url($pluginfileurl, "$path/$filename");
-        
+
         } else if (!empty($params['size'])) {
             $bsize = $file->get_filesize();
             if ($bsize < 1000000) {
-                $size = round($bsize/1000,1). 'KB';
+                $size = round($bsize / 1000, 1). 'KB';
             } else {
-                $size = round($bsize/1000000,1). 'MB';
+                $size = round($bsize / 1000000, 1). 'MB';
             }
             return $size;
-        
+
         } else {
             return $this->display_link($file, $path, $altname, $params);
         }
@@ -201,7 +200,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
      */
     protected function display_link($file, $path, $altname, $params = null) {
         global $OUTPUT;
-        
+
         $filename = $file->get_filename();
         $displayname = $altname ? $altname : $filename;
 
@@ -212,17 +211,17 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             'width' => 16)
         );
         if (!empty($params['download'])) {
-            list(,$context,,,$contentid) = explode('/', $path);
+            list(, $context, , , $contentid) = explode('/', $path);
             $url = new moodle_url("/mod/dataform/field/file/download.php", array('cid' => $contentid, 'context' => $context, 'file' => $filename));
         } else {
             $url = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
-        }                
-        
+        }
+
         return html_writer::link($url, "$fileicon&nbsp;$displayname");
     }
 
     /**
-     * 
+     *
      */
     public function pluginfile_patterns() {
         return array("[[{$this->_field->name}]]");
@@ -244,16 +243,16 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $field = $this->_field;
         $fieldid = $field->id;
         $fieldname = $field->name;
-        
+
         // Only [[fieldname]] can be imported
         if ($patternname != $fieldname) {
             return array(array(), array());
-        }            
-        
+        }
+
         $name = "f_{$fieldid}_";
 
         list($grp, $labels) = parent::get_pattern_import_settings($mform, $patternname, $header);
-        
+
         // File picker
         $fmoptions = array(
             'subdirs' => 0,
@@ -264,12 +263,12 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
 
         $grp[] = &$mform->createElement('filepicker', "{$name}_filepicker", null, null, $fmoptions);
         $labels[] = '';
-        
+
         return array($grp, $labels);
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -282,6 +281,6 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $patterns["[[$fieldname:download]]"] = array(false);
         $patterns["[[$fieldname:downloadcount]]"] = array(false);
 
-        return $patterns; 
+        return $patterns;
     }
 }

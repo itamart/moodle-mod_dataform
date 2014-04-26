@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage time
@@ -21,15 +21,14 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
-    public $date_only;
+    public $dateonly;
     public $masked;
-    public $start_year;
-    public $stop_year;
-    public $display_format;
+    public $startyear;
+    public $stopyear;
+    public $displayformat;
 
-    public function __construct($field) {       
+    public function __construct($field) {
         parent::__construct($field);
         $this->date_only = $this->param1;
         $this->masked = $this->param5;
@@ -44,11 +43,11 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
     protected function content_names() {
         return array('', 'year', 'month', 'day', 'hour', 'minute', 'enabled');
     }
-    
+
     /**
      *
      */
-    protected function format_content($entry, array $values = null) { 
+    protected function format_content($entry, array $values = null) {
         $fieldid = $this->id;
         $oldcontents = array();
         $contents = array();
@@ -63,7 +62,7 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
             if (count($values) === 1) {
                 $values = reset($values);
             }
-            
+
             if (!is_array($values)) {
                 // assuming timestamp is passed (e.g. in import)
                 $timestamp = $values;
@@ -71,7 +70,7 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
             } else {
                 // assuming any of year, month, day, hour, minute is passed
                 $enabled = $year = $month = $day = $hour = $minute = 0;
-                foreach ($values as $name => $val) {                
+                foreach ($values as $name => $val) {
                     if (!empty($name)) {          // the time unit
                         ${$name} = $val;
                     }
@@ -84,11 +83,11 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
             }
         }
         $contents[] = $timestamp;
-        return array($contents, $oldcontents);        
+        return array($contents, $oldcontents);
     }
 
     /**
-     * 
+     *
      */
     public function get_search_sql($search) {
         list($element, $not, $operator, $value) = $search;
@@ -114,10 +113,10 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
         if (!$csvrecord) {
             return $data;
         }
-        
+
         $fieldid = $this->id;
         $csvname = '';
-        
+
         $setting = reset($importsettings);
         if (!empty($setting['name'])) {
             $csvname = $setting['name'];
@@ -125,27 +124,26 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
 
         if ($csvname and isset($csvrecord[$csvname]) and $csvrecord[$csvname] !== '') {
             $timestr = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
-            
+
             if ($timestr) {
-                // It's a timestamp
-                if (((string) (int) $timestr === $timestr) 
+                if (((string) (int) $timestr === $timestr)
                         && ($timestr <= PHP_INT_MAX)
                         && ($timestr >= ~PHP_INT_MAX)) {
-
+                    // It's a timestamp
                     $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
-                    
-                // It's a valid time string
+
                 } else if ($timestr = strtotime($timestr)) {
+                    // It's a valid time string
                     $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
                 }
             }
         }
-    
+
         return $data;
     }
 
     /**
-     * 
+     *
      */
     public function get_sql_compare_text($column = 'content') {
         global $DB;
@@ -153,4 +151,3 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
     }
 
 }
-

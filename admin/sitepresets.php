@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod_dataform
  * @category admin
@@ -28,7 +28,7 @@ $urlparams = new stdClass;
 
 // presets list actions
 $urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // ids of presets to delete
-$urlparams->download =  optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
+$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 admin_externalpage_setup('moddataform_sitepresets');
@@ -37,7 +37,6 @@ $pm = new mod_dataform_preset_manager(0);
 
 // DATA PROCESSING
 $pm->process_presets($urlparams);
-
 
 echo $OUTPUT->header();
 

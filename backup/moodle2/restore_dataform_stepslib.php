@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod-dataform
  * @copyright 2011 Itamar Tzadok
@@ -37,7 +37,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $paths = array();
         $userinfo = $this->get_setting_value('userinfo'); // restore content and user info (requires the backup users)
 
-        
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
         $paths[] = new restore_path_element('dataform_filter', '/activity/dataform/filters/filter');
@@ -72,8 +71,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         }
 
         $newitemid = $this->task->get_activityid();
-        
-        if ($newitemid) { 
+
+        if ($newitemid) {
             $data->id = $newitemid;
             $DB->update_record('dataform', $data);
         } else {
@@ -98,7 +97,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             $this->set_mapping('context', $this->task->get_old_contextid(), $this->task->get_contextid());
         } else {
             // Save activity id in task
-            $this->task->set_activityid($newitemid); 
+            $this->task->set_activityid($newitemid);
             // Apply the id to course_modules->instance
             $DB->set_field('course_modules', 'instance', $newitemid, array('id' => $this->task->get_moduleid()));
         }
@@ -147,7 +146,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
             $data->customsort = serialize($sortfields);
         }
-                        
+
         // adjust customsearch field ids
         if ($data->customsearch) {
             $customsearch = unserialize($data->customsearch);
@@ -161,7 +160,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
             $data->customsearch = serialize($searchfields);
         }
-        
+
         // insert the dataform_filters record
         $newitemid = $DB->insert_record('dataform_filters', $data);
         $this->set_mapping('dataform_filter', $oldid, $newitemid, false); // no files associated
@@ -196,7 +195,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
             $data->patterns = serialize($newpatterns);
         }
-        
+
         // insert the dataform_views record
         $newitemid = $DB->insert_record('dataform_views', $data);
         $this->set_mapping('dataform_view', $oldid, $newitemid, true); // files by this item id
@@ -251,7 +250,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     protected function process_dataform_rating($data) {
         $data = (object)$data;
         $data->itemid = $this->get_new_parentid('dataform_entry');
-        $this->process_this_rating($data);        
+        $this->process_this_rating($data);
     }
 
     /**
@@ -272,7 +271,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $newitemid = $DB->insert_record('rating', $data);
     }
-    
+
     /**
      *
      */
@@ -292,10 +291,10 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         $this->add_related_dataformplugin_files('dataformfield', 'dataform_field');
 
         // TODO Add preset related files, matching by itemname (data_content)
-        //$this->add_related_files('mod_dataform', 'course_presets', 'dataform');
+        // $this->add_related_files('mod_dataform', 'course_presets', 'dataform');
 
         $dataformnewid = $this->get_new_parentid('dataform');
-        
+
         // default view
         if ($defaultview = $DB->get_field('dataform', 'defaultview', array('id' => $dataformnewid))) {
             if ($defaultview = $this->get_mappingid('dataform_view', $defaultview)) {
@@ -310,7 +309,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
         }
 
-
         // Update id of userinfo fields if needed
         // TODO can we condition this on restore to new site?
         if ($userinfofields = $DB->get_records('dataform_fields', array('dataid' => $dataformnewid, 'type' => 'userinfo'), '', 'id,param1,param2')) {
@@ -323,12 +321,12 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         }
 
     }
-    
+
     protected function add_related_dataformplugin_files($plugintype, $source) {
         global $CFG;
-        
+
         $plugins = core_component::get_plugin_list($plugintype);
-        foreach ($plugins as $type => $unused){
+        foreach ($plugins as $type => $unused) {
             $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
                 $this->add_related_files($pluginclass, $filearea, $source);

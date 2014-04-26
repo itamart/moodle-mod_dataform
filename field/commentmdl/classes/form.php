@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage commentmdl
@@ -26,7 +26,7 @@ class dataformfield_commentmdl_form extends mod_dataform\pluginbase\dataformfiel
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform =& $this->_form;
 
@@ -37,15 +37,15 @@ class dataformfield_commentmdl_form extends mod_dataform\pluginbase\dataformfiel
     /**
      *
      */
-    function validation($data, $files) {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
         // Name must be lower case
         if (strtolower($data['name']) != $data['name']) {
-            $errors['name'] = get_string('err_lowername','dataform');
+            $errors['name'] = get_string('err_lowername', 'dataform');
         }
 
         return $errors;
     }
-    
+
 }

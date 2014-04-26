@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage entrytime
@@ -22,14 +22,13 @@
  */
 defined('MOODLE_INTERNAL') or die;
 
-
 /**
  *
  */
 class dataformfield_entrytime_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
-     * 
+     *
      */
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
@@ -38,33 +37,49 @@ class dataformfield_entrytime_renderer extends mod_dataform\pluginbase\dataformf
         $replacements = array();
 
         foreach ($patterns as $pattern) {
-            // display nothing on new entries 
+            // display nothing on new entries
             if ($entry->id < 0) {
                 $replacements[$pattern] = '';
 
             } else {
                 list(, $timevar, $format) = explode(':', trim($pattern, '[]')) + array(null, null, null);
 
-                switch ($format) {            
-                    case 'date': $format = get_string('strftimedate'); break; 
-                    case 'minute': $format = '%M'; break; 
-                    case 'hour': $format = '%H'; break; 
-                    case 'day': $format = '%a'; break; 
-                    case 'week': $format = '%W'; break; 
-                    case 'month': $format = '%b'; break; 
-                    case 'm': $format = '%m'; break; 
+                switch ($format) {
+                    case 'date':
+                        $format = get_string('strftimedate');
+                        break;
+                    case 'minute':
+                        $format = '%M';
+                        break;
+                    case 'hour':
+                        $format = '%H';
+                        break;
+                    case 'day':
+                        $format = '%a';
+                        break;
+                    case 'week':
+                        $format = '%W';
+                        break;
+                    case 'month':
+                        $format = '%b';
+                        break;
+                    case 'm':
+                        $format = '%m';
+                        break;
                     case 'year':
-                    case 'Y': $format = '%Y'; break;
+                    case 'Y':
+                        $format = '%Y';
+                        break;
                 }
                 $replacements[$pattern] = userdate($entry->$timevar, $format);
             }
-        }    
+        }
 
         return $replacements;
     }
 
     /**
-     * Array of patterns this field supports 
+     * Array of patterns this field supports
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
@@ -91,6 +106,6 @@ class dataformfield_entrytime_renderer extends mod_dataform\pluginbase\dataformf
             $patterns["[[$fieldname:$timevar:Y]]"] = array(false);
         }
 
-        return $patterns; 
+        return $patterns;
     }
 }

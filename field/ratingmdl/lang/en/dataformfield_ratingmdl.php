@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage ratingmdl
@@ -36,4 +36,3 @@ $string['ratingmdl:ownviewratings'] = 'Own Entry - View Ratings';
 $string['ratingmdl:anyrate'] = 'Any Entry - Rate';
 $string['ratingmdl:anyviewaggregate'] = 'Any Entry - View Rating Aggregates';
 $string['ratingmdl:anyviewratings'] = 'Any Entry - View Ratings';
-

@@ -27,7 +27,6 @@ use core\plugininfo\base;
 
 defined('MOODLE_INTERNAL') || die();
 
-
 class dataformtool extends base {
     public function is_uninstall_allowed() {
         return true;

@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformview
  * @subpackage grid
- * @copyright 2012 Itamar Tzadok 
+ * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +40,7 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
     /**
      *
      */
-    function definition_entry_template() {
+    protected function definition_entry_template() {
 
         $view = $this->_view;
         $editoroptions = $view->editoroptions;
@@ -55,12 +55,12 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
         // Template editor (param2)
         $mform->addElement('editor', 'param2_editor', get_string('entrytemplate', 'dataform'), $editorattr, $editoroptions);
         $this->add_patterns_selectors('param2_editor', array('view', 'field'));
-        
+
         // cols (param3)
         $range = range(2, 50);
         $options = array('' => get_string('choosedots')) + array_combine($range, $range);
         $mform->addElement('select', 'cols', get_string('cols', 'dataformview_grid'), $options);
-        
+
         // rows  (param3)
         $mform->addElement('selectyesno', 'rows', get_string('rows', 'dataformview_grid'));
         $mform->disabledIf('rows', 'cols', 'eq', '');
@@ -70,10 +70,10 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
     /**
      *
      */
-    function data_preprocessing(&$data){
+    public function data_preprocessing(&$data) {
         parent::data_preprocessing($data);
         // grid layout
-        if (!empty($data->param3)){
+        if (!empty($data->param3)) {
             list(
                 $data->cols,
                 $data->rows,
@@ -84,7 +84,7 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
     /**
      *
      */
-    function set_data($data) {
+    public function set_data($data) {
         $this->data_preprocessing($data);
         parent::set_data($data);
     }
@@ -92,7 +92,7 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
     /**
      *
      */
-    function get_data() {
+    public function get_data() {
         if ($data = parent::get_data()) {
             // grid layout
             if (!empty($data->cols)) {
@@ -104,5 +104,4 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
         return $data;
     }
 
-    
 }

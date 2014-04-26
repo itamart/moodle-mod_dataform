@@ -19,7 +19,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11+ (20110323)).
+ * of Moodle's Database activity module (1.9.11+  (20110323)).
  * To the extent that Dataform code corresponds to Database code,
  * certain copyrights on the Database module may obtain.
  */
@@ -34,12 +34,12 @@ M.mod_dataform.util = M.mod_dataform.util || {};
  * Used when editing a dataform view
  */
 M.mod_dataform.util.init_tags_selector = function(Y, selectorname, editorname) {
-    Y.use('node', function () {       
-        if (!Y.one('#id_'+editorname) || !Y.one('#id_'+selectorname)) {
+    Y.use('node', function () {
+        if (!Y.one('#id_' + editorname) || !Y.one('#id_' + selectorname)) {
             return;
         }
-        
-        Y.one('#id_'+selectorname).on('change', function (e) {
+
+        Y.one('#id_' + selectorname).on('change', function (e) {
             var selector = e.target;
             var value = selector.get('options').item(selector.get('selectedIndex')).get('value');
             switch (value){
@@ -47,34 +47,34 @@ M.mod_dataform.util.init_tags_selector = function(Y, selectorname, editorname) {
                     value = String.fromCharCode(9);
                     break;
 
-                case '10':               
+                case '10':
                     value = String.fromCharCode(10);
                     break;
             }
-            if (Y.one('#id_'+editorname).getStyle('display') != 'none') {
-                editor = Y.one('#id_'+editorname).getDOMNode();
+            if (Y.one('#id_' + editorname).getStyle('display') != 'none') {
+                editor = Y.one('#id_' + editorname).getDOMNode();
                 insertAtCursor(editor, value);
 
             // tinyMCE displayed
             } else {
-                var editorid = 'id_'+editorname;
+                var editorid = 'id_' + editorname;
                 tinyMCE.execInstanceCommand(editorid, 'mceInsertContent', false, value);
             }
             selector.set('selectedIndex', 0);
         });
-    });               
+    });
 };
 
 /**
  * Checks/unchecks selector checkboxes on page for bulk actions.
  */
 M.mod_dataform.util.init_select_allnone = function(Y, elemname) {
-    Y.use('node', function (Y) {       
-        if (!Y.one('#id_'+elemname+'selectallnone')) {
+    Y.use('node', function (Y) {
+        if (!Y.one('#id_' + elemname + 'selectallnone')) {
             return;
         }
-        Y.one('#id_'+elemname+'selectallnone').on('click', function (e) {
-            var selectorclass = '.'+elemname+'selector';
+        Y.one('#id_' + elemname + 'selectallnone').on('click', function (e) {
+            var selectorclass = '.' + elemname + 'selector';
             if (e.target.get('checked')) {
                 Y.all(selectorclass).set('checked', 'checked');
             } else {
@@ -90,16 +90,16 @@ M.mod_dataform.util.init_select_allnone = function(Y, elemname) {
  * Used when editing dataform entries
  */
 M.mod_dataform.util.init_bulk_action = function(Y, elemname, action, url, defaultval) {
-    Y.use('node', function (Y) {       
-        if (!Y.one('#id_'+elemname+'_bulkaction_'+action)) {
+    Y.use('node', function (Y) {
+        if (!Y.one('#id_' + elemname + '_bulkaction_' + action)) {
             return;
         }
 
-        Y.one('#id_'+elemname+'_bulkaction_'+action).on('click', function (e) {
+        Y.one('#id_' + elemname + '_bulkaction_' + action).on('click', function (e) {
             e.preventDefault();
-            
+
             var selected = [];
-            Y.all('.'+elemname+'selector').each(function(selector) {
+            Y.all('.' + elemname + 'selector').each(function(selector) {
                 if (selector.get('checked')) {
                     selected.push(selector.get('value'));
                 }

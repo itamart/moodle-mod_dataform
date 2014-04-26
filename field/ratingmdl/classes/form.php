@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
- 
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package dataformfield
  * @subpackage ratingmdl
@@ -26,33 +26,33 @@ class dataformfield_ratingmdl_form extends mod_dataform\pluginbase\dataformfield
     /**
      *
      */
-    function field_definition() {
+    public function field_definition() {
 
         $mform =& $this->_form;
 
         // Restrict name to alphanumeric
         $mform->addRule('name', null, 'alphanumeric', null, 'client');
 
-        //-------------------------------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-        
+
         // entry rating
         $mform->addElement('modgrade', 'param1', get_string('rating', 'dataformfield_ratingmdl'));
         $mform->setDefault('param1', 0);
-        
+
     }
 
     /**
      *
      */
-    function validation($data, $files) {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
         // Name must be lower case
         if (strtolower($data['name']) != $data['name']) {
-            $errors['name'] = get_string('err_lowername','dataform');
+            $errors['name'] = get_string('err_lowername', 'dataform');
         }
 
         return $errors;
-    }    
+    }
 }
