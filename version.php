@@ -26,9 +26,9 @@
  * certain copyrights on the Database module may obtain.
  */
 
-$module->component = 'mod_dataform';
-$module->release  = '2.6.2';
-$module->version  = 2014041700;
-$module->requires = 2013111800;
-$module->maturity = MATURITY_STABLE;
-// $module->cron     = 60;
+$plugin->component = 'mod_dataform';
+$plugin->release  = '2.6.2+ (Build: 20140426)';
+$plugin->version  = 2014041701;
+$plugin->requires = 2013111800;
+$plugin->maturity = MATURITY_STABLE;
+// $plugin->cron     = 60;
