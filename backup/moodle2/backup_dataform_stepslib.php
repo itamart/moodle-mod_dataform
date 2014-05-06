@@ -136,8 +136,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
 
         $plugins = core_component::get_plugin_list($plugintype);
         foreach ($plugins as $type => $path) {
-            $pluginclass = $plugintype. "_$type";
-            require_once("$path/$type.php");
+            $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
                 $bne->annotate_files($pluginclass, $filearea, 'id'); // By id
             }
