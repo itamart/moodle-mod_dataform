@@ -137,7 +137,7 @@ class dataformview {
 
             // Options that require permission
             // $params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
-            // if (\mod_dataform\access\view_filter_override::validate($params)) {
+            // If (\mod_dataform\access\view_filter_override::validate($params)) {
             // }
         }
 
@@ -147,27 +147,28 @@ class dataformview {
 
         $filter = $fm->get_filter_by_id($fid, array('view' => $this));
 
-        // set specific entry id
+        // Set specific entry id
         if ($eids) {
             $filter->eids = $eids;
         }
-        // set specific users
+        // Set specific users
         if ($users) {
             $filter->users = is_array($users) ? $users : explode(',', $users);
         }
-        // set specific groups
+        // Set specific groups
         if ($groups) {
             $filter->groups = is_array($groups) ? $groups : explode(',', $groups);
         }
-        // add view specific perpage
+        // Add view specific perpage
         if ($perpage) {
             $filter->perpage = $perpage;
         }
-        // add view specific groupby
+        // Add view specific groupby
         if ($groupby) {
             $filter->groupby = $groupby;
         }
-        // add page
+
+        // Add page
         if ($page) {
             $filter->page = $page;
         }
@@ -193,7 +194,8 @@ class dataformview {
             $filter->append_search_options($csearch);
         }
 
-        // content fields
+
+        // Content fields
         if ($patternfields = $this->get_pattern_set('field')) {
             $filter->contentfields = array_keys($patternfields);
         }
@@ -208,7 +210,8 @@ class dataformview {
      * @return void
      */
     public function set_page($pagefile = null, array $options = null) {
-        // filter
+
+        // Filter
         $foptions = !empty($options['filter']) ? array('id' => $options['filter']) : null;
         $this->set_viewfilter($foptions);
     }
@@ -221,8 +224,8 @@ class dataformview {
     public function process_portfolio_export() {
         global $CFG;
 
-        // proces export requests
-        $export = optional_param('export', '', PARAM_TAGLIST);  // comma delimited entry ids or -1 for all entries in view
+        // Proces export requests
+        $export = optional_param('export', '', PARAM_TAGLIST);  // Comma delimited entry ids or -1 for all entries in view
         if ($export and confirm_sesskey()) {
             if (!empty($CFG->enableportfolios)) {
                 require_once("$CFG->libdir/portfoliolib.php");
@@ -850,7 +853,7 @@ class dataformview {
      */
     public function rewrite_pluginfile_urls($pluginfileurl = null) {
         foreach ($this->editors as $editor) {
-            // export with files should provide the file path
+            // Export with files should provide the file path
             if ($pluginfileurl) {
                 $this->$editor = str_replace('@@PLUGINFILE@@/', $pluginfileurl, $this->$editor);
             } else {
@@ -909,7 +912,8 @@ class dataformview {
         $files = array();
         $fs = get_file_storage();
 
-        // view files
+
+        // View files
         if (empty($set) or $set == 'view') {
             foreach ($this->editors as $editor) {
                 $files = array_merge($files, $fs->get_area_files($this->df->context->id,
@@ -921,9 +925,10 @@ class dataformview {
             }
         }
 
-        // field files
+
+        // Field files
         if (empty($set) or $set == 'field') {
-            // find which fields actually display files/images in the view
+            // Find which fields actually display files/images in the view
             $fids = array();
             if ($fieldpatterns = $this->get_pattern_set('field')) {
                 $fields = $this->get_fields();
@@ -933,8 +938,8 @@ class dataformview {
                     }
                 }
             }
-            // get the files from the entries
-            if ($this->entry_manager->entries and !empty($fids)) {  // set_content must have been called
+            // Get the files from the entries
+            if ($this->entry_manager->entries and !empty($fids)) {  // Set_content must have been called
                 $files = array_merge($files, $this->entry_manager->get_embedded_files($fids));
             }
         }
@@ -1115,7 +1120,7 @@ class dataformview {
                     if (!$data = $entriesform->get_data()) {
                         $data = new \stdClass;
                     }
-                    // validated successfully so process request
+                    // Validated successfully so process request
                     list($strnotify, $processedeids) = $entryman->process_entries('update', $update, $data, true);
 
                     $this->editentries = $this->continue_editing($data, $processedeids);
@@ -1262,7 +1267,7 @@ class dataformview {
         $filter = $this->filter;
         $editentries = !empty($options['editentries']) ? $options['editentries'] : $this->editentries;
 
-        // prepare params for form
+        // Prepare params for form
         $actionparams = array(
             'd' => $this->dataid,
             'view' => $this->id,
@@ -1287,7 +1292,7 @@ class dataformview {
         }
 
         $formclass = $this->get_entries_form_class();
-        return new $formclass($actionurl, $customdata);
+        return new $formclass($actionurl, $customdata, 'post', '', array('class' => 'entriesform'));
     }
 
     /**
@@ -1364,9 +1369,9 @@ class dataformview {
 
                 $calc = new calc_formula("=$formula");
                 $result = $calc->evaluate();
-                // false as result indicates some problem
+                // False as result indicates some problem
                 if ($result === false) {
-                    $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;')); // get_string('errorcalculationunknown', 'grades');
+                    $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;'));
                 } else {
                     // Set decimals
                     if (is_numeric($decimals)) {
@@ -1427,7 +1432,7 @@ class dataformview {
             $editentries = array_combine($editentries, $editentries);
         }
 
-        // compile entries if any
+        // Compile entries if any
         if ($entries) {
             $groupname = '';
             $groupdefinition = array();
@@ -1445,7 +1450,7 @@ class dataformview {
                 $groupdefinition[$entryid] = $editthisone;
 
             }
-            // collect remaining definitions (all of it if no groupby)
+            // Collect remaining definitions (all of it if no groupby)
             $displaydefinition[$groupname] = $groupdefinition;
         }
 
@@ -1541,7 +1546,7 @@ class dataformview {
 
         $this->id = $viewid;
 
-        // update item id of files area
+        // Update item id of files area
         $fs = get_file_storage();
         $contextid = $this->df->context->id;
         $component = $this->component;
@@ -1830,7 +1835,7 @@ class dataformview {
             $trust = !empty($data->{$editor.'trust'}) ? $data->{$editor.'trust'} : 1;
             $text = !empty($data->$editor) ? $data->$editor : '';
 
-            // replace \n in non text format
+            // Replace \n in non text format
             if ($format != FORMAT_PLAIN) {
                 $text = str_replace("\n", "", $text);
             }

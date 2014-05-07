@@ -131,18 +131,18 @@
   display: table-column;
 }
 
-#page-mod-dataform-embed .mform .entriesview fieldset.hidden,
-#page-mod-dataform-embed .mform .entriesview fieldset.hidden div,
-#page-mod-dataform-view .mform .entriesview fieldset.hidden,
-#page-mod-dataform-view .mform .entriesview fieldset.hidden div{
+#page-mod-dataform-embed .mform.entriesform fieldset.hidden,
+#page-mod-dataform-embed .mform.entriesform fieldset.hidden div,
+#page-mod-dataform-view .mform.entriesform fieldset.hidden,
+#page-mod-dataform-view .mform.entriesform fieldset.hidden div{
   margin: 0;
   padding: 0;
 }
 
 #page-mod-dataform-embed .mform .fitem .fitemtitle,
-#page-mod-dataform-embed .mform .entriesview .fitem .fitemtitle,
+#page-mod-dataform-embed .mform.entriesform .fitem .fitemtitle,
 /*#page-mod-dataform-view .mform .fitem .fitemtitle,*/
-#page-mod-dataform-view .mform .entriesview .fitem .fitemtitle {
+#page-mod-dataform-view .mform.entriesform .fitem .fitemtitle {
   float: left;
   text-align: left;
   width: auto;
@@ -150,11 +150,11 @@
 
 
 #page-mod-dataform-embed .mform .fitem .felement,
-#page-mod-dataform-embed .mform .entriesview .fitem .felement,
-#page-mod-dataform-embed .mform .entriesview .fitem .feditor,
+#page-mod-dataform-embed .mform.entriesform .fitem .felement,
+#page-mod-dataform-embed .mform .entriesform .fitem .feditor,
 /*#page-mod-dataform-view .mform .fitem .felement,*/
-#page-mod-dataform-view .mform .entriesview .fitem .felement,
-#page-mod-dataform-view .mform .entriesview .fitem .feditor {
+#page-mod-dataform-view .mform.entriesform .fitem .felement,
+#page-mod-dataform-view .mform.entriesform .fitem .feditor {
   margin-left: 0;
   width: 100%;
 }
