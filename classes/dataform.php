@@ -99,6 +99,11 @@ class mod_dataform_dataform {
         $df = new mod_dataform_dataform($dataformid, null, true);
         $viewman = new mod_dataform_view_manager($dataformid);
 
+        // Make sure user can access the view.
+        if (!array_key_exists($viewid, $viewman->views_menu)) {
+            return null;
+        }
+
         if ($view = $viewman->get_view_by_id($viewid)) {
             $params = array(
                     'js' => true,
@@ -132,6 +137,14 @@ class mod_dataform_dataform {
         global $DB;
 
         if (!$dataform = $DB->get_record('dataform', array('id' => $dataformid))) {
+            return null;
+        }
+
+        $df = new mod_dataform_dataform($dataformid, null, true);
+        $viewman = new mod_dataform_view_manager($dataformid);
+
+        // Make sure user can access the view.
+        if (!array_key_exists($viewid, $viewman->views_menu)) {
             return null;
         }
 
@@ -191,7 +204,7 @@ class mod_dataform_dataform {
         if ($d) {
             // Initialize from dataform id or object
             if (is_object($d)) {
-                // try object first
+                // Try object first
                 $this->_data = $d;
             } else if (!$this->_data = $DB->get_record('dataform', array('id' => $d))) {
                 throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: $d");
@@ -215,10 +228,10 @@ class mod_dataform_dataform {
             }
         }
 
-        // get context
+        // Get context
         $this->_context = \context_module::instance($this->_cm->id);
 
-        // set groups
+        // Set groups
         $this->_groupmode = groups_get_activity_groupmode($this->_cm);
         $this->_currentgroup = groups_get_activity_group($this->_cm, true);
     }
@@ -290,14 +303,15 @@ class mod_dataform_dataform {
 
         // LOGIN REQUIREMENT
         if (empty($params->nologin)) {
-            // guest auto login
+            // Guest auto login
             $autologinguest = false;
             if ($pagefile == 'view' or $pagefile == 'embed' or $pagefile == 'external') {
                 $autologinguest = true;
 
             }
 
-            // require login
+
+            // Require login
             require_login($this->course->id, $autologinguest, $this->cm);
         }
 
@@ -351,7 +365,7 @@ class mod_dataform_dataform {
         $PAGE->set_heading($this->course->fullname);
 
         // Set current view and view's page requirements only if activity ready (with default view)
-        // and access allowed
+        // And access allowed
         if ($this->defaultview) {
             $currentviewid = !empty($urlparams['view']) ? $urlparams['view'] : $this->defaultview;
 
@@ -419,7 +433,7 @@ class mod_dataform_dataform {
         global $PAGE;
 
         $cssurls = array();
-        // js includes from the js template
+        // Js includes from the js template
         if ($this->cssincludes) {
             foreach (explode("\n", $this->cssincludes) as $cssinclude) {
                 $cssinclude = trim($cssinclude);
@@ -437,7 +451,7 @@ class mod_dataform_dataform {
                 $cssurls[] = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
             }
         }
-        // css code from the css template
+        // Css code from the css template
         if ($this->css) {
             $cssurls[] = new moodle_url('/mod/dataform/css.php', array('d' => $this->id));
         }
@@ -451,7 +465,7 @@ class mod_dataform_dataform {
         }
 
         // CSS cannot be required after head, so in that case return the tags
-        // and they will be added to the html.
+        // And they will be added to the html.
         $csstags = '';
         $attrs = array('rel' => 'stylesheet', 'type' => 'text/css');
         foreach ($cssurls as $cssurl) {
@@ -472,7 +486,7 @@ class mod_dataform_dataform {
 
         $jsurls = array();
 
-        // js includes from the js template
+        // Js includes from the js template
         if ($this->jsincludes) {
             foreach (explode("\n", $this->jsincludes) as $jsinclude) {
                 $jsinclude = trim($jsinclude);
@@ -490,7 +504,7 @@ class mod_dataform_dataform {
                 $jsurls[] = moodle_url::make_file_url('/pluginfile.php', "$path/$filename");
             }
         }
-        // js code from the js template
+        // Js code from the js template
         if ($this->js) {
             $jsurls[] = new moodle_url('/mod/dataform/js.php', array('d' => $this->id));
         }
@@ -514,7 +528,7 @@ class mod_dataform_dataform {
             if ($rssviews = $this->get_rss_views()) {
                 require_once("$CFG->libdir/rsslib.php");
                 foreach ($rssviews as $viewid => $view) {
-                    $rsstitle = $view->get_rss_header_title(); // format_string($this->course->shortname) . ': %fullname%';
+                    $rsstitle = $view->get_rss_header_title(); // Format_string($this->course->shortname) . ': %fullname%';
                     $componentinstance = $this->id. "/$viewid";
                     rss_add_http_header($this->context, 'mod_dataform', $componentinstance, $rsstitle);
                 }
@@ -541,15 +555,15 @@ class mod_dataform_dataform {
 
         // Editing button (omit in embedded dataforms)
         if ($pagefile != 'embed' and $PAGE->user_allowed_editing()) {
-             // teacher editing mode
+            // Teacher editing mode
             if ($urlparams['edit'] != -1) {
                 $USER->editing = $urlparams['edit'];
             }
 
             $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
-                '<input type="hidden" name="d" value="'. $this->id. '" />'.
-                '<input type="hidden" name="edit" value="'. ($PAGE->user_is_editing() ? 0 : 1). '" />'.
-                '<input type="submit" value="'.get_string($PAGE->user_is_editing() ? 'blockseditoff' : 'blocksediton'). '" /></div></form></td></tr></table>';
+                '<input type="hidden" name="d" value="'.$this->id.'" />'.
+                '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing() ? 0 : 1).'" />'.
+                '<input type="submit" value="'.get_string($PAGE->user_is_editing() ? 'blockseditoff' : 'blocksediton').'" /></div></form></td></tr></table>';
             $PAGE->set_button($buttons);
         }
     }
@@ -624,8 +638,9 @@ class mod_dataform_dataform {
 
             if ($updatedf) {
                 if ($DB->update_record('dataform', $this->data)) {
+                    // Process notification message.
                     if ($notify and $notify !== true) {
-                        $this->notifications = array('success' => array('' => $notify));
+                        $this->notifications = array('success' => array('' => $notify));;
                     }
 
                     // Trigger event
@@ -973,7 +988,7 @@ class mod_dataform_dataform {
     }
 
 
-    //  GRADING
+    // GRADING
 
     /**
      *
@@ -981,9 +996,9 @@ class mod_dataform_dataform {
     public function get_gradebook_users(array $userids = null) {
         global $DB, $CFG;
 
-        // get the list of users by gradebook roles
+        // Get the list of users by gradebook roles
         if (!empty($CFG->gradebookroles)) {
-            $gradebookroles = explode(",", $CFG->gradebookroles);
+            $gradebookroles = explode(", ", $CFG->gradebookroles);
 
         } else {
             $gradebookroles = '';
@@ -1134,7 +1149,7 @@ class mod_dataform_dataform {
 
             $calc = new calc_formula("=$calculation");
             $result = $calc->evaluate();
-            // false as result indicates some problem
+            // False as result indicates some problem
             if ($result !== false) {
                 $grades[$userid] = (object) array(
                     'id' => $userid,
@@ -1174,7 +1189,7 @@ class mod_dataform_dataform {
         return true;
     }
 
-    //  USER
+    // USER
 
     /**
      * has a user reached the max number of entries?
@@ -1245,18 +1260,18 @@ class mod_dataform_dataform {
         $andwhereinterval = '';
 
         if (!$this->grouped) {
-            // Go by user
+            // Go by user.
             $andwhereuserorgroup = " AND userid = ? ";
             $params[] = $USER->id;
         } else {
-            // Go by group
+            // Go by group.
             $andwhereuserorgroup = " AND groupid = ? ";
-            // if user is trying add an entry and got this far
-            //  the user should belong to the current group
+            // If user is trying add an entry and got this far
+            // The user should belong to the current group
             $params[] = $this->currentgroup;
         }
 
-        // time interval
+        // Time interval
         if ($timeinterval = $this->timeinterval and $perinterval) {
             $timeavailable = $this->timeavailable;
             $elapsed = time() - $timeavailable;
