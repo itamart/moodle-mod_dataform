@@ -179,7 +179,7 @@ class mod_dataform_view_manager {
     public function get_view_by_id($viewid = 0) {
         global $DB;
 
-        if (!$viewid and !$viewid = $df->defaultview) {
+        if (!$viewid and !$viewid = \mod_dataform_dataform::instance($this->_dataformid)->defaultview) {
             return false;
         }
 
