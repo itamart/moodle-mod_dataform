@@ -261,7 +261,7 @@ class dataformrule {
             return $this->_block->config->views;
         }
         // Return all views
-        return \mod_dataform_view_manager::instance($this->_dataformid)->get_views_menu();
+        return \mod_dataform_view_manager::instance($this->_dataformid)->views_menu;
     }
 
     /**

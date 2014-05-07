@@ -506,7 +506,7 @@ class mod_dataform_view_manager {
      *
      */
     public function delete_views() {
-        if ($views = $this->get_views_menu()) {
+        if ($views = $this->views_menu) {
             $viewids = array_keys($views);
             $this->process_views('delete', $viewids, true);
         }

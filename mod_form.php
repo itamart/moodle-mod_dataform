@@ -97,7 +97,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         // Displayed view
         $options = array(0 => get_string('choosedots'));
         if ($this->_instance) {
-            if ($views = mod_dataform_view_manager::instance($this->_instance)->get_views_menu(array('forceget' => true))) {
+            if ($views = mod_dataform_view_manager::instance($this->_instance)->views_menu) {
                 $options = $options + $views;
             }
         }

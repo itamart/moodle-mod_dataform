@@ -575,7 +575,7 @@ class dataformviewpatterns {
 
         static $views = null;
         if ($views === null) {
-            $views = $this->_view->df->view_manager->get_views_menu();
+            $views = $this->_view->df->view_manager->views_menu;
         }
 
         if ($views) {

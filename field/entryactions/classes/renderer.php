@@ -433,7 +433,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         if ($this->_viewsmenu === null) {
             $field = $this->_field;
             $viewman = mod_dataform_view_manager::instance($this->_field->df->id);
-            $this->_viewsmenu = $viewman->get_views_menu();
+            $this->_viewsmenu = $viewman->views_menu;
         }
 
         return $this->_viewsmenu;

@@ -182,7 +182,7 @@ class dataformviewform extends \moodleform {
 
         // Redirect view after submission
         $options = array('' => get_string('choosedots'));
-        if ($viewsmenu = \mod_dataform_view_manager::instance($view->df->id)->get_views_menu()) {
+        if ($viewsmenu = \mod_dataform_view_manager::instance($view->df->id)->views_menu) {
             // Remove this view
             if ($view->id and !empty($viewsmenu[$view->id])) {
                 unset($viewsmenu[$view->id]);

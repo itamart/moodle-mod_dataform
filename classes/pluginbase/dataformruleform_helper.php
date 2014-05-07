@@ -62,7 +62,7 @@ class dataformruleform_helper {
         $mform->addElement('select', $prefix. 'viewselection', get_string('views', 'dataform'), $options);
 
         $items = array();
-        if ($items = \mod_dataform_view_manager::instance($dataformid)->get_views_menu()) {
+        if ($items = \mod_dataform_view_manager::instance($dataformid)->views_menu) {
             $items = array_combine($items, $items);
         }
         $select = &$mform->addElement('select', $prefix. 'views', null, $items);

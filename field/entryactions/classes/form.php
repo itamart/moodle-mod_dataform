@@ -50,7 +50,7 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
         // Target view (param1)
         $viewman = mod_dataform_view_manager::instance($field->dataid);
         $options = array('' => get_string('default'));
-        if ($viewsmenu = $viewman->get_views_menu()) {
+        if ($viewsmenu = $viewman->views_menu) {
             $options = $options + $viewsmenu;
         }
         $mform->addElement('select', "targetview_$action", get_string('targetview', 'dataformfield_entryactions'), $options);
