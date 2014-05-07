@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -88,12 +88,12 @@ class dataform_advanced_search_sql_test extends advanced_testcase {
 
         $this->resetAfterTest(true);
 
-        // we already have 2 users, we need 98 more - let's ignore the fact that guest can not post anywhere
+        // We already have 2 users, we need 98 more - let's ignore the fact that guest can not post anywhere
         for ($i = 3; $i <= 100; $i++) {
             $this->getDataGenerator()->create_user();
         }
 
-        // create dataform module - there should be more of these I guess
+        // Create dataform module - there should be more of these I guess
         $course = $this->getDataGenerator()->create_course();
         $data = $this->getDataGenerator()->create_module('dataform', array('course' => $course->id));
         $this->recorddata = $data;

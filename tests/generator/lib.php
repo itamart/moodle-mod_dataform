@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,10 @@
 
 defined('MOODLE_INTERNAL') or die;
 
+global $CFG;
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+
 /**
  * Page module PHPUnit data generator class
  *
@@ -45,6 +49,103 @@ class mod_dataform_generator extends testing_module_generator {
         $record = (object)(array)$record;
 
         return parent::create_instance($record, (array)$options);
+    }
+
+    /**
+     * Deletes an existing dataform module instance
+     *
+     * @param int $id Id of dataform instance
+     * @return void
+     */
+    public function delete_instance($id) {
+        if ($df = mod_dataform_dataform::instance($id)) {
+            $df->delete();
+        }
+    }
+
+    /**
+     * Deletes all dataform instances in course or site if course id not specified.
+     *
+     * @param int $id Id of course
+     * @return void
+     */
+    public function delete_all_instances($courseid = 0) {
+        global $DB;
+
+        $params = array();
+        if ($courseid) {
+            $params['course'] = $courseid;
+        }
+        if ($dataforms = $DB->get_records_menu('dataform', $params, '', 'id, id AS did')) {
+            foreach ($dataforms as $dataformid) {
+                mod_dataform_dataform::instance($dataformid)->delete();
+            }
+        }
+    }
+
+    /**
+     * Duplicates a single dataform within a course.
+     *
+     * This is based on the code from course/modduplicate.php, but reduced for
+     * simplicity.
+     *
+     * @param stdClass $course Course object
+     * @param int $cmid Dataform to duplicate
+     * @return stdClass The new dataform instance with cmid
+     */
+    public function duplicate_instance($course, $cmid) {
+        global $DB, $USER;
+
+        // Do backup.
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id
+        );
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        // Do restore.
+        $rc = new restore_controller(
+            $backupid,
+            $course->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id, backup::TARGET_CURRENT_ADDING
+        );
+        $rc->execute_precheck();
+        $rc->execute_plan();
+
+        // Find cmid.
+        $tasks = $rc->get_plan()->get_tasks();
+        $cmcontext = context_module::instance($cmid);
+        $newcmid = 0;
+        $newactivityid = 0;
+        foreach ($tasks as $task) {
+            if (is_subclass_of($task, 'restore_activity_task')) {
+                if ($task->get_old_contextid() == $cmcontext->id) {
+                    $newcmid = $task->get_moduleid();
+                    $newactivityid = $task->get_activityid();
+                    break;
+                }
+            }
+        }
+        $rc->destroy();
+        if (!$newcmid) {
+            throw new coding_exception('Unexpected: failure to find restored cmid');
+        }
+        if (!$instance = $DB->get_record('dataform', array('id' => $newactivityid))) {
+            throw new coding_exception('Unexpected: failure to find restored activityid');
+        }
+        $instance->cmid = $newcmid;
+
+        // Clear the time limit, otherwise phpunit complains.
+        set_time_limit(0);
+
+        return $instance;
     }
 
     /**
