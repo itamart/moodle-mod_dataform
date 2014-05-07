@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,22 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * mod_data comment created event.
- *
- * @package    mod_data
- * @copyright  2013 Rajesh Taneja <rajesh@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace dataformfield_commentmdl\event;
 
-namespace mod_data\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * mod_data comment created event.
+ * dataformfield_commentmdl comment created event.
  *
- * @package    mod_data
- * @copyright  2013 Rajesh Taneja <rajesh@moodle.com>
+ * @package    dataformfield_commentmdl
+ * @copyright  2014 Itamar Tzadok
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comment_created extends \core\event\comment_created {
@@ -39,7 +32,7 @@ class comment_created extends \core\event\comment_created {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/data/view.php', array('id' => $this->other['itemid']));
+        return new \moodle_url('/mod/dataform/view.php', array('id' => $this->other['itemid']));
     }
 
     /**
@@ -48,6 +41,6 @@ class comment_created extends \core\event\comment_created {
      * @return string
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' added comment for database activity with id ' . $this->other['itemid'];
+        return 'User with id ' . $this->userid . ' added comment for dataform activity with id ' . $this->other['itemid'];
     }
 }
