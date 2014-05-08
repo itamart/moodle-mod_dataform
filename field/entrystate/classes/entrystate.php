@@ -213,12 +213,14 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
             $note = (object) array('id' => $entry->id, 'old' => $states[$oldstate], 'new' => $states[$newstate]);
             $data['subject'] = get_string('statechanged', 'dataformfield_entrystate', $note);
             $data['content'] = $data['subject'];
+            $data['contentformat'] = FORMAT_PLAIN;
             $data['recipients'] = $recipients;
             $data['sender'] = get_admin();
             $data['name'] = 'dataform_notification';
             $data['notification'] = 1;
 
-            mod_dataform\pluginbase\dataformnotification::notify($data);
+            $notification = new \mod_dataform\observer\notification;
+            $notification->send_message($data);
         }
     }
 
