@@ -228,15 +228,15 @@ class mod_dataform_filter_manager {
         $filters = array();
 
         if (has_capability('mod/dataform:managefilters', $df->context)) {
-            // don't need record from database for filter form submission
+            // Don't need record from database for filter form submission
             if ($fids) {
-                // some filters are specified for action
+                // Some filters are specified for action
                 $fids = !is_array($fids) ? explode(',', $fids) : $fids;
                 foreach ($fids as $filterid) {
-                    $filters[] = $this->get_filter_by_id($filterid);
+                    $filters[$filterid] = $this->get_filter_by_id($filterid);
                 }
             } else if ($action == 'update') {
-                $filters[] = $this->get_filter_blank();
+                $filters[0] = $this->get_filter_blank();
             }
         }
         $processedfids = array();
@@ -262,7 +262,7 @@ class mod_dataform_filter_manager {
                 exit;
 
             } else {
-                // go ahead and perform the requested action
+                // Go ahead and perform the requested action
                 switch ($action) {
                     case 'duplicate':
                         if (!empty($filters)) {
@@ -270,8 +270,7 @@ class mod_dataform_filter_manager {
                                 if ($this->is_at_max_filters()) {
                                     break;
                                 }
-
-                                // set new name
+                                // Set new name
                                 while ($df->name_exists('filters', $filter->name)) {
                                     $filter->name = 'Copy of '. $filter->name;
                                 }
@@ -304,7 +303,7 @@ class mod_dataform_filter_manager {
                             $filter->delete();
                             unset($this->_filters[$filter->id]);
 
-                            // reset default filter if needed
+                            // Reset default filter if needed
                             if ($filter->id == $df->defaultfilter) {
                                 $df->update((object) array('defaultfilter' => 0));
                             }
@@ -361,7 +360,7 @@ class mod_dataform_filter_manager {
         $formparams = array('d' => $this->_dataformid, 'fid' => $filter->id, 'update' => 1);
         $formurl = new moodle_url('/mod/dataform/filter/edit.php', $formparams);
 
-        $mform = new mod_dataform\pluginbase\dataformfilterform_standard($filter, $formurl);
+        $mform = new mod_dataform\pluginbase\dataformfilterform_standard($filter->instance, $formurl);
         return $mform;
     }
 
@@ -419,7 +418,7 @@ class mod_dataform_filter_manager {
                 }
 
                 $i = (int) str_replace('searchandor', '', $var);
-                // check if trying to define a search criterion
+                // Check if trying to define a search criterion
                 if ($searchandor = $formdata->{"searchandor$i"}) {
                     if ($searchelement = $formdata->{"searchfield$i"}) {
                         list($fieldid, $element) = explode(',', $searchelement);
