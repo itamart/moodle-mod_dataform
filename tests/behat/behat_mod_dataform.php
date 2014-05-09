@@ -40,11 +40,6 @@ use Behat\Behat\Context\Step\Given as Given,
 class behat_mod_dataform extends behat_base {
 
     /**
-     * @var testing_data_generator
-     */
-    protected $datagenerator;
-
-    /**
      * Each element specifies:
      * - The data generator sufix used.
      * - The required fields.
@@ -69,7 +64,21 @@ class behat_mod_dataform extends behat_base {
         ),
     );
 
-    // BACKGROUND
+    /**
+     * Runs the specified scenario if exists.
+     *
+     * @Given /^I run dataform scenario "(?P<scenario_name_string>(?:[^"]|\\")*)" with:$/
+     * @param string $name
+     * @param TableNode $data
+     */
+    public function i_run_dataform_scenario_with($name, $data) {
+        $scenarioname = 'scenario_'. str_replace(' ', '_', $name);
+        if (method_exists($this, $scenarioname)) {
+            return $this->$scenarioname($data);
+        }
+        return array();
+    }
+
 
     /**
      * Starts afresh with a dataform activity 'Test dataform' in Course 1.
@@ -104,7 +113,7 @@ class behat_mod_dataform extends behat_base {
         // Now that we need them require the data generators.
         require_once(__DIR__ . '/../generator/lib.php');
 
-        $this->datagenerator = testing_util::get_data_generator()->get_plugin_generator('mod_dataform');
+        $generator = testing_util::get_data_generator()->get_plugin_generator('mod_dataform');
 
         $elementdatagenerator = self::$elements[$elementname]['datagenerator'];
         $requiredfields = self::$elements[$elementname]['required'];
@@ -138,9 +147,9 @@ class behat_mod_dataform extends behat_base {
 
             // Creates element.
             $methodname = 'create_' . $elementdatagenerator;
-            if (method_exists($this->datagenerator, $methodname)) {
+            if (method_exists($generator, $methodname)) {
                 // Using data generators directly.
-                $this->datagenerator->{$methodname}($elementdata);
+                $generator->{$methodname}($elementdata);
 
             } else if (method_exists($this, 'process_' . $elementdatagenerator)) {
                 // Using an alternative to the direct data generator call.
@@ -244,9 +253,11 @@ class behat_mod_dataform extends behat_base {
         );
     }
 
+    // FIELD
+
     /**
      * Adds a field of the specified type to the current dataform with the provided table data (usually Name).
-     * The step begins from the dataform's course page.
+     * The step begins in the dataform fields index.
      *
      * @Given /^I add a dataform field "(?P<field_type_string>(?:[^"]|\\")*)" with "(?P<form_data_string>(?:[^"]|\\")*)"$/
      * @param string $type
@@ -272,6 +283,8 @@ class behat_mod_dataform extends behat_base {
 
         return $steps;
     }
+
+    // VIEW
 
     /**
      * Adds a view of the specified type to the current dataform with the provided table data (usually Name).
@@ -336,6 +349,8 @@ class behat_mod_dataform extends behat_base {
     }
 
 
+    // FILTER
+
     /**
      * Adds a filter with the specified data to the current dataform.
      * The step begins in the dataform's Manage | Filters tab.
@@ -388,6 +403,7 @@ class behat_mod_dataform extends behat_base {
 
         return $steps;
     }
+
 
     /**
      * Sets a sort criterion in the dataform filter.
@@ -685,7 +701,309 @@ class behat_mod_dataform extends behat_base {
         return (array(new Given('"'. $element. '" "'. $selectortype. '" should not exist')));
     }
 
+    // SCENARIOS
+    /**
+     * Returns list of steps for manage view scenario.
+     *
+     * @param string $data Tab delimited field form data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_manage_view($data) {
+        $data = $data->getRowsHash();
+        $viewtype = $data['viewtype'];
 
+        $steps = array();
+
+        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "Test Dataform"');
+        $steps[] = new Given('I follow "Manage"');
+
+        $steps[] = new Given('I follow "Views"');
+        $steps[] = new Given('I add a dataform view "'. $viewtype. '" with "View 01"');
+        $steps[] = new Given('I see "View 01"');
+        $steps[] = new Given('I follow "Delete View 01"');
+        $steps[] = new Given('I press "Continue"');
+        $steps[] = new Given('I do not see "View 01"');
+
+        return $steps;
+    }
+
+    /**
+     * Returns list of steps for view required field scenario.
+     *
+     * @param string $data Tab delimited field form data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_view_required_field($data) {
+        $data = $data->getRowsHash();
+        $viewtype = $data['viewtype'];
+        $entrytemplate = $data['entrytemplate'];
+
+        $steps = array();
+
+        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "Test Dataform"');
+        $steps[] = new Given('I follow "Manage"');
+
+        $steps[] = new Given('I follow "Fields"');
+        $steps[] = new Given('I add a dataform field "text" with "Text 01"');
+
+        $steps[] = new Given('I follow "Views"');
+        $steps[] = new Given('I add a dataform view "'. $viewtype. '" with "View 01"');
+        $steps[] = new Given('I follow "Edit View 01"');
+        $steps[] = new Given('I expand all fieldsets');
+        $steps[] = new Given('I replace in field "'. $entrytemplate. '" "[[Text 01]]" with "[[*Text 01]]"');
+        $steps[] = new Given('I press "Save changes"');
+        $steps[] = new Given('I set "View 01" as default view');
+
+        $steps[] = new Given('I follow "Browse"');
+
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "You must supply a value here."');
+        $steps[] = new Given('I set the field "id_field_1_-1" to "The field is required in View 01"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "The field is required in View 01"');
+
+        return $steps;
+    }
+
+    /**
+     * Returns list of steps for view submission buttons scenario.
+     *
+     * @param string $data Tab delimited field form data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_view_submission_buttons($data) {
+        $data = $data->getRowsHash();
+        $viewtype = $data['viewtype'];
+        $actor = $data['actor'];
+
+        $steps = array();
+
+        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "Test Dataform"');
+        $steps[] = new Given('I follow "Manage"');
+
+        // Add a text field.
+        $steps[] = new Given('I follow "Fields"');
+        $steps[] = new Given('I add a dataform field "text" with "Field 01"');
+
+        // Add a view with ALL submission buttons.
+        $steps[] = new Given('I follow "Views"');
+        $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
+        $steps[] = new Given('I expand all fieldsets');
+        $steps[] = new Given('I set the field "Name" to "View 01"');
+        $steps[] = new Given('I set the field "savecontbuttonenable" to "check"');
+        $steps[] = new Given('I set the field "savenewbuttonenable" to "check"');
+        $steps[] = new Given('I set the field "savecontnewbuttonenable" to "check"');
+        $steps[] = new Given('I set the field "savenewcontbuttonenable" to "check"');
+        $steps[] = new Given('I press "Save changes"');
+        $steps[] = new Given('I set "View 01" as default view');
+
+        // Add a view with NO submission buttons.
+        $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
+        $steps[] = new Given('I expand all fieldsets');
+        $steps[] = new Given('I set the field "Name" to "View 02"');
+        $steps[] = new Given('I set the field "savebuttonenable" to ""');
+        $steps[] = new Given('I set the field "savecontbuttonenable" to ""');
+        $steps[] = new Given('I set the field "savenewbuttonenable" to ""');
+        $steps[] = new Given('I set the field "savecontnewbuttonenable" to ""');
+        $steps[] = new Given('I set the field "savenewcontbuttonenable" to ""');
+        $steps[] = new Given('I set the field "cancelbuttonenable" to ""');
+        $steps[] = new Given('I press "Save changes"');
+
+        // Go to browse view.
+        $steps[] = new Given('I follow "Browse"');
+
+        // Log in as actor if needed.
+        if ($actor != 'teacher1') {
+            $steps[] = new Given('I log out');
+            $steps[] = new Given('I log in as "'. $actor. '"');
+            $steps[] = new Given('I follow "Course 1"');
+            $steps[] = new Given('I follow "Test Dataform"');
+        }
+
+        // SAVE: The entry should be added.
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 01"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "Entry 01"');
+
+        // CANCEL: The entry should not be added.
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 02"');
+        $steps[] = new Given('I press "Cancel"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I do not see "Entry 02"');
+
+        // SAVE and CONTINUE: The entry should be added and should stay in form.
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 03"');
+        $steps[] = new Given('I press "Save and Continue"');
+        $steps[] = new Given('I do not see "Add a new entry"');
+        $steps[] = new Given('I do not see "Entry 01"');
+        $steps[] = new Given('the field "field_1_2" matches value "Entry 03"');
+
+        $steps[] = new Given('I set the field "field_1_2" to "Entry 02"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+
+        # SAVE as NEW (existing entry): A new entry should be added.
+        $steps[] = new Given('I follow "id_editentry2"');
+        $steps[] = new Given('I set the field "field_1_2" to "Entry 03"');
+        $steps[] = new Given('I press "Save as New"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+        $steps[] = new Given('I see "Entry 03"');
+
+        // SAVE as NEW (new entry): The entry should be added.
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 04"');
+        $steps[] = new Given('I press "Save as New"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+        $steps[] = new Given('I see "Entry 03"');
+        $steps[] = new Given('I see "Entry 04"');
+
+        // SAVE and START NEW (new entry): The entry should be added and and new entry form opened.
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 05"');
+        $steps[] = new Given('I press "Save and Start New"');
+        $steps[] = new Given('I do not see "Add a new entry"');
+        $steps[] = new Given('the field "field_1_-1" matches value ""');
+
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 06"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+        $steps[] = new Given('I see "Entry 03"');
+        $steps[] = new Given('I see "Entry 04"');
+        $steps[] = new Given('I see "Entry 05"');
+        $steps[] = new Given('I see "Entry 06"');
+
+        # SAVE and START NEW (existing entry): The entry should be updated and new entry form opened.
+        $steps[] = new Given('I follow "id_editentry4"');
+        $steps[] = new Given('the field "field_1_4" matches value "Entry 04"');
+
+        $steps[] = new Given('I set the field "field_1_4" to "Entry 04 modified"');
+        $steps[] = new Given('I press "Save and Start New"');
+        $steps[] = new Given('I do not see "Add a new entry"');
+        $steps[] = new Given('the field "field_1_-1" matches value ""');
+
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 07"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+        $steps[] = new Given('I see "Entry 03"');
+        $steps[] = new Given('I see "Entry 04 modified"');
+        $steps[] = new Given('I see "Entry 05"');
+        $steps[] = new Given('I see "Entry 06"');
+        $steps[] = new Given('I see "Entry 07"');
+
+        // SAVE as NEW and CONTINUE (new entry): The entry should be added and and remain in its form.
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the field "field_1_-1" to "Entry 08"');
+        $steps[] = new Given('I press "Save as New and Continue"');
+        $steps[] = new Given('I do not see "Add a new entry"');
+        $steps[] = new Given('the field "field_1_8" matches value "Entry 08"');
+
+        $steps[] = new Given('I set the field "field_1_8" to "Entry 08 modified"');
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+        $steps[] = new Given('I see "Entry 03"');
+        $steps[] = new Given('I see "Entry 04 modified"');
+        $steps[] = new Given('I see "Entry 05"');
+        $steps[] = new Given('I see "Entry 06"');
+        $steps[] = new Given('I see "Entry 07"');
+        $steps[] = new Given('I see "Entry 08 modified"');
+
+        // SAVE as NEW and CONTINUE (existing entry): The entry should be added and remain in its form.
+        $steps[] = new Given('I follow "id_editentry8"');
+        $steps[] = new Given('the field "field_1_8" matches value "Entry 08 modified"');
+
+        $steps[] = new Given('I set the field "field_1_8" to "Entry 09"');
+        $steps[] = new Given('I press "Save as New and Continue"');
+        $steps[] = new Given('I do not see "Add a new entry"');
+        $steps[] = new Given('the field "field_1_9" matches value "Entry 09"');
+
+        $steps[] = new Given('I press "Save"');
+        $steps[] = new Given('I see "Add a new entry"');
+        $steps[] = new Given('I see "Entry 01"');
+        $steps[] = new Given('I see "Entry 02"');
+        $steps[] = new Given('I see "Entry 03"');
+        $steps[] = new Given('I see "Entry 04 modified"');
+        $steps[] = new Given('I see "Entry 05"');
+        $steps[] = new Given('I see "Entry 06"');
+        $steps[] = new Given('I see "Entry 07"');
+        $steps[] = new Given('I see "Entry 08 modified"');
+        $steps[] = new Given('I see "Entry 09"');
+
+        // No submission buttons.
+        $steps[] = new Given('I follow "View 02"');
+        $steps[] = new Given('I do not see "Add a new entry"');
+        $steps[] = new Given('"id_editentry1" "link" does not exist');
+
+        // I shouldn't be able to edit via the url
+
+        return $steps;
+    }
+
+    /**
+     * Returns list of steps for manage field scenario.
+     *
+     * @param string $data Tab delimited field form data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_manage_field($data) {
+        $data = $data->getRowsHash();
+        $fieldtype = $data['fieldtype'];
+
+        $steps = array();
+
+        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "Test Dataform"');
+        $steps[] = new Given('I follow "Manage"');
+
+        $steps[] = new Given('I follow "Fields"');
+        // Add
+        $steps[] = new Given('I add a dataform field "'. $fieldtype. '" with "Field 01"');
+        $steps[] = new Given('I see "Field 01"');
+        // Edit
+        $steps[] = new Given('I follow "Edit Field 01"');
+        $steps[] = new Given('I see "Editing Field 01"');
+        $steps[] = new Given('I set the field "Name" to "Field 01 modified"');
+        $steps[] = new Given('I press "Save changes"');
+        $steps[] = new Given('I see "Field 01 modified"');        
+        // Delete
+        $steps[] = new Given('I follow "Delete Field 01"');
+        $steps[] = new Given('I press "Continue"');
+        $steps[] = new Given('I do not see "Field 01"');
+
+        return $steps;
+    }
+
+    // HELPERS
 
     /**
      * Returns list of steps for filling a dataform mod_form settings.
@@ -1049,7 +1367,12 @@ class behat_mod_dataform extends behat_base {
     protected function start_afresh_steps() {
         global $DB;
 
-        $steps = array();
+        // Delete properly any existing dataform instances.
+        if ($dataforms = $DB->get_records_menu('dataform', array(), '', 'id, id AS did')) {
+            foreach ($dataforms as $dataformid) {
+                mod_dataform_dataform::instance($dataformid)->delete();
+            }
+        }
 
         // Clean up tables
         $tables = array(
@@ -1065,6 +1388,8 @@ class behat_mod_dataform extends behat_base {
         foreach ($tables as $table) {
             $DB->execute("TRUNCATE TABLE {$prefix}{$table}");
         }
+
+        $steps = array();
 
         // Course
         $data = array(
