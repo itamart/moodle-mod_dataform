@@ -305,7 +305,7 @@ class mod_dataform_entry_manager {
                               WHERE $sql->where $andwhereeid $sql->sortorder";
 
                 $entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
-                
+
             } else if (!$filter->groupby and $perpage = $filter->perpage) {
                 // Get perpage subset
                 // A random set (filter->selection == 1)
@@ -675,6 +675,7 @@ class mod_dataform_entry_manager {
             return array();
         }
 
+        $df = mod_dataform_dataform::instance($this->dataformid);
         $accessman = mod_dataform_access_manager::instance($this->dataformid);
 
         // Check permissions
@@ -745,6 +746,12 @@ class mod_dataform_entry_manager {
                 foreach ($contents[$eid]['fields'] as $fieldid => $content) {
                     $fields[$fieldid]->update_content($entry, $content, $savenew);
                 }
+
+                // Update calculated grades if applicable
+                if ($entry->userid) {
+                    $df->update_calculated_grades($entry->userid);
+                }
+
                 $processed[$entry->id] = $entry;
             }
         }
@@ -788,6 +795,11 @@ class mod_dataform_entry_manager {
                 $field->duplicate_content($entry, $newentry);
             }
             $processed[$newentry->id] = $newentry;
+
+            // Update calculated grades if applicable
+            if ($entry->userid) {
+                $df->update_calculated_grades($entry->userid);
+            }
         }
         return processed;
     }
@@ -808,7 +820,6 @@ class mod_dataform_entry_manager {
         $df = mod_dataform_dataform::instance($this->dataformid);
 
         $processed = array();
-        $entryusers = array();
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
         foreach ($entries as $entry) {
             // Check permissions
@@ -838,16 +849,9 @@ class mod_dataform_entry_manager {
             $event->add_record_snapshot('dataform_entries', $entry);
             $event->trigger();
 
-            // Register user of deleted entries to update grades if needed.
+            // Update calculated grades if applicable
             if ($entry->userid) {
-                $entryusers[$entry->userid] = $entry->userid;
-            }
-        }
-
-        // Update grades if grading on number of entries
-        if ($df->is_grading_num_entries()) {
-            foreach ($entryusers as $userid) {
-                dataform_update_grades($df->data, $userid);
+                $df->update_calculated_grades($entry->userid);
             }
         }
 
@@ -940,11 +944,6 @@ class mod_dataform_entry_manager {
         $event = \mod_dataform\event\entry_created::create($eventparams);
         $event->add_record_snapshot('dataform_entries', $entry);
         $event->trigger();
-
-        // Update grades if grading on number of entries
-        if ($df->is_grading_num_entries()) {
-            dataform_update_grades($df->data, $entry->userid);
-        }
 
         return $entry->id;
     }
