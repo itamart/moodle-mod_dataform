@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
- * Events tests.
- *
-/**
- * PHPUnit dataform generator testcase
+ * Events testcase
  *
  * @package    mod_dataform
  * @category   phpunit
@@ -26,9 +25,6 @@
  * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
 class mod_dataform_events_testcase extends advanced_testcase {
     protected $_course;
 
@@ -69,12 +65,10 @@ class mod_dataform_events_testcase extends advanced_testcase {
     public function test_view_events() {
         $df = $this->get_a_dataform();
 
-        $this->try_crud_view('aligned', $df);
-        $this->try_crud_view('csv', $df);
-        $this->try_crud_view('grid', $df);
-        $this->try_crud_view('interval', $df);
-        $this->try_crud_view('rss', $df);
-        $this->try_crud_view('tabular', $df);
+        $viewtypes = array_keys(core_component::get_plugin_list('dataformview'));
+        foreach ($viewtypes as $type) {
+            $this->try_crud_view($type, $df);
+        }
 
         $df->delete();
     }
@@ -85,18 +79,10 @@ class mod_dataform_events_testcase extends advanced_testcase {
     public function test_field_events() {
         $df = $this->get_a_dataform();
 
-        $this->try_crud_field('text', $df);
-        $this->try_crud_field('textarea', $df);
-        $this->try_crud_field('checkbox', $df);
-        $this->try_crud_field('select', $df);
-        $this->try_crud_field('selectmulti', $df);
-        $this->try_crud_field('radiobutton', $df);
-        $this->try_crud_field('url', $df);
-        $this->try_crud_field('file', $df);
-        $this->try_crud_field('picture', $df);
-        $this->try_crud_field('number', $df);
-        $this->try_crud_field('time', $df);
-        $this->try_crud_field('entrystate', $df);
+        $fieldtypes = array_keys(core_component::get_plugin_list('dataformfield'));
+        foreach ($fieldtypes as $type) {
+            $this->try_crud_field($type, $df);
+        }
 
         $df->delete();
     }
