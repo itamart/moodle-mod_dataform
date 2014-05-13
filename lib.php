@@ -388,7 +388,7 @@ function dataform_get_completion_state($course, $cm, $userid, $type) {
 // ------------------------------------------------------------
 
 /**
- * Checks if a scale is being used by an dataform
+ * Checks if a scale is being used by a dataform,
  *
  * This is used by the backup code to decide whether to back up a scale
  * @param $dataformid int
@@ -399,16 +399,15 @@ function dataform_scale_used($dataformid, $scaleid) {
     global $DB;
 
     if ($scaleid) {
-        // Check the dataform instance
+        // Check the dataform instance.
         if ($DB->record_exists('dataform', array('id' => $dataformid, 'grade' => -$scaleid))) {
             return true;
         }
-        // Check all fields which are instances of interface rating
+        // Check all fields which are instances of interface usingscale.
         foreach (array_keys(core_component::get_plugin_list('dataformfield')) as $type) {
             $fieldclass = "dataformfield_{$type}_$type";
-            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\grading')) {
-                $scaleparam = $fieldclass::get_scale_param();
-                if ($DB->record_exists('dataform_fields', array('dataid' => $dataformid, 'type' => $type, $scaleparam => -$scaleid))) {
+            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\usingscale')) {
+                if ($fieldclass::is_using_scale($scaleid, $dataformid)) {
                     return true;
                 }
             }
@@ -419,7 +418,7 @@ function dataform_scale_used($dataformid, $scaleid) {
 }
 
 /**
- * Checks if scale is being used in any instance of dataform
+ * Checks if scale is being used in any instance of dataform.
  *
  * This is used to find out if scale used anywhere
  * @param $scaleid int
@@ -432,12 +431,11 @@ function dataform_scale_used_anywhere($scaleid) {
         if ($DB->record_exists('dataform', array('grade' => -$scaleid))) {
             return true;
         }
-        // Check all fields which are instances of interface rating
+        // Check all fields which are instances of interface usingscale.
         foreach (array_keys(core_component::get_plugin_list('dataformfield')) as $type) {
             $fieldclass = "dataformfield_{$type}_$type";
-            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\grading')) {
-                $scaleparam = $fieldclass::get_scale_param();
-                if ($DB->record_exists('dataform_fields', array('type' => $type, $scaleparam => -$scaleid))) {
+            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\usingscale')) {
+                if ($fieldclass::is_using_scale($scaleid)) {
                     return true;
                 }
             }
