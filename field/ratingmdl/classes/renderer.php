@@ -63,7 +63,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         $entryid = $entry->id;
         $edit = !empty($options['edit']);
 
-        // no edit mode
+        // No edit mode
         if ($edit or !$field->get_scaleid()) {
             if ($patterns) {
                 $replacements = array();
@@ -98,6 +98,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
 
                 if ($pattern == "[[$fieldname:count]]") {
                     $str = !empty($rating->count) ? $rating->count : '-';
+                    $str = html_writer::tag('span', $str, array('id' => "ratingcount_{$fieldid}_$entryid"));
 
                 } else if (strpos($pattern, "[[$fieldname:count:") === 0) {
                     list(, , $value) = explode(':', trim($pattern, '[]'));
@@ -129,11 +130,11 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
                     $str = $this->render_rating($entry);
 
                 } else if ($pattern == "[[$fieldname:avg:bar]]") {
-                    $value = !empty($rating) ? round($rating->aggregate[dataformfield_ratingmdl::AGGREGATE_AVG], 2) : 0;
+                    $value = !empty($rating) ? round($rating->aggregate[dataformfield_ratingmdl_ratingmdl::AGGREGATE_AVG], 2) : 0;
                     $str = $this->display_bar($entry, $value);
 
                 } else if ($pattern == "[[$fieldname:avg:star]]") {
-                    $value = !empty($rating) ? round($rating->aggregate[dataformfield_ratingmdl::AGGREGATE_AVG], 2) : 0;
+                    $value = !empty($rating) ? round($rating->aggregate[dataformfield_ratingmdl_ratingmdl::AGGREGATE_AVG], 2) : 0;
                     $str = $this->display_star($entry, $value);
 
                 } else {
@@ -149,12 +150,13 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
      *
      */
     public function get_aggregations($patterns) {
+        $fieldname = $this->_field->name;
 
         $aggr = array(
-            dataformfield_ratingmdl::AGGREGATE_AVG => "[[$fieldname:avg]]",
-            dataformfield_ratingmdl::AGGREGATE_MAX => "[[$fieldname:max]]",
-            dataformfield_ratingmdl::AGGREGATE_MIN => "[[$fieldname:min]]",
-            dataformfield_ratingmdl::AGGREGATE_SUM => "[[$fieldname:sum]]"
+            dataformfield_ratingmdl_ratingmdl::AGGREGATE_AVG => "[[$fieldname:avg]]",
+            dataformfield_ratingmdl_ratingmdl::AGGREGATE_MAX => "[[$fieldname:max]]",
+            dataformfield_ratingmdl_ratingmdl::AGGREGATE_MIN => "[[$fieldname:min]]",
+            dataformfield_ratingmdl_ratingmdl::AGGREGATE_SUM => "[[$fieldname:sum]]"
         );
         if ($aggregations = array_intersect($aggr, $patterns)) {
             return array_keys($aggregations);
@@ -167,21 +169,22 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
      *
      */
     public function render_rating($entry) {
-        global $CFG, $PAGE;
+        global $PAGE;
 
-        $fieldname = $this->_field->name;
-        $fieldid = $this->_field->id;
+        $field = $this->_field;
+        $fieldname = $field->name;
+        $fieldid = $field->id;
         $entryid = $entry->id;
 
         if (empty($entry->rating)) {
             return null;
         }
 
-        $rating = $entry->rating;
-        if (!$rating->user_can_rate() and !has_capability('mod/dataform:manageratings', $this->_field->get_df()->context)) {
+        if (!$field->user_can_rate($entry)) {
             return null;
         }
 
+        $rating = $entry->rating;
         $ratinghtml = ''; // the string we'll return
         $strrate = get_string("rate", "rating");
 
@@ -218,7 +221,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
 
         $wrapper = html_writer::tag('div', $rateparams. $rateselect. $submitbutton, array('class' => 'ratingform'));
 
-        // Start the rating form.
+        // Start the rating form
         $formattrs = array(
             'id' => "ratingpost_{$fieldid}_$entryid",
             'class'  => 'postratingform',
@@ -229,7 +232,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
 
         // Initialize ajax
         $config = array(array('fieldid' => $fieldid, 'entryid' => $entryid));
-        $this->initialise_rating_javascript($PAGE, $config);
+        $PAGE->requires->yui_module('moodle-dataformfield_ratingmdl-rater', 'M.dataformfield_ratingmdl.rater.init', $config);
 
         return $rateform;
     }
@@ -242,23 +245,22 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
 
         $fieldname = $this->_field->name;
 
-        if (isset($entry->rating)) {
-            $rating = $entry->rating;
-            if ($rating->settings->permissions->viewall
-                and $rating->settings->pluginpermissions->viewall) {
-
-                $nonpopuplink = $rating->get_view_ratings_url();
-                $popuplink = $rating->get_view_ratings_url(true);
-                $popupaction = new popup_action('click', $popuplink, 'ratings', array('height' => 400, 'width' => 600));
-
-                if ($tag == "[[$fieldname:view]]") {
-                    return $OUTPUT->action_link($nonpopuplink, 'view all', $popupaction);
-                } else {
-                    return $popuplink;
-                }
-            }
+        if (!$this->_field->user_can_view_ratings($entry)) {
+            return null;
         }
-        return '';
+
+        $rating = $entry->rating;
+        $nonpopuplink = $rating->get_view_ratings_url();
+        $popuplink = $rating->get_view_ratings_url(true);
+        $popupaction = new popup_action('click', $popuplink, 'ratings', array('height' => 400, 'width' => 600));
+
+        if ($tag == "[[$fieldname:view]]") {
+            return $OUTPUT->action_link($nonpopuplink, 'view all', $popupaction);
+        } else {
+            return $popuplink;
+        }
+
+        return null;
     }
 
     /**
@@ -271,9 +273,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
             return 0;
         }
 
-        $rating = $entry->rating;
-        $canviewall = ($rating->settings->permissions->viewall and $rating->settings->pluginpermissions->viewall);
-        if (!$canviewall) {
+        if (!$this->_field->user_can_view_aggregates($entry)) {
             return 0;
         }
 
@@ -294,9 +294,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
             return null;
         }
 
-        $rating = $entry->rating;
-        $canviewall = ($rating->settings->permissions->viewall and $rating->settings->pluginpermissions->viewall);
-        if (!$canviewall) {
+        if (!$this->_field->user_can_view_ratings($entry)) {
             return null;
         }
 
@@ -304,6 +302,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
             return null;
         }
 
+        $rating = $entry->rating;
         $scalemenu = make_grades_menu($rating->settings->scale->id);
 
         $table = new html_table;
@@ -341,10 +340,14 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
      *
      */
     protected function display_bar($entry, $value) {
+        if (!$this->_field->user_can_view_aggregates($entry)) {
+            return null;
+        }
+
         if (isset($entry->rating) and $value) {
             $rating = $entry->rating;
 
-            $width = round($value / $rating->settings->scale->max * 100);
+            $width = round(($value / $rating->settings->scale->max) * 100);
             $displayvalue = round($value, 2);
             $bar = html_writer::tag('div', '.', array('style' => "width:$width%;height:100%;background:gold;color:gold"));
             return $bar;
@@ -357,6 +360,10 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
      */
     protected function display_star($entry, $value) {
         global $OUTPUT;
+
+        if (!$this->_field->user_can_view_aggregates($entry)) {
+            return null;
+        }
 
         if (isset($entry->rating)) {
             $rating = $entry->rating;
@@ -372,22 +379,6 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
             return $wrapper;
         }
         return '';
-    }
-
-    /**
-     * Initialises JavaScript to enable AJAX ratings on the provided page.
-     *
-     * @param moodle_page $page
-     * @return true always returns true
-     */
-    protected function initialise_rating_javascript(moodle_page $page, $config = null) {
-        global $CFG;
-
-        if (!empty($CFG->enableajax)) {
-            $page->requires->yui_module('moodle-dataformfield_ratingmdl-rater', 'M.dataformfield_ratingmdl.rater.init', $config);
-        }
-
-        return true;
     }
 
     /**

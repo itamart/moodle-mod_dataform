@@ -52,7 +52,8 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
 
             var inputssize = theinputs.size();
             for (var i = 0; i < inputssize; i++) {
-                if (theinputs.item(i).get("name") != "returnurl") {//dont include return url for ajax requests
+                if (theinputs.item(i).get("name") != "returnurl") {
+                    // Dont include return url for ajax requests
                     thedata[theinputs.item(i).get("name")] = theinputs.item(i).get("value");
                 }
             }

@@ -36,7 +36,7 @@ class dataformfield_ratingmdl_form extends mod_dataform\pluginbase\dataformfield
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // entry rating
+        // Entry rating
         $mform->addElement('modgrade', 'param1', get_string('rating', 'dataformfield_ratingmdl'));
         $mform->setDefault('param1', 0);
 

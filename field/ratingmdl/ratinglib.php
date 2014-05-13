@@ -25,7 +25,7 @@
  * Extends the core rating class
  */
 
-require_once("$CFG->dirroot/rating/lib.php");
+require_once(__DIR__. '/../../../../rating/lib.php');
 
 class ratingmdl_rating extends rating {
 
@@ -86,10 +86,10 @@ class ratingmdl_rating extends rating {
 
         if ($aggregate and $aggregation != RATING_AGGREGATE_COUNT) {
             if ($aggregation != RATING_AGGREGATE_SUM and !$this->settings->scale->isnumeric) {
-                // round aggregate as we're using it as an index
+                // Round aggregate as we're using it as an index
                 $aggregate = $this->settings->scale->scaleitems[round($aggregate)];
             } else {
-                // aggregation is SUM or the scale is numeric
+                // Aggregation is SUM or the scale is numeric
                 $aggregate = round($aggregate, 1);
             }
         }
@@ -204,7 +204,7 @@ class ratingmdl_rating_manager extends rating_manager {
         }
         $aggregationsql = !empty($aggregatessql) ? implode(', ', $aggregatessql). ', ' : '';
 
-        // sql for entry ids
+        // Sql for entry ids
         $andwhereitems = '';
         if (!empty($options->items)) {
             $itemids = array_keys($options->items);
@@ -252,7 +252,7 @@ class ratingmdl_rating_manager extends rating_manager {
         $params['component']    = $options->component;
         $params['ratingarea'] = $options->ratingarea;
 
-        // sql for entry ids
+        // Sql for entry ids
         $andwhereitems = '';
         if (!empty($options->items)) {
             $itemids = array_keys($options->items);
@@ -263,8 +263,8 @@ class ratingmdl_rating_manager extends rating_manager {
 
         $sql = "SELECT r.id, r.itemid, r.component, r.ratingarea, r.contextid, r.scaleid,
                        r.rating, r.userid, r.timecreated, r.timemodified, ".
-                       user_picture::fields('u', array('idnumber', 'username'), 'uid '). "
-                FROM {rating} r
+                       user_picture::fields('u', array('idnumber', 'username'), 'uid ').
+               " FROM {rating} r
                     JOIN {user} u ON u.id = r.userid
 
                 WHERE r.contextid = :contextid
@@ -301,7 +301,7 @@ class ratingmdl_rating_manager extends rating_manager {
         $options->itemid = $item->id;
         $options->settings = $rec->settings;
         // Note: rec->scaleid = the id of scale at the time the rating was submitted
-        // may be different from the current scale id
+        // May be different from the current scale id
         $options->scaleid = $rec->scaleid;
 
         $options->userid = !empty($rec->userid) ? $rec->userid : 0;
