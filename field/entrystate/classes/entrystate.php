@@ -21,7 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent {
+class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent
+        implements mod_dataform\interfaces\grading {
 
     const ROLE_AUTHOR = -1;
     const ROLE_ENTRIES_MANAGER = -2;
@@ -326,4 +327,57 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         return 'e';
     }
 
+    // GRADING
+    /**
+     * Returns the value replacement of the pattern for each user with content in the field.
+     *
+     * @param string $pattern
+     * @param array $entryids The ids of entries the field values should be fetched from.
+     *      If not provided the method should return values from all applicable entries.
+     * @param int $userid   The id of the users whose field values are requested.
+     *      If not specified, should return values for all applicable users.
+     * @return null|array Array of userid => value pairs.
+     */
+    public function get_user_values($pattern, array $entryids = null, $userid = 0) {
+        global $DB;
+
+        // If specific user and list of entries provided,
+        // get values only if the user has entries.
+        if ($userid and $entryids) {
+            if (empty($entryids[$userid])) {
+                return array();
+            }
+            $entryids = $entryids[$userid];
+        }
+
+        $params = array();
+        $params[] = $this->dataid;
+
+        // User
+        $selectuser = '';
+        if ($userid) {
+            $selectuser = " userid = ? ";
+            $params[] = $userid;
+        }
+
+        // Entries
+        $selectentries = '';
+        if ($entryids) {
+            list($inids, $eparams) = $DB->get_in_or_equal($entryids);
+            $selectentries = " id $inids ";
+            $params = array_merge($params, $eparams);
+        }
+
+        $select = "dataid = ? AND $selectuser AND $selectentries";
+        $values = array();
+        if ($entries = $DB->get_records_select('dataform_entries', $select, $params, 'state', 'id,userid,state')) {
+            foreach ($entries as $entryid => $entry) {
+                if (empty($values[$entry->userid])) {
+                    $values[$entry->userid] = array();
+                }
+                $values[$entry->userid][] = $entry->state;
+            }
+        }
+        return $values;
+    }
 }
