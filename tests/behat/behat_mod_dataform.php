@@ -975,6 +975,7 @@ class behat_mod_dataform extends behat_base {
     protected function scenario_manage_field($data) {
         $data = $data->getRowsHash();
         $fieldtype = $data['fieldtype'];
+        $fieldname = !empty($data['fieldname']) ? $data['fieldname'] : 'Field 01';
 
         $steps = array();
 
@@ -987,18 +988,18 @@ class behat_mod_dataform extends behat_base {
 
         $steps[] = new Given('I follow "Fields"');
         // Add
-        $steps[] = new Given('I add a dataform field "'. $fieldtype. '" with "Field 01"');
-        $steps[] = new Given('I see "Field 01"');
+        $steps[] = new Given('I add a dataform field "'. $fieldtype. '" with "'. $fieldname. '"');
+        $steps[] = new Given('I see "'. $fieldname. '"');
         // Edit
-        $steps[] = new Given('I follow "Edit Field 01"');
-        $steps[] = new Given('I see "Editing Field 01"');
-        $steps[] = new Given('I set the field "Name" to "Field 01 modified"');
+        $steps[] = new Given('I follow "Edit '. $fieldname. '"');
+        $steps[] = new Given('I see "Editing \''. $fieldname. '\'"');
+        $steps[] = new Given('I set the field "Description" to "'. $fieldname. ' modified"');
         $steps[] = new Given('I press "Save changes"');
-        $steps[] = new Given('I see "Field 01 modified"');        
+        $steps[] = new Given('I see "'. $fieldname. ' modified"');
         // Delete
-        $steps[] = new Given('I follow "Delete Field 01"');
+        $steps[] = new Given('I follow "Delete '. $fieldname. '"');
         $steps[] = new Given('I press "Continue"');
-        $steps[] = new Given('I do not see "Field 01"');
+        $steps[] = new Given('I do not see "'. $fieldname. '"');
 
         return $steps;
     }

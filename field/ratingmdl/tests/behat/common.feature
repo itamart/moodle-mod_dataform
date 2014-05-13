@@ -5,3 +5,4 @@ Feature: Common
     Scenario: Manage field
         Given I run dataform scenario "manage field" with:
             | fieldtype | ratingmdl |
+            | fieldname | therating |
