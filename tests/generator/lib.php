@@ -180,6 +180,15 @@ class mod_dataform_generator extends testing_module_generator {
         $df = mod_dataform_dataform::instance($record->dataid);
         $field = $df->field_manager->get_field($record->type);
         $field->name = $record->name;
+
+        // Params
+        for ($i = 1; $i <= 10; $i++) {
+            $parami = "param$i";
+            if (isset($record->$parami)) {
+                $field->$parami = $record->$parami;
+            }
+        }
+
         $field->create($field->data);
         return $field->data;
     }
