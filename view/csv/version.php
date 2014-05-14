@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformview_csv';
-$plugin->version  = 2014041700;
+$plugin->version  = 2014051300;
 $plugin->requires = 2013111800;

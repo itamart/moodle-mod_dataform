@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_entryactions';
-$plugin->version  = 2014041700;
+$plugin->version  = 2014051300;
 $plugin->requires = 2013111800;
