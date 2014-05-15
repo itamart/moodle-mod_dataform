@@ -260,7 +260,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 $viewfilterid = $view->filterid;
                 if ($viewfilterid and !in_array($viewfilterid, array_keys($filtersmenu))) {
                     $url = new moodle_url($actionbaseurl, $sessparam + array('setfilter' => $viewid, 'fid' => -1));
-                    $viewfilter = html_writer::link($url, $OUTPUT->pix_icon('i/risk_xss', $strreset));
+                    $viewfilter = html_writer::link($url, $this->output->pix_icon('i/risk_xss', $strreset));
 
                 } else {
                     if ($viewfilterid) {
@@ -553,7 +553,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
      * @return string HTML fragment of html_table
      */
     public function filters_admin_list() {
-        global $OUTPUT, $PAGE;
+        global $PAGE;
 
         if (!$this->_dataformid) {
             return null;
@@ -594,7 +594,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_select_allnone', array('filter'));
 
         $icon = new pix_icon('t/delete', get_string('multidelete', 'dataform'));
-        $multidelete = $OUTPUT->action_icon(null, $icon, null, array('id' => 'id_filter_bulkaction_delete'));
+        $multidelete = $this->output->action_icon(null, $icon, null, array('id' => 'id_filter_bulkaction_delete'));
         $deleteurl = new moodle_url($actionbaseurl, $sessparam);
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('filter', 'delete', $deleteurl->out(false)));
 
@@ -680,6 +680,132 @@ class mod_dataform_renderer extends plugin_renderer_base {
         // echo $OUTPUT->help_icon('filteradd', 'dataform');
         echo html_writer::end_tag('div');
         echo html_writer::empty_tag('br');
+    }
+
+    /**
+     *
+     */
+    public function rules_admin_list($cat, $ruletypename, $blocktype, $rules) {
+        if (!$this->_dataformid) {
+            return null;
+        }
+
+        $baseurl = "/mod/dataform/$cat/index.php";
+        $ruletype = str_replace("dataform$cat", '', $blocktype);
+
+        // Add icon
+        $params = array(
+            'd' => $this->_dataformid,
+            'bui_addblock' => $blocktype,
+            'edit' => 1,
+            'sesskey' => sesskey(),
+        );
+        $url = new moodle_url($baseurl, $params);
+        $pix = $this->output->pix_icon('t/add', get_string('ruleadd', 'dataform'));
+        $linkparams = array('id' => "id_add_{$ruletype}_{$cat}_rule");
+        $addlink = html_writer::link($url, $pix, $linkparams);
+
+        echo html_writer::tag('h3', $ruletypename. "  $addlink");
+
+        // table headings
+        $strname = get_string('name');
+        $strdescription = get_string('description');
+        $strpermissions = get_string('permissions', 'role');
+        $strapplyto = get_string('views', 'dataform');
+        $stredit = get_string('edit');
+        $strdelete = get_string('delete');
+        $strhide = get_string('hide');
+        $strshow = get_string('show');
+
+        $headers = array(
+            array($strname, 'left', false),
+            array($strdescription, 'left', false),
+            array($strapplyto, 'left', false),
+            array('', 'center', false),
+        );
+
+        $table = new html_table();
+        foreach ($headers as $header) {
+            list($table->head[], $table->align[], $table->wrap[]) = $header;
+        }
+
+        $count = 0;
+        foreach ($rules as $rule) {
+            $block = $rule->get_block();
+            $blockid = $block->instance->id;
+            $data = $rule->get_data();
+            $idforaction = $cat. $rule->type. ++$count;
+
+            // Name
+
+            // Applicable views
+            $applicableviews = '';
+            if ($views = $rule->get_applicable_views()) {
+                $applicableviews = \html_writer::alist($views);
+            }
+
+            // Show/hide
+            if (!empty($data->enabled)) {
+                $showhide = 'hide';
+                $able = 'disable';
+            } else {
+                $showhide = 'show';
+                $able = 'enable';
+            }
+            $params = array(
+                'd' => $this->_dataformid,
+                'type' => $rule->type,
+                $able => $block->instance->id,
+                'sesskey' => sesskey()
+            );
+            $url = new moodle_url($baseurl, $params);
+            $pix = $this->output->pix_icon("t/$showhide", get_string($showhide));
+            $linkparams = array('id' => "id_showhide$idforaction");
+            $showhidelink = html_writer::link($url, $pix, $linkparams);
+
+            // Edit settings
+            $params = array(
+                'd' => $this->_dataformid,
+                'bui_editid' => $block->instance->id,
+                'edit' => 1,
+                'sesskey' => sesskey()
+            );
+            $url = new moodle_url($baseurl, $params);
+            $pix = $this->output->pix_icon('t/edit', '');
+            $linkparams = array('id' => "id_edit$idforaction");
+            $editlink = html_writer::link($url, $pix, $linkparams);
+
+            // Edit permissions
+            $params = array(
+                'd' => $this->_dataformid,
+                'contextid' => $block->context->id,
+            );
+            $url = new moodle_url('/admin/roles/permissions.php', $params);
+            $pix = $this->output->pix_icon('i/edit', get_string('edit'));
+            $linkparams = array('id' => "id_editperm$idforaction");
+            $editpermlink = html_writer::link($url, $pix, $linkparams);
+
+            // Delete
+            $params = array(
+                'd' => $this->_dataformid,
+                'type' => $rule->type,
+                'delete' => $block->instance->id,
+                'sesskey' => sesskey()
+            );
+            $url = new moodle_url($baseurl, $params);
+            $pix = $this->output->pix_icon('t/delete', get_string('delete'));
+            $linkparams = array('id' => "id_delete$idforaction");
+            $deletelink = html_writer::link($url, $pix, $linkparams);
+
+            $table->data[] = array(
+                $data->name,
+                $data->description,
+                $applicableviews,
+                "$showhidelink $editlink $editpermlink $deletelink",
+            );
+        }
+
+        echo html_writer::tag('div', html_writer::table($table), array('class' => 'itemslist'));
     }
 
     /**

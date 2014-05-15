@@ -69,8 +69,10 @@ $output = $df->get_renderer();
 echo $output->header(array('tab' => 'access', 'heading' => $df->name, 'urlparams' => $urlparams));
 
 if ($accesstypes = $aman->get_types()) {
-    foreach ($accesstypes as $type => $unused) {
-        $aman->print_list($type);
+    foreach ($accesstypes as $blocktype => $accesstype) {
+        $type = str_replace('dataformaccess', '', $blocktype);
+        $rules = $aman->get_type_rules($type);
+        echo $output->rules_admin_list('access', $accesstype, $blocktype, $rules);
     }
 } else {
     echo $output->notification(get_string('acccesstypesnotfound', 'dataform'), 'notifyproblem');

@@ -62,15 +62,17 @@ if ($urlparams->disable and confirm_sesskey()) {
 }
 // Delete
 if ($urlparams->delete and confirm_sesskey()) {
-    $nman->delete_rule($urlparams->type, $urlparams->delete);
+    $nman->delete_rule($urlparams->delete);
 }
 
 $output = $df->get_renderer();
 echo $output->header(array('tab' => 'notification', 'heading' => $df->name, 'urlparams' => $urlparams));
 
 if ($notetypes = $nman->get_types()) {
-    foreach ($notetypes as $type => $unused) {
-        $nman->print_list($type);
+    foreach ($notetypes as $blocktype => $notetype) {
+        $type = str_replace('dataformnotification', '', $blocktype);
+        $rules = $nman->get_type_rules($type);
+        echo $output->rules_admin_list('notification', $notetype, $blocktype, $rules);
     }
 } else {
     echo $output->notification(get_string('notificationtypesnotfound', 'dataform'), 'notifyproblem');
