@@ -310,7 +310,6 @@ class mod_dataform_dataform {
 
             }
 
-
             // Require login
             require_login($this->course->id, $autologinguest, $this->cm);
         }

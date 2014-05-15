@@ -34,10 +34,8 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
 
-
         $generator = $this->getDataGenerator();
         $dataformgenerator = $generator->get_plugin_generator('mod_dataform');
-
 
         $this->assertEquals(0, $DB->count_records('dataform'));
 

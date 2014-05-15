@@ -860,7 +860,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I see "Entry 01"');
         $steps[] = new Given('I see "Entry 02"');
 
-        # SAVE as NEW (existing entry): A new entry should be added.
+        // SAVE as NEW (existing entry): A new entry should be added.
         $steps[] = new Given('I follow "id_editentry2"');
         $steps[] = new Given('I set the field "field_1_2" to "Entry 03"');
         $steps[] = new Given('I press "Save as New"');
@@ -896,7 +896,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I see "Entry 05"');
         $steps[] = new Given('I see "Entry 06"');
 
-        # SAVE and START NEW (existing entry): The entry should be updated and new entry form opened.
+        // SAVE and START NEW (existing entry): The entry should be updated and new entry form opened.
         $steps[] = new Given('I follow "id_editentry4"');
         $steps[] = new Given('the field "field_1_4" matches value "Entry 04"');
 
@@ -1041,7 +1041,6 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I follow "id_deleteaccess'. $ruletype. '1"');
         $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
 
-
         return $steps;
     }
 
@@ -1083,7 +1082,6 @@ class behat_mod_dataform extends behat_base {
         // Delete the rule
         $steps[] = new Given('I follow "id_deletenotification'. $ruletype. '1"');
         $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
-
 
         return $steps;
     }

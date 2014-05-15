@@ -615,7 +615,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     public static function is_using_scale($scaleid, $dataformid = 0) {
         global $DB;
 
-        $params = array('type' => $this->type, 'param1' => -$scaleid);
+        $params = array('type' => 'ratingmdl', 'param1' => -$scaleid);
         if ($dataformid) {
             $params['dataid'] = $dataformid;
         }

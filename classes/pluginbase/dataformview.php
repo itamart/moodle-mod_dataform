@@ -194,7 +194,6 @@ class dataformview {
             $filter->append_search_options($csearch);
         }
 
-
         // Content fields
         if ($patternfields = $this->get_pattern_set('field')) {
             $filter->contentfields = array_keys($patternfields);
@@ -912,7 +911,6 @@ class dataformview {
         $files = array();
         $fs = get_file_storage();
 
-
         // View files
         if (empty($set) or $set == 'view') {
             foreach ($this->editors as $editor) {
@@ -924,7 +922,6 @@ class dataformview {
                                                                 false));
             }
         }
-
 
         // Field files
         if (empty($set) or $set == 'field') {
