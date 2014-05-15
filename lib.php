@@ -644,14 +644,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             return false;
         }
 
-        // nanogong ugly hack
-        if ($field->type != 'nanogong') {
-            if (empty($USER->id)) {
-                return false;
-            }
-
-            require_course_login($course, true, $cm);
-        }
+        require_course_login($course, true, $cm);
 
         if (!$entry = $DB->get_record('dataform_entries', array('id' => $content->entryid))) {
             return false;
@@ -670,7 +663,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         if ($entry->groupid) {
             $groupmode = groups_get_activity_groupmode($cm, $course);
             if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
-                if (!groups_is_member($record->groupid)) {
+                if (!groups_is_member($entry->groupid)) {
                     return false;
                 }
             }

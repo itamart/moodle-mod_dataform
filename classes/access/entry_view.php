@@ -74,10 +74,8 @@ class entry_view extends base {
 
         // Group entry
         if (\mod_dataform\pluginbase\dataformentry::is_grouped($entry)) {
-            if (groups_is_member($entry->groupid)) {
-                $params['capabilities'] = array('mod/dataform:entrygroupview');
-                return parent::validate($params);
-            }
+            $params['capabilities'] = array('mod/dataform:entrygroupview');
+            return parent::validate($params);
         }
 
         // Anonymous entry

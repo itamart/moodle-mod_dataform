@@ -193,8 +193,9 @@ class mod_dataform_entry_manager {
         }
         // Current group
         if ($df->currentgroup) {
-            $wheregroup .= " AND e.groupid = ? ";
-            $params[] = $df->currentgroup;
+            list($ingroups, $groupparams) = $DB->get_in_or_equal(array($df->currentgroup, 0));
+            $wheregroup .= " AND e.groupid $ingroups ";
+            $params = array_merge($params, $groupparams);
         }
 
         // Sql for fetching the entries
