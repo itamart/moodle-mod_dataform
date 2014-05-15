@@ -705,10 +705,10 @@ class behat_mod_dataform extends behat_base {
     /**
      * Returns list of steps for manage view scenario.
      *
-     * @param string $data Tab delimited field form data.
+     * @param TableNode $data Scenario data.
      * @return array Array of Given objects.
      */
-    protected function scenario_manage_view($data) {
+    protected function scenario_manage_view(TableNode $data) {
         $data = $data->getRowsHash();
         $viewtype = $data['viewtype'];
 
@@ -734,10 +734,10 @@ class behat_mod_dataform extends behat_base {
     /**
      * Returns list of steps for view required field scenario.
      *
-     * @param string $data Tab delimited field form data.
+     * @param TableNode $data Scenario data.
      * @return array Array of Given objects.
      */
-    protected function scenario_view_required_field($data) {
+    protected function scenario_view_required_field(TableNode $data) {
         $data = $data->getRowsHash();
         $viewtype = $data['viewtype'];
         $entrytemplate = $data['entrytemplate'];
@@ -777,10 +777,10 @@ class behat_mod_dataform extends behat_base {
     /**
      * Returns list of steps for view submission buttons scenario.
      *
-     * @param string $data Tab delimited field form data.
+     * @param TableNode $data Scenario data.
      * @return array Array of Given objects.
      */
-    protected function scenario_view_submission_buttons($data) {
+    protected function scenario_view_submission_buttons(TableNode $data) {
         $data = $data->getRowsHash();
         $viewtype = $data['viewtype'];
         $actor = $data['actor'];
@@ -969,10 +969,10 @@ class behat_mod_dataform extends behat_base {
     /**
      * Returns list of steps for manage field scenario.
      *
-     * @param string $data Tab delimited field form data.
+     * @param TableNode $data Scenario data.
      * @return array Array of Given objects.
      */
-    protected function scenario_manage_field($data) {
+    protected function scenario_manage_field(TableNode $data) {
         $data = $data->getRowsHash();
         $fieldtype = $data['fieldtype'];
         $fieldname = !empty($data['fieldname']) ? $data['fieldname'] : 'Field 01';
@@ -1000,6 +1000,90 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I follow "Delete '. $fieldname. '"');
         $steps[] = new Given('I press "Continue"');
         $steps[] = new Given('I do not see "'. $fieldname. '"');
+
+        return $steps;
+    }
+
+    /**
+     * Returns list of steps for manage access rule scenario.
+     *
+     * @param TableNode $data Scenario data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_manage_access_rule(TableNode $data) {
+        $data = $data->getRowsHash();
+        $ruletype = $data['ruletype'];
+        $typename = get_string('typename', "block_dataformaccess$ruletype");
+        $rulename = !empty($data['rulename']) ? $data['rulename'] : "New $typename rule";
+
+        $steps = array();
+
+        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "Test Dataform"');
+        $steps[] = new Given('I follow "Manage"');
+
+        $steps[] = new Given('I follow "Access"');
+
+        // Add a rule
+        $steps[] = new Given('I follow "id_add_'. $ruletype. '_access_rule"');
+        $steps[] = new Given('I see "'. "New $typename rule". '"');
+
+        // Update the rule
+        $steps[] = new Given('I follow "id_editaccess'. $ruletype. '1"');
+        $steps[] = new Given('I set the field "Name" to "'. "New $typename rule". ' modified"');
+        $steps[] = new Given('I press "Save changes"');
+        $steps[] = new Given('I see "'. "New $typename rule". ' modified"');
+
+        // Delete the rule
+        $steps[] = new Given('I follow "id_deleteaccess'. $ruletype. '1"');
+        $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
+
+
+        return $steps;
+    }
+
+    /**
+     * Returns list of steps for manage notification rule scenario.
+     *
+     * @param TableNode $data Scenario data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_manage_notification_rule(TableNode $data) {
+        $data = $data->getRowsHash();
+        $ruletype = !empty($data['ruletype']) ? $data['ruletype'] : null;
+        $typename = get_string('typename', "block_dataformnotification$ruletype");
+        $rulename = !empty($data['rulename']) ? $data['rulename'] : "New $typename rule";
+
+        $steps = array();
+
+        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "Test Dataform"');
+        $steps[] = new Given('I follow "Manage"');
+
+        $steps[] = new Given('I follow "Notifications"');
+
+        // Add a rule
+        $steps[] = new Given('I follow "id_add_'. $ruletype. '_notification_rule"');
+        $steps[] = new Given('I see "'. "New $typename rule". '"');
+
+        // Update the rule
+        $steps[] = new Given('I follow "id_editnotification'. $ruletype. '1"');
+        $steps[] = new Given('I set the field "Name" to "'. "New $typename rule". ' modified"');
+        $steps[] = new Given('I set the field "Events" to "Entry created"');
+        $steps[] = new Given('I set the field "Admin" to "Check"');
+        $steps[] = new Given('I press "Save changes"');
+        $steps[] = new Given('I see "'. "New $typename rule". ' modified"');
+
+        // Delete the rule
+        $steps[] = new Given('I follow "id_deletenotification'. $ruletype. '1"');
+        $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
+
 
         return $steps;
     }
@@ -1394,31 +1478,32 @@ class behat_mod_dataform extends behat_base {
 
         // Course
         $data = array(
-            '| fullname | shortname | category |',
-            '| Course 1 | C1 | 0 |',
+            '| fullname | shortname | category  |',
+            '| Course 1 | C1        | 0         |',
         );
         $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "courses" exist:', $table);
 
         // Users
         $data = array(
-            '| username | firstname | lastname | email |',
-            '| teacher1 | Teacher | 1 | teacher1@asd.com |',
-            '| assistant1 | Assistant | 1 | assistant1@asd.com |',
-            '| student1 | Student | 1 | student1@asd.com |',
-            '| student2 | Student | 2 | student2@asd.com |',
-            '| student3 | Student | 3 | student3@asd.com |',
+            '| username     | firstname | lastname  | email                 |',
+            '| teacher1     | Teacher   | 1         | teacher1@asd.com      |',
+            '| assistant1   | Assistant | 1         | assistant1@asd.com    |',
+            '| assistant2   | Assistant | 1         | assistant2@asd.com    |',
+            '| student1     | Student   | 1         | student1@asd.com      |',
+            '| student2     | Student   | 2         | student2@asd.com      |',
+            '| student3     | Student   | 3         | student3@asd.com      |',
         );
         $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "users" exist:', $table);
 
         // Enrollments
         $data = array(
-            '| user | course | role |',
-            '| teacher1 | C1 | editingteacher |',
-            '| assistant1 | C1 | teacher |',
-            '| student1 | C1 | student |',
-            '| student2 | C1 | student |',
+            '| user         | course | role             |',
+            '| teacher1     | C1     | editingteacher   |',
+            '| assistant1   | C1     | teacher          |',
+            '| student1     | C1     | student          |',
+            '| student2     | C1     | student          |',
         );
         $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
         $steps[] = new Given('the following "course enrolments" exist:', $table);
