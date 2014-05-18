@@ -74,8 +74,12 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
         $fieldname = "field_{$fieldid}_{$entryid}";
 
         $currentstate = !empty($entry->state) ? $entry->state : 0;
-        $mform->addElement('select', $fieldname, null, $field->states);
-        $mform->setDefault($fieldname, $currentstate);
+        if ($states = $field->get_user_transition_states($entry)) {
+            $mform->addElement('select', $fieldname, null, $states);
+            $mform->setDefault($fieldname, $currentstate);
+        } else {
+            $mform->addElement('html', $field->states[$currentstate]);
+        }
     }
 
     /**

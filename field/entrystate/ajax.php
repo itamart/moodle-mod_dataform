@@ -49,7 +49,7 @@ require_login($df->course->id, false, $df->cm);
 require_sesskey();
 
 $PAGE->set_context($df->context);
-$PAGE->set_url('/mod/dataform/field/entrystate/ajax.php', array('contextid' => $context->id));
+$PAGE->set_url('/mod/dataform/field/entrystate/ajax.php', array('contextid' => $df->context->id));
 
 // Get the field
 $field = $df->field_manager->get_field_by_id($fieldid);

@@ -86,6 +86,25 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     }
 
     /**
+     * Returns a list of states which the current user can set.
+     *
+     * @return array
+     */
+    public function get_user_transition_states($entry) {
+        if ($states = $this->states) {
+            if (!isset($entry->state)) {
+                $entry->state = 0;
+            }
+            foreach ($states as $state => $name) {
+                if (!$this->can_instate($entry, $state)) {
+                    unset($states[$state]);
+                }
+            }
+        }
+        return $states;
+    }
+
+    /**
      * Validates state update request against the field configuration.
      *
      * @param stdClass $entry
@@ -95,10 +114,16 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     public function update_state($entry, $newstate) {
         global $DB;
 
+        // Valid requested state?
+        if (!isset($this->states[$newstate])) {
+            return get_string('incorrectstate', 'dataformfield_entrystate', $newstate);
+        }
+
         // Any change at all?
         $oldstate = $entry->state;
-        if ($newstate == $oldstate) {
-            return get_string('incorrectstate', 'dataformfield_entrystate');
+        if ($newstate == $oldstate) {            
+            $info = (object) array('entryid' => $entry->id, 'newstate' => $this->states[$newstate]);
+            return get_string('alreadyinstate', 'dataformfield_entrystate', $info);
         }
 
         // Field editable?
@@ -106,15 +131,15 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
             return get_string('instatingdenied', 'dataformfield_entrystate');
         }
 
-        // Allowed transition
+        // Allowed transition?
         if (!$this->can_instate($entry, $newstate)) {
             return get_string('instatingdenied', 'dataformfield_entrystate');
         }
 
-        // All's good so update entry
+        // All's good so update entry.
         $DB->set_field('dataform_entries', 'state', $newstate, array('id' => $entry->id));
 
-        // Notify as required
+        // Notify as required.
         $this->send_notifications($entry, $newstate);
 
         return null;

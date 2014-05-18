@@ -38,8 +38,12 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
             thedata['entryid'] = this.get('entryid');
             thedata['sesskey'] = this.get('sesskey');
 
-            // Get the parent link
-            var link = e.target.get('parentNode');
+            // Get the link
+            var link = e.target;
+            if (e.target.get('tagName').toLowerCase() != 'a') {
+                link = e.target.get('parentNode');
+            }
+            // Get the requested state
             var arr = link.get('id').split('_');
             thedata['state'] = arr[2];
 
@@ -56,7 +60,7 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
                             var data = Y.JSON.parse(outcome.responseText);
                             if (data.success){
                                 var entryid = scope.get('entryid');
-                                if (data.entryid && data.entryid == entryid) {
+                                if (data.entryid && (data.entryid == entryid)) {
                                     if (scope.container) {
                                         scope.container.set('innerHTML', data.statescontent);
                                         scope.container.all('a').set('href', '#');

@@ -52,7 +52,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         if ($states = $field->states) {
             $statenames = implode("\n", $states);
         }
-        $mform->addElement('textarea', 'states', null, array('rows' => 5));
+        $mform->addElement('textarea', 'states', get_string('states', 'dataformfield_entrystate'), array('rows' => 5));
         $mform->setType('states', PARAM_TEXT);
         $mform->setDefault('states', $statenames);
         $mform->addHelpButton('states', 'states', 'dataformfield_entrystate');
