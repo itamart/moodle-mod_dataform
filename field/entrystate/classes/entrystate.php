@@ -121,7 +121,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
 
         // Any change at all?
         $oldstate = $entry->state;
-        if ($newstate == $oldstate) {            
+        if ($newstate == $oldstate) {
             $info = (object) array('entryid' => $entry->id, 'newstate' => $this->states[$newstate]);
             return get_string('alreadyinstate', 'dataformfield_entrystate', $info);
         }
