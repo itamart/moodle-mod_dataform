@@ -1086,7 +1086,7 @@ function xmldb_dataform_upgrade_2014041100($dbman, $oldversion) {
 function xmldb_dataform_upgrade_last($dbman, $oldversion) {
     global $CFG, $DB;
 
-    $newversion = 2014051700;
+    $newversion = 2014051301;
     if ($oldversion < $newversion) {
         // Add completionspecificgrade column to dataform
         $table = new xmldb_table('dataform');
