@@ -64,6 +64,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2012121600($dbman, $oldversion);
     xmldb_dataform_upgrade_2012121900($dbman, $oldversion);
     xmldb_dataform_upgrade_2013051101($dbman, $oldversion);
+    xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_last($dbman, $oldversion);
 
     return true;
@@ -536,7 +537,7 @@ function xmldb_dataform_upgrade_2013051101($dbman, $oldversion) {
     }
 }
 
-function xmldb_dataform_upgrade_last($dbman, $oldversion) {
+function xmldb_dataform_upgrade_2014041100($dbman, $oldversion) {
     global $CFG, $DB;
 
     $newversion = 2014041100;
@@ -1081,3 +1082,23 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
 
     return true;
 }
+
+function xmldb_dataform_upgrade_last($dbman, $oldversion) {
+    global $CFG, $DB;
+
+    $newversion = 2014051700;
+    if ($oldversion < $newversion) {
+        // Add completionspecificgrade column to dataform
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('completionspecificgrade', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '0', 'completionentries');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // dataform savepoint reached
+        upgrade_mod_savepoint(true, $newversion, 'dataform');
+    }
+
+    return true;
+}
+

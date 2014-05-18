@@ -362,7 +362,7 @@ function dataform_get_custom_icon_url($cmid) {
  *   value depends on comparison type)
  */
 function dataform_get_completion_state($course, $cm, $userid, $type) {
-    global $CFG, $DB;
+    global $DB;
 
     // Get dataform details
     if (!($dataform = $DB->get_record('dataform', array('id' => $cm->instance)))) {
@@ -370,9 +370,32 @@ function dataform_get_completion_state($course, $cm, $userid, $type) {
     }
 
     $result = $type;
+
+    // Required entries
     if ($dataform->completionentries) {
         $entriescount = $DB->count_records('dataform_entries', array('dataid' => $dataform->id, 'userid' => $userid));
         $value = ($entriescount >= $dataform->completionentries);
+        if ($type == COMPLETION_AND) {
+            $result = $result && $value;
+        } else {
+            $result = $result || $value;
+        }
+    }
+
+    // Required specific grade
+    if ($dataform->completionspecificgrade) {
+        // Get the user's grade.
+        $params = array(
+            'itemtype' => 'mod',
+            'itemmodule' => 'dataform',
+            'iteminstance' => $dataform->id,
+            'courseid' => $course->id,
+            'itemnumber' => 0
+        );
+        $gitem = grade_item::fetch($params);
+        $grade = $gitem->get_grade($userid, false);
+
+        $value = ($grade->finalgrade >= $dataform->completionspecificgrade);
         if ($type == COMPLETION_AND) {
             $result = $result && $value;
         } else {

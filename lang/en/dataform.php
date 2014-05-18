@@ -61,6 +61,9 @@ $string['modulenameplural'] = 'Dataforms';
     $string['completionentries'] = 'Participants must add entries:';
     $string['completionentriesgroup'] = 'Require entries';
     $string['completionentrieshelp'] = 'requiring entries to complete';
+    $string['completionspecificgrade'] = 'Participants must receive the grade:';
+    $string['completionspecificgradegroup'] = 'Require specific grade';
+    $string['completionspecificgradehelp'] = 'requiring specific grade to complete';
 
     // Entries
     $string['entriesmax'] = 'Maximum entries';

@@ -1246,6 +1246,16 @@ class mod_dataform_dataform {
 
         if (!$pattern or preg_match("%$pattern%", $this->gradecalc) !== false) {
             dataform_update_grades($this->data, $userid);
+
+            // Update specific grade completion if tracked.
+            if ($this->completionspecificgrade) {
+                $completion = new \completion_info($this->course);
+                if ($completion->is_enabled($this->cm) != COMPLETION_TRACKING_AUTOMATIC) {
+                    return;
+                }
+
+                $completion->update_state($this->cm, COMPLETION_UNKNOWN, $userid);
+            }
         }
     }
 

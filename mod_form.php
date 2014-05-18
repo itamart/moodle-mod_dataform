@@ -31,8 +31,6 @@ require_once("$CFG->dirroot/course/moodleform_mod.php");
 
 class mod_dataform_mod_form extends moodleform_mod {
 
-    protected $_df = null;
-
     public function definition() {
         $mform = &$this->_form;
 
@@ -232,10 +230,13 @@ class mod_dataform_mod_form extends moodleform_mod {
 
     }
 
-
+    /**
+     *
+     */
     public function add_completion_rules() {
         $mform =& $this->_form;
 
+        // Required entries
         $group = array();
         $group[] =& $mform->createElement('checkbox', 'completionentriesenabled', '', get_string('completionentries', 'dataform'));
         $group[] =& $mform->createElement('text', 'completionentries', '', array('size' => 3));
@@ -243,11 +244,40 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addGroup($group, 'completionentriesgroup', get_string('completionentriesgroup', 'dataform'), array(' '), false);
         $mform->disabledIf('completionentries', 'completionentriesenabled', 'notchecked');
 
-        return array('completionentriesgroup');
+        // Required specific grade
+        $specificgradestr = get_string('completionspecificgrade', 'dataform');
+        $specificgradegroupstr = get_string('completionspecificgradegroup', 'dataform');
+        $group = array();
+        $group[] = &$mform->createElement('checkbox', 'completionspecificgradeenabled', '', $specificgradestr);
+        $options = array();
+        if (!empty($this->current->grade)) {
+            if ($this->current->grade > 0) {
+                $range = range($this->current->grade, 1);
+                $options = array_combine($range, $range);
+            } else {
+                // Custom scale
+                $scale = grade_scale::fetch(array('id' => -$this->current->grade));
+                $options = $scale->load_items();
+            }
+        }
+        $group[] = &$mform->createElement('select', 'completionspecificgrade', null, $options);
+        $mform->addGroup($group, 'completionspecificgradegroup', $specificgradegroupstr, array(' '), false);
+        $mform->disabledIf('completionspecificgradeenabled', 'grade', 'eq', 0);
+        $mform->disabledIf('completionspecificgrade', 'completionspecificgradeenabled', 'notchecked');
+
+        return array(
+            'completionentriesgroup',
+            'completionspecificgradegroup',
+        );
     }
 
+    /**
+     *
+     */
     public function completion_rule_enabled($data) {
-        return (!empty($data['completionentriesenabled']) && $data['completionentries'] != 0);
+        $completionentries = (!empty($data['completionentriesenabled']) and $data['completionentries'] != 0);
+        $completionspecificgrade = (!empty($data['completionspecificgradeenabled']) and $data['completionspecificgrade'] != 0);
+        return ($completionentries or $completionspecificgrade);
     }
 
     /**
@@ -259,6 +289,7 @@ class mod_dataform_mod_form extends moodleform_mod {
 
         // Set up the completion checkboxes which aren't part of standard data.
         $data['completionentriesenabled'] = (int) !empty($data['completionentries']);
+        $data['completionspecificgradeenabled'] = (int) !empty($data['completionspecificgrade']);
     }
 
     /**
@@ -293,6 +324,27 @@ class mod_dataform_mod_form extends moodleform_mod {
             if (empty($data->completionentriesenabled) or !$autocompletion) {
                 $data->completionentries = 0;
             }
+            if (empty($data->completionspecificgradeenabled) or !$autocompletion) {
+                $data->completionspecificgrade = 0;
+            }
+            if (empty($data->grade) and !empty($data->completionspecificgradeenabled)) {
+                unset($data->completionspecificgradeenabled);
+                $data->completionspecificgrade = 0;
+            }
+            if (!empty($data->grade) and !empty($data->completionspecificgrade)) {
+                if ($data->grade > 0) {
+                    if ($data->completionspecificgrade > $data->grade) {
+                        $data->completionspecificgrade = $data->grade;
+                    }
+                } else {
+                    // Custom scale
+                    $scale = grade_scale::fetch(array('id' => -$data->grade));
+                    $numitems = count($scale->load_items());
+                    if ($data->completionspecificgrade > $numitems) {
+                        $data->completionspecificgrade = $numitems;
+                    }
+                }
+            }
         }
 
         return $data;
@@ -304,13 +356,17 @@ class mod_dataform_mod_form extends moodleform_mod {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Completion: Automatic on-view completion can not work together with 'Inline view' option
-        if (empty($errors['completion'])
-                    and array_key_exists('completion', $data)
-                    and $data['completion'] == COMPLETION_TRACKING_AUTOMATIC
-                    and !empty($data['completionview'])
-                    and !empty($data['inlineview'])) {
-            $errors['completion'] = get_string('noautocompletioninline', 'mod_dataform');
+        // Completion
+        if (!empty($errors['completion'])) {
+            return $errors;
+        }
+
+        $autocomletion = (isset($data['completion']) and $data['completion'] == COMPLETION_TRACKING_AUTOMATIC);
+        if ($autocomletion) {
+            // Automatic on-view completion can not work together with 'Inline view' option
+            if (!empty($data['completionview']) and !empty($data['inlineview'])) {
+                $errors['completion'] = get_string('noautocompletioninline', 'mod_dataform');
+            }
         }
 
         return $errors;

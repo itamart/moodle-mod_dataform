@@ -42,7 +42,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             'grade', 'gradecalc',
             'maxentries', 'entriesrequired', 'individualized', 'grouped', 'anonymous', 'timelimit',
             'css', 'cssincludes', 'js', 'jsincludes',
-            'defaultview', 'defaultfilter', 'completionentries'));
+            'defaultview', 'defaultfilter', 'completionentries', 'completionspecificgrade'));
 
         $fields = new backup_nested_element('fields');
         $field = new backup_nested_element('field', array('id'), array(
