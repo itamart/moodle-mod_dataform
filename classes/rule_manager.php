@@ -88,7 +88,7 @@ abstract class mod_dataform_rule_manager {
 
                         unset($this->_rules[$biid]);
                     }
-                    unset($this->_typerules[$ruletype][key]);
+                    unset($this->_typerules[$ruletype][$key]);
                 }
             }
         }
