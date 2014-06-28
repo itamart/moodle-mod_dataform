@@ -17,7 +17,7 @@
 namespace mod_dataform\pluginbase;
 
 /**
- * @package dataform
+ * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

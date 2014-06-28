@@ -17,7 +17,7 @@
 /**
  * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
- * @package dataform
+ * @package mod_dataform
  * @category view
  * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
