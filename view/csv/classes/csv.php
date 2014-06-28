@@ -379,7 +379,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     /**
      * Returns a fieldset of view options
      */
-    public function get_default_view_template() {
+    protected function get_default_view_template() {
         // Notifications
         $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
