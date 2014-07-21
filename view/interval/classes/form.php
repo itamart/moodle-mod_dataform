@@ -46,11 +46,11 @@ class dataformview_interval_form extends dataformview_grid_form {
     protected function definition_view_interval() {
         $mform =& $this->_form;
 
-        // Specifications
+        // specifications
         // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'intervalsettingshdr', get_string('settings', 'dataformview_interval'));
+        $mform->addElement('header', 'intervalsettingshdr', get_string('interval', 'dataformview_interval'));
 
-        // Interval
+        // interval
         $intervals = array(0 => get_string('always'),
                         'hourly' => get_string('hourly', 'dataformview_interval'),
                         'daily' => get_string('daily', 'dataformview_interval'),
@@ -72,14 +72,17 @@ class dataformview_interval_form extends dataformview_grid_form {
         $mform->disabledIf('customhours', 'param5', 'neq', 'custom');
         $mform->disabledIf('customdays', 'param5', 'neq', 'custom');
 
-        // Selection type
-        $types = array(mod_dataform_entry_manager::SELECT_FIRST_PAGE => get_string('first', 'dataformview_interval'),
-                        mod_dataform_entry_manager::SELECT_LAST_PAGE => get_string('last', 'dataformview_interval'),
-                        mod_dataform_entry_manager::SELECT_NEXT_PAGE => get_string('next'),
-                        mod_dataform_entry_manager::SELECT_RANDOM_PAGE => get_string('random', 'dataformview_interval'));
+        // selection type
+        $types = array(
+            \mod_dataform_entry_manager::SELECT_FIRST_PAGE => get_string('firstpage', 'dataformview_interval'),
+            \mod_dataform_entry_manager::SELECT_LAST_PAGE => get_string('lastpage', 'dataformview_interval'),
+            \mod_dataform_entry_manager::SELECT_NEXT_PAGE => get_string('nextpage', 'dataformview_interval'),
+            \mod_dataform_entry_manager::SELECT_RANDOM_PAGE => get_string('randompage', 'dataformview_interval'),
+            \mod_dataform_entry_manager::SELECT_RANDOM_ENTRIES => get_string('randomentries', 'dataformview_interval'),
+        );
         $mform->addElement('select', 'param4', get_string('selection', 'dataformview_interval'), $types);
 
-        // Reset next
+        // reset next
         $mform->addElement('text', 'param8', get_string('resetnext', 'dataformview_interval'), array('size' => 8));
         $mform->setType('param8', PARAM_INT);
         $mform->setDefault('param8', 100);
@@ -118,7 +121,7 @@ class dataformview_interval_form extends dataformview_grid_form {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // Set custom refresh (param6)
+            // set custom refresh (param6)
             $customrefreshsecs = 0;
             if (!empty($data->customminutes)) {
                 $customrefreshsecs += ($data->customminutes * 60);

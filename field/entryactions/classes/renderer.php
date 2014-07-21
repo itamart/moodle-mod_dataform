@@ -58,20 +58,20 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         foreach ($patterns as $pattern) {
             $str = '';
             if (strpos($pattern, "[[$fieldname:more:") === 0 and !$editing) {
-                // More for each view
+                // more for each view
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_more($entry, array('view' => $viewname));
             } else if (strpos($pattern, "[[$fieldname:moreurl:") === 0) {
-                // Moreurl for each view
+                // moreurl for each view
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_more($entry, array('view' => $viewname, 'url' => 1));
             } else if (strpos($pattern, "[[$fieldname:edit:") === 0 and !$editing) {
-                // Edit for each view
+                // edit for each view
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_edit($entry, array('view' => $viewname));
             } else {
                 switch ($pattern) {
-                    // Reference
+                    // reference
                     case "[[$fieldname:more]]":
                         $str = !$editing ? $this->display_more($entry) : '';
                         break;
@@ -433,7 +433,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         if ($this->_viewsmenu === null) {
             $field = $this->_field;
             $viewman = mod_dataform_view_manager::instance($this->_field->df->id);
-            $this->_viewsmenu = $viewman->get_views_menu();
+            $this->_viewsmenu = $viewman->views_menu;
         }
 
         return $this->_viewsmenu;
@@ -448,7 +448,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $cat = get_string('pluginname', 'dataformfield_entryactions');
 
-        // Actions
+        // actions
         $patterns["[[$fieldname:actionmenu]]"] = array(true, $cat);
         $patterns["[[$fieldname:edit]]"] = array(true, $cat);
         $patterns["[[$fieldname:delete]]"] = array(true, $cat);
@@ -456,7 +456,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $patterns["[[$fieldname:export]]"] = array(true, $cat);
         $patterns["[[$fieldname:duplicate]]"] = array(true, $cat);
 
-        // Reference
+        // reference
         $patterns["[[$fieldname:anchor]]"] = array(true, $cat);
         $patterns["[[$fieldname:more]]"] = array(true, $cat);
         $patterns["[[$fieldname:moreurl]]"] = array(true, $cat);

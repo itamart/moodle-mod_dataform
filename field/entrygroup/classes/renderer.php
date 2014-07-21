@@ -36,7 +36,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
 
         // Set the group object
         $group = new stdClass;
-        if ($entry->id < 0) { // New record (0)
+        if ($entry->id < 0) { // new record (0)
             $entry->groupid = $field->df->currentgroup;
             $group->id = $entry->groupid;
             $group->idnumber = null;
@@ -74,9 +74,9 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
                     $replacements[$pattern] = $group->name;
                     break;
 
-                // Case 'description':
+                // case 'description':
                     // $replacements[$pattern] = $group->description;
-                    // Break;
+                    // break;
 
                 case 'picture':
                     $replacements[$pattern] = print_group_picture($group, $field->get_df()->course->id, false, true);

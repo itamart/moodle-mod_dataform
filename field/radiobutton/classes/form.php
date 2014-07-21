@@ -31,7 +31,7 @@ class dataformfield_radiobutton_form extends dataformfield_select_form {
 
         $mform = &$this->_form;
 
-        // Options separator
+        // options separator
         $mform->addElement(
             'select',
             'param3',

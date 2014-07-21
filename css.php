@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -29,9 +28,9 @@
 require_once('../../config.php');
 
 $urlparams = new object;
-$urlparams->d = optional_param('d', 0, PARAM_INT);   // Dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);   // Course module id
-$urlparams->cssedit = optional_param('cssedit', 0, PARAM_BOOL);   // Edit mode
+$urlparams->d = optional_param('d', 0, PARAM_INT);   // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);   // course module id
+$urlparams->cssedit = optional_param('cssedit', 0, PARAM_BOOL);   // edit mode
 
 if ($urlparams->cssedit) {
     require_once("$CFG->libdir/formslib.php");
@@ -43,23 +42,23 @@ if ($urlparams->cssedit) {
 
             $mform = &$this->_form;
 
-            // Buttons
+            // buttons
             // -------------------------------------------------------------------------------
             $this->add_action_buttons(true);
 
-            // Css
+            // css
             // -------------------------------------------------------------------------------
             $mform->addElement('header', 'generalhdr', get_string('headercss', 'dataform'));
 
-            // Includes
+            // includes
             $attributes = array('wrap' => 'virtual', 'rows' => 3, 'style' => 'width:95%');
             $mform->addElement('textarea', 'cssincludes', get_string('cssincludes', 'dataform'), $attributes);
 
-            // Code
+            // code
             $attributes = array('wrap' => 'virtual', 'rows' => 5, 'style' => 'width:95%');
             $mform->addElement('textarea', 'css', get_string('csscode', 'dataform'), $attributes);
 
-            // Uploads
+            // uploads
             $options = array(
                 'subdirs' => 0,
                 'maxbytes' => $COURSE->maxbytes,
@@ -68,7 +67,7 @@ if ($urlparams->cssedit) {
             );
             $mform->addElement('filemanager', 'cssupload', get_string('cssupload', 'dataform'), null, $options);
 
-            // Buttons
+            // buttons
             // -------------------------------------------------------------------------------
             $this->add_action_buttons(true);
         }
@@ -81,19 +80,19 @@ if ($urlparams->cssedit) {
 
     $df->set_page('css', array('urlparams' => $urlparams));
 
-    // Activate navigation node
+    // activate navigation node
     navigation_node::override_active_url(new moodle_url('/mod/dataform/css.php', array('id' => $df->cm->id, 'cssedit' => 1)));
 
     $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id, 'cssedit' => 1)));
 
     if ($data = $mform->get_data()) {
-        // Update the dataform
+        // update the dataform
         $rec = new stdClass;
         $rec->css = $data->css;
         $rec->cssincludes = $data->cssincludes;
         $df->update($rec, get_string('csssaved', 'dataform'));
 
-        // Add uploaded files
+        // add uploaded files
         $options = array(
             'subdirs' => 0,
             'maxbytes' => $COURSE->maxbytes,
@@ -123,7 +122,7 @@ if ($urlparams->cssedit) {
 
 } else {
 
-    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true); // Session not used here
+    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true); // session not used here
 
     $lifetime  = 600;                                   // Seconds to cache this stylesheet
 

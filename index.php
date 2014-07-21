@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -29,7 +28,7 @@
 require_once("../../config.php");
 require_once("$CFG->dirroot/mod/dataform/lib.php");
 
-$id             = required_param('id', PARAM_INT);   // Course
+$id             = required_param('id', PARAM_INT);   // course
 // $add            = optional_param('add', '', PARAM_ALPHA);
 // $update         = optional_param('update', 0, PARAM_INT);
 // $duplicate      = optional_param('duplicate', 0, PARAM_INT);
@@ -74,32 +73,32 @@ $table->attributes['cellpadding'] = '2';
 $table->head  = array ();
 $table->align = array ();
 
-// Section
+// section
 if ($usesections) {
     $table->head[] = get_string('sectionname', 'format_'.$course->format);
     $table->align[] = 'center';
 }
 
-// Name
+// name
 $table->head[] = get_string('name');
 $table->align[] = 'left';
 
-// Description
+// description
 $table->head[] = get_string('description');
 $table->align[] = 'left';
 
-// Number of entries
+// number of entries
 $table->head[] = get_string('entries', 'dataform');
 $table->align[] = 'center';
 
-// Rss
+// rss
 $rss = (!empty($CFG->enablerssfeeds) and !empty($CFG->dataform_enablerssfeeds));
 if ($rss) {
     $table->head[] = get_string('rss');
     $table->align[] = 'center';
 }
 
-// Actions
+// actions
 if ($showeditbuttons = $PAGE->user_allowed_editing()) {
     $table->head[] = '';
     $table->align[] = 'center';
@@ -122,7 +121,7 @@ foreach ($dataforms as $dataform) {
         continue;
     }
 
-    // Section
+    // section
     if ($usesections) {
         if ($dataform->section !== $currentsection) {
             if ($currentsection !== null) {
@@ -135,20 +134,20 @@ foreach ($dataforms as $dataform) {
         }
     }
 
-    // Name (linked; dim if not visible)
+    // name (linked; dim if not visible)
     $linkparams = !$dataform->visible ? array('class' => 'dimmed') : null;
     $linkedname = html_writer::link(new moodle_url('/mod/dataform/view.php', array('id' => $dataform->coursemodule)),
                                 format_string($dataform->name, true),
                                 $linkparams);
     $tablerow[] = $linkedname;
 
-    // Description
+    // description
     $tablerow[] = format_text($dataform->intro, $dataform->introformat, $options);
 
-    // Number of entries
+    // number of entries
     $tablerow[] = $df->get_entries_count(mod_dataform_dataform::COUNT_ALL);
 
-    // Rss
+    // rss
     $rsslinks = array();
     if ($rss and $rssviews = $df->get_rss_views()) {
         foreach ($rssviews as $view) {

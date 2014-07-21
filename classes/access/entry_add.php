@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ class entry_add extends base {
         }
         // User at max entries (per interval)
         if ($df->user_at_max_entries(true)) {
-            return false;    // No more entries for you (come back next interval or so)
+            return false;    // no more entries for you (come back next interval or so)
         }
 
         // Early entries

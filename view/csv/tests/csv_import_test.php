@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod_dataform
+ * @package    dataformview_csv
  * @category   phpunit
- * @copyright  2012 Itamar Tzadok
+ * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,13 +26,14 @@ defined('MOODLE_INTERNAL') or die;
 /**
  * PHPUnit dataform import testcase
  *
- * @package    mod_dataform
+ * @package    dataformview_csv
  * @category   phpunit
  * @group      mod_dataform
+ * @group      dataformview_csv
  * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_dataform_import_testcase extends advanced_testcase {
+class dataformview_csv_import_testcase extends advanced_testcase {
 
     protected $_course;
 

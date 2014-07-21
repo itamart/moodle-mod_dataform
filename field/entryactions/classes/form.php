@@ -38,7 +38,7 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
     /**
      *
      */
-    public function field_definition_action($action) {
+    protected function field_definition_action($action) {
         global $CFG;
 
         $field = $this->_field;
@@ -50,7 +50,7 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
         // Target view (param1)
         $viewman = mod_dataform_view_manager::instance($field->dataid);
         $options = array('' => get_string('default'));
-        if ($viewsmenu = $viewman->get_views_menu()) {
+        if ($viewsmenu = $viewman->views_menu) {
             $options = $options + $viewsmenu;
         }
         $mform->addElement('select', "targetview_$action", get_string('targetview', 'dataformfield_entryactions'), $options);
@@ -65,6 +65,7 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
         $mform->addElement('text', "themeicon_$action", get_string('themeicon', 'dataformfield_entryactions'));
         $mform->setType("themeicon_$action", PARAM_TEXT);
         $mform->addHelpButton("themeicon_$action", 'targetview', 'dataformfield_entryactions');
+
         /*
         // Custom icon
         $options = array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes, 'maxfiles' => 1, 'accepted_types' => array('image'));
@@ -75,7 +76,6 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
 
         // Entry condition (filter)
         */
-
     }
 
 }

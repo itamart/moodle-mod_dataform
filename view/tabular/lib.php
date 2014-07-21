@@ -61,8 +61,8 @@ function dataformview_tabular_pluginfile($course, $cm, $context, $filearea, $arg
             return false;
         }
 
-        // Finally send the file
-        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
     return false;
 }

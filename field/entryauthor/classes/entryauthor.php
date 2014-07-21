@@ -189,10 +189,10 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
         $sortdir = $sortdir ? 'DESC' : 'ASC';
         $contentfull = $this->get_sort_sql();
         $sql = "SELECT DISTINCT $contentfull
-                  FROM {user} u
-                       JOIN {dataform_entries} e ON u.id = e.userid
-                 WHERE e.dataid = ? AND  $contentfull IS NOT NULL
-                 ORDER BY $contentfull $sortdir";
+                FROM {user} u
+                    JOIN {dataform_entries} e ON u.id = e.userid
+                WHERE e.dataid = ? AND  $contentfull IS NOT NULL
+                ORDER BY $contentfull $sortdir";
 
         $distinctvalues = array();
         if ($options = $DB->get_records_sql($sql, array($this->df->id))) {

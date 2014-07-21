@@ -57,12 +57,12 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                         $replacements[$pattern] = $this->display_browse($entry);
                         break;
 
-                    // Plain text, no links
+                    // plain text, no links
                     case "[[$fieldname:text]]":
                         $replacements[$pattern] = html_to_text($this->display_browse($entry, array('text' => true)));
                         break;
 
-                    // Plain text, with links
+                    // plain text, with links
                     case "[[$fieldname:textlinks]]":
                         $replacements[$pattern] = $this->display_browse($entry, array('text' => true, 'links' => true));
                         break;
@@ -132,7 +132,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
 
-        // Editor
+        // editor
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
 
         $attr = array();
@@ -150,7 +150,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                 $mform->addRule($fieldname, null, 'required', null, 'client');
             }
         } else {
-            // Format
+            // format
             $data->{"{$fieldname}format"} = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
 
             $data = file_prepare_standard_editor($data, $fieldname, $field->get_editoroptions(), $field->get_df()->context, 'mod_dataform', 'content', $contentid);

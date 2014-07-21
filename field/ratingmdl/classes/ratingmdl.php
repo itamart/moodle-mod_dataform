@@ -23,7 +23,9 @@
 
 require_once(__DIR__. '/../ratinglib.php');
 
-class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataformfield_nocontent implements mod_dataform\interfaces\grading {
+class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataformfield_nocontent
+            implements mod_dataform\interfaces\grading, mod_dataform\interfaces\usingscale {
+
     protected $_scaleid = 0;
     protected $_allratings = null;
 
@@ -43,11 +45,19 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
      *
      */
     public function permissions() {
+        $context = $this->df->context;
+        $ownviewaggregate = has_capability('dataformfield/ratingmdl:ownviewaggregate', $context);
+        $anyviewaggregate = has_capability('dataformfield/ratingmdl:anyviewaggregate', $context);
+        $ownviewratings = has_capability('dataformfield/ratingmdl:ownviewratings', $context);
+        $anyviewratings = has_capability('dataformfield/ratingmdl:anyviewratings', $context);
+        $ownrate = has_capability('dataformfield/ratingmdl:ownrate', $context);
+        $anyrate = has_capability('dataformfield/ratingmdl:anyrate', $context);
+
         return array(
-            'view'    => true,
-            'viewany' => true,
-            'viewall' => true,
-            'rate'    => true
+            'view'    => $ownviewaggregate,
+            'viewany' => $anyviewaggregate,
+            'viewall' => $ownviewratings or $anyviewratings,
+            'rate'    => $ownrate or $anyrate,
         );
     }
 
@@ -112,13 +122,6 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             throw new rating_exception('invalidnum');
         }
 
-        // Check the item we're rating was created in the assessable time window
-        // If (!empty($info->assesstimestart) && !empty($info->assesstimefinish)) {
-        // If ($info->timecreated < $info->assesstimestart || $info->timecreated > $info->assesstimefinish) {
-        // Throw new rating_exception('notavailable');
-        //    }
-        // }
-
         // Make sure groups allow this user to see the item they're rating
         $groupid = $this->df->currentgroup;
         if ($groupid > 0 and $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course)) {
@@ -136,6 +139,114 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
 
         return true;
     }
+
+    /**
+     * Returns true if the user is able to rate in this field in the specified entry.
+     *
+     * @param stdClass $entry Entry
+     * @param int $userid Current user assumed if left empty
+     * @return bool
+     */
+    public function user_can_rate($entry, $userid = null) {
+        if (empty($userid)) {
+            global $USER;
+            $userid = $USER->id;
+        }
+
+        // You can't rate if you don't have the system cap
+        if (empty($entry->rating->settings->permissions->rate)) {
+            return false;
+        }
+
+        // Is it your own entry?
+        $ownentry = ($userid == $entry->userid);
+
+        // It is your entry!
+        if ($ownentry) {
+            return has_capability('dataformfield/ratingmdl:ownrate', $this->df->context);
+        }
+
+        // It is not your entry!
+        if (!$ownentry) {
+            return has_capability('dataformfield/ratingmdl:anyrate', $this->df->context);
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the user is able to view ratings in this field in the specified entry.
+     *
+     * @param stdClass $entry Entry
+     * @param int $userid Current user assumed if left empty
+     * @return bool
+     */
+    public function user_can_view_ratings($entry, $userid = null) {
+        if (empty($userid)) {
+            global $USER;
+            $userid = $USER->id;
+        }
+
+        // You can't view ratings if you don't have the system cap
+        if (empty($entry->rating->settings->permissions->viewall)) {
+            return false;
+        }
+
+        // Is it your own entry?
+        $ownentry = ($userid == $entry->userid);
+
+        // It is your entry!
+        if ($ownentry) {
+            return has_capability('dataformfield/ratingmdl:ownviewratings', $this->df->context);
+        }
+
+        // It is not your entry!
+        if (!$ownentry) {
+            return has_capability('dataformfield/ratingmdl:anyviewratings', $this->df->context);
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the user is able to view aggregates in this field in the specified entry.
+     *
+     * @param stdClass $entry Entry
+     * @param int $userid Current user assumed if left empty
+     * @return bool
+     */
+    public function user_can_view_aggregates($entry, $userid = null) {
+        if (empty($userid)) {
+            global $USER;
+            $userid = $USER->id;
+        }
+
+        // Is it your own entry?
+        $ownentry = ($userid == $entry->userid);
+
+        // You can't view own aggregates if you don't have the system cap
+        if ($ownentry and empty($entry->rating->settings->permissions->view)) {
+            return false;
+        }
+
+        // You can't view any aggregates if you don't have the system cap
+        if (!$ownentry and empty($entry->rating->settings->permissions->viewany)) {
+            return false;
+        }
+
+        // It is your entry!
+        if ($ownentry) {
+            return has_capability('dataformfield/ratingmdl:ownviewaggregate', $this->df->context);
+        }
+
+        // It is not your entry!
+        if (!$ownentry) {
+            return has_capability('dataformfield/ratingmdl:anyviewaggregate', $this->df->context);
+        }
+
+        return false;
+    }
+
 
     // SQL MANAGEMENT
     /**
@@ -382,7 +493,11 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     }
 
     /**
+     * Returns rating records, all or for a specific entry and/or for a specific rating.
      *
+     * @param array $options
+     *      itemid => int Entry id
+     *      rating => int Rating value
      * @return array Recordset
      */
     public function get_rating_records(array $options = null) {
@@ -441,8 +556,18 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     }
 
     // GRADING
-    public function get_user_values($pattern, $userid = 0) {
-        global $CFG;
+    /**
+     * Returns the value replacement of the pattern for each user with content in the field.
+     *
+     * @param string $pattern
+     * @param array $entryids The ids of entries the field values should be fetched from.
+     *      If not provided the method should return values from all applicable entries.
+     * @param int $userid   The id of the users whose field values are requested.
+     *      If not specified, should return values for all applicable users.
+     * @return null|array Array of userid => value pairs.
+     */
+    public function get_user_values($pattern, array $entryids = null, $userid = 0) {
+        $values = array();
 
         if (!$aggrs = $this->renderer->get_aggregations(array($pattern))) {
             return null;
@@ -459,21 +584,44 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         $options->itemtableusercolumn = 'userid';
         $options->modulename = 'dataform';
         $options->moduleid   = $this->df->id;
-        $options->userid = $userid;
         $options->scaleid = $this->get_scaleid();
 
         $rm = new ratingmdl_rating_manager();
-        return $rm->get_user_grades($options);
+
+        $users = $userid ? array($userid) : array();
+
+        foreach ($users as $userid) {
+            $options->userid = $userid;
+            if ($usergrades = $rm->get_user_grades($options)) {
+                $uservalues = array_map(
+                    function($g) {
+                        return $g->rawgrade;
+                    },
+                    $usergrades
+                );
+                $values[$userid] = $uservalues[$userid];
+            }
+        }
+
+        return $values;
     }
 
+    // USING SCALE
     /**
      * Returns the database column used to store the scale.
      *
      * @return string
      */
-    public static function get_scale_param() {
-        return 'param1';
+    public static function is_using_scale($scaleid, $dataformid = 0) {
+        global $DB;
+
+        $params = array('type' => 'ratingmdl', 'param1' => -$scaleid);
+        if ($dataformid) {
+            $params['dataid'] = $dataformid;
+        }
+        return $DB->record_exists('dataform_fields', $params);
     }
+
     // GETTERS
 
     /**

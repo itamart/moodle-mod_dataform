@@ -71,7 +71,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         $formfieldname = "field_{$fieldid}_{$entryid}";
         $patterns = $this->add_clean_pattern_keys($patterns);
 
-        // Only [[$fieldname]] is editable so check it if exists
+        // only [[$fieldname]] is editable so check it if exists
         if (array_key_exists("[[*$fieldname]]", $patterns) and isset($data->$formfieldname)) {
             if (!$content = clean_param($data->$formfieldname, PARAM_NOTAGS)) {
                 return array($formfieldname, get_string('fieldrequired', 'dataform'));
@@ -95,12 +95,12 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
 
         $fieldattr = array();
 
-        // Style
+        // style
         if ($field->param2) {
             $fieldattr['style'] = 'width:'. s($field->param2). s($field->param3). ';';
         }
 
-        // Class
+        // class
         $classes = $field->name_normalized;
         if ($field->param4) {
             $classes .= ' '. s($field->param4);
@@ -116,7 +116,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         if ($required) {
             $mform->addRule($fieldname, null, 'required', null, 'client');
         }
-        // Format rule
+        // format rule
         if ($format = $field->param4) {
             $mform->addRule($fieldname, null, $format, null, 'client');
             // Adjust type
@@ -135,7 +135,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
                     break;
             }
         }
-        // Length rule
+        // length rule
         if ($length = $field->param5) {
             ($min = $field->param6) or ($min = 0);
             ($max = $field->param7) or ($max = 64);

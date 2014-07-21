@@ -43,16 +43,16 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
      * @return void
      */
     protected function get_default_entry_template() {
-        // Get all the fields
+        // get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
-            return; // You shouldn't get that far if there are no user fields
+            return; // you shouldn't get that far if there are no user fields
         }
 
-        // Set content
+        // set content
         $table = new html_table();
         $table->attributes['align'] = 'center';
         $table->attributes['cellpadding'] = '2';
-        // Fields
+        // fields
         foreach ($fields as $field) {
             if ($field->id > 0) {
                 $name = new html_table_cell($field->name. ':');
@@ -63,14 +63,14 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
                 $table->data[] = $row;
             }
         }
-        // Actions
+        // actions
         $row = new html_table_row();
         $entryactions = get_string('fieldname', 'dataformfield_entryactions');
         $actions = new html_table_cell("[[$entryactions:edit]]  [[$entryactions:delete]]");
         $actions->colspan = 2;
         $row->cells = array($actions);
         $table->data[] = $row;
-        // Construct the table
+        // construct the table
         $entrydefault = html_writer::table($table);
         $this->param2 = html_writer::tag('div', $entrydefault, array('class' => 'entry'));
     }
@@ -83,7 +83,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
 
         $elements = array();
 
-        // Flatten the set to a list of elements
+        // flatten the set to a list of elements
         foreach ($entriesset as $entrydefinitions) {
             $elements = array_merge($elements, $entrydefinitions);
         }
@@ -113,7 +113,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
         }
 
         // Editing so split the entry template to tags and html
-        // Split the entry template to tags and html
+        // split the entry template to tags and html
         $tags = array_keys($fielddefinitions);
         $parts = $this->split_tags($tags, $this->param2);
 
@@ -135,7 +135,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
 
-        // Get patterns definitions
+        // get patterns definitions
         $fields = $this->get_fields();
         $tags = array();
         $patterndefinitions = array();
@@ -153,7 +153,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
             }
         }
 
-        // Split the entry template to tags and html
+        // split the entry template to tags and html
         $parts = $this->split_tags($tags, $this->param2);
 
         foreach ($parts as $part) {

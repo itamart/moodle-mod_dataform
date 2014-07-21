@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -282,7 +282,7 @@ function mod_dataform_capabilities_dataform_view() {
  */
 function mod_dataform_capabilities_dataform_entry() {
     return array(
-        // Manage entries: view, write, delete, export etc.
+        // manage entries: view, write, delete, export etc.
         'mod/dataform:manageentries' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -784,7 +784,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
  */
 function mod_dataform_capabilities_dataform_preset() {
     return array(
-        // Manage user presets
+        // manage user presets
         'mod/dataform:managepresets' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -797,7 +797,7 @@ function mod_dataform_capabilities_dataform_preset() {
             )
         ),
 
-        // View all user presets
+        // view all user presets
         'mod/dataform:presetsviewall' => array(
 
             'captype' => 'read',
@@ -820,13 +820,13 @@ function mod_dataform_capabilities_dataform_depracated() {
 
     // DEPRACATED
 
-        // View entries
+        // view entries
         'mod/dataform:viewentry' => array(
 
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
             'archetypes' => array(
-                'frontpage' => CAP_ALLOW, // Needed for dataforms on the frontpage
+                'frontpage' => CAP_ALLOW, // needed for dataforms on the frontpage
                 'guest' => CAP_ALLOW,
                 'student' => CAP_ALLOW,
                 'teacher' => CAP_ALLOW,
@@ -835,7 +835,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Write entries
+        // write entries
         'mod/dataform:writeentry' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -850,7 +850,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // View anonymous entries
+        // view anonymous entries
         'mod/dataform:viewanonymousentry' => array(
 
             'captype' => 'read',
@@ -861,7 +861,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Export entries
+        // export entries
         'mod/dataform:exportentry' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -875,7 +875,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Export own entries
+        // export own entries
         'mod/dataform:exportownentry' => array(
 
             'captype' => 'read',
@@ -888,7 +888,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Export all entries
+        // export all entries
         'mod/dataform:exportallentries' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -916,7 +916,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Mangae comments
+        // mangae comments
         'mod/dataform:managecomments' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -930,7 +930,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Comment on entries
+        // comment on entries
         'mod/dataform:comment' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -945,7 +945,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Mangae ratings
+        // mangae ratings
         'mod/dataform:manageratings' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -959,7 +959,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Rate entries
+        // rate entries
         'mod/dataform:rate' => array(
 
             'captype' => 'write',
@@ -971,7 +971,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // View entry ratings
+        // view entry ratings
         'mod/dataform:ratingsview' => array(
 
             'captype' => 'read',

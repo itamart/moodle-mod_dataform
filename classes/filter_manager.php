@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -233,10 +232,10 @@ class mod_dataform_filter_manager {
                 // Some filters are specified for action
                 $fids = !is_array($fids) ? explode(',', $fids) : $fids;
                 foreach ($fids as $filterid) {
-                    $filters[] = $this->get_filter_by_id($filterid);
+                    $filters[$filterid] = $this->get_filter_by_id($filterid);
                 }
             } else if ($action == 'update') {
-                $filters[] = $this->get_filter_blank();
+                $filters[0] = $this->get_filter_blank();
             }
         }
         $processedfids = array();
@@ -270,7 +269,6 @@ class mod_dataform_filter_manager {
                                 if ($this->is_at_max_filters()) {
                                     break;
                                 }
-
                                 // Set new name
                                 while ($df->name_exists('filters', $filter->name)) {
                                     $filter->name = 'Copy of '. $filter->name;
@@ -361,7 +359,7 @@ class mod_dataform_filter_manager {
         $formparams = array('d' => $this->_dataformid, 'fid' => $filter->id, 'update' => 1);
         $formurl = new moodle_url('/mod/dataform/filter/edit.php', $formparams);
 
-        $mform = new mod_dataform\pluginbase\dataformfilterform_standard($filter, $formurl);
+        $mform = new mod_dataform\pluginbase\dataformfilterform_standard($filter->instance, $formurl);
         return $mform;
     }
 
@@ -433,7 +431,7 @@ class mod_dataform_filter_manager {
                         }
 
                         // If finalizing, aggregate by fieldid and searchandor,
-                        // Otherwise just make a flat array (of arrays)
+                        // otherwise just make a flat array (of arrays)
                         if ($finalize) {
                             if (!isset($searchfields[$fieldid])) {
                                 $searchfields[$fieldid] = array();
@@ -655,9 +653,12 @@ class mod_dataform_filter_manager {
         $usort = null;
         if ($query) {
             $usort = urldecode($query);
-            $usort = array_map(function($a) {
-                return explode(' ', $a);
-            }, explode(',', $usort));
+            $usort = array_map(
+                function($a) {
+                    return explode(' ', $a);
+                },
+                explode(',', $usort)
+            );
         }
         return $usort;
     }
@@ -680,7 +681,7 @@ class mod_dataform_filter_manager {
                         }
                         list($not, $op, $value) = $options;
                         $searchvalue = is_array($value) ? implode('|', $value) : $value;
-                        $ucsearch[] = "$fieldid:$key:$not, $op, $searchvalue";
+                        $ucsearch[] = "$fieldid:$key:$not,$op,$searchvalue";
                     }
                 }
             }
@@ -700,9 +701,12 @@ class mod_dataform_filter_manager {
             $searchies = explode('@', $ucsearch);
             foreach ($searchies as $key => $searchy) {
                 list($fieldid, $andor, $options) = explode(':', $searchy);
-                $soptions[$fieldid] = array($andor => array_map(function($a) {
-                    return explode(',', $a);
-                }, explode('#', $options)));
+                $soptions[$fieldid] = array($andor => array_map(
+                    function($a) {
+                        return explode(',', $a);
+                    },
+                    explode('#', $options))
+                );
             }
         }
         return $soptions;

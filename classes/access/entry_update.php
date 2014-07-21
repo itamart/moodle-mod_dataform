@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,8 +52,8 @@ class entry_update extends base {
         }
 
         // Unspecified entry
-        // If (empty($params['entry'])) {
-        // Return self::has_capability('mod/dataform:entryanyupdate', $params);
+        // if (empty($params['entry'])) {
+        //    return self::has_capability('mod/dataform:entryanyupdate', $params);
         // }
 
         // Early entries

@@ -31,19 +31,19 @@ class dataformfield_selectmulti_form extends mod_dataform\pluginbase\dataformfie
         $mform = &$this->_form;
         $field = $this->_field;
 
-        // ---------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // Options
+        // options
         $mform->addElement('textarea', 'param1', get_string('options', 'dataformfield_selectmulti'), 'wrap="virtual" rows="10" cols="50"');
 
-        // Default options
+        // default options
         $mform->addElement('textarea', 'param2', get_string('optionsdefault', 'dataformfield_selectmulti'), 'wrap="virtual" rows="5" cols="50"');
 
-        // Options separator
+        // options separator
         $mform->addElement('select', 'param3', get_string('optionsseparator', 'dataformfield_selectmulti'), array_map('current', $field->separator_types));
 
-        // Allow add option
+        // allow add option
         $mform->addElement('selectyesno', 'param4', get_string('allowaddoption', 'dataformfield_selectmulti'));
 
     }

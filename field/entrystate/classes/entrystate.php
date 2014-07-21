@@ -21,7 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent {
+class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent
+        implements mod_dataform\interfaces\grading {
 
     const ROLE_AUTHOR = -1;
     const ROLE_ENTRIES_MANAGER = -2;
@@ -85,6 +86,25 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     }
 
     /**
+     * Returns a list of states which the current user can set.
+     *
+     * @return array
+     */
+    public function get_user_transition_states($entry) {
+        if ($states = $this->states) {
+            if (!isset($entry->state)) {
+                $entry->state = 0;
+            }
+            foreach ($states as $state => $name) {
+                if (!$this->can_instate($entry, $state)) {
+                    unset($states[$state]);
+                }
+            }
+        }
+        return $states;
+    }
+
+    /**
      * Validates state update request against the field configuration.
      *
      * @param stdClass $entry
@@ -94,10 +114,16 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     public function update_state($entry, $newstate) {
         global $DB;
 
+        // Valid requested state?
+        if (!isset($this->states[$newstate])) {
+            return get_string('incorrectstate', 'dataformfield_entrystate', $newstate);
+        }
+
         // Any change at all?
         $oldstate = $entry->state;
         if ($newstate == $oldstate) {
-            return get_string('incorrectstate', 'dataformfield_entrystate');
+            $info = (object) array('entryid' => $entry->id, 'newstate' => $this->states[$newstate]);
+            return get_string('alreadyinstate', 'dataformfield_entrystate', $info);
         }
 
         // Field editable?
@@ -105,15 +131,15 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
             return get_string('instatingdenied', 'dataformfield_entrystate');
         }
 
-        // Allowed transition
+        // Allowed transition?
         if (!$this->can_instate($entry, $newstate)) {
             return get_string('instatingdenied', 'dataformfield_entrystate');
         }
 
-        // All's good so update entry
+        // All's good so update entry.
         $DB->set_field('dataform_entries', 'state', $newstate, array('id' => $entry->id));
 
-        // Notify as required
+        // Notify as required.
         $this->send_notifications($entry, $newstate);
 
         return null;
@@ -141,9 +167,12 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
 
         $roleids = array();
         if ($userroles = get_user_roles($this->df->context)) {
-            $roleids = array_map(function($a) {
-                return $a->roleid;
-            }, $userroles);
+            $roleids = array_map(
+                function($a) {
+                    return $a->roleid;
+                },
+                $userroles
+            );
         }
 
         foreach ($permissions as $key) {
@@ -210,12 +239,14 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
             $note = (object) array('id' => $entry->id, 'old' => $states[$oldstate], 'new' => $states[$newstate]);
             $data['subject'] = get_string('statechanged', 'dataformfield_entrystate', $note);
             $data['content'] = $data['subject'];
+            $data['contentformat'] = FORMAT_PLAIN;
             $data['recipients'] = $recipients;
             $data['sender'] = get_admin();
             $data['name'] = 'dataform_notification';
             $data['notification'] = 1;
 
-            mod_dataform\pluginbase\dataformnotification::notify($data);
+            $notification = new \mod_dataform\observer\notification;
+            $notification->send_message($data);
         }
     }
 
@@ -321,4 +352,57 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         return 'e';
     }
 
+    // GRADING
+    /**
+     * Returns the value replacement of the pattern for each user with content in the field.
+     *
+     * @param string $pattern
+     * @param array $entryids The ids of entries the field values should be fetched from.
+     *      If not provided the method should return values from all applicable entries.
+     * @param int $userid   The id of the users whose field values are requested.
+     *      If not specified, should return values for all applicable users.
+     * @return null|array Array of userid => value pairs.
+     */
+    public function get_user_values($pattern, array $entryids = null, $userid = 0) {
+        global $DB;
+
+        // If specific user and list of entries provided,
+        // get values only if the user has entries.
+        if ($userid and $entryids) {
+            if (empty($entryids[$userid])) {
+                return array();
+            }
+            $entryids = $entryids[$userid];
+        }
+
+        $params = array();
+        $params[] = $this->dataid;
+
+        // User
+        $selectuser = '';
+        if ($userid) {
+            $selectuser = " userid = ? ";
+            $params[] = $userid;
+        }
+
+        // Entries
+        $selectentries = '';
+        if ($entryids) {
+            list($inids, $eparams) = $DB->get_in_or_equal($entryids);
+            $selectentries = " id $inids ";
+            $params = array_merge($params, $eparams);
+        }
+
+        $select = "dataid = ? AND $selectuser AND $selectentries";
+        $values = array();
+        if ($entries = $DB->get_records_select('dataform_entries', $select, $params, 'state', 'id,userid,state')) {
+            foreach ($entries as $entryid => $entry) {
+                if (empty($values[$entry->userid])) {
+                    $values[$entry->userid] = array();
+                }
+                $values[$entry->userid][] = $entry->state;
+            }
+        }
+        return $values;
+    }
 }

@@ -19,7 +19,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
- * of Moodle's Database activity module (1.9.11 +  (20110323)).
+ * of Moodle's Database activity module (1.9.11+  (20110323)).
  * To the extent that Dataform code corresponds to Database code,
  * certain copyrights on the Database module may obtain.
  */
@@ -105,12 +105,12 @@ M.mod_dataform.util.init_bulk_action = function(Y, elemname, action, url, defaul
                 }
             });
 
+            // send selected item ids to processing
             if (selected.length) {
-                // Send selected item ids to processing
                 location.href = url + '&' + action + '=' + selected.join(',');
 
+            // if no items selected but there is default, send it
             } else if (defaultval) {
-                // If no items selected but there is default, send it
                 location.href = url + '&' + action + '=' + defaultval;
             }
         });

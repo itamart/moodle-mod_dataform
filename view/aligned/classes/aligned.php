@@ -33,12 +33,12 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
      * @return void
      */
     protected function get_default_entry_template() {
-        // Get all the fields
+        // get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
-            return; // You shouldn't get that far if there are no user fields
+            return; // you shouldn't get that far if there are no user fields
         }
 
-        // Set content
+        // set content
         $this->param2 = '';
         // Author
         $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
@@ -50,7 +50,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
                 $this->param2 .= "\n[[$fieldname]]";
             }
         }
-        // Actions
+        // actions
         $fieldname = get_string('fieldname', 'dataformfield_entryactions');
         $this->param2 .= "\n[[$fieldname:edit]]\n[[$fieldname:delete]]";
     }
@@ -109,7 +109,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         // Open table and wrap header with thead
         $elements[] = html_writer::start_tag('table', array('class' => 'generaltable')). $tableheader;
 
-        // Flatten the set to a list of elements, wrap with tbody and close table
+        // flatten the set to a list of elements, wrap with tbody and close table
         $elements[] = html_writer::start_tag('tbody');
         foreach ($entriesset as $entryid => $entrydefinitions) {
             $elements = array_merge($elements, $entrydefinitions);

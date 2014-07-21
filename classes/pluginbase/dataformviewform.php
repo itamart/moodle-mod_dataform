@@ -47,11 +47,11 @@ class dataformviewform extends \moodleform {
         $editoroptions = $view->editoroptions;
         $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
 
-        // Buttons
+        // buttons
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
 
-        // General
+        // general
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('viewgeneral', 'dataform'));
 
@@ -72,7 +72,7 @@ class dataformviewform extends \moodleform {
         $mform->addHelpButton('visible', 'viewvisibility', 'dataform');
         $mform->setDefault('visible', 1);
 
-        // Filter
+        // filter
         if (!$filtersmenu = \mod_dataform_filter_manager::instance($view->dataid)->get_filters(null, true)) {
             $filtersmenu = array(0 => get_string('filtersnonedefined', 'dataform'));
         } else {
@@ -82,19 +82,17 @@ class dataformviewform extends \moodleform {
         $mform->addHelpButton('filterid', 'viewfilter', 'dataform');
         $mform->setDefault('filterid', 0);
 
-        // Entries per page
+        // entries per page
         $options = array(
             0 => get_string('choose'),
-            1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10,
-            15 => 15,
+            1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 15 => 15,
             20 => 20, 30 => 30, 40 => 40, 50 => 50,
-            100 => 100, 200 => 200, 300 => 300, 400 => 400, 500 => 500,
-            1000 => 1000
+            100 => 100, 200 => 200, 300 => 300, 400 => 400, 500 => 500, 1000 => 1000
         );
         $mform->addElement('select', 'perpage', get_string('viewperpage', 'dataform'), $options);
         $mform->addHelpButton('perpage', 'viewperpage', 'dataform');
 
-        // Group by
+        // group by
         if (!$fieldsmenu = $view->df->field_manager->get_fields_menu(array('exclude' => array('entry')))) {
             $fieldsmenu = array('' => get_string('fieldsnonedefined', 'dataform'));
         } else {
@@ -109,7 +107,7 @@ class dataformviewform extends \moodleform {
         // Remove elements
         $this->definition_remove_elements();
 
-        // Buttons
+        // buttons
         $this->add_action_buttons();
     }
 
@@ -184,7 +182,7 @@ class dataformviewform extends \moodleform {
 
         // Redirect view after submission
         $options = array('' => get_string('choosedots'));
-        if ($viewsmenu = \mod_dataform_view_manager::instance($view->df->id)->get_views_menu()) {
+        if ($viewsmenu = \mod_dataform_view_manager::instance($view->df->id)->views_menu) {
             // Remove this view
             if ($view->id and !empty($viewsmenu[$view->id])) {
                 unset($viewsmenu[$view->id]);
@@ -224,15 +222,15 @@ class dataformviewform extends \moodleform {
         $mform = &$this->_form;
 
         $buttonarray = array();
-        // Save and display
+        // save and display
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        // Save and continue
+        // save and continue
         $buttonarray[] = &$mform->createElement('submit', 'submitreturnbutton', get_string('savecont', 'dataform'));
-        // Reset to default
+        // reset to default
         $buttonarray[] = &$mform->createElement('submit', 'resetdefaultbutton', get_string('viewresettodefault', 'dataform'));
         $mform->registerNoSubmitButton('resetdefaultbutton');
-        // Switch editor
-        // Cancel
+        // switch editor
+        // cancel
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');

@@ -24,13 +24,13 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d          = optional_param('d', 0, PARAM_INT);             // Dataform id
-$urlparams->id         = optional_param('id', 0, PARAM_INT);            // Course module id
+$urlparams->d          = optional_param('d', 0, PARAM_INT);             // dataform id
+$urlparams->id         = optional_param('id', 0, PARAM_INT);            // course module id
 
-// Items list actions
+// items list actions
 $urlparams->type = optional_param('type', '', PARAM_ALPHA);          // Type of a rule to add
 $urlparams->biid = optional_param('biid', 0, PARAM_INT);   // Block id of rule to edit
-$urlparams->update = optional_param('update', 0, PARAM_INT);   // Update item
+$urlparams->update = optional_param('update', 0, PARAM_INT);   // update item
 $urlparams->cancel = optional_param('cancel', 0, PARAM_BOOL);
 
 $urlparams->enable = optional_param('enable', 0, PARAM_INT);     // Enable context (show block)
@@ -46,7 +46,7 @@ $df->require_manage_permission('access');
 $df->set_page('access/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/access/index.php', array('id' => $df->cm->id)));
 
 $aman = mod_dataform_access_manager::instance($df->id);
@@ -69,8 +69,10 @@ $output = $df->get_renderer();
 echo $output->header(array('tab' => 'access', 'heading' => $df->name, 'urlparams' => $urlparams));
 
 if ($accesstypes = $aman->get_types()) {
-    foreach ($accesstypes as $type => $unused) {
-        $aman->print_list($type);
+    foreach ($accesstypes as $blocktype => $accesstype) {
+        $type = str_replace('dataformaccess', '', $blocktype);
+        $rules = $aman->get_type_rules($type);
+        echo $output->rules_admin_list('access', $accesstype, $blocktype, $rules);
     }
 } else {
     echo $output->notification(get_string('acccesstypesnotfound', 'dataform'), 'notifyproblem');

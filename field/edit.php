@@ -23,10 +23,10 @@
 require_once('../../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d          = required_param('d', PARAM_INT);    // Dataform ID
+$urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
 
-$urlparams->type       = optional_param('type', '', PARAM_ALPHA);   // Type of a field to edit
-$urlparams->fid        = optional_param('fid', 0, PARAM_INT);       // Field id to edit
+$urlparams->type       = optional_param('type', '', PARAM_ALPHA);   // type of a field to edit
+$urlparams->fid        = optional_param('fid', 0, PARAM_INT);       // field id to edit
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d);
@@ -35,7 +35,7 @@ $df->set_page('field/edit', array('urlparams' => $urlparams));
 $df->require_manage_permission('fields');
 
 if ($urlparams->fid) {
-    $field = $df->field_manager->get_field_by_id($urlparams->fid, true); // Force get
+    $field = $df->field_manager->get_field_by_id($urlparams->fid, true); // force get
 } else if ($urlparams->type) {
     $field = $df->field_manager->get_field($urlparams->type);
 }
@@ -50,11 +50,11 @@ if ($mform->is_cancelled()) {
 if ($data = $mform->get_data()) {
 
     if (!$field->id) {
-        // Add new field
+        // add new field
         $field->create($data);
 
     } else {
-        // Update field
+        // update field
         $data->id = $field->id;
 
         // Prepare for replacing patterns
@@ -74,11 +74,11 @@ if ($data = $mform->get_data()) {
         redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id)));
     }
 
-    // Continue to edit so refresh the form
+    // continue to edit so refresh the form
     $mform = $field->get_form();
 }
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 $output = $df->get_renderer();
@@ -87,7 +87,7 @@ echo $output->header(array('tab' => 'fields', 'heading' => $df->name, 'nonotific
 $formheading = $field->id ? get_string('fieldedit', 'dataform', $field->name) : get_string('fieldnew', 'dataform', $field->get_typename());
 echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
 
-// Display form
+// display form
 $mform->set_data($field->data);
 $mform->display();
 

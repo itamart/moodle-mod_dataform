@@ -56,12 +56,12 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
         $mform->addElement('editor', 'param2_editor', get_string('entrytemplate', 'dataform'), $editorattr, $editoroptions);
         $this->add_patterns_selectors('param2_editor', array('view', 'field'));
 
-        // Cols (param3)
+        // cols (param3)
         $range = range(2, 50);
         $options = array('' => get_string('choosedots')) + array_combine($range, $range);
         $mform->addElement('select', 'cols', get_string('cols', 'dataformview_grid'), $options);
 
-        // Rows  (param3)
+        // rows  (param3)
         $mform->addElement('selectyesno', 'rows', get_string('rows', 'dataformview_grid'));
         $mform->disabledIf('rows', 'cols', 'eq', '');
 
@@ -72,7 +72,7 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
      */
     public function data_preprocessing(&$data) {
         parent::data_preprocessing($data);
-        // Grid layout
+        // grid layout
         if (!empty($data->param3)) {
             list(
                 $data->cols,
@@ -94,7 +94,7 @@ class dataformview_grid_form extends mod_dataform\pluginbase\dataformviewform {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // Grid layout
+            // grid layout
             if (!empty($data->cols)) {
                 $data->param3 = $data->cols. ' '. (int) !empty($data->rows);
             } else {

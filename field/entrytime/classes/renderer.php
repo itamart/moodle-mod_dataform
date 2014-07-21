@@ -33,11 +33,11 @@ class dataformfield_entrytime_renderer extends mod_dataform\pluginbase\dataformf
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
 
-        // No edit mode
+        // no edit mode
         $replacements = array();
 
         foreach ($patterns as $pattern) {
-            // Display nothing on new entries
+            // display nothing on new entries
             if ($entry->id < 0) {
                 $replacements[$pattern] = '';
 

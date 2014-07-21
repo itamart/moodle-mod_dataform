@@ -81,7 +81,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $required = !empty($options['required']);
         $selected = !empty($entry->{"c{$fieldid}_content"}) ? (int) $entry->{"c{$fieldid}_content"} : 0;
 
-        // Check for default value
+        // check for default value
         if (!$selected and $defaultval = $field->param2) {
             $selected = (int) array_search($defaultval, $menuoptions);
         }

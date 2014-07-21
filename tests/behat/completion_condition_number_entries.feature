@@ -7,18 +7,18 @@ Feature: Set a certain number of entries as a completion condition for a datafor
     @javascript
     Scenario: Set X number of entries as a condition
 
-        Given a fresh site with dataform "Test Dataform"
+        Given a fresh site with dataform "Dataform completion condition number entries"
 
         # Site completion enabling
-        
+
         Then I log in as "admin"
         And I set the following administration settings values:
           | Enable completion tracking | 1 |
           | Enable conditional access | 1 |
         And I log out
-        
+
         # Course completion enabling
-        
+
         Then I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on
@@ -26,54 +26,76 @@ Feature: Set a certain number of entries as a completion condition for a datafor
         And I set the following fields to these values:
           | Enable completion tracking | Yes |
         And I press "Save changes"
-        
+
         # Dataform completion enabling
-        
-        Then I follow "Test Dataform"
+
+        Then I follow "Dataform completion condition number entries"
         And I follow "Edit settings"
         And I set the following fields to these values:
           | Completion tracking | Show activity as complete when conditions are met |
           | completionentriesenabled | 1 |
           | completionentries | 2 |
         And I press "Save and display"
-        
+
         Then I go to manage dataform "views"
         And I add a dataform view "aligned" with "View Aligned"
         Then I set "View Aligned" as default view
-        
+
         And I log out
-        
+
         # Student not yet completed
-        
+
         Then I log in as "student1"
         And I follow "Course 1"
-        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Test Dataform']" "xpath_element"
-        
+        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Dataform completion condition number entries']" "xpath_element"
+
         # Student adding first entry
 
-        Then I follow "Test Dataform"
+        Then I follow "Dataform completion condition number entries"
         And I follow "Add a new entry"
         And I press "Save"
-        
+
         # Student not yet completed
 
         And I follow "Course 1"
-        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Test Dataform']" "xpath_element"
-        
+        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Dataform completion condition number entries']" "xpath_element"
+
         # Student adding second entry
 
-        Then I follow "Test Dataform"
+        Then I follow "Dataform completion condition number entries"
         And I follow "Add a new entry"
         And I press "Save"
 
         # Student completed
 
         And I follow "Course 1"
-        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Test Dataform']" "xpath_element"
+        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Dataform completion condition number entries']" "xpath_element"
+
+        # Student deleting second entry
+
+        Then I follow "Dataform completion condition number entries"
+        And I follow "id_deleteentry2"
+        And I press "Continue"
+
+        # Student not yet completed
+
+        And I follow "Course 1"
+        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Dataform completion condition number entries']" "xpath_element"
+
+        # Student adding second entry
+
+        Then I follow "Dataform completion condition number entries"
+        And I follow "Add a new entry"
+        And I press "Save"
+
+        # Student completed
+
+        And I follow "Course 1"
+        And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Dataform completion condition number entries']" "xpath_element"
 
         And I log out
 
         And I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform completion condition number entries"
         And I delete this dataform

@@ -91,7 +91,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
             $mform->addRule($fieldname, null, 'required', null, 'client');
         }
 
-        // Add alt name if not forcing name
+        // add alt name if not forcing name
         if (!$field->param2) {
             $mform->addElement('text', "{$fieldname}_alt", get_string('alttext', 'dataformfield_url'));
             $mform->setType("{$fieldname}_alt", PARAM_TEXT);
@@ -114,34 +114,34 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
                 return '';
             }
 
-            // Simple url text
+            // simple url text
             if (empty($type)) {
                 return $url;
             }
 
-            // Param2 forces the text to something
+            // param2 forces the text to something
             if ($field->param2) {
                 $alttext = s($field->param2);
             } else {
                 $alttext = empty($entry->{"c{$fieldid}_content1"}) ? $url : $entry->{"c{$fieldid}_content1"};
             }
 
-            // Linking
+            // linking
             if ($type == 'link') {
                 return html_writer::link($url, $alttext);
             }
 
-            // Image
+            // image
             if ($type == 'image') {
                 return html_writer::empty_tag('img', array('src' => $url));
             }
 
-            // Image flexible
+            // image flexible
             if ($type == 'imageflex') {
                 return html_writer::empty_tag('img', array('src' => $url, 'style' => 'width:100%'));
             }
 
-            // Media
+            // media
             if ($type == 'media') {
                 require_once("$CFG->dirroot/filter/mediaplugin/filter.php");
                 $mpfilter = new filter_mediaplugin($field->get_df()->context, array());

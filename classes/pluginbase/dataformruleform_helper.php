@@ -17,7 +17,7 @@
 namespace mod_dataform\pluginbase;
 
 /**
- * @package dataform
+ * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,16 +38,16 @@ class dataformruleform_helper {
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // Name
+        // name
         $mform->addElement('text', $prefix. 'name', get_string('name'), array('size' => '32'));
         $mform->addRule($prefix. 'name', null, 'required', null, 'client');
         $mform->setType($prefix. 'name', $paramtext);
 
-        // Description
+        // description
         $mform->addElement('text', $prefix. 'description', get_string('description'), array('size' => '64'));
         $mform->setType($prefix. 'description', PARAM_CLEAN);
 
-        // Enabled
+        // enabled
         $mform->addElement('selectyesno', $prefix. 'enabled', get_string('ruleenabled', 'dataform'));
         $mform->setDefault($prefix. 'enabled', 1);
 
@@ -62,7 +62,7 @@ class dataformruleform_helper {
         $mform->addElement('select', $prefix. 'viewselection', get_string('views', 'dataform'), $options);
 
         $items = array();
-        if ($items = \mod_dataform_view_manager::instance($dataformid)->get_views_menu()) {
+        if ($items = \mod_dataform_view_manager::instance($dataformid)->views_menu) {
             $items = array_combine($items, $items);
         }
         $select = &$mform->addElement('select', $prefix. 'views', null, $items);
@@ -120,7 +120,7 @@ class dataformruleform_helper {
         if ($customsearch) {
             $searchfields = $customsearch;
             // If not from form then the searchfields is aggregated and we need
-            // To flatten them. An aggregated array should have a non-zero key
+            // to flatten them. An aggregated array should have a non-zero key
             // (fieldid) in the first element.
             if (key($searchfields)) {
                 foreach ($searchfields as $fieldid => $searchfield) {
@@ -134,7 +134,7 @@ class dataformruleform_helper {
                                 continue;
                             }
                             list($element, $not, $operator, $value) = $searchoption;
-                            $searchcriteria[] = array("$fieldid, $element", $andor, $not, $operator, $value);
+                            $searchcriteria[] = array("$fieldid,$element", $andor, $not, $operator, $value);
                         }
                     }
                 }
@@ -215,7 +215,7 @@ class dataformruleform_helper {
                 }
 
                 $i = (int) str_replace('searchandor', '', $var);
-                // Check if trying to define a search criterion
+                // check if trying to define a search criterion
                 if ($searchandor = $formdata->{"searchandor$i"}) {
                     if ($searchelement = $formdata->{"searchfield$i"}) {
                         list($fieldid, $element) = explode(',', $searchelement);

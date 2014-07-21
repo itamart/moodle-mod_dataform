@@ -38,7 +38,7 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
 
         $replacements = array_fill_keys(array_keys($patterns), '');
 
-        // No edit mode for this field so just return html
+        // no edit mode for this field so just return html
         if ($entry->id > 0 and !empty($CFG->usecomments)) {
             foreach ($patterns as $pattern) {
                 switch($pattern) {

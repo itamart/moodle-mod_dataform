@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ require_once('../../../../config.php');
 
 $result = new stdClass;
 
-// If session has expired and its an ajax request so we cant do a page redirect
-if (!isloggedin()) {
+// if session has expired and its an ajax request so we cant do a page redirect
+if ( !isloggedin() ) {
     $result->error = get_string('sessionerroruser', 'error');
     echo json_encode($result);
     die();
@@ -49,7 +49,7 @@ require_login($df->course->id, false, $df->cm);
 require_sesskey();
 
 $PAGE->set_context($df->context);
-$PAGE->set_url('/mod/dataform/field/entrystate/ajax.php', array('contextid' => $context->id));
+$PAGE->set_url('/mod/dataform/field/entrystate/ajax.php', array('contextid' => $df->context->id));
 
 // Get the field
 $field = $df->field_manager->get_field_by_id($fieldid);
@@ -63,6 +63,9 @@ if ($error = $field->update_state($entry, $newstate)) {
     echo json_encode($result);
     die();
 }
+
+// Update grade if needed.
+$df->update_calculated_grades($entry->userid, "##\d*:$field->name##");
 
 $entry->state = $newstate;
 $entry->baseurl = '';

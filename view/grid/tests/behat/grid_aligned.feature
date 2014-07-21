@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformview
+@mod @mod_dataform @dataformview @dataformview_grid
 Feature: Dataform view general patterns
     In order to modify look and behavior of a Dataform view
     As a Teacher

@@ -118,7 +118,7 @@ class notification {
         $message->notification    = (int) !empty($data['notification']);
 
         // Send message
-        if ($recipients = $data['recipients']) {
+        if (!empty($data['recipients'])) {
             $res['method'] = 'message';
 
             // Message provider name
@@ -126,7 +126,7 @@ class notification {
                 $message->name = $data['name'];
             }
 
-            foreach ($recipients as $recipient) {
+            foreach ($data['recipients'] as $recipient) {
                 $message->userto = $recipient;
 
                 if (!empty($recipient->mailformat) and $recipient->mailformat == FORMAT_HTML) {
@@ -138,20 +138,21 @@ class notification {
         }
 
         // Send email
-        if ($recipients = $data['recipientemails']) {
+        if (!empty($data['recipientemails'])) {
             $res['method'] = 'email';
-            foreach ($recipients as $recipient) {
+
+            foreach ($data['recipientemails'] as $recipient) {
                 $message->recipient = $recipient;
-                // Email directly rather than using the messaging system to ensure its not routed to a popup or jabber.
+                // Email directly rather than using the messaging system to ensure its not routed to a popup or jabber
                 $res[$recipient] = email_to_user(
                     $message->userto,
                     $message->siteshortname,
                     $message->subject,
                     $message->fullmessage,
                     $message->fullmessagehtml,
-                    null, // Attachment
-                    null, // Attachname
-                    false, // Usetrueaddress
+                    null, // attachment
+                    null, // attachname
+                    false, // usetrueaddress
                     null // $CFG->forum_replytouser
                 );
             }

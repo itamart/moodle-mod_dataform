@@ -30,10 +30,10 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
 
         $mform = &$this->_form;
 
-        // ---------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // Field width
+        // field width
         $fieldwidthgrp = array();
         $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
         $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));

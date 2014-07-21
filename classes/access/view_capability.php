@@ -41,7 +41,7 @@ class view_capability extends base {
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
         $viewid = $params['viewid'];
 
-        return $man->get_type_rules('view');
+        return array_merge($man->get_type_rules('view'), $man->get_type_rules('entry'));
     }
 
 }

@@ -12,8 +12,8 @@ Feature: Navigation tabs
 
         Then I see "Browse"
         And I see "Manage"
-        And "Views" "link" should not exist in the ".nav.nav-tabs" "css_element"
-        And "Fields" "link" should not exist in the ".nav.nav-tabs" "css_element"
+        And "Views" "link" should not exist in the ".nav-tabs" "css_element"
+        And "Fields" "link" should not exist in the ".nav-tabs" "css_element"
 
         Then I follow "Manage"
         And I follow "Fields"

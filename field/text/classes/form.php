@@ -36,7 +36,7 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
         // Auto link
         $mform->addElement('selectyesno', 'param1', get_string('autolink', 'dataformfield_text'));
 
-        // Field width
+        // field width
         $fieldwidthgrp = array();
         $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
         $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
@@ -48,8 +48,8 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
         $mform->setDefault('param2', '');
         $mform->setDefault('param3', 'px');
 
-        // Rules
-        // Format rules
+        // rules
+        // format rules
         $options = array(
             '' => get_string('choosedots'),
             'alphanumeric' => get_string('err_alphanumeric', 'form'),
@@ -60,7 +60,7 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
         );
         $mform->addElement('select', 'param4', get_string('format'), $options);
 
-        // Length (param5, 6, 7): min, max, range
+        // length (param5, 6, 7): min, max, range
         $options = array(
             '' => get_string('choosedots'),
             'minlength' => get_string('min', 'dataform'),

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,7 +42,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             'grade', 'gradecalc',
             'maxentries', 'entriesrequired', 'individualized', 'grouped', 'anonymous', 'timelimit',
             'css', 'cssincludes', 'js', 'jsincludes',
-            'defaultview', 'defaultfilter', 'completionentries'));
+            'defaultview', 'defaultfilter', 'completionentries', 'completionspecificgrade'));
 
         $fields = new backup_nested_element('fields');
         $field = new backup_nested_element('field', array('id'), array(
@@ -136,8 +136,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
 
         $plugins = core_component::get_plugin_list($plugintype);
         foreach ($plugins as $type => $path) {
-            $pluginclass = $plugintype. "_$type";
-            require_once("$path/$type.php");
+            $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
                 $bne->annotate_files($pluginclass, $filearea, 'id'); // By id
             }

@@ -378,7 +378,7 @@ class mod_dataform_field_manager {
 
         $dffields = $this->get_fields();
         $fields = array();
-        // Collate the fields for processing
+        // collate the fields for processing
         foreach ($fids as $fieldid) {
             if ($fieldid > 0 and isset($dffields[$fieldid])) {
                 $fields[$fieldid] = $dffields[$fieldid];
@@ -408,11 +408,11 @@ class mod_dataform_field_manager {
                 exit;
 
             } else {
-                // Go ahead and perform the requested action
+                // go ahead and perform the requested action
                 switch ($action) {
                     case 'visible':
                         foreach ($fields as $fid => $field) {
-                            // Hide = 0; (show to owner) = 1; show to everyone = 2
+                            // hide = 0; (show to owner) = 1; show to everyone = 2
                             $field->visible = (($field->visible + 1) % 3);
                             $field->update($field->data);
 
@@ -424,7 +424,7 @@ class mod_dataform_field_manager {
 
                     case 'editable':
                         foreach ($fields as $fid => $field) {
-                            // Lock = 0; unlock = -1;
+                            // lock = 0; unlock = -1;
                             $field->editable = $field->editable ? 0 : -1;
                             $field->update($field->data);
 
@@ -439,7 +439,7 @@ class mod_dataform_field_manager {
                             if ($this->is_at_max_fields()) {
                                 break;
                             }
-                            // Set new name
+                            // set new name
                             while ($df->name_exists('fields', $field->name)) {
                                 $field->name .= '_1';
                             }

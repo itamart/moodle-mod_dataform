@@ -1,9 +1,10 @@
-@mod @mod_dataform @dataformfield @dataformfield_number
+@mod @mod_dataform @dataformentry @dataformfield @dataformfield_selectmulti
 Feature: Add dataform entries
     In order to work with a dataform activity
     As a teacher
     I need to add dataform entries to a dataform instance
     
+
     @javascript
     Scenario: Use required or noedit patterns
         Given I start afresh with dataform "Test Dataform"
@@ -13,7 +14,8 @@ Feature: Add dataform entries
 
         # Add fields
         When I go to manage dataform "fields"
-        And I add a dataform field "number" with "Number 01"        
+        And I add a dataform field "selectmulti" with "Selectmulti 01"        
+        And I set dataform field "Selectmulti 01" options to "SLM 01\nSLM 02\nSLM 03\nSLM 04"        
 
         # Add a default view
         When I follow "Views"
@@ -27,51 +29,51 @@ Feature: Add dataform entries
         When I follow "Browse"
         And I follow "Add a new entry"
         And I press "Save"
-        Then "id_editentry1" "link" should exist        
+        Then I do not see "SLM 01"
+        And I do not see "SLM 02"
+        And I do not see "SLM 03"
+        And I do not see "SLM 04"
+        And "id_editentry1" "link" should exist        
 
-        # No rules with content
-        And I follow "id_editentry1"
-        And I set the field "id_field_1_1" to "356"
-        And I press "Save"
-        Then I see "356"
-        
-        When I follow "id_editentry1"
-        And I set the field "id_field_1_1" to ""
-        And I press "Save"
-        Then I do not see "356"
-        
         # Required *
         When I go to manage dataform "views"
         And I follow "id_editview1"
         And I expand all fieldsets
-        And I fill textarea "Entry template" with "[[*Number 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
+        And I fill textarea "Entry template" with "[[*Selectmulti 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
         And I press "Save changes"
         And I follow "Browse"
         And I follow "id_editentry1"
         And I press "Save"
         Then I see "You must supply a value here."
-        And I set the field "id_field_1_1" to "1112367"
+        And I set the field "id_field_1_1_selected" to "SLM 03"
         And I press "Save"
-        Then I see "1112367"
+        Then I do not see "SLM 01"
+        And I do not see "SLM 02"
+        And I see "SLM 03"
+        And I do not see "SLM 04"
 
         # No edit !
         When I go to manage dataform "views"
         And I follow "id_editview1"
         And I expand all fieldsets
-        And I fill textarea "Entry template" with "[[!Number 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
+        And I fill textarea "Entry template" with "[[!Selectmulti 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
         And I press "Save changes"
         And I follow "Browse"
         And I follow "id_editentry1"
-        Then "id_field_1_1" "field" should not exist
+        Then "id_field_1_1_selected" "select" should not exist
         And I press "Save"
-        Then I see "1112367"       
+        Then I do not see "SLM 01"
+        And I do not see "SLM 02"
+        And I see "SLM 03"
+        And I do not see "SLM 04"
 
         #Clean up
         And I delete this dataform
 
     
+    
     @javascript
-    Scenario Outline: Add dataform entry with number field
+    Scenario Outline: Add dataform entry with selectmulti field
         Given I start afresh with dataform "Test Dataform"
         And I log in as "teacher1"
         And I follow "Course 1"
@@ -79,7 +81,7 @@ Feature: Add dataform entries
 
         # Add a field field
         When I go to manage dataform "fields"
-        And I add a dataform field "number" with "<fielddata>"       
+        And I add a dataform field "selectmulti" with "<fielddata>"       
         
         # Add a default view
         When I follow "Views"
@@ -95,7 +97,7 @@ Feature: Add dataform entries
 
         # Add an entry with content
         When I follow "Add a new entry"
-        And I set the field "field_1_-1" to "<input>"
+        #And I set the field "field_1_-1" to "<result>"
         And I press "Save"
         And I wait to be redirected
         Then I see "<result>"
@@ -104,10 +106,10 @@ Feature: Add dataform entries
         And I delete this dataform
         
     Examples:
-| input | result | fielddata |
-#|	455552.3	|	455552	|	Field 01	Field description 01	0	1		0	100	px	|
-#|	1005.5	|	1005	|	Field 02	Field description 02	1	0		0	240	px	|
-#|	14	|	14.0	|	Field 03	Field description 03	2	1		1	100	%	|
-#|	1000.3335	|	1000.33	|	Field 04	Field description 04	0	0		2	50	%	|
-#|	99.999	|	99.99900	|	Field 05	Field description 05	1	1		5	60	em	|
-#|	0.12345678	|	0.123457	|	Field 06	Field description 06	2	0		6	100	em	|
+| result | fielddata |
+#|    Option 2, Option 4    |    Field 01    Field description 01    0    1        Option 1\nOption 2\nOption 3\nOption 4    Option 2\nOption 4    3    1    |
+#|    Yesterday Today Tomorrow    |    Field 02    Field description 02    1    0        Yesterday\nToday\nTomorrow    Yesterday\nToday\nTomorrow    1    1    |
+#|    1,3,5,7,9,11    |    Field 03    Field description 03    2    1        1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12    1\n3\n5\n7\n9\n11    2    1    |
+#|    Field 04    |    Field 04    Field description 04    0    0        One option        2    0    |
+#|    Two    |    Field 05    Field description 05    1    1        Two\nTwo    Two    1    0    |
+#|    Useful    |    Field 06    Field description 06    2    0        Useful    Useful    0    0    |

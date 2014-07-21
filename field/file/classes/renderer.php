@@ -58,19 +58,19 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             if ($cleanpattern == "[[$fieldname]]") {
                 $displaybrowse = $this->display_browse($entry);
             } else if ($cleanpattern == "[[{$fieldname}:url]]") {
-                // Url
+                // url
                 $displaybrowse = $this->display_browse($entry, array('url' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:alt]]") {
-                // Alt
+                // alt
                 $displaybrowse = $this->display_browse($entry, array('alt' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:size]]") {
-                // Size
+                // size
                 $displaybrowse = $this->display_browse($entry, array('size' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:download]]") {
-                // Download
+                // download
                 $displaybrowse = $this->display_browse($entry, array('download' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:downloadcount]]") {
-                // Download count
+                // download count
                 $displaybrowse = $this->display_browse($entry, array('downloadcount' => 1));
             }
 
@@ -107,7 +107,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $draftitemid = file_get_submitted_draft_itemid("{$fieldname}_filemanager");
         file_prepare_draft_area($draftitemid, $field->get_df()->context->id, 'mod_dataform', 'content', $contentid, $fmoptions);
 
-        // File manager
+        // file manager
         $mform->addElement('filemanager', "{$fieldname}_filemanager", $field->name, null, $fmoptions);
         $mform->setDefault("{$fieldname}_filemanager", $draftitemid);
         $required = !empty($options['required']);
@@ -115,7 +115,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             $mform->addRule("{$fieldname}_filemanager", null, 'required', null, 'client');
         }
 
-        // Alt text
+        // alt text
         // $altoptions = array();
         // $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext', 'dataformfield_file'), $altoptions);
         // $mform->setDefault("{$fieldname}_alttext", s($content1));

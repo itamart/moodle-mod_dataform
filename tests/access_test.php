@@ -14,9 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Access tests.
- *
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * PHPUnit dataform access testcase
  *
@@ -26,9 +25,6 @@
  * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
 class mod_dataform_access_testcase extends advanced_testcase {
     protected $course;
     protected $guest;

@@ -30,16 +30,16 @@ require_once("$CFG->libdir/tablelib.php");
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // Dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);            // Course module id
-$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // Update field id
+$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // update field id
 
-// Fields list actions
-$urlparams->new        = optional_param('new', 0, PARAM_ALPHA);     // Type of the new field
-$urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of fields to delete
-$urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of fields to duplicate
-$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // Id of field to hide/(show to owner)/show to all
-$urlparams->editable    = optional_param('editable', 0, PARAM_INT);     // Id of field to set editing
+// fields list actions
+$urlparams->new        = optional_param('new', 0, PARAM_ALPHA);     // type of the new field
+$urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // ids (comma delimited) of fields to delete
+$urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // ids (comma delimited) of fields to duplicate
+$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // id of field to hide/(show to owner)/show to all
+$urlparams->editable    = optional_param('editable', 0, PARAM_INT);     // id of field to set editing
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
@@ -50,27 +50,23 @@ $df->require_manage_permission('fields');
 $df->set_page('field/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
 $fieldman = $df->field_manager;
-
 if ($urlparams->duplicate and confirm_sesskey()) {
     // Duplicate requested fields
     $fieldman->process_fields('duplicate', $urlparams->duplicate, $urlparams->confirmed);
-
 } else if ($urlparams->delete and confirm_sesskey()) {
     // Delete requested fields
     $fieldman->process_fields('delete', $urlparams->delete, $urlparams->confirmed);
-
 } else if ($urlparams->visible and confirm_sesskey()) {
-    // Set field visibility (confirmed by default)
-    $fieldman->process_fields('visible', $urlparams->visible, true);
-
+    // Set field visibility
+    $fieldman->process_fields('visible', $urlparams->visible, true);    // confirmed by default
 } else if ($urlparams->editable and confirm_sesskey()) {
-    // Set field editability (confirmed by default)
-    $fieldman->process_fields('editable', $urlparams->editable, true);
+    // Set field editability
+    $fieldman->process_fields('editable', $urlparams->editable, true);    // confirmed by default
 }
 
 // Get the fields

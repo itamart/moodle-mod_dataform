@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,5 +25,5 @@
 
 defined('MOODLE_INTERNAL') or die;
 
-// List of observers
+/* List of observers */
 $observers = mod_dataform_observers_helper::observers();

@@ -44,7 +44,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
                 }
                 $required = $this->is_required($pattern);
                 // Determine whether date only selector
-                $date = (($cleanpattern == "[[$fieldname:date]]") or $field->dataonly);
+                $date = (($cleanpattern == "[[$fieldname:date]]") or $field->date_only);
                 $options = array('required' => $required, 'date' => $date);
                 $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $options));
                 break;
@@ -55,7 +55,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         // Browse mod
         foreach ($patterns as $pattern => $cleanpattern) {
             // Determine display format
-            $format = (strpos($pattern, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($pattern, '[]')) : $field->displayformat);
+            $format = (strpos($pattern, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($pattern, '[]')) : $field->display_format);
             // For specialized patterns convert format to the userdate format string
             switch ($format) {
                 case 'date':
@@ -84,7 +84,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
                     $format = '%Y';
                     break;
                 default:
-                    if (!$format and $field->dataonly) {
+                    if (!$format and $field->date_only) {
                         $format = get_string('strftimedate', 'langconfig');
                     }
             }
@@ -150,12 +150,12 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         // Optional
         $tmoptions['optional'] = (!empty($options['required']) ? false : true);
         // Start year
-        if ($field->startyear) {
-            $tmoptions['startyear'] = $field->startyear;
+        if ($field->start_year) {
+            $tmoptions['startyear'] = $field->start_year;
         }
         // End year
-        if ($field->stopyear) {
-            $tmoptions['stopyear'] = $field->stopyear;
+        if ($field->stop_year) {
+            $tmoptions['stopyear'] = $field->stop_year;
         }
         $mform->addElement("date_{$time}selector", $fieldname, null, $tmoptions);
         // $mform->addRule($fieldname, null, 'required', null, 'client');
@@ -174,8 +174,8 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $includetime = empty($options['date']) ? true : false;
 
         $step = 5;
-        $startyear = $field->startyear ? $field->startyear : 1970;
-        $stopyear = $field->stopyear ? $field->stopyear : 2020;
+        $startyear = $field->start_year ? $field->start_year : 1970;
+        $stopyear = $field->stop_year ? $field->stop_year : 2020;
         $maskday = get_string('day', 'dataformfield_time');
         $maskmonth = get_string('month', 'dataformfield_time');
         $maskyear = get_string('year', 'dataformfield_time');

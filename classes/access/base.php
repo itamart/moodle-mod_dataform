@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,12 +42,11 @@ abstract class base {
         $dataformid = $params['dataformid'];
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // In group mode, not member must have accessallgroups
+        // In separate groups mode, not member must have accessallgroups.
         // At this point, does not apply to particular rules.
         if ($df->groupmode) {
-            $currentorvisible = ($df->currentgroup or $df->groupmode == VISIBLEGROUPS);
-            $member = ($df->currentgroup and groups_is_member($df->currentgroup));
-            if (!$currentorvisible and !$member) {
+            $currentandseparate = ($df->currentgroup and $df->groupmode == SEPARATEGROUPS);
+            if ($currentandseparate and !groups_is_member($df->currentgroup)) {
                 if (!has_capability('moodle/site:accessallgroups', $df->context)) {
                     return false;
                 }

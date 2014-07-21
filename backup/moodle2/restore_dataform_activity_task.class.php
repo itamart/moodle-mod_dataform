@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ require_once("$CFG->dirroot/mod/dataform/backup/moodle2/restore_dataform_stepsli
  */
 class restore_dataform_activity_task extends restore_activity_task {
 
-    protected $ownerid = 0; // User id of designated owner of content
+    protected $ownerid = 0; // user id of designated owner of content
 
     /**
      *
@@ -69,7 +69,7 @@ class restore_dataform_activity_task extends restore_activity_task {
         parent::build();
 
         // If restoring into a given activity remove the module_info step b/c there
-        // Is no need to create a module instance
+        // is no need to create a module instance
         if ($this->get_activityid()) {
             $steps = array();
             foreach ($this->steps as $key => $step) {
@@ -88,11 +88,11 @@ class restore_dataform_activity_task extends restore_activity_task {
     public function build1() {
 
         // If restoring into a given activity remove the module_info step b/c there
-        // Is no need to create a module instance
+        // is no need to create a module instance
         if ($this->get_activityid()) {
 
             // Here we add all the common steps for any activity and, in the point of interest
-            // We call to define_my_steps() is order to get the particular ones inserted in place.
+            // we call to define_my_steps() is order to get the particular ones inserted in place.
             $this->define_my_steps();
 
             // Roles (optionally role assignments and always role overrides)

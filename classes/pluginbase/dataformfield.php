@@ -50,7 +50,7 @@ abstract class dataformfield {
     public function __construct($field) {
 
         if (empty($field)) {
-            throw new coding_exception('Field object must be passed to field constructor.');
+            throw new \coding_exception('Field object must be passed to field constructor.');
         }
 
         $this->_field = $field;
@@ -344,12 +344,12 @@ abstract class dataformfield {
             $updated = true;
 
         } else if (is_null($contentid) and !empty($contents)) {
-            // Insert only if no old contents and there is new contents
+            // insert only if no old contents and there is new contents
             $rec->id = $DB->insert_record('dataform_contents', $rec);
             $updated = true;
 
         } else {
-            // Update if new is different from old
+            // update if new is different from old
             foreach ($contents as $key => $content) {
                 if (!isset($oldcontents[$key]) or $content !== $oldcontents[$key]) {
                     $rec->id = $contentid; // MUST_EXIST
@@ -421,7 +421,7 @@ abstract class dataformfield {
                     $DB->update_record('dataform_contents', $content);
                 }
 
-                // Rename content dir if exists
+                // rename content dir if exists
                 $path = $CFG->dataroot.'/'.$this->df->course->id.'/'.$CFG->moddata.'/dataform/'.$this->df->id;
                 $olddir = "$path/". $this->id;
                 $newdir = "$path/$tofieldid";
@@ -534,11 +534,11 @@ abstract class dataformfield {
         $oldcontents = array();
         $contents = array();
 
-        // Old content
+        // old content
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
-        // New content
+        // new content
         if (!empty($values)) {
             $content = reset($values);
             $contents[] = (string) clean_param($content, PARAM_NOTAGS);
@@ -747,10 +747,10 @@ abstract class dataformfield {
         }
 
         // For all NOT criteria except NOT Empty, exclude entries
-        // Which don't meet the positive criterion
-        // Because some fields may not have content records
-        // And the respective entries may be filter out
-        // Despite meeting the criterion
+        // which don't meet the positive criterion
+        // because some fields may not have content records
+        // and the respective entries may be filter out
+        // despite meeting the criterion
         $excludeentries = (($not and $operator !== '') or (!$not and $operator === ''));
 
         if ($excludeentries) {

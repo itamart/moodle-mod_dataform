@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ function dataform_rss_get_feed($context, $args) {
     if ($cm) {
         $modcontext = context_module::instance($cm->id);
 
-        // Context id from db should match the submitted one.
+        // context id from db should match the submitted one
         if ($context->id != $modcontext->id) {
             return null;
         }
@@ -68,7 +68,7 @@ function dataform_rss_get_feed($context, $args) {
 
     // Get the cache file info
     // The cached file name is formatted dfid_viewid_contentstamp,
-    // Where contentstamp is provided by the view
+    // where contentstamp is provided by the view
     $componentid = $dataformid. "_$viewid";
     $cachedfilepath = dataform_rss_get_cached_file_path($componentid);
     $contentstamp = $cachedfilepath ? dataform_rss_get_cached_content_stamp($cachedfilepath) : null;
@@ -155,7 +155,7 @@ function dataform_rss_get_cached_file_path($componentid) {
     }
 
     // There should be only one. At any rate all cached files for the componentid are deleted
-    // When the cache is refreshed.
+    // when the cache is refreshed.
     $cachefilename = reset($files);
     return $cachefilename;
 }

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,15 +38,13 @@ interface grading {
     /**
      * Returns the value replacement of the pattern for each user with content in the field.
      *
+     * @param string $pattern
+     * @param array $entryids The ids of entries the field values should be fetched from.
+     *      If not provided the method should return values from all applicable entries.
+     * @param int $userid   The id of the users whose field values are requested.
+     *      If not specified, should return values for all applicable users.
      * @return null|array Array of userid => value pairs.
      */
-    public function get_user_values($pattern, $userid = 0);
-
-    /**
-     * Returns the database column used to store the scale.
-     *
-     * @return string
-     */
-    public static function get_scale_param();
+    public function get_user_values($pattern, array $entryids = null, $userid = 0);
 
 }

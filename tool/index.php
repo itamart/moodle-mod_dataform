@@ -23,11 +23,11 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // Dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);           // Course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);           // course module id
 
-// Views list actions
-$urlparams->run    = optional_param('run', '', PARAM_PLUGIN);  // Tool plugin to run
+// views list actions
+$urlparams->run    = optional_param('run', '', PARAM_PLUGIN);  // tool plugin to run
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
@@ -38,7 +38,7 @@ $df->require_manage_permission('tools');
 $df->set_page('tool/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/tool/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
@@ -65,10 +65,9 @@ foreach (array_keys(core_component::get_plugin_list('dataformtool')) as $subplug
         'description' => get_string('pluginname_help', "dataformtool_$subpluginname")
     );
 }
-// Sort in alphabetical order.
-ksort($tools);
+ksort($tools);    // sort in alphabetical order
 
-// Any notifications?
+// any notifications?
 if (!$tools) {
     $df->notifications = array('problem' => array('toolnoneindataform' => get_string('toolnoneindataform', 'dataform')));
 }
@@ -76,15 +75,15 @@ if (!$tools) {
 $output = $df->get_renderer();
 echo $output->header(array('tab' => 'tools', 'heading' => $df->name, 'urlparams' => $urlparams));
 
-// If there are tools print admin style list of them
+// if there are tools print admin style list of them
 if ($tools) {
     $actionbaseurl = '/mod/dataform/tool/index.php';
     $linkparams = array('d' => $df->id, 'sesskey' => sesskey());
 
-    // Table headings
+    // table headings
     $strname = get_string('name');
     $strdesc = get_string('description');
-    $strrun = get_string('toolrun', 'dataform');;
+    $strrun = get_string('toolrun', 'dataform');
 
     $table = new html_table();
     $table->head = array($strname, $strdesc, $strrun);

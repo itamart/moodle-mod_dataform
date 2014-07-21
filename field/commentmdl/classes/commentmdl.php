@@ -98,23 +98,23 @@ class dataformfield_commentmdl_commentmdl extends mod_dataform\pluginbase\datafo
             throw new comment_exception('invalidcmid', 'dataform');
         }
 
-        // Validate comment area
-        // If ($params->commentarea != $this->name) {
-            // Throw new comment_exception('invalidcommentarea');
+        // validate comment area
+        // if ($params->commentarea != $this->name) {
+            // throw new comment_exception('invalidcommentarea');
         // }
 
-        // Validation for non-comment-managers
+        // validation for non-comment-managers
         if (!has_capability('mod/dataform:managecomments', $this->df->context)) {
 
-            // Non-comment-managers can add/view comments on their own entries
-            // But require df->comments for add/view on other entries (excluding grading entries)
+            // non-comment-managers can add/view comments on their own entries
+            // but require df->comments for add/view on other entries (excluding grading entries)
 
-            // Validate entry
+            // validate entry
             if (!$entry = $DB->get_record('dataform_entries', array('id' => $params->itemid))) {
                 throw new comment_exception('invalidcommentitemid');
             }
 
-            // Group access
+            // group access
             if ($entry->groupid) {
                 $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course);
                 if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $this->df->context)) {
@@ -125,7 +125,7 @@ class dataformfield_commentmdl_commentmdl extends mod_dataform\pluginbase\datafo
             }
         }
 
-        // Validation for comment deletion
+        // validation for comment deletion
         if (!empty($params->commentid)) {
             if ($comment = $DB->get_record('comments', array('id' => $params->commentid))) {
                 if ($comment->commentarea != $this->name) {

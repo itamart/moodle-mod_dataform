@@ -26,9 +26,9 @@ require_once("$CFG->libdir/adminlib.php");
 
 $urlparams = new stdClass;
 
-// Presets list actions
-$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // Ids of presets to delete
-$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);     // Ids of presets to download in one zip
+// presets list actions
+$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // ids of presets to delete
+$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 admin_externalpage_setup('moddataform_sitepresets');
@@ -40,10 +40,10 @@ $pm->process_presets($urlparams);
 
 echo $OUTPUT->header();
 
-// Print the preset form
+// print the preset form
 $pm->print_preset_form();
 
-// If there are presets print admin style list of them
+// if there are presets print admin style list of them
 echo html_writer::tag('h4', get_string('presetavailableinsite', 'dataform'));
 $presets = $pm->get_user_presets($pm::PRESET_SITEAREA);
 echo $pm->get_site_presets_list($presets);

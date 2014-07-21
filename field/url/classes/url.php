@@ -36,12 +36,12 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
         $fieldid = $this->id;
         $oldcontents = array();
         $contents = array();
-        // Old contents
+        // old contents
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = isset($entry->{"c$fieldid". '_content'}) ? $entry->{"c$fieldid". '_content'} : null;
             $oldcontents[] = isset($entry->{"c$fieldid". '_content1'}) ? $entry->{"c$fieldid". '_content1'} : null;
         }
-        // New contents
+        // new contents
         $url = $alttext = null;
         if (!empty($values)) {
             foreach ($values as $name => $value) {

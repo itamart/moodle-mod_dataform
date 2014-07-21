@@ -63,7 +63,7 @@ class dataformview {
     public function __construct($view) {
 
         if (empty($view)) {
-            throw new coding_exception('View object must be passed to dataformview constructor.');
+            throw new \coding_exception('View object must be passed to dataformview constructor.');
         }
 
         $this->_view = $view;
@@ -167,6 +167,7 @@ class dataformview {
         if ($groupby) {
             $filter->groupby = $groupby;
         }
+
         // Add page
         if ($page) {
             $filter->page = $page;
@@ -208,6 +209,7 @@ class dataformview {
      * @return void
      */
     public function set_page($pagefile = null, array $options = null) {
+
         // Filter
         $foptions = !empty($options['filter']) ? array('id' => $options['filter']) : null;
         $this->set_viewfilter($foptions);
@@ -312,7 +314,7 @@ class dataformview {
             $filter->eids = $this->editentries;
         }
         $options['filter'] = $filter;
-        $this->entry_manager->set_content($options);
+        $this->set_entries_content($options);
 
         // Rewrite plugin file url
         $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
@@ -321,6 +323,17 @@ class dataformview {
         // Complie the view template
         $viewhtml = $this->compile_view_template($options);
         return $viewhtml;
+    }
+
+    /**
+     * Fetches target entries from database.
+     *
+     * @return void
+     */
+    protected function set_entries_content(array $options) {
+        $this->entry_manager->set_content($options);
+        // Adjust page in case changed by selection method (e.g. random selection).
+        $this->filter->page = $this->entry_manager->page;
     }
 
     /**
@@ -438,8 +451,9 @@ class dataformview {
             if (!empty($filter->id)) {
                 $baseurlparams['filter'] = $filter->id;
             }
-            if (!empty($filter->eids)) {
-                $baseurlparams['eids'] = $filter->eids;
+            if ($filter->eids) {
+                $eids = is_array($filter->eids) ? implode(',', $filter->eids) : $filter->eids;
+                $baseurlparams['eids'] = $eids;
             }
             if ($filter->page) {
                 $baseurlparams['page'] = $filter->page;
@@ -1270,7 +1284,7 @@ class dataformview {
             'page' => $filter->page,
             'update' => $editentries
         );
-        if (!empty($filter->eids)) {
+        if ($filter->eids) {
             $actionparams['eids'] = $editentries;
         }
 
@@ -1287,7 +1301,7 @@ class dataformview {
         }
 
         $formclass = $this->get_entries_form_class();
-        return new $formclass($actionurl, $customdata);
+        return new $formclass($actionurl, $customdata, 'post', '', array('class' => 'entriesform'));
     }
 
     /**
@@ -1362,7 +1376,7 @@ class dataformview {
                     list($formula, $decimals) = explode(';', $formula);
                 }
 
-                $calc = new calc_formula("=$formula");
+                $calc = new \calc_formula("=$formula");
                 $result = $calc->evaluate();
                 // False as result indicates some problem
                 if ($result === false) {
@@ -1549,7 +1563,7 @@ class dataformview {
             $files = $fs->get_area_files($contextid, $component, $filearea, 0);
             if (count($files) > 1) {
                 foreach ($files as $file) {
-                    $filerec = new object;
+                    $filerec = new \stdClass;
                     $filerec->itemid = $this->id;
                     $fs->create_file_from_storedfile($filerec, $file);
                 }

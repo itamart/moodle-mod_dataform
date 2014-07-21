@@ -30,7 +30,7 @@ class dataformfield_time_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // ---------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
         // Date

@@ -36,3 +36,6 @@ $string['ratingmdl:ownviewratings'] = 'Own Entry - View Ratings';
 $string['ratingmdl:anyrate'] = 'Any Entry - Rate';
 $string['ratingmdl:anyviewaggregate'] = 'Any Entry - View Rating Aggregates';
 $string['ratingmdl:anyviewratings'] = 'Any Entry - View Ratings';
+// EVENTS
+$string['event_rating_created'] = 'Rating created';
+$string['event_rating_deleted'] = 'Rating deleted';

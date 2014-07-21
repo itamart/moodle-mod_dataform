@@ -111,6 +111,7 @@ class mod_dataform_preset_manager {
         $table->head = array($strs->name, $strs->description, $strs->screenshot, $strs->apply, implode('&nbsp;', $multiactions));
         $table->align = array('left', 'left', 'center', 'right', 'right');
         $table->wrap = array(false, false, false, false);
+        $table->attributes['class'] = 'generaltable coursepresets';
 
         foreach ($presets as $preset) {
             $presetname = $preset->shortname;
@@ -160,6 +161,7 @@ class mod_dataform_preset_manager {
         $table->align = array('left', 'left', 'center', 'right', 'right');
         $table->wrap = array(false, false, false, false, false);
 
+        $table->attributes['class'] = 'generaltable sitepresets';
         foreach ($presets as $preset) {
 
             $presetname = $preset->shortname;
@@ -208,32 +210,36 @@ class mod_dataform_preset_manager {
 
         $url = new moodle_url($this->get_base_url(), array('sesskey' => sesskey(), 'add' => 1));
         $mform = new mod_dataform\pluginbase\dataformpresetform($url, array('dataformid' => $this->_dataformid));
-        // Add presets
+        // add presets
         if ($data = $mform->get_data()) {
             if (!empty($data->preset_source) and $data->preset_source == 'current') {
-                // Preset this dataform
+                // preset this dataform
                 $this->create_preset_from_backup($data->preset_data);
+
             } else {
-                // Upload presets
+                // upload presets
                 $this->create_preset_from_upload($data->uploadfile);
             }
         } else if (!empty($params->apply) and confirm_sesskey()) {
-            // Apply a preset
+            // apply a preset
             if ($this->apply_preset($params->apply, $params->torestorer)) {
-                // Rebuild course cache to show new dataform name on the course page
+                // rebuild course cache to show new dataform name on the course page
                 $df = mod_dataform_dataform::instance($this->_dataformid);
                 rebuild_course_cache($df->course->id);
                 redirect(new moodle_url('/mod/dataform/view.php', array('d' => $this->_dataformid)));
             }
+
         } else if (!empty($params->download) and confirm_sesskey()) {
-            // Download (bulk in zip)
+            // download (bulk in zip)
             $this->download_presets($params->download);
+
         } else if (!empty($params->share) and confirm_sesskey()) {
-            // Share presets
+            // share presets
             $this->share_presets($params->share);
             redirect($this->get_base_url());
+
         } else if (!empty($params->delete) and confirm_sesskey()) {
-            // Delete presets
+            // delete presets
             $this->delete_presets($params->delete);
             redirect($this->get_base_url());
         }
@@ -258,15 +264,15 @@ class mod_dataform_preset_manager {
                 $users = 1;
         }
 
-        // Store preset settings in $SESSION
+        // store preset settings in $SESSION
         $SESSION->{"dataform_{$df->cm->id}_preset"} = "$users $anon";
 
         $bc = new backup_controller(backup::TYPE_1ACTIVITY, $df->cm->id, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
 
-        // Clear preset settings from $SESSION
+        // clear preset settings from $SESSION
         unset($SESSION->{"dataform_{$df->cm->id}_preset"});
 
-        // Set users and anon in plan
+        // set users and anon in plan
         $bc->get_plan()->get_setting('users')->set_value($users);
         $bc->get_plan()->get_setting('anonymize')->set_value($anon);
         $bc->set_status(backup::STATUS_AWAITING);
@@ -343,7 +349,7 @@ class mod_dataform_preset_manager {
                 $preset->filename = $file->get_filename();
                 $fs->create_file_from_storedfile($preset, $file);
             } else if ($ext == 'zip') {
-                // Extract files to the draft area
+                // extract files to the draft area
                 $zipper = get_file_packer('application/zip');
                 $file->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
                 $file->delete();
@@ -371,7 +377,7 @@ class mod_dataform_preset_manager {
         global $DB, $CFG, $USER;
 
         $df = mod_dataform_dataform::instance($this->_dataformid);
-        // Extract the backup file to the temp folder
+        // extract the backup file to the temp folder
         $folder = 'tmp-'. $df->context->id. '-'. time();
         $backuptempdir = make_temp_directory("backup/$folder");
         $zipper = get_file_packer('application/zip');
@@ -420,9 +426,9 @@ class mod_dataform_preset_manager {
             $rc->execute_plan();
 
             $transaction->allow_commit();
-            // Rc cleanup
+            // rc cleanup
             $rc->destroy();
-            // Anonymous users cleanup
+            // anonymous users cleanup
             $DB->delete_records_select('user', $DB->sql_like('firstname', '?'), array('%anonfirstname%'));
             return true;
         } else {

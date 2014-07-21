@@ -41,7 +41,7 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
                 $cb->setChecked(true);
             }
         }
-        // Add checkbox controller
+        // add checkbox controller
 
         return array($grp, array($field->separator));
     }
@@ -78,7 +78,7 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
 
         $formfieldname = "field_{$fieldid}_{$entryid}_selected";
 
-        // Only [[$fieldname]] is editable so check it if exists
+        // only [[$fieldname]] is editable so check it if exists
         if (in_array("[[*$fieldname]]", $tags)) {
             $emptyfield  = true;
             foreach ($field->options_menu() as $key => $unused) {

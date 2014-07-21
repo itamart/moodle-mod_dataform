@@ -179,7 +179,7 @@ class mod_dataform_view_manager {
     public function get_view_by_id($viewid = 0) {
         global $DB;
 
-        if (!$viewid and !$viewid = $df->defaultview) {
+        if (!$viewid and !$viewid = \mod_dataform_dataform::instance($this->_dataformid)->defaultview) {
             return false;
         }
 
@@ -385,7 +385,7 @@ class mod_dataform_view_manager {
                 exit;
 
             } else {
-                // Go ahead and perform the requested action
+                // go ahead and perform the requested action
                 switch ($action) {
                     case 'visible':
                         $updateview = new stdClass;
@@ -474,7 +474,7 @@ class mod_dataform_view_manager {
                         break;
 
                     case 'default':
-                        foreach ($views as $vid => $view) { // There should be only one
+                        foreach ($views as $vid => $view) { // there should be only one
                             if (!$view->visible) {
                                 $updateview = new stdClass;
                                 $updateview->id = $vid;
@@ -506,7 +506,7 @@ class mod_dataform_view_manager {
      *
      */
     public function delete_views() {
-        if ($views = $this->get_views_menu()) {
+        if ($views = $this->views_menu) {
             $viewids = array_keys($views);
             $this->process_views('delete', $viewids, true);
         }

@@ -62,17 +62,17 @@ class dataformview_csv_form extends dataformview_aligned_form {
         // $mform->addElement('advcheckbox', 'updateexisting',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));
         // $mform->disabledIf('updateexisting', 'importenable', 'eq', 0);
 
-        // Delimiter
+        // delimiter
         $delimiters = csv_import_reader::get_delimiter_list();
         $mform->addElement('select', 'delimiter', get_string('csvdelimiter', 'dataform'), $delimiters);
         $mform->setDefault('delimiter', 'comma');
 
-        // Enclosure
+        // enclosure
         $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size' => '10'));
         $mform->setType('enclosure', PARAM_NOTAGS);
         $mform->setDefault('enclosure', '');
 
-        // Encoding
+        // encoding
         $choices = textlib::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
@@ -113,7 +113,7 @@ class dataformview_csv_form extends dataformview_aligned_form {
         if ($data = parent::get_data()) {
             // CSV settings
             $defaultsettings = $this->_view->get_default_csv_settings();
-            $currentsettings = "$data->delimiter, $data->enclosure, $data->encoding";
+            $currentsettings = "$data->delimiter,$data->enclosure,$data->encoding";
             if ($defaultsettings != $currentsettings) {
                 $data->param1 = $currentsettings;
             } else {

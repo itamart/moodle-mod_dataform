@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -29,8 +28,8 @@
 require_once('../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d = optional_param('d', 0, PARAM_INT);  // Dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);  // Course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);  // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);  // course module id
 
 // Current view id
 $urlparams->view = optional_param('view', 0, PARAM_INT);

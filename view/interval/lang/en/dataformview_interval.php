@@ -21,15 +21,17 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['interval'] = 'Interval';
 $string['custom'] = 'Custom';
 $string['daily'] = 'Daily';
-$string['first'] = 'First';
+$string['firstpage'] = 'First page';
 $string['hourly'] = 'Hourly';
-$string['last'] = 'Last';
+$string['lastpage'] = 'Last page';
 $string['monthly'] = 'Monthly';
-$string['next'] = 'Next';
+$string['nextpage'] = 'Next page';
 $string['pluginname'] = 'Interval';
-$string['random'] = 'Random';
+$string['randompage'] = 'Random page';
+$string['randomentries'] = 'Random entries';
 $string['refresh'] = 'Refresh';
 $string['resetnext'] = 'Iterations before reset next count';
 $string['selection'] = 'Which entries to select';

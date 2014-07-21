@@ -35,12 +35,12 @@ class dataformfield_textarea_form extends mod_dataform\pluginbase\dataformfieldf
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // Field width (cols)
+        // field width (cols)
         $mform->addElement('text', 'param2', get_string('cols', 'dataformfield_textarea'), array('size' => '8'));
         $mform->setType('param2', PARAM_INT);
         $mform->addRule('param2', null, 'numeric', null, 'client');
 
-        // Field height (rows)
+        // field height (rows)
         $mform->addElement('text', 'param3', get_string('rows', 'dataformfield_textarea'), array('size' => '8'));
         $mform->setType('param3', PARAM_INT);
         $mform->addRule('param3', null, 'numeric', null, 'client');
@@ -60,12 +60,12 @@ class dataformfield_textarea_form extends mod_dataform\pluginbase\dataformfieldf
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
-        // Max bytes
+        // max bytes
         $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
         $mform->addElement('select', 'param5', get_string('filemaxsize', 'dataform'), $options);
         $mform->disabledIf('param5', 'param1', 'eq', 0);
 
-        // Max files
+        // max files
         $range = range(1, 100);
         $options = array(-1 => get_string('unlimited')) + array_combine($range, $range);
         $mform->addElement('select', 'param6', get_string('filesmax', 'dataform'), $options);

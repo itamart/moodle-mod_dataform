@@ -52,7 +52,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         if ($states = $field->states) {
             $statenames = implode("\n", $states);
         }
-        $mform->addElement('textarea', 'states', null, array('rows' => 5));
+        $mform->addElement('textarea', 'states', get_string('states', 'dataformfield_entrystate'), array('rows' => 5));
         $mform->setType('states', PARAM_TEXT);
         $mform->setDefault('states', $statenames);
         $mform->addHelpButton('states', 'states', 'dataformfield_entrystate');
@@ -60,7 +60,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         // State icon
         // $options = array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes, 'maxfiles' => 1, 'accepted_types' => array('image'));
         // $draftitemid = file_get_submitted_draft_itemid("stateicon$num");
-        // File_prepare_draft_area($draftitemid, $field->df->context->id, 'dataformfield_entrystate', "stateicon$num", $field->id, $options);
+        // file_prepare_draft_area($draftitemid, $field->df->context->id, 'dataformfield_entrystate', "stateicon$num", $field->id, $options);
         // $mform->addElement('filemanager', "stateicon$num", get_string('stateicon', 'dataformfield_entrystate'), null, $options);
         // $mform->setDefault("stateicon$num", $draftitemid);
         // $mform->addHelpButton("stateicon$num", 'stateicon', 'dataformfield_entrystate');

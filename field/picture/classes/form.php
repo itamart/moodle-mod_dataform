@@ -137,7 +137,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
 
         $mform =& $this->_form;
 
-        // Accetped types
+        // accetped types
         $options = array();
         $options['*.jpg,*.gif,*.png'] = get_string('filetypeimage', 'dataform');
         $options['*.jpg'] = get_string('filetypejpg', 'dataform');

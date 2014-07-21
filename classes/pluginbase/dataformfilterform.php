@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataform
+ * @package mod_dataform
  * @category filter
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -88,7 +88,7 @@ abstract class dataformfilterform extends \moodleform {
             $optionsarr[] = &$mform->createElement('select', "sortdir$count", null, $diroptions);
             $mform->addGroup($optionsarr, "sortoptionarr$count", $label, ' ', false);
 
-            $mform->setDefault("sortfield$count", "$fieldid, $element");
+            $mform->setDefault("sortfield$count", "$fieldid,$element");
             $mform->setDefault("sortdir$count", $sortdir);
 
             $mform->disabledIf("sortdir$count", "sortfield$count", 'eq', '');
@@ -137,7 +137,7 @@ abstract class dataformfilterform extends \moodleform {
 
             $searchfields = unserialize($customsearch);
             // If not from form then the searchfields is aggregated and we need
-            // To flatten them. An aggregated array should have a non-zero key
+            // to flatten them. An aggregated array should have a non-zero key
             // (fieldid) in the first element.
             if (key($searchfields)) {
                 foreach ($searchfields as $fieldid => $searchfield) {
@@ -151,7 +151,7 @@ abstract class dataformfilterform extends \moodleform {
                                 continue;
                             }
                             list($element, $not, $operator, $value) = $searchoption;
-                            $searchcriteria[] = array("$fieldid, $element", $andor, $not, $operator, $value);
+                            $searchcriteria[] = array("$fieldid,$element", $andor, $not, $operator, $value);
                         }
                     }
                 }
@@ -242,7 +242,7 @@ abstract class dataformfilterform extends \moodleform {
 
         $filter = $this->_filter;
 
-        // Parse custom settings
+        // parse custom settings
         $sorturlquery = '';
         $searchurlquery = '';
 

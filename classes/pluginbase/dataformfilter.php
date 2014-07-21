@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataform
+ * @package mod_dataform
  * @category filter
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,16 +30,12 @@ defined('MOODLE_INTERNAL') or die;
  */
 class dataformfilter {
 
-    public $contentfields;
-
-    public $eids;
-    public $users;
-    public $page;
-
     protected $_instance;
+    protected $_attributes;
 
     protected $_filteredtables = null;
     protected $_searchfields = null;
+    protected $_contentfields = null;
     protected $_sortfields = null;
     protected $_joins = null;
     protected $_entriesexcluded = array();
@@ -47,27 +43,30 @@ class dataformfilter {
     /**
      * constructor
      */
-    public function __construct($filterdata) {
+    public function __construct($data) {
+        // Instance.
         $this->_instance = new \stdClass;
+        $this->_instance->id = empty($data->id) ? 0 : $data->id;
+        $this->_instance->dataid = $data->dataid; // required
+        $this->_instance->name = empty($data->name) ? '' : $data->name;
+        $this->_instance->description = empty($data->description) ? '' : $data->description;
+        $this->_instance->visible = !isset($data->visible) ? 1 : $data->visible;
 
-        $this->id = empty($filterdata->id) ? 0 : $filterdata->id;
-        $this->dataid = $filterdata->dataid; // Required
-        $this->name = empty($filterdata->name) ? '' : $filterdata->name;
-        $this->description = empty($filterdata->description) ? '' : $filterdata->description;
-        $this->visible = !isset($filterdata->visible) ? 1 : $filterdata->visible;
+        $this->_instance->perpage = empty($data->perpage) ? 0 : $data->perpage;
+        $this->_instance->selection = empty($data->selection) ? 0 : $data->selection;
+        $this->_instance->groupby = empty($data->groupby) ? '' : $data->groupby;
+        $this->_instance->customsort = empty($data->customsort) ? '' : $data->customsort;
+        $this->_instance->customsearch = empty($data->customsearch) ? '' : $data->customsearch;
+        $this->_instance->search = empty($data->search) ? '' : $data->search;
 
-        $this->perpage = empty($filterdata->perpage) ? 0 : $filterdata->perpage;
-        $this->selection = empty($filterdata->selection) ? 0 : $filterdata->selection;
-        $this->groupby = empty($filterdata->groupby) ? '' : $filterdata->groupby;
-        $this->customsort = empty($filterdata->customsort) ? '' : $filterdata->customsort;
-        $this->customsearch = empty($filterdata->customsearch) ? '' : $filterdata->customsearch;
-        $this->search = empty($filterdata->search) ? '' : $filterdata->search;
-        $this->contentfields = empty($filterdata->contentfields) ? null : $filterdata->contentfields;
-
-        $this->eids = empty($filterdata->eids) ? null : $filterdata->eids;
-        $this->users = empty($filterdata->users) ? null : $filterdata->users;
-        $this->groups = empty($filterdata->groups) ? null : $filterdata->groups;
-        $this->page = empty($filterdata->page) ? 0 : $filterdata->page;
+        // Other attributes.
+        $this->_attributes = new \stdClass;
+        $this->_attributes->eids = empty($data->eids) ? '' : $data->eids;
+        $this->_attributes->users = empty($data->users) ? '' : $data->users;
+        $this->_attributes->groups = empty($data->groups) ? '' : $data->groups;
+        $this->_attributes->page = empty($data->page) ? 0 : $data->page;
+        $this->_attributes->pagenum = empty($data->pagenum) ? 0 : $data->pagenum;
+        $this->_attributes->contentfields = empty($data->contentfields) ? '' : $data->contentfields;
     }
 
     /**
@@ -81,9 +80,15 @@ class dataformfilter {
      */
     public function __set($key, $value) {
         if (method_exists($this, 'set_'.$key)) {
+            // Call set method.
             $this->{'set_'.$key}($value);
+        } else if (isset($this->_attributes->$key)) {
+            // Set non-instance attributes.
+            $this->_attributes->$key = $value;
+        } else if (isset($this->_instance->$key)) {
+            // Set instance attribute.
+            $this->_instance->$key = $value;
         }
-        $this->_instance->{$key} = $value;
     }
 
     /**
@@ -96,9 +101,15 @@ class dataformfilter {
      * @return mixed
      */
     public function __get($key) {
+        // Call get method.
         if (method_exists($this, 'get_'.$key)) {
             return $this->{'get_'.$key}();
         }
+        // Return attributes such as eids, users, page, contentfields, pagenum.
+        if (isset($this->_attributes->$key)) {
+            return $this->_attributes->$key;
+        }
+        // Return instance attributes.
         if (isset($this->_instance->{$key})) {
             return $this->_instance->{$key};
         }
@@ -237,7 +248,7 @@ class dataformfilter {
 
         $searchfrom = array();
         $searchwhere = array();
-        $searchparams = array(); // Named params array
+        $searchparams = array(); // named params array
 
         $searchfields = $this->_searchfields;
         $simplesearch = $this->search;
@@ -248,7 +259,7 @@ class dataformfilter {
 
         if ($searchfields) {
             foreach ($searchfields as $fieldid => $searchfield) {
-                // If we got this far there must be some actual search values
+                // if we got this far there must be some actual search values
                 if (empty($fields[$fieldid])) {
                     continue;
                 }
@@ -275,7 +286,7 @@ class dataformfilter {
                     }
                 }
 
-                // Add OR search clause
+                // add OR search clause
                 if (!empty($searchfield['OR'])) {
                     foreach ($searchfield['OR'] as $option) {
                         if ($fieldsqloptions = $field->get_search_sql($option)) {
@@ -326,10 +337,10 @@ class dataformfilter {
             $searchparams = array_merge($searchparams, $eidsparams);
         }
 
-        // Compile sql for search settings
+        // compile sql for search settings
         if ($searchfrom) {
             foreach ($searchfrom as $fieldid) {
-                // Add only tables which are not already added
+                // add only tables which are not already added
                 if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
                     $this->_filteredtables[] = $fieldid;
                     $searchtables .= $fields[$fieldid]->get_search_from_sql();
@@ -346,7 +357,7 @@ class dataformfilter {
 
         $wheresearch = $searchwhere ? ' AND '. implode(' AND ', $searchwhere) : '';
 
-        // Register referred tables
+        // register referred tables
         $this->_filteredtables = $searchfrom;
         $searchparams = array_values($searchparams);
         return array($searchtables, $wheresearch, $searchparams);
@@ -455,9 +466,12 @@ class dataformfilter {
         $whatcontent = !empty($whatcontent) ? ', '. implode(', ', $whatcontent) : ' ';
         $contenttables = ' '. implode(' ', $contentfrom);
         if ($params) {
-            $params = array_map(function($fieldid) {
-                return " c$fieldid.fieldid = ? ";
-            }, $params);
+            $params = array_map(
+                function($fieldid) {
+                    return " c$fieldid.fieldid = ? ";
+                },
+                $params
+            );
             $wherecontent = ' AND '. implode(' AND ', $params);
         }
 
@@ -469,8 +483,8 @@ class dataformfilter {
      */
     public function get_join_sql($fields) {
 
-        $whatjoin = ' '; // List of field ids whose content should be fetched in the main query.
-        $jointables = ' '; // List of content tables to include in the main query.
+        $whatjoin = ' '; // List of field ids whose content should be fetched in the main query
+        $jointables = ' '; // List of content tables to include in the main query
         $params = array();
 
         // Joins should have been registerec in get_content_sql

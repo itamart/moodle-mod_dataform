@@ -30,12 +30,12 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     public function update($data) {
         global $DB;
 
-        // Before we update get the current options
+        // before we update get the current options
         $oldoptions = $this->options_menu();
-        // Update
+        // update
         parent::update($data);
 
-        // Adjust content if necessary
+        // adjust content if necessary
         $adjustments = array();
         // Get updated options
         $newoptions = $this->options_menu(true);
@@ -48,7 +48,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
         }
 
         if (!empty($adjustments)) {
-            // Fetch all contents of the field whose content in keys
+            // fetch all contents of the field whose content in keys
             list($incontent, $params) = $DB->get_in_or_equal(array_keys($adjustments));
             array_unshift($params, $this->id);
             $contents = $DB->get_records_select_menu('dataform_contents',
@@ -91,12 +91,12 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
      */
     protected function format_content($entry, array $values = null) {
         $fieldid = $this->id;
-        // Old contents
+        // old contents
         $oldcontents = array();
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
-        // New contents
+        // new contents
         $contents = array();
 
         $selected = $newvalue = null;
@@ -108,7 +108,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
                 }
             }
         }
-        // Update new value in the field type
+        // update new value in the field type
         if ($newvalue = s($newvalue)) {
             $options = $this->options_menu();
             if (!$selected = (int) array_search($newvalue, $options)) {
@@ -117,7 +117,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
                 $this->update($this->data);
             }
         }
-        // Add the content
+        // add the content
         if (!is_null($selected)) {
             $contents[] = $selected;
         }
@@ -180,7 +180,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
      *
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
-        // Import only from csv
+        // import only from csv
         if (!$csvrecord) {
             return $data;
         }

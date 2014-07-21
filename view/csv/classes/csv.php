@@ -59,7 +59,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             return;
         }
 
-        // Proces csv import request
+        // proces csv import request
         $importcsv = optional_param('importcsv', 0, PARAM_INT);
         if ($importcsv and $this->param5 and confirm_sesskey()) {
             $this->process_import();
@@ -128,7 +128,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         }
 
         // Convert encoding
-        $returnstr = mb_convert_encoding($returnstr, $this->_encoding);
+        $returnstr = mb_convert_encoding($returnstr, $this->_encoding, 'UTF-8');
 
         header("Content-Type: application/download\n");
         header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -162,9 +162,9 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             $data->errors = array();
 
             $fieldsettings = array();
-            // Collect field import settings from formdata by field, pattern and element
+            // collect field import settings from formdata by field, pattern and element
             foreach ($formdata as $name => $value) {
-                if (strpos($name, 'f_') !== false) {   // Assuming only field settings start with f_
+                if (strpos($name, 'f_') !== false) {   // assuming only field settings start with f_
                     list(, $fieldid, $pattern, $setting) = explode('_', $name);
                     if (!array_key_exists($fieldid, $fieldsettings)) {
                         $fieldsettings[$fieldid] = array();
@@ -182,10 +182,10 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
 
             // Get the csv content
             if (!empty($formdata->csvtext)) {
-                // Upload from text
+                // upload from text
                 $csvcontent = $formdata->csvtext;
             } else {
-                // Upload from file
+                // upload from file
                 $csvcontent = $mform->get_file_content('importfile');
             }
 
@@ -261,7 +261,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         }
 
         // Get the field definitions
-        // Array(array(pattern => value,...)...)
+        // array(array(pattern => value,...)...)
         $entryvalues = array();
         foreach ($exportentries as $entryid => $entry) {
             $patternvalues = array();
@@ -282,14 +282,14 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         foreach ($columns as $column) {
             list($pattern, $header, ) = $column;
             $columnpatterns[] = $pattern;
-            $csvheader[] = ($header ? $header : trim($pattern, '[#]'));
+            $csvheader[] = $header ? $header : trim($pattern, '[#]');
         }
 
         $csvcontent = array();
         $csvcontent[] = $csvheader;
 
         // Get the field definitions
-        // Array(array(pattern => value,...)...)
+        // array(array(pattern => value,...)...)
         foreach ($entryvalues as $entryid => $patternvalues) {
             $row = array();
             foreach ($columnpatterns as $pattern) {
@@ -332,20 +332,20 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             return $data;
         }
 
-        // Csv column headers
+        // csv column headers
         if (!$fieldnames = $cir->get_columns()) {
             $data->errors[] = $cir->get_error();
             return $data;
         }
 
-        // Process each csv record
+        // process each csv record
         $updateexisting = $updateexisting and !empty($csvfieldnames['entryid']);
         $i = 0;
         $cir->init();
 
         while ($csvrecord = $cir->next()) {
             $csvrecord = array_combine($fieldnames, $csvrecord);
-            // Set the entry id
+            // set the entry id
             if ($updateexisting and $csvrecord['entryid'] > 0) {
                 $entryid = $csvrecord['entryid'];
             } else {
@@ -379,7 +379,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     /**
      * Returns a fieldset of view options
      */
-    public function get_default_view_template() {
+    protected function get_default_view_template() {
         // Notifications
         $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 

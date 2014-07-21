@@ -38,15 +38,15 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
      * @return void
      */
     protected function get_default_entry_template() {
-        // Get all the fields
+        // get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
-            return; // You shouldn't get that far if there are no user fields
+            return; // you shouldn't get that far if there are no user fields
         }
 
         // Set the entry template
         $table = new html_table();
         $table->attributes['cellpadding'] = '2';
-        // Fields
+        // fields
         foreach ($fields as $field) {
             if ($field->id > 0) {
                 $name = new html_table_cell($field->name. ':');
@@ -57,14 +57,14 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                 $table->data[] = $row;
             }
         }
-        // Actions
+        // actions
         $row = new html_table_row();
         $entryactions = get_string('fieldname', 'dataformfield_entryactions');
         $actions = new html_table_cell("[[$entryactions:edit]]  [[$entryactions:delete]]");
         $actions->colspan = 2;
         $row->cells = array($actions);
         $table->data[] = $row;
-        // Construct the table
+        // construct the table
         $entrydefault = html_writer::table($table);
         $this->param2 = html_writer::tag('div', $entrydefault, array('class' => 'entry'));
     }
@@ -89,19 +89,19 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
                     $rows = ceil($entriescount / $cols);
                 } else {
                     $rows = 1;
-                    $percol = (ceil($entriescount / $cols) > 1 ? ceil($entriescount / $cols) : null);
+                    $percol = ceil($entriescount / $cols) > 1 ? ceil($entriescount / $cols) : null;
                 }
             }
 
             $table = $this->make_table($cols, $rows);
             $grouphtml = html_writer::table($table);
-            // Now split $tablehtml to cells by ##begintablecell##
+            // now split $tablehtml to cells by ##begintablecell##
             $cells = explode('##begintablecell##', $grouphtml);
-            // The first part is everything before first cell
+            // the first part is everything before first cell
             $elements[] = array_shift($cells);
         }
 
-        // Flatten the set to a list of elements
+        // flatten the set to a list of elements
         $count = 0;
         foreach ($entriesset as $entrydefinitions) {
             $elements = array_merge($elements, $entrydefinitions);
@@ -166,7 +166,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
 
-        // Get patterns definitions
+        // get patterns definitions
         $fields = $this->get_fields();
         $tags = array();
         $patterndefinitions = array();
@@ -184,7 +184,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
             }
         }
 
-        // Split the entry template to tags and html
+        // split the entry template to tags and html
         $parts = $this->split_tags($tags, $this->param2);
 
         foreach ($parts as $part) {

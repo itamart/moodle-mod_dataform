@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -26,9 +25,9 @@
  * certain copyrights on the Database module may obtain.
  */
 
-$module->component = 'mod_dataform';
-$module->release  = '2.7beta (Build: 20140426)';
-$module->version  = 2014042600.00;
-$module->requires = 2014042400;
-$module->maturity = MATURITY_BETA;
-// $module->cron     = 60;
+$plugin->component = 'mod_dataform';
+$plugin->release  = '2.7';
+$plugin->version = 2014072000;
+$plugin->requires = 2014051200;
+$plugin->maturity = MATURITY_STABLE;
+// $plugin->cron     = 60;

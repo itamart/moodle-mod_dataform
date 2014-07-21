@@ -38,13 +38,20 @@ class completion {
 
         $observers[] = array(
             'eventname'   => '\mod_dataform\event\entry_created',
-            'callback'    => '\mod_dataform\observer\completion::update',
+            'callback'    => '\mod_dataform\observer\completion::update_require_entries',
         );
 
         $observers[] = array(
             'eventname'   => '\mod_dataform\event\entry_deleted',
-            'callback'    => '\mod_dataform\observer\completion::update',
+            'callback'    => '\mod_dataform\observer\completion::update_require_entries',
         );
+
+        if (class_exists('\core\event\user_graded')) {
+            $observers[] = array(
+                'eventname'   => '\core\event\user_graded',
+                'callback'    => '\mod_dataform\observer\completion::update_require_specific_grade',
+            );
+        }
 
         return $observers;
     }
@@ -54,7 +61,7 @@ class completion {
      *
      * @return void
      */
-    public static function update(\core\event\base $event) {
+    public static function update_require_entries(\core\event\base $event) {
         global $DB;
 
         $dataformid = $event->other['dataid'];
@@ -62,12 +69,40 @@ class completion {
 
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        $completion = new \completion_info($df->course);
-        if ($completion->is_enabled($df->cm) != COMPLETION_TRACKING_AUTOMATIC) {
-            return;
-        }
-
+        // Currently only completion by require entries.
         if ($df->completionentries) {
+            $completion = new \completion_info($df->course);
+            if ($completion->is_enabled($df->cm) != COMPLETION_TRACKING_AUTOMATIC) {
+                return;
+            }
+
+            $completion->update_state($df->cm, COMPLETION_UNKNOWN, $entryuserid);
+        }
+    }
+
+    /**
+     * Updates activity completion status.
+     *
+     * @return void
+     */
+    public static function update_require_specific_grade(\core\event\base $event) {
+        global $DB;
+
+        $entryuserid = $event->relateduserid;
+
+        $giid = $event->other['itemid'];
+        $gitem = grade_item::fetch(array('id' => $giid));
+        $dataformid = $gitem->iteminstance;
+
+        $df = \mod_dataform_dataform::instance($dataformid);
+
+        // Currently only completion by require entries.
+        if ($df->completionspecificgrade) {
+            $completion = new \completion_info($df->course);
+            if ($completion->is_enabled($df->cm) != COMPLETION_TRACKING_AUTOMATIC) {
+                return;
+            }
+
             $completion->update_state($df->cm, COMPLETION_UNKNOWN, $entryuserid);
         }
     }

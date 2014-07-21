@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -67,7 +66,7 @@ function dataform_add_instance($data) {
 
     // Activity icon
     if (!empty($data->activityicon)) {
-        // We need to use context now, so we need to make sure all needed info is already in db
+        // we need to use context now, so we need to make sure all needed info is already in db
         $DB->set_field('course_modules', 'instance', $data->id, array('id' => $data->coursemodule));
         $context = context_module::instance($data->coursemodule);
         $options = array('subdirs' => 0,
@@ -294,7 +293,7 @@ function dataform_get_coursemodule_info($cm) {
  */
 function dataform_cm_info_dynamic(cm_info $cm) {
     if ($customdata = $cm->customdata and !empty($customdata->inlineview)) {
-        // The field 'customdata' is not empty IF AND ONLY IF we display content inline
+        // the field 'customdata' is not empty IF AND ONLY IF we display content inline
         $cm->set_no_view_link();
     }
 }
@@ -362,7 +361,7 @@ function dataform_get_custom_icon_url($cmid) {
  *   value depends on comparison type)
  */
 function dataform_get_completion_state($course, $cm, $userid, $type) {
-    global $CFG, $DB;
+    global $DB;
 
     // Get dataform details
     if (!($dataform = $DB->get_record('dataform', array('id' => $cm->instance)))) {
@@ -370,9 +369,32 @@ function dataform_get_completion_state($course, $cm, $userid, $type) {
     }
 
     $result = $type;
+
+    // Required entries
     if ($dataform->completionentries) {
         $entriescount = $DB->count_records('dataform_entries', array('dataid' => $dataform->id, 'userid' => $userid));
         $value = ($entriescount >= $dataform->completionentries);
+        if ($type == COMPLETION_AND) {
+            $result = $result && $value;
+        } else {
+            $result = $result || $value;
+        }
+    }
+
+    // Required specific grade
+    if ($dataform->completionspecificgrade) {
+        // Get the user's grade.
+        $params = array(
+            'itemtype' => 'mod',
+            'itemmodule' => 'dataform',
+            'iteminstance' => $dataform->id,
+            'courseid' => $course->id,
+            'itemnumber' => 0
+        );
+        $gitem = grade_item::fetch($params);
+        $grade = $gitem->get_grade($userid, false);
+
+        $value = ($grade->finalgrade >= $dataform->completionspecificgrade);
         if ($type == COMPLETION_AND) {
             $result = $result && $value;
         } else {
@@ -388,7 +410,7 @@ function dataform_get_completion_state($course, $cm, $userid, $type) {
 // ------------------------------------------------------------
 
 /**
- * Checks if a scale is being used by an dataform
+ * Checks if a scale is being used by a dataform,
  *
  * This is used by the backup code to decide whether to back up a scale
  * @param $dataformid int
@@ -399,16 +421,15 @@ function dataform_scale_used($dataformid, $scaleid) {
     global $DB;
 
     if ($scaleid) {
-        // Check the dataform instance
+        // Check the dataform instance.
         if ($DB->record_exists('dataform', array('id' => $dataformid, 'grade' => -$scaleid))) {
             return true;
         }
-        // Check all fields which are instances of interface rating
+        // Check all fields which are instances of interface usingscale.
         foreach (array_keys(core_component::get_plugin_list('dataformfield')) as $type) {
             $fieldclass = "dataformfield_{$type}_$type";
-            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\grading')) {
-                $scaleparam = $fieldclass::get_scale_param();
-                if ($DB->record_exists('dataform_fields', array('dataid' => $dataformid, 'type' => $type, $scaleparam => -$scaleid))) {
+            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\usingscale')) {
+                if ($fieldclass::is_using_scale($scaleid, $dataformid)) {
                     return true;
                 }
             }
@@ -419,7 +440,7 @@ function dataform_scale_used($dataformid, $scaleid) {
 }
 
 /**
- * Checks if scale is being used in any instance of dataform
+ * Checks if scale is being used in any instance of dataform.
  *
  * This is used to find out if scale used anywhere
  * @param $scaleid int
@@ -432,12 +453,11 @@ function dataform_scale_used_anywhere($scaleid) {
         if ($DB->record_exists('dataform', array('grade' => -$scaleid))) {
             return true;
         }
-        // Check all fields which are instances of interface rating
+        // Check all fields which are instances of interface usingscale.
         foreach (array_keys(core_component::get_plugin_list('dataformfield')) as $type) {
             $fieldclass = "dataformfield_{$type}_$type";
-            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\grading')) {
-                $scaleparam = $fieldclass::get_scale_param();
-                if ($DB->record_exists('dataform_fields', array('type' => $type, $scaleparam => -$scaleid))) {
+            if (is_subclass_of($fieldclass, '\mod_dataform\interfaces\usingscale')) {
+                if ($fieldclass::is_using_scale($scaleid)) {
                     return true;
                 }
             }
@@ -629,8 +649,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
             return false;
         }
-        // Finally send the file
-        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
     // FIELD CONTENT files
@@ -646,14 +666,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             return false;
         }
 
-        // Nanogong ugly hack
-        if ($field->type != 'nanogong') {
-            if (empty($USER->id)) {
-                return false;
-            }
-
-            require_course_login($course, true, $cm);
-        }
+        require_course_login($course, true, $cm);
 
         if (!$entry = $DB->get_record('dataform_entries', array('id' => $content->entryid))) {
             return false;
@@ -664,15 +677,15 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         }
 
         if ($dataform->id != $cm->instance) {
-            // Hacker attempt - context does not match the contentid
+            // hacker attempt - context does not match the contentid
             return false;
         }
 
-        // Group access
+        // group access
         if ($entry->groupid) {
             $groupmode = groups_get_activity_groupmode($cm, $course);
             if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
-                if (!groups_is_member($record->groupid)) {
+                if (!groups_is_member($entry->groupid)) {
                     return false;
                 }
             }
@@ -695,8 +708,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
             return false;
         }
-        // Finally send the file
-        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
     // PRESET files
@@ -711,8 +724,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             return false;
         }
 
-        // Finally send the file
-        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
     if (($filearea === 'js' or $filearea === 'css')) {
@@ -726,8 +739,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             return false;
         }
 
-        // Finally send the file
-        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
+        // finally send the file
+        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
     }
 
     return false;
@@ -790,13 +803,13 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
         $dfnode->add(get_string('gradebook', 'grades'), new moodle_url('/grade/report/index.php', array('id' => $PAGE->course->id)));
     }
 
-    // Delete
+    // delete
     if ($manager['templates']) {
         $dfnode->add(get_string('renewactivity', 'dataform'), new moodle_url('/mod/dataform/view.php', array('id' => $PAGE->cm->id, 'renew' => 1, 'sesskey' => sesskey())));
         $dfnode->add(get_string('deleteactivity', 'dataform'), new moodle_url('/course/mod.php', array('delete' => $PAGE->cm->id, 'sesskey' => sesskey())));
     }
 
-    // Manage
+    // manage
     $manage = $dfnode->add(get_string('manage', 'dataform'));
 
     if ($manager['views']) {
@@ -992,7 +1005,7 @@ function dataform_get_view_actions() {
 /**
  */
 function dataform_get_post_actions() {
-    return array('add', 'update', 'delete');
+    return array('add', 'update', 'record delete');
 }
 
 // ------------------------------------------------------------
@@ -1166,14 +1179,14 @@ function dataform_upgrade_grades() {
              WHERE m.name='dataform' AND m.id=cm.module AND cm.instance=d.id";
     $rs = $DB->get_recordset_sql($sql);
     if ($rs->valid()) {
-        // Too much debug output
+        // too much debug output
         $pbar = new progress_bar('dataupgradegrades', 500, true);
         $i = 0;
         foreach ($rs as $data) {
             $i++;
-            upgrade_set_timeout(60 * 5); // Set up timeout, may also abort execution
+            upgrade_set_timeout(60 * 5); // set up timeout, may also abort execution
             dataform_update_grades($data, 0, false);
-            $pbar->update($i, $count, "Updating Dataform grades ($i / $count).");
+            $pbar->update($i, $count, "Updating Dataform grades ($i/$count).");
         }
     }
     $rs->close();

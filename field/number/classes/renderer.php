@@ -52,9 +52,9 @@ class dataformfield_number_renderer extends dataformfield_text_renderer {
         }
 
         $decimals = (int) trim($field->param1);
-        // Only apply number formatting if param1 contains an integer number >= 0:
+        // only apply number formatting if param1 contains an integer number >= 0:
         if ($decimals) {
-            // Removes leading zeros (eg. '007' -> '7'; '00' -> '0')
+            // removes leading zeros (eg. '007' -> '7'; '00' -> '0')
             $str = sprintf("%4.{$decimals}f", $number);
         } else {
             $str = (int) $number;

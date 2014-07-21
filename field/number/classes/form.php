@@ -30,14 +30,14 @@ class dataformfield_number_form extends mod_dataform\pluginbase\dataformfieldfor
 
         $mform =& $this->_form;
 
-        // ---------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // Decimals
+        // decimals
         $options = array('' => 0) + array_combine(range(1, 10), range(1, 10));
         $mform->addElement('select', 'param1', get_string('decimals', 'dataformfield_number'), $options);
 
-        // Field width
+        // field width
         $fieldwidthgrp = array();
         $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
         $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));

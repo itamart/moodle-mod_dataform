@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * Defines message providers (types of messages being sent)
  *
  * @package mod
- * @package dataform
+ * @package mod_dataform
  * @copyright  2013 Itamar Tzadok
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

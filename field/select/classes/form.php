@@ -30,19 +30,19 @@ class dataformfield_select_form extends mod_dataform\pluginbase\dataformfieldfor
 
         $mform =& $this->_form;
 
-        // ---------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // Options
+        // options
         $mform->addElement('textarea', 'param1', get_string('options', 'dataformfield_select'), 'wrap="virtual" rows="5" cols="30"');
 
-        // Default value
+        // default value
         $mform->addElement('text', 'param2', get_string('optionsdefault', 'dataformfield_select'));
         $mform->setType('param2', PARAM_TEXT);
 
-        // Reserve param3 for options separator (e.g. radiobutton, image button)
+        // reserve param3 for options separator (e.g. radiobutton, image button)
 
-        // Allow add option
+        // allow add option
         $mform->addElement('selectyesno', 'param4', get_string('allowaddoption', 'dataformfield_select'));
 
     }

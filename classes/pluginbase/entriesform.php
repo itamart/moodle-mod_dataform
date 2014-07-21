@@ -31,15 +31,15 @@ class entriesform extends \moodleform {
 
     public function definition() {
 
-        // Buttons
+        // buttons
         // -------------------------------------------------------------------------------
         // $this->add_action_buttons();
 
-        // Entries
+        // entries
         // -------------------------------------------------------------------------------
         $this->definition_entries();
 
-        // Buttons again
+        // buttons again
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
@@ -117,16 +117,16 @@ class entriesform extends \moodleform {
         if (!$errors = parent::validation($data, $files)) {
             $errors = array();
 
-            // Field validations
+            // field validations
             $view = $this->_customdata['view'];
             $patterns = $view->get_pattern_set('field');
             $fields = $view->get_fields();
             $entryids = explode(',', $this->_customdata['update']);
 
             foreach ($entryids as $eid) {
-                // Validate all fields for this entry
+                // validate all fields for this entry
                 foreach ($fields as $fid => $field) {
-                    // Captcha check
+                    // captcha check
                     if ($field->type == 'captcha') {
                         if ($err = $field->verify($eid, $mform)) {
                             $errors = array_merge($errors, $err);

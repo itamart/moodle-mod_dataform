@@ -22,7 +22,7 @@
  */
 
 class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
-    public $dataonly;
+    public $dateonly;
     public $masked;
     public $startyear;
     public $stopyear;
@@ -30,11 +30,11 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
 
     public function __construct($field) {
         parent::__construct($field);
-        $this->dataonly = $this->param1;
+        $this->date_only = $this->param1;
         $this->masked = $this->param5;
-        $this->startyear = $this->param2;
-        $this->stopyear = $this->param3;
-        $this->displayformat = $this->param4;
+        $this->start_year = $this->param2;
+        $this->stop_year = $this->param3;
+        $this->display_format = $this->param4;
     }
 
     /**
@@ -51,12 +51,12 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
         $fieldid = $this->id;
         $oldcontents = array();
         $contents = array();
-        // Old contents
+        // old contents
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
 
-        // New contents
+        // new contents
         $timestamp = null;
         if (!empty($values)) {
             if (count($values) === 1) {
@@ -64,14 +64,14 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
             }
 
             if (!is_array($values)) {
-                // Assuming timestamp is passed (e.g. in import)
+                // assuming timestamp is passed (e.g. in import)
                 $timestamp = $values;
 
             } else {
-                // Assuming any of year, month, day, hour, minute is passed
+                // assuming any of year, month, day, hour, minute is passed
                 $enabled = $year = $month = $day = $hour = $minute = 0;
                 foreach ($values as $name => $val) {
-                    if (!empty($name)) {          // The time unit
+                    if (!empty($name)) {          // the time unit
                         ${$name} = $val;
                     }
                 }

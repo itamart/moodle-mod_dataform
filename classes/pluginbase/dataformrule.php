@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataform
+ * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -261,7 +261,7 @@ class dataformrule {
             return $this->_block->config->views;
         }
         // Return all views
-        return \mod_dataform_view_manager::instance($this->_dataformid)->get_views_menu();
+        return \mod_dataform_view_manager::instance($this->_dataformid)->views_menu;
     }
 
     /**

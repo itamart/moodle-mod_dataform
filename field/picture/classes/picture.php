@@ -113,18 +113,18 @@ class dataformfield_picture_picture extends dataformfield_file_file {
             return;
         }
 
-        // Update dimensions and regenerate thumbs
+        // update dimensions and regenerate thumbs
         foreach ($files as $file) {
 
             if ($file->is_valid_image() and strpos($file->get_filename(), 'thumb_') === false) {
-                // Original first
+                // original first
                 if ($updatefile) {
                     $maxwidth  = $this->appearance->maxw ? $this->appearance->maxw : 0;
                     $maxheight = $this->appearance->maxh ? $this->appearance->maxh : 0;
 
                     // If either width or height try to (re)generate
                     if ($maxwidth or $maxheight) {
-                        // This may fail for various reasons
+                        // this may fail for various reasons
                         try {
                             $filerec = array(
                                 'contextid' => $file->get_contextid(),
@@ -147,7 +147,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
                     }
                 }
 
-                // Thumbnail next
+                // thumbnail next
                 if ($updatethumb) {
                     $thumbwidth  = $this->appearance->thumbw ? $this->appearance->thumbw : '';
                     $thumbheight = $this->appearance->thumbh ? $this->appearance->thumbh : '';

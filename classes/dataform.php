@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2012 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -99,6 +98,11 @@ class mod_dataform_dataform {
         $df = new mod_dataform_dataform($dataformid, null, true);
         $viewman = new mod_dataform_view_manager($dataformid);
 
+        // Make sure user can access the view.
+        if (!array_key_exists($viewid, $viewman->views_menu)) {
+            return null;
+        }
+
         if ($view = $viewman->get_view_by_id($viewid)) {
             $params = array(
                     'js' => true,
@@ -135,6 +139,14 @@ class mod_dataform_dataform {
             return null;
         }
 
+        $df = new mod_dataform_dataform($dataformid, null, true);
+        $viewman = new mod_dataform_view_manager($dataformid);
+
+        // Make sure user can access the view.
+        if (!array_key_exists($viewid, $viewman->views_menu)) {
+            return null;
+        }
+
         // Set the url for the iframe
         $urlparams = array('d' => $dataformid, 'view' => $viewid);
         if ($filterid) {
@@ -162,9 +174,12 @@ class mod_dataform_dataform {
                     }
                 }
             }
-            $stylestr = implode('', array_map(function($a, $b) {
-                return "$a: $b";
-            }, array_keys($styles), $styles));
+            $stylestr = implode('', array_map(
+                function($a, $b) {
+                    return "$a: $b";
+                },
+                array_keys($styles), $styles)
+            );
             $params['style'] = $stylestr;
 
             // Add scrolling attr
@@ -538,7 +553,7 @@ class mod_dataform_dataform {
 
         // Editing button (omit in embedded dataforms)
         if ($pagefile != 'embed' and $PAGE->user_allowed_editing()) {
-             // Teacher editing mode
+            // Teacher editing mode
             if ($urlparams['edit'] != -1) {
                 $USER->editing = $urlparams['edit'];
             }
@@ -939,7 +954,7 @@ class mod_dataform_dataform {
         ";
         $where = '';
         $groupby = " GROUP BY userid ";
-        $params = array('id'  => $this->id);
+        $params = array($this->id);
 
         if ($userid) {
             $where .= " AND userid = ? ";
@@ -968,6 +983,34 @@ class mod_dataform_dataform {
         }
 
         return null;
+    }
+
+    /**
+     * Returns entry ids for each user.
+     *
+     * @param int $userid
+     * @return array Associative array userid => array(entryid, entryid, ...)
+     */
+    public function get_entry_ids_per_user($userid = 0) {
+        global $DB;
+
+        $entryids = array();
+
+        $params = array('dataid'  => $this->id);
+        if ($userid) {
+            $params['userid'] = $userid;
+        }
+
+        if ($entries = $DB->get_records_menu('dataform_entries', $params, 'userid', 'id,userid')) {
+            foreach ($entries as $entryid => $userid) {
+                if (empty($entryids[$userid])) {
+                    $entryids[$userid] = array();
+                }
+                $entryids[$userid][] = $entryid;
+            }
+        }
+
+        return $entryids;
     }
 
 
@@ -1078,9 +1121,31 @@ class mod_dataform_dataform {
         require_once("$CFG->libdir/mathslib.php");
         $formula = $this->gradecalc;
 
+        // Patterns container
         $patterns = array();
-        $users = array();
+
+        // Users container
+        if ($userid) {
+            $users = array($userid => array());
+        } else {
+            $gusers = $this->get_gradebook_users();
+            $users = array_fill_keys(array_keys($gusers), array());
+        }
+
+        // Must have users
+        if (!$users) {
+            return null;
+        }
+
+        // Grades container
         $grades = array();
+        foreach ($users as $userid => $unused) {
+            $grades[$userid] = (object) array(
+                'id' => $userid,
+                'userid' => $userid,
+                'rawgrade' => null
+            );
+        }
 
         // Num entries pattern
         if (strpos($formula, '##numentries##') !== false) {
@@ -1095,13 +1160,18 @@ class mod_dataform_dataform {
             }
         }
 
-        // Extract field patterns from the formula
-        if (preg_match_all("%\[\[[^\]]+\]\]%", $formula, $matches)) {
+        // Extract grading field patterns from the formula.
+        if (preg_match_all("/##\d*:[^#]+##/", $formula, $matches)) {
+            // Get the entry ids per user.
+            $entryids = $this->get_entry_ids_per_user($userid);
+
             foreach ($matches[0] as $pattern) {
                 $patterns[$pattern] = 0;
 
-                // Get the field from the pattern
-                if (!$field = $this->field_manager->get_field_by_pattern($pattern)) {
+                list($targetval, $fieldpattern) = explode(':', trim($pattern, '#'), 2);
+
+                // Get the field from the pattern.
+                if (!$field = $this->field_manager->get_field_by_pattern("[[$fieldpattern]]")) {
                     continue;
                 }
 
@@ -1111,22 +1181,39 @@ class mod_dataform_dataform {
                 }
 
                 // Get user values for the pattern
-                if (!$values = $field->get_user_values($pattern, $userid)) {
+                if (!$uservalues = $field->get_user_values($fieldpattern, $entryids, $userid)) {
                     continue;
                 }
 
                 // Register pattern values for users
-                foreach ($values as $userid => $value) {
+                foreach ($uservalues as $userid => $values) {
                     if (empty($users[$userid])) {
                         $users[$userid] = array();
                     }
-                    $users[$userid][$pattern] = $value;
+
+                    // Keep only target val if specified.
+                    if ($targetval) {
+                        foreach ($values as $key => $value) {
+                            if ($value != $targetval) {
+                                unset($values[$key]);
+                            }
+                        }
+                    }
+                    if ($values) {
+                        $users[$userid][$pattern] = implode(',', $values);
+                    }
                 }
             }
         }
 
         // For each user calculate the formula and create a grade object
-        foreach ($users as $userid => $values) {
+        foreach ($grades as $userid => $grade) {
+            // If no values, no grade for this user.
+            if (empty($users[$userid])) {
+                continue;
+            }
+
+            $values = $users[$userid];
             $replacements = array_merge($patterns, $values);
             $calculation = str_replace(array_keys($replacements), $replacements, $formula);
 
@@ -1134,42 +1221,41 @@ class mod_dataform_dataform {
             $result = $calc->evaluate();
             // False as result indicates some problem
             if ($result !== false) {
-                $grades[$userid] = (object) array(
-                    'id' => $userid,
-                    'userid' => $userid,
-                    'rawgrade' => $result
-                );
+                $grade->rawgrade = $result;
             }
         }
+
         return $grades;
     }
 
     /**
-     * Returns user's calculated grades in the dataform instance.
+     * Updates the user's calculated grades in the dataform instance.
      *
-     * @param int $userid The user id whose grades should be retrieved or 0 for all grades
+     * @param int $userid The user id whose grades should be retrieved or 0 for all grades.
+     * @param bool $numentries Whether number of entries for the user has changed.
+     * @return void
      */
-    public function is_grading_num_entries() {
+    public function update_calculated_grades($userid, $pattern = null) {
         global $CFG;
 
-        if (!$this->grade) {
-            return false;
+        // Must be grading to continue.
+        if (!$this->grade or !$this->gradecalc) {
+            return;
         }
 
-        // Look for numentries in gradecalc.
-        if (!$this->gradecalc or strpos($this->gradecalc, '##numentries##') === false) {
-            return false;
-        }
+        if (!$pattern or preg_match("%$pattern%", $this->gradecalc) !== false) {
+            dataform_update_grades($this->data, $userid);
 
-        // There is numentries in gradecalc so check the grading method to see if calc is used.
-        require_once("$CFG->dirroot/grade/grading/lib.php");
-        $gradingman = get_grading_manager($this->context, 'mod_dataform', 'activity');
-        $controller = $gradingman->get_active_controller();
-        if (!empty($controller)) {
-            return false;
-        }
+            // Update specific grade completion if tracked.
+            if ($this->completionspecificgrade) {
+                $completion = new \completion_info($this->course);
+                if ($completion->is_enabled($this->cm) != COMPLETION_TRACKING_AUTOMATIC) {
+                    return;
+                }
 
-        return true;
+                $completion->update_state($this->cm, COMPLETION_UNKNOWN, $userid);
+            }
+        }
     }
 
     // USER

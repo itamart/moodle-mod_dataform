@@ -45,7 +45,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
                 if ($cleanpattern == "[[$fieldname:addnew]]") {
                     $params['addnew'] = true;
                 }
-                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $params));
+                $replacements[$pattern] = array(array($this , 'display_edit'), array($entry, $params));
                 $editonce = true;
             } else {
                 if ($cleanpattern == "[[$fieldname:options]]") {
@@ -78,7 +78,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
             $selected = array();
         }
 
-        // Check for default values
+        // check for default values
         if (!$selected and $field->param2) {
             $selected = $field->default_values();
         }

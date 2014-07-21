@@ -160,21 +160,21 @@ abstract class dataformfieldrenderer {
      * @return array Associative array of associative arrays
      */
     public final function get_menu($showall = false) {
-        // The default menu category for fields
+        // the default menu category for fields
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // Which category
+                // which category
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('fields', 'dataform');
                 }
-                // Prepare array
+                // prepare array
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // Add tag
+                // add tag
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -209,7 +209,7 @@ abstract class dataformfieldrenderer {
         // Set the template pattern
         $templaterep = array();
         if ($editing) {
-            $templaterep["[[$fieldname@]]"] = array(array($this, 'parse_label'), array($replacements));
+            $templaterep["[[$fieldname@]]"] = array(array($this , 'parse_label'), array($replacements));
         } else {
             $template = $field->label;
             foreach ($replacements as $pattern => $replacement) {

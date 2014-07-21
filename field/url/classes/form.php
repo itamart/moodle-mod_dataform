@@ -30,13 +30,13 @@ class dataformfield_url_form extends mod_dataform\pluginbase\dataformfieldform {
 
         $mform =& $this->_form;
 
-        // ---------------------------------------------------------
+        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // Use url picker
+        // use url picker
         $mform->addElement('selectyesno', 'param1', get_string('usepicker', 'dataformfield_url'));
 
-        // Force link name
+        // force link name
         $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size' => '32'));
         $mform->setType('param2', PARAM_TEXT);
     }

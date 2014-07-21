@@ -34,7 +34,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' => 'mod/dataform:manageratings'
     ),
 
     // Own Entry View Aggregates
@@ -48,7 +47,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
     // Own Entry View Ratings
@@ -61,7 +59,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
     // Any Entry - Rate
@@ -77,7 +74,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' => 'mod/dataform:manageratings'
     ),
 
     // Any Entry View Aggregates
@@ -91,7 +87,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
     // Any Entry View Ratings
@@ -104,7 +99,6 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-        'clonepermissionsfrom' => 'mod/dataform:ratingsview'
     ),
 
 );

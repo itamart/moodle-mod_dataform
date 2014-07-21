@@ -173,7 +173,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
         $formfieldname = "field_{$fieldid}_{$entryid}";
         $patterns = $this->add_clean_pattern_keys($patterns);
 
-        // Only [[$fieldname]] is editable so check if exists
+        // only [[$fieldname]] is editable so check if exists
         if (array_key_exists("[[*$fieldname]]", $patterns) and isset($data->$formfieldname)) {
             if (!$content = clean_param($data->$formfieldname, PARAM_INT)) {
                 return array($fieldname, get_string('fieldrequired', 'dataform'));

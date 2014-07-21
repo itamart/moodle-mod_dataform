@@ -57,7 +57,7 @@ class dataformview_rss_form extends mod_dataform\pluginbase\dataformviewform {
 
         // Feed view (param5)
         $options = array('' => get_string('choosedots'));
-        if ($viewsmenu = $df->view_manager->get_views_menu()) {
+        if ($viewsmenu = $df->view_manager->views_menu) {
             $options = $options + $viewsmenu;
         }
         $mform->addElement('select', 'param5', get_string('feedview', 'dataformview_rss'), $options);
@@ -91,7 +91,7 @@ class dataformview_rss_form extends mod_dataform\pluginbase\dataformviewform {
 
         // Item view (param3)
         $options = array('' => get_string('choosedots'));
-        if ($viewsmenu = $df->view_manager->get_views_menu()) {
+        if ($viewsmenu = $df->view_manager->views_menu) {
             $options = $options + $viewsmenu;
         }
         $mform->addElement('select', 'param3', get_string('itemview', 'dataformview_rss'), $options);

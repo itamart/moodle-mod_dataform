@@ -66,18 +66,18 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
-        // Max bytes (param1)
+        // max bytes (param1)
         $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
         $mform->addElement('select', 'param1', get_string('filemaxsize', 'dataform'), $options);
 
-        // Max files (param2)
+        // max files (param2)
         $range = range(1, 100);
         $options = array_combine($range, $range);
         $options[-1] = get_string('unlimited');
         $mform->addElement('select', 'param2', get_string('filesmax', 'dataform'), $options);
         $mform->setDefault('param2', -1);
 
-        // Accetped types
+        // accetped types
         $this->definition_filetypes();
 
     }
@@ -89,7 +89,7 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // Accetped types (param3)
+        // accetped types (param3)
         $options = array();
         $options['*'] = get_string('filetypeany', 'dataform');
         $options['*.jpg,*.gif,*.png'] = get_string('filetypeimage', 'dataform');

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataform
+ * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,7 +38,7 @@ abstract class mod_dataform_rule_manager {
     /** @var array List of rule (block) ids by field name */
     protected $_fieldrules = null;
 
-    // Construct
+    // construct
     public function __construct($dataformid) {
         $this->_dataformid = $dataformid;
     }
@@ -65,6 +65,7 @@ abstract class mod_dataform_rule_manager {
         if (!empty($this->_rules[$biid])) {
             $rule = $this->_rules[$biid];
             $rule->delete();
+            unset($this->_rules[$biid]);
             $this->get_rules();
         }
     }
@@ -87,7 +88,7 @@ abstract class mod_dataform_rule_manager {
 
                         unset($this->_rules[$biid]);
                     }
-                    unset($this->_typerules[$ruletype][key]);
+                    unset($this->_typerules[$ruletype][$key]);
                 }
             }
         }
@@ -272,119 +273,5 @@ abstract class mod_dataform_rule_manager {
      * @return string
      */
     protected abstract function get_category();
-
-    /**
-     *
-     */
-    public function print_list($blocktype) {
-        global $OUTPUT;
-
-        $cat = $this->get_category();
-        $ruletype = str_replace("dataform$cat", '', $blocktype);
-        $accesstypes = $this->get_types();
-        $baseurl = "/mod/dataform/$cat/index.php";
-
-        // Add icon
-        $params = array(
-            'd' => $this->_dataformid,
-            'bui_addblock' => $blocktype,
-            'edit' => 1,
-            'sesskey' => sesskey(),
-        );
-        $url = new moodle_url($baseurl, $params);
-        $pix = $OUTPUT->pix_icon('t/add', get_string('ruleadd', 'dataform'));
-        $addlink = html_writer::link($url, $pix);
-
-        echo html_writer::tag('h3', $accesstypes[$blocktype]. "  $addlink");
-
-        // Table headings
-        $strname = get_string('name');
-        $strdescription = get_string('description');
-        $strpermissions = get_string('permissions', 'role');
-        $strapplyto = get_string('views', 'dataform');
-        $stredit = get_string('edit');
-        $strdelete = get_string('delete');
-        $strhide = get_string('hide');
-        $strshow = get_string('show');
-
-        $headers = array(
-            array($strname, 'left', false),
-            array($strdescription, 'left', false),
-            array($strapplyto, 'left', false),
-            array('', 'center', false),
-        );
-
-        $table = new html_table();
-        foreach ($headers as $header) {
-            list($table->head[], $table->align[], $table->wrap[]) = $header;
-        }
-
-        $this->get_rules();
-        $typerules = !empty($this->_typerules[$ruletype]) ? $this->_typerules[$ruletype] : array();
-        foreach ($typerules as $ruleid) {
-            $rule = $this->_rules[$ruleid];
-            $block = $rule->get_block();
-            $data = $rule->get_data();
-
-            $applicableviews = '';
-            if ($views = $rule->get_applicable_views()) {
-                $applicableviews = \html_writer::alist($views);
-            }
-
-            // Show/hide
-            if (!empty($data->enabled)) {
-                $showhide = 'hide';
-                $able = 'disable';
-            } else {
-                $showhide = 'show';
-                $able = 'enable';
-            }
-            $params = array(
-                'd' => $this->_dataformid,
-                'type' => $ruletype,
-                $able => $block->instance->id,
-                'sesskey' => sesskey()
-            );
-            $url = new moodle_url($baseurl, $params);
-            $pix = $OUTPUT->pix_icon("t/$showhide", get_string($showhide));
-            $showhidelink = html_writer::link($url, $pix);
-
-            // Edit settings
-            $params = array(
-                'd' => $this->_dataformid,
-                'bui_editid' => $block->instance->id,
-                'edit' => 1,
-                'sesskey' => sesskey()
-            );
-            $url = new moodle_url($baseurl, $params);
-            $pix = $OUTPUT->pix_icon('t/edit', '');
-            $editlink = html_writer::link($url, $pix);
-
-            // Edit permissions
-            $params = array(
-                'd' => $this->_dataformid,
-                'contextid' => $block->context->id,
-            );
-            $editpermlink = html_writer::link(new moodle_url('/admin/roles/permissions.php', $params), $OUTPUT->pix_icon('i/edit', get_string('edit')));
-
-            // Delete
-            $params = array(
-                'd' => $this->_dataformid,
-                'type' => $ruletype,
-                'delete' => $block->instance->id,
-                'sesskey' => sesskey()
-            );
-            $deletelink = html_writer::link(new moodle_url($baseurl, $params), $OUTPUT->pix_icon('t/delete', get_string('delete')));
-
-            $table->data[] = array(
-                $data->name,
-                $data->description,
-                $applicableviews,
-                "$showhidelink $editlink $editpermlink $deletelink",
-            );
-        }
-
-        echo html_writer::tag('div', html_writer::table($table), array('class' => 'itemslist'));
-    }
 
 }

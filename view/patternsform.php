@@ -17,7 +17,7 @@
 /**
  * This file is part of the Dataform module for Moodle - http://moodle.org/.
  *
- * @package dataform
+ * @package mod_dataform
  * @category view
  * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -43,7 +43,7 @@ class mod_dataform_view_patternsform extends moodleform {
             $this->definition_pattern_replacement($key, $pattern);
         }
 
-        // Action buttons
+        // action buttons
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }

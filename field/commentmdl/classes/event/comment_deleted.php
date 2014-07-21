@@ -14,22 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * mod_data comment deleted event.
- *
- * @package    mod_data
- * @copyright  2013 Rajesh Taneja <rajesh@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace dataformfield_commentmdl\event;
 
-namespace mod_data\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * mod_data comment deleted event.
+ * dataformfield_commentmdl comment deleted event.
  *
- * @package    mod_data
- * @copyright  2013 Rajesh Taneja <rajesh@moodle.com>
+ * @package    dataformfield_commentmdl
+ * @copyright  2014 Itamar Tzadok
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comment_deleted extends \core\event\comment_deleted {
@@ -39,7 +32,7 @@ class comment_deleted extends \core\event\comment_deleted {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/data/view.php', array('id' => $this->other['itemid']));
+        return new \moodle_url('/mod/dataform/view.php', array('id' => $this->other['itemid']));
     }
 
     /**
@@ -48,6 +41,6 @@ class comment_deleted extends \core\event\comment_deleted {
      * @return string
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' deleted comment for database activity with id ' . $this->other['itemid'];
+        return 'User with id ' . $this->userid . ' deleted comment for dataform activity with id ' . $this->other['itemid'];
     }
 }

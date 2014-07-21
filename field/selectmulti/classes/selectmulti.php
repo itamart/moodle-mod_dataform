@@ -152,16 +152,16 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         $oldcontents = array();
         $contents = array();
 
-        // Old contents
+        // old contents
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
 
-        // Parse values
+        // parse values
         $selected = !empty($values['selected']) ? $values['selected'] : array();
         $newvalues = !empty($values['newvalue']) ? explode('#', $values['newvalue']) : array();
 
-        // Update new values in field type
+        // update new values in field type
         if ($newvalues) {
             $options = $this->options_menu();
             $update = false;
@@ -179,7 +179,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
             }
         }
 
-        // New contents
+        // new contents
         if (!empty($selected)) {
             $contents[] = '#'. implode('#', $selected). '#';
         }
@@ -227,7 +227,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
      *
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
-        // Import only from csv
+        // import only from csv
         if (!$csvrecord) {
             return $data;
         }

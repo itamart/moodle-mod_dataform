@@ -24,8 +24,8 @@
 require_once('../../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d = required_param('d', PARAM_INT);             // Dataform id
-$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // Update filter id
+$urlparams->d = required_param('d', PARAM_INT);             // dataform id
+$urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // update filter id
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d);
@@ -33,7 +33,7 @@ $df = mod_dataform_dataform::instance($urlparams->d);
 $df->set_page('filter/edit', array('urlparams' => $urlparams));
 $df->require_manage_permission('filters');
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/filter/index.php', array('id' => $df->cm->id)));
 
 $fm = mod_dataform_filter_manager::instance($urlparams->d);
@@ -50,8 +50,8 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id)));
 }
 
+// No submit buttons: return to form
 if ($mform->no_submit_button_pressed() ) {
-    // No submit buttons: return to form
     // Get clean filter from submitted data
     if ($data = $mform->get_submitted_data()) {
         $filter = $fm->get_filter_from_form($filter, $data, true);
@@ -59,7 +59,6 @@ if ($mform->no_submit_button_pressed() ) {
     }
 
 } else if ($data = $mform->get_data()) {
-    // Process validated
     // Get clean filter from data
     $filter = $fm->get_filter_from_form($filter, $data, true);
     $filter->update();
@@ -75,7 +74,7 @@ echo $output->header(array('tab' => 'filters', 'heading' => $df->name, 'nonotifi
 $streditinga = $filter->id ? get_string('filteredit', 'dataform', $filter->name) : get_string('filternew', 'dataform');
 echo html_writer::tag('h2', format_string($streditinga), array('class' => 'mdl-align'));
 
-// Display form
+// display form
 $mform->display();
 
 echo $output->footer();

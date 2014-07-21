@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,7 +25,7 @@
  * Extends the core rating class
  */
 
-require_once("$CFG->dirroot/rating/lib.php");
+require_once(__DIR__. '/../../../../rating/lib.php');
 
 class ratingmdl_rating extends rating {
 

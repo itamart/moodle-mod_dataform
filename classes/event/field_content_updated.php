@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,9 +53,8 @@ class field_content_updated extends field_base {
      * @return string
      */
     public function get_description() {
-        return 'The content of field '. $this->objectid.
-            ' belonging to the dataform activity '. $this->other['dataid'].
-            ' has been updated for entry '. $this->other['entryid']. '.';
+        return 'The content of field '. $this->objectid. ' belonging to the dataform activity '. $this->other['dataid'].
+        ' has been updated for entry '. $this->other['entryid']. '.';
     }
 
 }

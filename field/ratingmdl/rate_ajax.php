@@ -49,48 +49,63 @@ if (!isloggedin()) {
 }
 
 list($context, $course, $cm) = get_context_info_array($contextid);
-require_login($course, false, $cm);
 
-$contextid = null; // Now we have a context object throw away the id from the user
-$PAGE->set_context($context);
-$PAGE->set_url('/mod/dataform/field/ratingmdl/rate_ajax.php', array('contextid' => $context->id));
+// Instantiate the Dataform
+$df = mod_dataform_dataform::instance($cm->instance);
+require_login($df->course->id, false, $df->cm);
 
-if (!confirm_sesskey() || !has_capability('moodle/rating:rate', $context)) {
+// Sesskey
+if (!confirm_sesskey()) {
     echo $OUTPUT->header();
     echo get_string('ratepermissiondenied', 'rating');
     echo $OUTPUT->footer();
     die();
 }
 
-$rm = new ratingmdl_rating_manager();
+$PAGE->set_context($df->context);
+$PAGE->set_url('/mod/dataform/field/ratingmdl/rate_ajax.php', array('contextid' => $context->id));
 
-// Check the module rating permissions
-// Doing this check here rather than within rating_manager::get_ratings() so we can return a json error response
-$pluginpermissionsarray = $rm->get_plugin_permissions_array($context->id, $component, $ratingarea);
+// Get the field
+$field = $df->field_manager->get_field_by_name($ratingarea);
 
-if (!$pluginpermissionsarray['rate']) {
+// Get the entry
+$entry = $DB->get_record('dataform_entries', array('id' => $itemid));
+
+// Get the entry rating
+if (!$entryrating = $field->get_entry_rating($entry)) {
     $result->error = get_string('ratepermissiondenied', 'rating');
     echo json_encode($result);
     die();
-} else {
-    $params = array(
-        'context'     => $context,
-        'component'   => $component,
-        'ratingarea'  => $ratingarea,
-        'itemid'      => $itemid,
-        'scaleid'     => $scaleid,
-        'rating'      => $userrating,
-        'rateduserid' => $rateduserid,
-        'aggregation' => $aggregationmethod
-    );
-    if (!$rm->check_rating_is_valid($params)) {
-        $result->error = get_string('ratinginvalid', 'rating');
-        echo json_encode($result);
-        die();
-    }
+}
+$entry->rating = $entryrating;
+
+$rm = new ratingmdl_rating_manager();
+
+// Check the module rating permissions
+if (!$field->user_can_rate($entry, $USER->id)) {
+    $result->error = get_string('ratepermissiondenied', 'rating');
+    echo json_encode($result);
+    die();
 }
 
-// Rating options used to update the rating then retrieve the aggregations
+// Check that the rating is valid
+$params = array(
+    'context'     => $context,
+    'component'   => $component,
+    'ratingarea'  => $ratingarea,
+    'itemid'      => $itemid,
+    'scaleid'     => $scaleid,
+    'rating'      => $userrating,
+    'rateduserid' => $rateduserid,
+    'aggregation' => $aggregationmethod
+);
+if (!$rm->check_rating_is_valid($params)) {
+    $result->error = get_string('ratinginvalid', 'rating');
+    echo json_encode($result);
+    die();
+}
+
+// Rating options used to update the rating then retrieving the aggregations
 $ratingoptions = new stdClass;
 $ratingoptions->context = $context;
 $ratingoptions->ratingarea = $ratingarea;
@@ -103,7 +118,7 @@ if ($userrating != RATING_UNSET_RATING) {
     $rating = new rating($ratingoptions);
     $rating->update_rating($userrating);
 } else {
-    // Delete the rating if the user set to Rate...
+    // Delete the rating if the user set to Rate.
     $options = new stdClass;
     $options->contextid = $context->id;
     $options->component = $component;
@@ -112,21 +127,6 @@ if ($userrating != RATING_UNSET_RATING) {
     $options->itemid = $itemid;
 
     $rm->delete_ratings($options);
-}
-
-// Future possible enhancement: add a setting to turn grade updating off for those who don't want them in gradebook
-// Note that this would need to be done in both rate.php and rate_ajax.php
-if ($context->contextlevel == CONTEXT_MODULE) {
-    // Tell the module that its grades have changed
-    $modinstance = $DB->get_record($cm->modname, array('id' => $cm->instance));
-    if ($modinstance) {
-        $modinstance->cmidnumber = $cm->id; // MDL-12961
-        $functionname = $cm->modname.'_update_grades';
-        require_once($CFG->dirroot."/mod/{$cm->modname}/lib.php");
-        if (function_exists($functionname)) {
-            $functionname($modinstance, $rateduserid);
-        }
-    }
 }
 
 // Need to retrieve the updated item to get its new aggregate value

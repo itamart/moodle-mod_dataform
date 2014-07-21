@@ -24,16 +24,17 @@
 require_once('../../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d = required_param('d', PARAM_INT);             // Dataform id
-$urlparams->view = required_param('view', PARAM_INT);       // View id
-$urlparams->pagefile = required_param('pagefile', PARAM_TEXT);       // Df page file
-$urlparams->fid = optional_param('fid', mod_dataform_filter_manager::USER_FILTER_ADVANCED, PARAM_INT);       // View id
+$urlparams->d = required_param('d', PARAM_INT);             // dataform id
+$urlparams->view = required_param('view', PARAM_INT);       // view id
+$urlparams->pagefile = required_param('pagefile', PARAM_TEXT);       // df page file
+$urlparams->fid = optional_param('fid', mod_dataform_filter_manager::USER_FILTER_ADVANCED, PARAM_INT);       // view id
 
 // Set a dataform object
 $df = mod_dataform_dataform::instance($urlparams->d);
 $df->set_page($urlparams->pagefile, array('urlparams' => $urlparams));
+// require_capability('mod/dataform:advancedfilter', $df->context);
 
-// Activate navigation node
+// activate navigation node
 // navigation_node::override_active_url(new moodle_url('/mod/dataform/filter/editadvanced.php', array('d' => $df->id)));
 
 $fm = mod_dataform_filter_manager::instance($df->id);
@@ -48,7 +49,7 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url("/mod/dataform/$pagefile.php", array('d' => $df->id, 'view' => $view->id)));
 }
 
-// Process validated
+// process validated
 if ($data = $mform->get_data()) {
 
     $filter = (object) $fm->get_filter_from_form($filter, $data, true);
@@ -71,7 +72,7 @@ echo $output->header($headerparams);
 $streditinga = $filter->id ? get_string('filteredit', 'dataform', $filter->name) : get_string('filternew', 'dataform');
 echo html_writer::tag('h2', format_string($streditinga), array('class' => 'mdl-align'));
 
-// Display form
+// display form
 $mform->display();
 
 echo $output->footer();

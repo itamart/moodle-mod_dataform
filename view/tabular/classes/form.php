@@ -50,7 +50,7 @@ class dataformview_tabular_form extends mod_dataform\pluginbase\dataformviewform
 
         $mform = &$this->_form;
 
-        // Content
+        // content
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'entrytemplatehdr', get_string('entrytemplate', 'dataform'));
         $mform->addHelpButton('entrytemplatehdr', 'entrytemplate', 'dataform');

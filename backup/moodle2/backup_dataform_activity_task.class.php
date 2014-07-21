@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod-dataform
+ * @package mod_dataform
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,11 +39,11 @@ class backup_dataform_activity_task extends backup_activity_task {
         if (isset($SESSION->{"dataform_{$this->moduleid}_preset"})) {
             list($users, $anon) = explode(' ', $SESSION->{"dataform_{$this->moduleid}_preset"});
             list($roottask, , ) = $this->plan->get_tasks();
-            // Set users setting
+            // set users setting
             $userssetting = $roottask->get_setting('users');
             $userssetting->set_value($users);
             $this->plan->get_setting('users')->set_value($users);
-            // Disable dependencies if needed
+            // disable dependencies if needed
             if (!$users) {
                 $dependencies = $userssetting->get_dependencies();
                 foreach ($dependencies as &$dependent) {
@@ -51,7 +51,7 @@ class backup_dataform_activity_task extends backup_activity_task {
                     $dependentsetting->set_value(0);
                 }
             }
-            // Set anonymize
+            // set anonymize
             $anonsetting = $roottask->get_setting('anonymize');
             $anonsetting->set_value($anon);
             $this->plan->get_setting('anonymize')->set_value($anon);

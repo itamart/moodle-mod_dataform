@@ -123,21 +123,21 @@ class dataformviewpatterns {
      * @return array Associative array of associative arrays
      */
     public final function get_menu($showall = false) {
-        // The default menu category for views
+        // the default menu category for views
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // Which category
+                // which category
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('views', 'dataform');
                 }
-                // Prepare array
+                // prepare array
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // Add tag
+                // add tag
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -258,7 +258,7 @@ class dataformviewpatterns {
                     $view->editentries = $entryid;
                     $replacement = $view->get_entries_display($options);
                 }
-                // We may want to notify something if none of the above applies.
+                // Notify something
                 break;
 
             case '##entries##':
@@ -575,7 +575,7 @@ class dataformviewpatterns {
 
         static $views = null;
         if ($views === null) {
-            $views = $this->_view->df->view_manager->get_views_menu();
+            $views = $this->_view->df->view_manager->views_menu;
         }
 
         if ($views) {

@@ -22,10 +22,10 @@
 require_once('../../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d          = required_param('d', PARAM_INT);    // Dataform ID
+$urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
 
-$urlparams->type = optional_param('type', '', PARAM_ALPHA);   // Type of a view to edit
-$urlparams->vedit = optional_param('vedit', 0, PARAM_INT);       // View id to edit
+$urlparams->type = optional_param('type', '', PARAM_ALPHA);   // type of a view to edit
+$urlparams->vedit = optional_param('vedit', 0, PARAM_INT);       // view id to edit
 // $urlparams->returnurl = optional_param('returnurl', '', PARAM_URL);
 
 // Set a dataform object
@@ -46,14 +46,14 @@ if ($urlparams->vedit) {
 
 $mform = $view->get_form();
 
-// For cancelled
+// Form cancelled
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
 }
 
+// No submit buttons: reset to default
 if ($mform->no_submit_button_pressed() ) {
-    // No submit buttons: reset to default
-    // Reset view to default
+    // reset view to default
     $resettodefault = optional_param('resetdefaultbutton', '', PARAM_ALPHA);
     if ($resettodefault) {
         $urlparams->resetdefault = 1;
@@ -65,12 +65,12 @@ if ($mform->no_submit_button_pressed() ) {
     $data = $view->from_form($data);
 
     if (!$view->id) {
-        // Add new view
+        // add new view
         $view->add($data);
         $notification = get_string('viewsadded', 'dataform');
 
     } else {
-        // Update view
+        // update view
         $view->update($data);
         $notification = get_string('viewsupdated', 'dataform');
     }
@@ -85,7 +85,7 @@ if ($mform->no_submit_button_pressed() ) {
     $mform = $view->get_form();
 }
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/view/index.php', array('id' => $df->cm->id)));
 
 $output = $df->get_renderer();
@@ -94,7 +94,7 @@ echo $output->header(array('tab' => 'views', 'heading' => $df->name, 'nonotifica
 $formheading = $view->id ? get_string('viewedit', 'dataform', $view->name) : get_string('viewnew', 'dataform', $view->get_typename());
 echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
 
-// Display form
+// display form
 $mform->set_data($view->to_form());
 $mform->display();
 

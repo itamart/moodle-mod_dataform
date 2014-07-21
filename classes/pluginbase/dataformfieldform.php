@@ -41,21 +41,21 @@ class dataformfieldform extends \moodleform {
     public function definition() {
         $mform = &$this->_form;
 
-        // Buttons
+        // buttons
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
 
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // Name
+        // name
         $mform->addElement('text', 'name', get_string('name'), array('size' => '32'));
         $mform->addRule('name', null, 'required', null, 'client');
 
-        // Description
+        // description
         $mform->addElement('text', 'description', get_string('description'), array('size' => '64'));
 
-        // Visible
+        // visible
         $options = array(
             dataformfield::VISIBLE_NONE => get_string('fieldvisiblenone', 'dataform'),
             dataformfield::VISIBLE_OWNER => get_string('fieldvisibleowner', 'dataform'),
@@ -65,9 +65,7 @@ class dataformfieldform extends \moodleform {
         $mform->setDefault('visible', dataformfield::VISIBLE_ALL);
 
         // Editable
-        // $options = array(-1 => get_string('unlimited'), 0 => get_string('none'));
         $options = array(-1 => get_string('yes'), 0 => get_string('no'));
-        // $options = $options + array_combine(range(1, 50), range(1, 50));
         $mform->addElement('select', 'editable', get_string('fieldeditable', 'dataform'), $options);
         $mform->setDefault('editable', -1);
 
@@ -89,7 +87,7 @@ class dataformfieldform extends \moodleform {
         // -------------------------------------------------------------------------------
         $this->field_definition();
 
-        // Buttons
+        // buttons
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
@@ -107,11 +105,11 @@ class dataformfieldform extends \moodleform {
         $mform = &$this->_form;
 
         $buttonarray = array();
-        // Save and display
+        // save and display
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        // Save and continue
+        // save and continue
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savecont', 'dataform'));
-        // Cancel
+        // cancel
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');

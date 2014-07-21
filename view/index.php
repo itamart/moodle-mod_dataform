@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage dataform
+ * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,17 +24,17 @@ require_once("$CFG->libdir/tablelib.php");
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // Dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);           // Course module id
-$urlparams->vedit = optional_param('vedit', 0, PARAM_INT);     // View id to edit
+$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
+$urlparams->id = optional_param('id', 0, PARAM_INT);           // course module id
+$urlparams->vedit = optional_param('vedit', 0, PARAM_INT);     // view id to edit
 
 // List actions
-$urlparams->default    = optional_param('default', 0, PARAM_INT);  // Id of view to default
-$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // Id of view to hide/(show)/show
-$urlparams->reset     = optional_param('reset', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of views to delete
-$urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of views to delete
-$urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // Ids (comma delimited) of views to duplicate
-$urlparams->setfilter   = optional_param('setfilter', 0, PARAM_INT);  // Id of view to filter
+$urlparams->default    = optional_param('default', 0, PARAM_INT);  // id of view to default
+$urlparams->visible    = optional_param('visible', 0, PARAM_INT);     // id of view to hide/(show)/show
+$urlparams->reset     = optional_param('reset', 0, PARAM_SEQUENCE);   // ids (comma delimited) of views to delete
+$urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // ids (comma delimited) of views to delete
+$urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // ids (comma delimited) of views to duplicate
+$urlparams->setfilter   = optional_param('setfilter', 0, PARAM_INT);  // id of view to filter
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
@@ -46,7 +45,7 @@ $df->require_manage_permission('views');
 $df->set_page('view/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// Activate navigation node
+// activate navigation node
 navigation_node::override_active_url(new moodle_url('/mod/dataform/view/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING
@@ -60,17 +59,17 @@ if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested v
 } else if ($urlparams->delete and confirm_sesskey()) { // Delete any requested views
     $viewman->process_views('delete', $urlparams->delete, $urlparams->confirmed);
 
-} else if ($urlparams->visible and confirm_sesskey()) {    // Set view's visibility
-    $viewman->process_views('visible', $urlparams->visible, true);    // Confirmed by default
+} else if ($urlparams->visible and confirm_sesskey()) {    // set view's visibility
+    $viewman->process_views('visible', $urlparams->visible, true);    // confirmed by default
 
-} else if ($urlparams->default and confirm_sesskey()) {  // Set view to default
-    $viewman->process_views('default', $urlparams->default, true);    // Confirmed by default
+} else if ($urlparams->default and confirm_sesskey()) {  // set view to default
+    $viewman->process_views('default', $urlparams->default, true);    // confirmed by default
 
-} else if ($urlparams->setfilter and confirm_sesskey()) {  // Re/set view filter
-    $viewman->process_views('filter', $urlparams->setfilter, true);    // Confirmed by default
+} else if ($urlparams->setfilter and confirm_sesskey()) {  // re/set view filter
+    $viewman->process_views('filter', $urlparams->setfilter, true);    // confirmed by default
 }
 
-// Any notifications?
+// any notifications?
 $df->notifications = array('problem' => array('defaultview' => null));
 if (!$views = $viewman->get_views(array('forceget' => true))) {
     $df->notifications = array('problem' => array('getstartedviews' => get_string('viewnoneindataform', 'dataform')));
@@ -86,7 +85,7 @@ if ($patternscleanup = optional_param('patternscleanup', 0, PARAM_INT)) {
     mod_dataform_view_manager::patterns_cleanup($df->id, $patternscleanup);
 }
 
-// If not cleaning patterns, display view list
+// if not cleaning patterns, display view list
 if (!$patternscleanup) {
     // Display subplugin selector
     echo $output->subplugin_select('view');
