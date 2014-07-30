@@ -297,7 +297,7 @@ abstract class dataformfilterform extends \moodleform {
                             $searcharr[] = implode('<br />', $fieldoptions);
                         }
                     }
-                    if ($searcharr) {
+                    if (!empty($searcharr)) {
                         $searchurlquery = '&ucsearch='. \mod_dataform_filter_manager::get_search_url_query($searchfields);
                     }
                 } else if ($filter->search) {

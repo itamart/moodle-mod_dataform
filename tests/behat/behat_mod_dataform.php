@@ -57,6 +57,11 @@ class behat_mod_dataform extends behat_base {
             'required' => array('type', 'dataform', 'name'),
             'switchids' => array('dataform' => 'dataid'),
         ),
+        'filters' => array(
+            'datagenerator' => 'filter',
+            'required' => array('dataform', 'name'),
+            'switchids' => array('dataform' => 'dataid'),
+        ),
         'entries' => array(
             'datagenerator' => 'entry',
             'required' => array('dataform'),
@@ -247,9 +252,10 @@ class behat_mod_dataform extends behat_base {
      * @param string $tabname
      */
     public function i_go_to_manage_dataform($tabname) {
+        $node = get_string($tabname, 'dataform');
+        $path = "Dataform activity administration > Manage";
         return array(
-            new Given('I follow "'. get_string('manage', 'dataform'). '"'),
-            new Given('I follow "'. get_string($tabname, 'dataform'). '"'),
+            new Given('I navigate to "'. $node. '" node in "'. $path. '"'),
         );
     }
 

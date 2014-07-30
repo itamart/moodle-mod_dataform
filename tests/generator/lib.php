@@ -159,7 +159,13 @@ class mod_dataform_generator extends testing_module_generator {
         $df = mod_dataform_dataform::instance($record->dataid);
         $view = $df->view_manager->get_view($record->type);
         $view->generate_default_view();
-        $view->name = $record->name;
+
+        // Add data from record.
+        foreach ($record as $var => $value) {
+            $view->$var = $value;
+        }
+
+        // Add the view.
         $view->add($view->data);
 
         // Set as default if specified
@@ -167,6 +173,64 @@ class mod_dataform_generator extends testing_module_generator {
             $df->view_manager->process_views('default', $view->id, true);
         }
         return $view->data;
+    }
+
+    /**
+     * Generates a dataform filter.
+     * @param array|stdClass $record
+     * @param array $options
+     * @return stdClass generated object
+     */
+    public function create_filter($record, array $options = null) {
+        $record = (object)(array)$record;
+        $filter = new \mod_dataform\pluginbase\dataformfilter($record);
+
+        // Append sort options if specified.
+        if (!empty($record->sortoptions)) {
+            // Convert fieldid sortdir to
+            // fieldid => sortdir
+            $sorties = array();
+            foreach (explode(',', $record->sortoptions) as $sortoption) {
+                list($fieldid, $sortdir) = explode(' ', $sortoption);
+            }
+            $filter->append_sort_options($record->sortoptions);
+        }
+
+        // Append search options if specified.
+        if (!empty($record->searchoptions)) {
+            // Convert AND|OR,fieldid,element,[NOT],operator,value to
+            // fieldid => (endor => (element, not, operator, value))
+            $searchoptions = array_map(
+                function ($a) {
+                    list($andor, $fieldid, $element, $isnot, $op, $value) = explode(',', $a);
+                    return array($fieldid => array($andor => array(array($element, $isnot, $op, $value))));
+                },
+                explode(';', $record->searchoptions)
+            );
+
+            $searchies = array();
+            foreach ($searchoptions as $searchoption) {
+                foreach ($searchoption as $fieldid => $andors) {
+                    if (empty($searchies[$fieldid])) {
+                        $searchies[$fieldid] = $andors;
+                    } else {
+                        foreach ($andors as $andor => $soptions) {
+                            if (empty($searchies[$fieldid][$andor])) {
+                                $searchies[$fieldid][$andor] = $soptions;
+                            } else {
+                                foreach ($soptions as $soption) {
+                                    $searchies[$fieldid][$andor][] = $soption;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $filter->append_search_options($searchies);
+        }
+        $filter->update();
+        return $filter->instance;
     }
 
     /**
@@ -185,7 +249,10 @@ class mod_dataform_generator extends testing_module_generator {
         for ($i = 1; $i <= 10; $i++) {
             $parami = "param$i";
             if (isset($record->$parami)) {
-                $field->$parami = $record->$parami;
+                $value = $record->$parami;
+                // Really ugly hack: make new lines in string.
+                $value = str_replace('\r\n', "\n", $value);
+                $field->$parami = $value;
             }
         }
 
