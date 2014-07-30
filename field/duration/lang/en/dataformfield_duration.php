@@ -22,3 +22,4 @@
  */
 $string['pluginname'] = 'Duration';
 $string['fixedunit'] = 'Fixed unit';
+$string['limitunitsto'] = 'Limit units to';

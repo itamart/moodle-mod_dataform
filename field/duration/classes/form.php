@@ -33,7 +33,18 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
 
-        // field width
+        // Displayed units.
+        $units = array(
+            604800 => get_string('weeks'),
+            86400 => get_string('days'),
+            3600 => get_string('hours'),
+            60 => get_string('minutes'),
+            1 => get_string('seconds'),
+        );
+        $select = $mform->addElement('select', 'param4', get_string('limitunitsto', 'dataformfield_duration'), $units);
+        $select->setMultiple(true);
+
+        // Field width.
         $fieldwidthgrp = array();
         $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
         $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
@@ -44,4 +55,39 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
         $mform->setDefault('param2', '');
         $mform->setDefault('param3', 'px');
     }
+
+    /**
+     *
+     */
+    public function data_preprocessing(&$data) {
+        if (!empty($data->param4)) {
+            $data->param4 = explode(',', $data->param4);
+        }
+    }
+
+    /**
+     *
+     */
+    public function set_data($data) {
+        $this->data_preprocessing($data);
+        parent::set_data($data);
+    }
+
+    /**
+     *
+     */
+    public function get_data() {
+        $field = $this->_field;
+
+        if ($data = parent::get_data()) {
+            // Limit units to (param4)
+            if (!empty($data->param4)) {
+                $data->param4 = implode(',', $data->param4);
+            } else {
+                $data->param4 = null;
+            }
+        }
+        return $data;
+    }
+
 }
