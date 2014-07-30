@@ -100,7 +100,13 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
             $fieldattr['style'] = 'width:'. s($field->param2). s($field->param3). ';';
         }
 
-        $elem = &$mform->addElement('duration', $fieldname, null, array('optional' => null), $fieldattr);
+        // Optional and units.
+        $elemattr = array();
+        $elemattr['optional'] = null;
+        if ($field->param4) {
+            $elemattr['units'] = explode(',', $field->param4);
+        }
+        $elem = &$mform->addElement('duration', $fieldname, null, $elemattr, $fieldattr);
         $mform->setDefault($fieldname, $number);
         $required = !empty($options['required']);
         if ($required) {
