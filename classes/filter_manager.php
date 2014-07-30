@@ -679,9 +679,9 @@ class mod_dataform_filter_manager {
                         if (empty($options)) {
                             continue;
                         }
-                        list($not, $op, $value) = $options;
+                        list($element, $not, $op, $value) = $options;
                         $searchvalue = is_array($value) ? implode('|', $value) : $value;
-                        $ucsearch[] = "$fieldid:$key:$not,$op,$searchvalue";
+                        $ucsearch[] = "$fieldid:$key:$element,$not,$op,$searchvalue";
                     }
                 }
             }

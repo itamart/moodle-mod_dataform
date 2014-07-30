@@ -578,9 +578,9 @@ class dataformfilter {
                 } else {
                     foreach ($searchies[$fieldid] as $andor => $options) {
                         if (empty($searchoptions[$fieldid][$andor])) {
-                            $searchoptions[$fieldid][$andor] = $options;
+                            $searchoptions[$fieldid][$andor] = array($options);
                         } else {
-                            $searchoptions[$fieldid][$andor] = array_merge($searchoptions[$fieldid][$andor], $options);
+                            $searchoptions[$fieldid][$andor][] = $options;
                         }
                     }
                 }
