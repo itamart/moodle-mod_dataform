@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_entryauthor';
-$plugin->version = 2014072100;
+$plugin->version = 2014073100;
 $plugin->requires = 2014051200;
