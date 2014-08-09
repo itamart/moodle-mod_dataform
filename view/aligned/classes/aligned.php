@@ -32,27 +32,30 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
      *
      * @return void
      */
-    protected function get_default_entry_template() {
+    public function set_default_entry_template($content = null) {
         // get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
             return; // you shouldn't get that far if there are no user fields
         }
 
-        // set content
-        $this->param2 = '';
-        // Author
-        $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
-        $this->param2 .= "[[$fieldname:picture]]\n[[$fieldname:name]]";
-        // Fields
-        foreach ($fields as $field) {
-            if ($field->id > 0) {
-                $fieldname = $field->name;
-                $this->param2 .= "\n[[$fieldname]]";
+        if ($content === null) {
+            // set content
+            $content = '';
+            // Author
+            $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
+            $content .= "[[$fieldname:picture]]\n[[$fieldname:name]]";
+            // Fields
+            foreach ($fields as $field) {
+                if ($field->id > 0) {
+                    $fieldname = $field->name;
+                    $content .= "\n[[$fieldname]]";
+                }
             }
+            // actions
+            $fieldname = get_string('fieldname', 'dataformfield_entryactions');
+            $content .= "\n[[$fieldname:edit]]\n[[$fieldname:delete]]";
         }
-        // actions
-        $fieldname = get_string('fieldname', 'dataformfield_entryactions');
-        $this->param2 .= "\n[[$fieldname:edit]]\n[[$fieldname:delete]]";
+        $this->param2 = $content;
     }
 
     /**

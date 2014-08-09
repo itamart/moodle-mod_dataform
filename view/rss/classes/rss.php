@@ -42,37 +42,40 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
      *
      * @return void
      */
-    protected function get_default_entry_template() {
+    public function set_default_entry_template($content = null) {
         // get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
             return; // you shouldn't get that far if there are no user fields
         }
 
-        // set content
-        $table = new html_table();
-        $table->attributes['align'] = 'center';
-        $table->attributes['cellpadding'] = '2';
-        // fields
-        foreach ($fields as $field) {
-            if ($field->id > 0) {
-                $name = new html_table_cell($field->name. ':');
-                $name->style = 'text-align:right;';
-                $content = new html_table_cell("[[{$field->name}]]");
-                $row = new html_table_row();
-                $row->cells = array($name, $content);
-                $table->data[] = $row;
+        if ($content === null) {
+            // set content
+            $table = new html_table();
+            $table->attributes['align'] = 'center';
+            $table->attributes['cellpadding'] = '2';
+            // fields
+            foreach ($fields as $field) {
+                if ($field->id > 0) {
+                    $name = new html_table_cell($field->name. ':');
+                    $name->style = 'text-align:right;';
+                    $content = new html_table_cell("[[{$field->name}]]");
+                    $row = new html_table_row();
+                    $row->cells = array($name, $content);
+                    $table->data[] = $row;
+                }
             }
+            // actions
+            $row = new html_table_row();
+            $entryactions = get_string('fieldname', 'dataformfield_entryactions');
+            $actions = new html_table_cell("[[$entryactions:edit]]  [[$entryactions:delete]]");
+            $actions->colspan = 2;
+            $row->cells = array($actions);
+            $table->data[] = $row;
+            // construct the table
+            $entrydefault = html_writer::table($table);
+            $content = html_writer::tag('div', $entrydefault, array('class' => 'entry'));
         }
-        // actions
-        $row = new html_table_row();
-        $entryactions = get_string('fieldname', 'dataformfield_entryactions');
-        $actions = new html_table_cell("[[$entryactions:edit]]  [[$entryactions:delete]]");
-        $actions->colspan = 2;
-        $row->cells = array($actions);
-        $table->data[] = $row;
-        // construct the table
-        $entrydefault = html_writer::table($table);
-        $this->param2 = html_writer::tag('div', $entrydefault, array('class' => 'entry'));
+        $this->param2 = $content;
     }
 
     /**

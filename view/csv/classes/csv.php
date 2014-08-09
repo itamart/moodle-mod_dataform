@@ -377,29 +377,36 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     }
 
     /**
-     * Returns a fieldset of view options
+     * Generates the default view template for a new view instance or when reseting an existing instance.
+     * If content is specified, sets the template to the content.
+     *
+     * @param string $content HTML fragment.
+     * @return void
      */
-    protected function get_default_view_template() {
-        // Notifications
-        $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
+    public function set_default_view_template($content = null) {
+        if ($content === null) {
+            // Notifications
+            $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
-        // Export/import
-        $expimp = \html_writer::tag('div', '##exportall## | ##exportpage## | ##import##', array('class' => ''));
+            // Export/import
+            $expimp = \html_writer::tag('div', '##exportall## | ##exportpage## | ##import##', array('class' => ''));
 
-        // Add new entry
-        $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
+            // Add new entry
+            $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
 
-        // Filtering
-        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
+            // Filtering
+            $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
 
-        // Paging bar
-        $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
-        // Entries
-        $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
+            // Paging bar
+            $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
+            // Entries
+            $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
 
-        // Set the view template
-        $exporthide = \html_writer::tag('div', $expimp. $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
-        $this->section = \html_writer::tag('div', $exporthide. $entries);
+            // Set the view template
+            $exporthide = \html_writer::tag('div', $expimp. $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
+            $content = \html_writer::tag('div', $exporthide. $entries);
+        }
+        $this->section = $content;
     }
 
     // GETTERS
