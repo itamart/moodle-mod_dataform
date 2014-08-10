@@ -86,6 +86,95 @@ class behat_mod_dataform extends behat_base {
 
 
     /**
+     * Resets (truncates) all dataform tables to remove any records and reset sequences.
+     * This set of steps is essential for any standalone scenario that adds entries with content
+     * since such a scenario has to refer to input elements by the name field_{fieldid}_{entryid}
+     * (or field_{fieldid}_-1 for a new entry) and the ids have to persist between runs.
+     *
+     * @Given /^a fresh site for dataform scenario$/
+     * @return array
+     */
+    public function start_afresh_steps() {
+        global $DB;
+
+        // Delete properly any existing dataform instances.
+        if ($dataforms = $DB->get_records_menu('dataform', array(), '', 'id, id AS did')) {
+            foreach ($dataforms as $dataformid) {
+                mod_dataform_dataform::instance($dataformid)->delete();
+            }
+        }
+
+        // Clean up tables
+        $tables = array(
+            'dataform',
+            'dataform_contents',
+            'dataform_entries',
+            'dataform_fields',
+            'dataform_filters',
+            'dataform_views',
+        );
+
+        $prefix = $DB->get_prefix();
+        foreach ($tables as $table) {
+            $DB->execute("TRUNCATE TABLE {$prefix}{$table}");
+        }
+
+        $steps = array();
+
+        // Course
+        $data = array(
+            '| fullname | shortname | category  |',
+            '| Course 1 | C1        | 0         |',
+        );
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "courses" exist:', $table);
+
+        // Users
+        $data = array(
+            '| username     | firstname | lastname  | email                 |',
+            '| teacher1     | Teacher   | 1         | teacher1@asd.com      |',
+            '| assistant1   | Assistant | 1         | assistant1@asd.com    |',
+            '| assistant2   | Assistant | 1         | assistant2@asd.com    |',
+            '| student1     | Student   | 1         | student1@asd.com      |',
+            '| student2     | Student   | 2         | student2@asd.com      |',
+            '| student3     | Student   | 3         | student3@asd.com      |',
+        );
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "users" exist:', $table);
+
+        // Enrollments
+        $data = array(
+            '| user         | course | role             |',
+            '| teacher1     | C1     | editingteacher   |',
+            '| assistant1   | C1     | teacher          |',
+            '| student1     | C1     | student          |',
+            '| student2     | C1     | student          |',
+        );
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "course enrolments" exist:', $table);
+
+        // Groups
+        $data = array(
+            '| name    | description | course  | idnumber |',
+            '| Group 1 | Anything    | C1 | G1   |',
+            '| Group 2 | Anything    | C1 | G2   |',
+        );
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "groups" exist:', $table);
+
+        // Group members
+        $data = array(
+            '| user     | group  |',
+            '| student1 | G1 |',
+            '| student2 | G2 |',
+        );
+        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "group members" exist:', $table);
+
+        return $steps;
+    }
+
+    /**
      * Starts afresh with a dataform activity 'Test dataform' in Course 1.
      * See {@link behat_mod_dataform::i_start_afresh()}.
      *
@@ -290,7 +379,7 @@ class behat_mod_dataform extends behat_base {
         return $steps;
     }
 
-    // VIEW
+    // VIEW.
 
     /**
      * Adds a view of the specified type to the current dataform with the provided table data (usually Name).
@@ -354,8 +443,54 @@ class behat_mod_dataform extends behat_base {
         return $steps;
     }
 
+    /**
+     * Sets the view's view template to specified text passed as PyStringNode.
+     * Useful for setting textareas.
+     * The step begins in a form.
+     *
+     * @Given /^view "(?P<view_name_string>(?:[^"]|\\")*)" in dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" has the following view template:$/
+     * @param string $viewname
+     * @param string $dataformid
+     * @param Behat\Gherkin\Node\PyStringNode $content
+     */
+    public function view_in_dataform_has_the_following_view_template($viewname, $dataformid, Behat\Gherkin\Node\PyStringNode $content) {
+        $df = mod_dataform_dataform::instance($dataformid);
+        $view = $df->view_manager->get_view_by_name($viewname);
+        $view->set_default_view_template($content->__toString());
+        $view->update($view->data);
+    }
 
-    // FILTER
+    /**
+     * Sets the view's entry template to specified text passed as PyStringNode.
+     * The step begins in a form.
+     *
+     * @Given /^view "(?P<view_name_string>(?:[^"]|\\")*)" in dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" has the following entry template:$/
+     * @param string $viewname
+     * @param string $dataformid
+     * @param Behat\Gherkin\Node\PyStringNode $content
+     */
+    public function view_in_dataform_has_the_following_entry_template($viewname, $dataformid, Behat\Gherkin\Node\PyStringNode $content) {
+        $df = mod_dataform_dataform::instance($dataformid);
+        $view = $df->view_manager->get_view_by_name($viewname);
+        $view->set_default_entry_template($content->__toString());
+        $view->update($view->data);
+    }
+
+    /**
+     * Sets the css template of the specified dataform to the text passed as PyStringNode.
+     *
+     * @Given /^dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" has the following css:$/
+     * @param string $dataformid
+     * @param Behat\Gherkin\Node\PyStringNode $content
+     */
+    public function dataform_has_the_following_css($dataformid, Behat\Gherkin\Node\PyStringNode $content) {
+        $rec = new stdClass;
+        $rec->css = $content->__toString();
+        $df = mod_dataform_dataform::instance($dataformid);
+        $df->update($rec);
+    }
+
+    // FILTER.
 
     /**
      * Adds a filter with the specified data to the current dataform.
@@ -1443,94 +1578,6 @@ class behat_mod_dataform extends behat_base {
             $vals
         );
         return new Behat\Gherkin\Node\TableNode(implode("\n", $tabledata));
-    }
-
-    /**
-     * Resets (truncates) all dataform tables to remove any records and reset sequences.
-     * This step is essential for any standalone scenario that adds entries with content
-     * since such a scenario has to refer to input elements by the name field_{fieldid}_{entryid}
-     * (or field_{fieldid}_-1 for a new entry) and the ids have to persist between runs.
-     *
-     * @return array
-     */
-    protected function start_afresh_steps() {
-        global $DB;
-
-        // Delete properly any existing dataform instances.
-        if ($dataforms = $DB->get_records_menu('dataform', array(), '', 'id, id AS did')) {
-            foreach ($dataforms as $dataformid) {
-                mod_dataform_dataform::instance($dataformid)->delete();
-            }
-        }
-
-        // Clean up tables
-        $tables = array(
-            'dataform',
-            'dataform_contents',
-            'dataform_entries',
-            'dataform_fields',
-            'dataform_filters',
-            'dataform_views',
-        );
-
-        $prefix = $DB->get_prefix();
-        foreach ($tables as $table) {
-            $DB->execute("TRUNCATE TABLE {$prefix}{$table}");
-        }
-
-        $steps = array();
-
-        // Course
-        $data = array(
-            '| fullname | shortname | category  |',
-            '| Course 1 | C1        | 0         |',
-        );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
-        $steps[] = new Given('the following "courses" exist:', $table);
-
-        // Users
-        $data = array(
-            '| username     | firstname | lastname  | email                 |',
-            '| teacher1     | Teacher   | 1         | teacher1@asd.com      |',
-            '| assistant1   | Assistant | 1         | assistant1@asd.com    |',
-            '| assistant2   | Assistant | 1         | assistant2@asd.com    |',
-            '| student1     | Student   | 1         | student1@asd.com      |',
-            '| student2     | Student   | 2         | student2@asd.com      |',
-            '| student3     | Student   | 3         | student3@asd.com      |',
-        );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
-        $steps[] = new Given('the following "users" exist:', $table);
-
-        // Enrollments
-        $data = array(
-            '| user         | course | role             |',
-            '| teacher1     | C1     | editingteacher   |',
-            '| assistant1   | C1     | teacher          |',
-            '| student1     | C1     | student          |',
-            '| student2     | C1     | student          |',
-        );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
-        $steps[] = new Given('the following "course enrolments" exist:', $table);
-
-        // Groups
-        $data = array(
-            '| name    | description | course  | idnumber |',
-            '| Group 1 | Anything    | C1 | G1   |',
-            '| Group 2 | Anything    | C1 | G2   |',
-        );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
-        $steps[] = new Given('the following "groups" exist:', $table);
-
-        // Group members
-        $data = array(
-            '| user     | group  |',
-            '| student1 | G1 |',
-            '| student2 | G2 |',
-        );
-        $table = new Behat\Gherkin\Node\TableNode(implode("\n", $data));
-        $steps[] = new Given('the following "group members" exist:', $table);
-
-        return $steps;
     }
 
     /**
