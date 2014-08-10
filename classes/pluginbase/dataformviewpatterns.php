@@ -573,12 +573,9 @@ class dataformviewpatterns {
             '##filtersmenu##' => array(true, $cat),
         );
 
-        static $views = null;
-        if ($views === null) {
-            $views = $this->_view->df->view_manager->views_menu;
-        }
+        $viewman = $this->_view->df->view_manager;
 
-        if ($views) {
+        if ($views = $viewman->views_menu) {
             foreach ($views as $viewname) {
                 $patterns["##viewurl:$viewname##"] = array(false);
                 $patterns["##viewcontent:$viewname##"] = array(false);
