@@ -45,16 +45,19 @@ class dataformview_csv_importform extends moodleform {
         $view = $this->_view;
         $mform = &$this->_form;
 
-        // field settings
-        // -------------------------------------------------------------------------------
-        $this->field_settings();
+        // Field settings.
+        $this->definition_field_settings();
 
-        // csv settings
-        // -------------------------------------------------------------------------------
-        $this->csv_settings();
+        // Import options.
+        $this->definition_import_options();
 
-        // action buttons
-        // -------------------------------------------------------------------------------
+        // Csv settings.
+        $this->definition_csv_settings();
+
+        // Csv content.
+        $this->definition_csv_content();
+
+        // Action buttons.
         $this->add_action_buttons();
     }
 
@@ -65,11 +68,11 @@ class dataformview_csv_importform extends moodleform {
         $mform = &$this->_form;
 
         $grp = array();
-        // Test
+        // Test.
         $grp[] = &$mform->createElement('submit', 'submitbutton_test', get_string('test', 'dataformview_csv'));
-        // Import
+        // Import.
         $grp[] = &$mform->createElement('submit', 'submitbutton', get_string('import'));
-        // Cancel
+        // Cancel.
         $grp[] = &$mform->createElement('cancel', 'cancel');
         $mform->addGroup($grp, 'buttongrp', '', ' ', false);
         $mform->closeHeaderBefore('buttongrp');
@@ -78,7 +81,7 @@ class dataformview_csv_importform extends moodleform {
     /**
      *
      */
-    protected function field_settings() {
+    protected function definition_field_settings() {
         $view = $this->_view;
         $df = $view->get_df();
         $mform = &$this->_form;
@@ -108,37 +111,61 @@ class dataformview_csv_importform extends moodleform {
     /**
      *
      */
-    protected function csv_settings() {
+    protected function definition_csv_settings() {
         $mform = &$this->_form;
         $view = $this->_view;
 
         $mform->addElement('header', 'csvsettingshdr', get_string('csvsettings', 'dataformview_csv'));
+        $mform->setExpanded('csvsettingshdr');
 
-        // delimiter
+        // Delimiter.
         $delimiters = csv_import_reader::get_delimiter_list();
         $mform->addElement('select', 'delimiter', get_string('csvdelimiter', 'dataform'), $delimiters);
 
-        // enclosure
+        // Enclosure.
         $mform->addElement('text', 'enclosure', get_string('csvenclosure', 'dataform'), array('size' => '10'));
         $mform->setType('enclosure', PARAM_NOTAGS);
 
-        // encoding
+        // Encoding.
         $choices = textlib::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
+    }
+
+    /**
+     *
+     */
+    protected function definition_csv_content() {
+        $mform = &$this->_form;
+        $view = $this->_view;
 
         // CSV content header
         $mform->addElement('header', 'csvcontenthdr', get_string('csvcontent', 'dataformview_csv'));
+        $mform->setExpanded('csvcontenthdr');
 
         // upload file
         $mform->addElement('filepicker', 'importfile', get_string('uploadfile', 'dataformview_csv'));
 
         // upload text
         $mform->addElement('textarea', 'csvtext', get_string('uploadtext', 'dataformview_csv'), array('wrap' => 'virtual', 'rows' => '5', 'style' => 'width:100%;'));
+    }
 
-        // update existing entries
+    /**
+     *
+     */
+    protected function definition_import_options() {
+        $mform = &$this->_form;
+        $view = $this->_view;
+
+        $mform->addElement('header', 'importoptionshdr', get_string('importoptions', 'dataformview_csv'));
+        $mform->setExpanded('importoptionshdr');
+
+        // Add per participant.
+        $mform->addElement('selectyesno', 'addperparticipant', get_string('addperparticipant', 'dataformview_csv'));
+
+        // Update existing entries.
         // $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_csv'));
 
-        // edit after import
+        // Edit after import.
         // $mform->addElement('selectyesno', 'editafter', get_string('importeditimported', 'dataformview_csv'));
     }
 
