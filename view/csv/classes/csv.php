@@ -194,12 +194,14 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 return;
             }
 
-            // Process the csv content
+            // Process the csv content.
             $options = array(
                 'delimiter' => $formdata->delimiter,
                 'enclosure' => ($formdata->enclosure ? $formdata->enclosure : ''),
                 'encoding' => $formdata->encoding,
-                'settings' => $fieldsettings
+                'settings' => $fieldsettings,
+                'updateexisting' =>  !empty($formdata->updateexisting),
+                'addperparticipant' =>  !empty($formdata->addperparticipant),
             );
             $data = $this->process_csv($data, $csvcontent, $options);
 
@@ -322,7 +324,6 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         $delimiter = !empty($options['delimiter']) ? $options['delimiter'] : $this->_delimiter;
         $enclosure = !empty($options['enclosure']) ? $options['enclosure'] : $this->_enclosure;
         $encoding = !empty($options['encoding']) ? $options['encoding'] : $this->_encoding;
-        $updateexisting = !empty($options['updateexisting']) ? $options['updateexisting'] : false;
         $fieldsettings = !empty($options['settings']) ? $options['settings'] : array();
 
         $readcount = $cir->load_csv_content($csvcontent, $encoding, $delimiter);
@@ -332,33 +333,69 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             return $data;
         }
 
-        // csv column headers
+        // Csv column headers.
         if (!$fieldnames = $cir->get_columns()) {
             $data->errors[] = $cir->get_error();
             return $data;
         }
 
-        // process each csv record
-        $updateexisting = $updateexisting and !empty($csvfieldnames['entryid']);
+        // Are we updating existing entries?
+        $updateexisting = !empty($options['updateexisting']) and !empty($csvfieldnames['entryid']);
+
+        // Are we adding the imported entries to every participant?
+        $addperparticipant = (!empty($options['addperparticipant']) and $users = $this->df->get_gradebook_users());
+
         $i = 0;
         $cir->init();
 
         while ($csvrecord = $cir->next()) {
             $csvrecord = array_combine($fieldnames, $csvrecord);
-            // set the entry id
+
+            // Update an existing entry.
             if ($updateexisting and $csvrecord['entryid'] > 0) {
+
+                // Set the entry id.
                 $entryid = $csvrecord['entryid'];
-            } else {
-                $i--;
-                $entryid = $i;
+                $data->eids[$entryid] = $entryid;
+
+                // Iterate the fields and collate their entry content.
+                foreach ($fieldsettings as $fieldid => $importsettings) {
+                    $field = $this->df->field_manager->get_field_by_id($fieldid);
+                    $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
+                }
+                continue;
             }
-            // Iterate the fields and collate their entry content
+
+            // Add the entry for every participant.
+            if ($addperparticipant) {
+                foreach ($users as $userid => $unused) {
+
+                    // Set the entry id.
+                    $i++;
+                    $entryid = -$i;
+                    $data->eids[$entryid] = $entryid;
+                    $data->{"entry_{$entryid}_userid"} = $userid;
+
+                    // Iterate the fields and collate their entry content.
+                    foreach ($fieldsettings as $fieldid => $importsettings) {
+                        $field = $this->df->field_manager->get_field_by_id($fieldid);
+                        $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
+                    }
+                }
+                continue;
+            }
+
+            // Add a new entry.
+
+            $i++;
+            $entryid = -$i;
+            $data->eids[$entryid] = $entryid;
+
+            // Iterate the fields and collate their entry content.
             foreach ($fieldsettings as $fieldid => $importsettings) {
                 $field = $this->df->field_manager->get_field_by_id($fieldid);
                 $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
             }
-            // Register entry id
-            $data->eids[$entryid] = $entryid;
         }
         $cir->cleanup(true);
         $cir->close();
