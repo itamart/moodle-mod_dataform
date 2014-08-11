@@ -1331,29 +1331,46 @@ class dataformview {
     protected function process_calculations($text) {
         global $CFG;
 
-        if (preg_match_all("/%%F\d*:=[^%]+%%/", $text, $matches)) {
+        // HACK removing occurences of [[entryid]] because they are
+        // currently not resolved in new entries.
+        $text = str_replace('[[entryid]]', '', $text);
+
+        if (preg_match_all("/%%F\d*:=[^%]*%%/", $text, $matches)) {
             require_once("$CFG->libdir/mathslib.php");
             sort($matches[0]);
-            $replacements = array();
+
+            // List of formulas.
             $formulas = array();
+            // Formula replacements.
+            $replacements = array();
+
+            // Register all formulas according to formula identifier.
             foreach ($matches[0] as $pattern) {
                 $cleanpattern = trim($pattern, '%');
                 list($fid, $formula) = explode(':=', $cleanpattern, 2);
+                // Skip an empty formula.
+                if (empty($formula) and $formula !== 0) {
+                    continue;
+                }
                 isset($formulas[$fid]) or $formulas[$fid] = array();
-                // Enclose formula in brackets to preserve precedence
+                // Enclose formula in brackets to preserve precedence.
                 $formulas[$fid][] = "($formula)";
                 $replacements[$pattern] = $formula;
             }
 
-            // Process group formulas in formulas (e.g. _F1_)
+            // Process group formulas in formulas (e.g. _F1_).
+            // We put 0 if we can't find a replacement so that the formula could be calculated.
             foreach ($formulas as $fid => $formulae) {
                 foreach ($formulae as $key => $formula) {
-                    if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
+                    if (preg_match_all("/_F\d+_/", $formula, $frefs)) {
                         foreach ($frefs[0] as $fref) {
                             $fref = trim($fref, '_');
                             if (isset($formulas[$fref])) {
-                                $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
+                                $replace = implode(',', $formulas[$fref]);
+                            } else {
+                                $replace = 0;
                             }
+                            $formula = str_replace("_{$fref}_", $replace, $formula);
                         }
                         $formulae[$key] = $formula;
                     }
@@ -1361,40 +1378,44 @@ class dataformview {
                 $formulas[$fid] = $formulae;
             }
 
-            // Process group formulas in replacements (e.g. _F1_)
+            // Process group formulas in replacements (e.g. _F1_).
+            // We put 0 if we can't find a replacement so that the formula could be calculated.
             foreach ($replacements as $pattern => $formula) {
-                if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
+                if (preg_match_all("/_F\d+_/", $formula, $frefs)) {
                     foreach ($frefs[0] as $fref) {
                         $fref = trim($fref, '_');
                         if (isset($formulas[$fref])) {
-                            $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
+                            $replace = implode(',', $formulas[$fref]);
+                        } else {
+                            $replace = 0;
                         }
+                        $formula = str_replace("_{$fref}_", $replace, $formula);
                     }
                     $replacements[$pattern] = $formula;
                 }
             }
 
-            // Calculate
+            // Calculate.
             foreach ($replacements as $pattern => $formula) {
-                // Number of decimals can be set as ;n at the end of the formula
+                // Number of decimals can be set as ;n at the end of the formula.
                 $decimals = null;
                 if (strpos($formula, ';')) {
                     list($formula, $decimals) = explode(';', $formula);
                 }
-
                 $calc = new \calc_formula("=$formula");
                 $result = $calc->evaluate();
-                // False as result indicates some problem
+                // False as result indicates some problem.
                 if ($result === false) {
                     $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;'));
                 } else {
-                    // Set decimals
+                    // Set decimals.
                     if (is_numeric($decimals)) {
                         $result = sprintf("%4.{$decimals}f", $result);
                     }
                     $replacements[$pattern] = $result;
                 }
             }
+
             $text = str_replace(array_keys($replacements), $replacements, $text);
         }
         return $text;
