@@ -170,7 +170,7 @@ class mod_dataform_generator extends testing_module_generator {
 
         // Set as default if specified
         if (!empty($record->default)) {
-            $df->view_manager->process_views('default', $view->id, true);
+            $df->view_manager->process_views('default', $view->id, null, true);
         }
         return $view->data;
     }

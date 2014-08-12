@@ -399,10 +399,12 @@ $string['modulenameplural'] = 'Dataforms';
     $string['views'] = 'Views';
     $string['view'] = 'view';
     $string['viewvisibility'] = 'Visibility';
-    $string['viewvisibility_help'] = 'Set to No if you wish to condition access to the view (require viewaccesshidden capability). By default managers can access hidden views. Users who cannot access a view will not see the view link in the views menu and navigation.';
+    $string['viewvisibility_help'] = 'A Disabled view is accessible only with viewaccesshidden capability (typically teachers and managers).
+    A Visible view can be accessed by participants and appears in navigation.
+    A Hidden view can be accessed by participants but does not appear in navigation.';
     $string['viewdisabled'] = 'Disabled';
-    $string['viewenabled'] = 'Enabled';
     $string['viewvisible'] = 'Visible';
+    $string['viewhidden'] = 'Hidden';
 
     $string['wrongdataid'] = 'Wrong dataform id provided';
     $string['submission'] = 'Submission';

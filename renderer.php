@@ -238,15 +238,14 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
             $viewdescription = format_text($view->description, FORMAT_PLAIN);
 
-            // visible
-            if ($visible = $view->visible) {
-                $visibleicon = $hideicon;
-            } else {
-                $visibleicon = $showicon;
-            }
-            $viewvisible = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('visible' => $viewid)), $visibleicon);
+            // Visibility.
+            $visibility = $view::get_visibility_modes();
+            $selecturl = new moodle_url($actionbaseurl, $sessparam + array('visible' => $viewid));
+            $select = new single_select($selecturl, 'visibility', $visibility, $view->visible, null);
+            $selectedclass = !$view->visible ? 'disabled' : ($view->visible == $view::VISIBILITY_HIDDEN ? 'hidden' : 'visible');
+            $viewvisible = html_writer::tag('div', $this->output->render($select), array('class' => "viewvisibilityselector view$selectedclass"));
 
-            // default view
+            // Default view.
             if ($viewid == $df->defaultview) {
                 $viewdefault = $defaulticon;
             } else {
@@ -255,7 +254,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 $viewdefault = html_writer::link($defaulturl, $nodefaulticon, array('id' => $idsetdefault));
             }
 
-            // View filter
+            // View filter.
             if (!empty($filtersmenu)) {
                 $viewfilterid = $view->filterid;
                 if ($viewfilterid and !in_array($viewfilterid, array_keys($filtersmenu))) {

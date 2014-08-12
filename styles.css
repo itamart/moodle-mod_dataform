@@ -191,3 +191,21 @@
 .mform fieldset.collapsible legend div.summary span.summarylabel {
     color: #0088CC;
 }
+
+.viewvisibilityselector.viewdisabled select,
+.viewvisibilityselector select option[value="0"] {
+    background-color: #666;
+    color: #FFF;
+}
+
+.viewvisibilityselector.viewvisible select,
+.viewvisibilityselector select option[value="1"] {
+    background-color: #FFF;
+    color: #555;
+}
+
+.viewvisibilityselector.viewhidden select,
+.viewvisibilityselector select option[value="2"] {
+    background-color: #DDD;
+    color: #555;
+}

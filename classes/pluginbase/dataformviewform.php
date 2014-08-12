@@ -68,7 +68,7 @@ class dataformviewform extends \moodleform {
         $mform->addHelpButton('description', 'viewdescription', 'dataform');
 
         // Visibility
-        $mform->addElement('selectyesno', 'visible', get_string('viewvisibility', 'dataform'));
+        $mform->addElement('select', 'visible', get_string('viewvisibility', 'dataform'), $view::get_visibility_modes());
         $mform->addHelpButton('visible', 'viewvisibility', 'dataform');
         $mform->setDefault('visible', 1);
 

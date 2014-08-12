@@ -134,7 +134,7 @@ class mod_dataform_access_testcase extends advanced_testcase {
             $df->update($args);
 
             // Set the view
-            $view->visible = ($case->viewvisible == '0' ? 0 : 1);
+            $view->visible = $case->viewvisible;
             $view->update($view->data);
 
             // Set the entry
