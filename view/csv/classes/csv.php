@@ -200,8 +200,8 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 'enclosure' => ($formdata->enclosure ? $formdata->enclosure : ''),
                 'encoding' => $formdata->encoding,
                 'settings' => $fieldsettings,
-                'updateexisting' =>  !empty($formdata->updateexisting),
-                'addperparticipant' =>  !empty($formdata->addperparticipant),
+                'updateexisting' => !empty($formdata->updateexisting),
+                'addperparticipant' => !empty($formdata->addperparticipant),
             );
             $data = $this->process_csv($data, $csvcontent, $options);
 
