@@ -28,6 +28,13 @@ namespace mod_dataform\pluginbase;
  */
 class dataformview {
 
+    /** @const int View is available only to managers. */
+    const VISIBILITY_DISABLED = 0;
+    /** @const int View is available to all and appears in navigation. */
+    const VISIBILITY_VISIBLE = 1;
+    /** @const int View is available to all but does not appear in navigation. */
+    const VISIBILITY_HIDDEN = 2;
+
     /** @const int Show edited entries separate from non-edited */
     const EDIT_SEPARATE = 1;
     /** @const int Show edited entries inline with non-edited */
@@ -374,6 +381,19 @@ class dataformview {
      */
     public function get_typename() {
         return get_string('pluginname', "dataformview_{$this->type}");
+    }
+
+    /**
+     * Returns a menu list of visibility modes.
+     *
+     * @return array
+     */
+    public static function get_visibility_modes() {
+        return array(
+            self::VISIBILITY_DISABLED => get_string('viewdisabled', 'dataform'),
+            self::VISIBILITY_VISIBLE => get_string('viewvisible', 'dataform'),
+            self::VISIBILITY_HIDDEN => get_string('viewhidden', 'dataform'),
+        );
     }
 
     /**

@@ -341,11 +341,12 @@ class mod_dataform_view_manager {
      *
      * @param string $action
      * @param string|array $vids View ids to process
+     * @param object|array $data
      * @param bool $confirmed
      * @return bool/array
      * @throws \required_capability_exception on mod/dataform:manageviews
      */
-    public function process_views($action, $vids, $confirmed = false) {
+    public function process_views($action, $vids, $data = null, $confirmed = false) {
         global $DB, $OUTPUT;
 
         $df = mod_dataform_dataform::instance($this->_dataformid);
@@ -385,22 +386,34 @@ class mod_dataform_view_manager {
                 // go ahead and perform the requested action
                 switch ($action) {
                     case 'visible':
+                        $strnotify = '';
+
+                        $data = $data ? (array) $data : null;
+
+                        // We need a visibility value.
+                        if (!isset($data['visibility'])) {
+                            break;
+                        }
+
+                        // Visibility value must be a valid mode.
+                        if (!array_key_exists($data['visibility'], \mod_dataform\pluginbase\dataformview::get_visibility_modes())) {
+                            break;
+                        }
+
                         $updateview = new stdClass;
                         foreach ($views as $vid => $view) {
-                            if ($vid == $df->defaultview) {
-                                // Nothing to do: should already be visible and cannot be hidden.
+                            // Default view cannot be disabled.
+                            if ($vid == $df->defaultview and !$data['visibility']) {
                                 continue;
-                            } else {
-                                // Switch visibility
-                                $view->visible = $view->visible ? 0 : 1;
-                                // Update
-                                if ($view->update($view->data)) {
-                                    $processedvids[] = $vid;
-                                }
+                            }
+
+                            // Update visibility.
+                            $view->visible = $data['visibility'];
+                            if ($view->update($view->data)) {
+                                $processedvids[] = $vid;
                             }
                         }
 
-                        $strnotify = '';
                         break;
 
                     case 'filter':
@@ -505,7 +518,7 @@ class mod_dataform_view_manager {
     public function delete_views() {
         if ($views = $this->views_menu) {
             $viewids = array_keys($views);
-            $this->process_views('delete', $viewids, true);
+            $this->process_views('delete', $viewids, null, true);
         }
     }
 
