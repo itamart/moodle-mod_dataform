@@ -82,13 +82,13 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
         $mform->setExpanded('recipientshdr');
 
         // Admin
-        $mform->addElement('checkbox', $prefix. 'recipientadmin', get_string('admin'));
+        $mform->addElement('advcheckbox', $prefix. 'recipientadmin', get_string('admin'));
         // Support
-        $mform->addElement('checkbox', $prefix. 'recipientsupport', get_string('supportcontact', 'admin'));
+        $mform->addElement('advcheckbox', $prefix. 'recipientsupport', get_string('supportcontact', 'admin'));
         // Entry author
-        $mform->addElement('checkbox', $prefix. 'recipientauthor', get_string('author', 'dataform'));
+        $mform->addElement('advcheckbox', $prefix. 'recipientauthor', get_string('author', 'dataform'));
         // Role (mod/dataform:notification permission in context)
-        $mform->addElement('checkbox', $prefix. 'recipientrole', get_string('role'));
+        $mform->addElement('advcheckbox', $prefix. 'recipientrole', get_string('role'));
         // Username (comma delimited)
         $mform->addElement('text', $prefix. 'recipientusername', get_string('username'));
         $mform->setType($prefix. 'recipientusername', $paramtext);
