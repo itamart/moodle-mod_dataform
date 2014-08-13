@@ -95,9 +95,18 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
         // Time list separated by ..
         if (strpos($value, '..') !== false) {
             $value = array_map('strtotime', explode('..', $value));
+            // Must have valid timestamps.
+            if (in_array(false, $value, true)) {
+                return null;
+            }
         } else {
             $value = strtotime($value);
+            // Must have valid timestamps.
+            if ($value === false) {
+                return null;
+            }
         }
+
         return parent::get_search_sql(array($element, $not, $operator, $value));
     }
 
