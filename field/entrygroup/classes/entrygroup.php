@@ -110,4 +110,34 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
         return 'g';
     }
 
+    /**
+     * @return string SQL fragment.
+     */
+    public function get_search_from_sql() {
+        return " JOIN {groups} g ON g.id = e.groupid  ";
+    }
+
+    /**
+     *
+     */
+    public function get_select_sql() {
+        $elements = array(
+            'g.idnumber AS groupidnumber',
+            'g.name AS groupname',
+            'g.hidepicture AS grouphidepic',
+            'g.picture AS grouppic',
+        );
+        $selectsql = implode(',', $elements);
+        return " $selectsql ";
+    }
+
+    /**
+     *
+     */
+    public function get_sort_from_sql() {
+        $sql = " LEFT JOIN {groups} g ON g.id = e.groupid  ";
+        return array($sql, null);
+    }
+
+
 }

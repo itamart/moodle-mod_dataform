@@ -149,70 +149,63 @@ class mod_dataform_entry_manager {
         global $DB, $USER;
 
         $df = mod_dataform_dataform::instance($this->dataformid);
-        if (!$view = $this->view_manager->get_view_by_id($this->viewid)) {
-            return null;
-        }
 
-        $fields = $view->get_fields();
-
-        // Params array for the sql
+        // Params array for the sql.
         $params = array();
         $params[] = $this->dataformid;
 
-        // Access base params: this dataform and this view
+        // Access base params: this dataform and this view.
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
 
-        // USER FILTERING
+        // USER FILTERING.
         $whereuser = '';
-        // Limit to requested users
+        // Limit to requested users.
         if ($filter->users) {
             list($inusers, $userparams) = $DB->get_in_or_equal($filter->users);
             $whereuser .= " AND e.userid $inusers ";
             $params = array_merge($params, $userparams);
         }
-        // Exclude own entries
+        // Exclude own entries.
         if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryownview', $accessparams)) {
             $whereuser .= " AND e.userid <> ? ";
             $params[] = $USER->id;
         }
-        // Exclude guest/anonymous
+        // Exclude guest/anonymous.
         if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryanonymousview', $accessparams)) {
             $whereuser .= " AND e.userid <> ? ";
             $params[] = 0;
         }
-        // Exclude other entries
+        // Exclude other entries.
         $viewany = mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
         $entriesmanager = mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
         if (($df->individualized and !$entriesmanager) or !$viewany) {
             $whereuser .= " AND e.userid = ? ";
             $params[] = $USER->id;
         }
-        // GROUP FILTERING
+        // GROUP FILTERING.
         $wheregroup = '';
-        // Specific groups requested
+        // Specific groups requested.
         if (!empty($filter->groups)) {
             list($ingroups, $groupparams) = $DB->get_in_or_equal($filter->groups);
             $wheregroup .= " AND e.groupid $ingroups ";
             $params = array_merge($params, $groupparams);
         }
-        // Current group
+        // Current group.
         if ($df->currentgroup) {
             list($ingroups, $groupparams) = $DB->get_in_or_equal(array($df->currentgroup, 0));
             $wheregroup .= " AND e.groupid $ingroups ";
             $params = array_merge($params, $groupparams);
         }
 
-        // Sql for fetching the entries
+        // Sql for fetching the entries.
         $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid';
         $whatuser = user_picture::fields('u', array('idnumber', 'username'), 'uid ');
-        $whatgroup = 'g.idnumber AS groupidnumber, g.name AS groupname, g.hidepicture AS grouphidepic, g.picture AS grouppic';
 
         $tables = ' {dataform_entries} e
-                    JOIN {user} u ON u.id = e.userid
-                    LEFT JOIN {groups} g ON g.id = e.groupid ';
+                    JOIN {user} u ON u.id = e.userid ';
         $wheredfid = " e.dataid = ? ";
 
-        // Filter sql
+        // FILTER SQL.
         list(
             $searchtables,
             $searchwhere,
@@ -228,10 +221,10 @@ class mod_dataform_entry_manager {
             $dataformcontent,
             $joinwhat,
             $jointables,
-        ) = $filter->get_sql($fields);
+        ) = $filter->get_sql();
 
         $count = ' COUNT(e.id) ';
-        $whatsql = " DISTINCT $whatentry, $whatuser, $whatgroup $contentwhat $joinwhat";
+        $whatsql = " DISTINCT $whatentry, $whatuser $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
 

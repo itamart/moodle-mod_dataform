@@ -70,13 +70,4 @@ abstract class dataformfield_internal extends dataformfield {
     public function is_dataform_content() {
         return false;
     }
-
-    /**
-     * Returns a list of elements to which quick search may be applied.
-     *
-     * @return array
-     */
-    public function get_simple_search_elements() {
-        return array();
-    }
 }

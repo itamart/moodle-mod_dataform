@@ -151,8 +151,13 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
      *
      */
     public function get_search_sql($search) {
-        if ($search) {
-            $search[3] = $this->get_search_value($search[3]);
+        if (!$search) {
+            return null;
+        }
+
+        // The search value must be found in the field options.
+        if (!$search[3] = $this->get_search_value($search[3])) {
+            return null;
         }
         return parent::get_search_sql($search);
     }
