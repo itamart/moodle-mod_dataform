@@ -127,7 +127,7 @@ class dataformview_csv_importform extends moodleform {
         $mform->setType('enclosure', PARAM_NOTAGS);
 
         // Encoding.
-        $choices = textlib::get_encodings();
+        $choices = core_text::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $choices);
     }
 
