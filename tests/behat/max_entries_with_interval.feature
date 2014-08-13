@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformactivity
+@mod @dataform_no_mod @dataformactivity
 Feature: Dataform max entries
 
     @javascript

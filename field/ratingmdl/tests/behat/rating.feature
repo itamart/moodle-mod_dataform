@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_ratingmdl @dataformfield_ratingmdl_rating
+@mod @dataform_no_mod @dataformfield @dataformfield_ratingmdl @dataformfield_ratingmdl_rating
 Feature: Rating
 
     @javascript

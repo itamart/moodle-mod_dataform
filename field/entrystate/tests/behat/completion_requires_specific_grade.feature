@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_entrystate @dataformfield_entrystate_completion
+@mod @dataform_no_mod @dataformfield @dataformfield_entrystate @dataformfield_entrystate_completion
 Feature: Completion
 
     @javascript
