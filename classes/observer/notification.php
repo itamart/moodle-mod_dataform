@@ -117,11 +117,11 @@ class notification {
         $message->smallmessage    = $data['subject'];
         $message->notification    = (int) !empty($data['notification']);
 
-        // Send message
+        // Send message.
         if (!empty($data['recipients'])) {
             $res['method'] = 'message';
 
-            // Message provider name
+            // Message provider name.
             if (!empty($data['name'])) {
                 $message->name = $data['name'];
             }
@@ -137,23 +137,22 @@ class notification {
             }
         }
 
-        // Send email
+        // Send email.
         if (!empty($data['recipientemails'])) {
             $res['method'] = 'email';
 
             foreach ($data['recipientemails'] as $recipient) {
-                $message->recipient = $recipient;
-                // Email directly rather than using the messaging system to ensure its not routed to a popup or jabber
-                $res[$recipient] = email_to_user(
-                    $message->userto,
-                    $message->siteshortname,
+                // Email directly rather than using the messaging system to ensure its not routed to a popup or jabber.
+                $res[$recipient->id] = email_to_user(
+                    $recipient,
+                    $message->userfrom,
                     $message->subject,
                     $message->fullmessage,
                     $message->fullmessagehtml,
-                    null, // attachment
-                    null, // attachname
-                    false, // usetrueaddress
-                    null // $CFG->forum_replytouser
+                    '', // Attachment.
+                    '', // Attachname.
+                    false, // Usetrueaddress.
+                    '' // CFG forum_replytouser.
                 );
             }
         }
@@ -165,20 +164,20 @@ class notification {
      *
      */
     public function prepare_data($event, $data, $context) {
-        // Adjust sender
+        // Adjust sender.
         if (!empty($data->sender)) {
-            // Get entry author id for sender author where applicable
+            // Get entry author id for sender author where applicable.
             if ($data->sender == 'author' and $event->relateduserid) {
                 $data->sender = $event->relateduserid;
             }
 
-            // Get event user id for sender where applicable
+            // Get event user id for sender where applicable.
             if ($data->sender == 'event' and $event->userid) {
                 $data->sender = $event->userid;
             }
         }
 
-        // Get entry author id for recipient author where applicable
+        // Get entry author id for recipient author where applicable.
         if (!empty($data->recipientauthor) and $event->relateduserid) {
             $data->recipientauthor = $event->relateduserid;
         }
@@ -247,7 +246,7 @@ class notification {
     protected function get_sender_user($data) {
         global $DB, $USER;
 
-        // No reply
+        // No reply.
         if (empty($data->sender)) {
             $data->sender = \core_user::NOREPLY_USER;
         }
@@ -264,25 +263,25 @@ class notification {
     protected function get_recipient_users($data, $context) {
         $recipients = array();
 
-        // Admin
+        // Admin.
         if (!empty($data->recipientadmin)) {
             $user = get_admin();
             $recipients[$user->id] = $user;
         }
 
-        // Support
+        // Support.
         if (!empty($data->recipientsupport)) {
             if ($user = \core_user::get_support_user()) {
                 $recipients[$user->id] = $user;
             }
         }
 
-        // Author
+        // Author.
         if (!empty($data->recipientauthor)) {
             $recipients[$data->recipientauthor] = \core_user::get_user($data->recipientauthor);
         }
 
-        // Username
+        // Username.
         if (!empty($data->recipientusername)) {
             $usernames = explode(',', $data->recipientusername);
             foreach ($usernames as $username) {
@@ -292,7 +291,7 @@ class notification {
             }
         }
 
-        // Notification roles
+        // Notification roles.
         if (!empty($config->recipientrole)) {
             if ($users = get_users_by_capability($context, 'mod/dataform:notification')) {
                 foreach ($users as $userid => $user) {
@@ -315,14 +314,16 @@ class notification {
 
         if (!empty($data->recipientemail)) {
             $emails = explode(',', $data->recipientemail);
+            $userfields = array_fill_keys(get_all_user_name_fields(), '');
             foreach ($emails as $email) {
                 if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
-                    $user = new \stdClass;
+                    $user = (object) $userfields;
+                    $user->id = -1;
                     $user->email = $email;
                     $user->firstname = 'emailuser';
                     $user->lastname = '';
                     $user->maildisplay = true;
-                    $user->mailformat = $this->get_content_format();
+                    $user->mailformat = $this->get_content_format($data);
                     $recipients[] = $user;
                 }
             }

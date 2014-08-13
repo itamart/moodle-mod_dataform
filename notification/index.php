@@ -24,43 +24,43 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d          = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id         = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT); // Dataform id.
+$urlparams->id = optional_param('id', 0, PARAM_INT); // Course module id.
 
-// items list actions
-$urlparams->type = optional_param('type', '', PARAM_ALPHA);          // Type of a rule to add
-$urlparams->biid = optional_param('biid', 0, PARAM_INT);   // Block id of rule to edit
-$urlparams->update = optional_param('update', 0, PARAM_INT);   // update item
+// Items list actions.
+$urlparams->type = optional_param('type', '', PARAM_ALPHA); // Type of a rule to add.
+$urlparams->biid = optional_param('biid', 0, PARAM_INT); // Block id of rule to edit.
+$urlparams->update = optional_param('update', 0, PARAM_INT); // Update item.
 $urlparams->cancel = optional_param('cancel', 0, PARAM_BOOL);
 
-$urlparams->enable = optional_param('enable', 0, PARAM_INT);     // Enable context (show block)
-$urlparams->disable = optional_param('disable', 0, PARAM_INT);     // Disable context (hide block)
-$urlparams->delete = optional_param('delete', 0, PARAM_INT);   // Delete context (delete block)
+$urlparams->enable = optional_param('enable', 0, PARAM_INT); // Enable context (show block).
+$urlparams->disable = optional_param('disable', 0, PARAM_INT); // Disable context (hide block).
+$urlparams->delete = optional_param('delete', 0, PARAM_INT); // Delete context (delete block).
 
-$urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
+$urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
 $df->require_manage_permission('notifications');
 
 $df->set_page('notification/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/notification/index.php', array('id' => $df->cm->id)));
 
 $nman = mod_dataform_notification_manager::instance($df->id);
 
-// DATA PROCESSING
-// Enable
+// DATA PROCESSING.
+// Enable.
 if ($urlparams->enable and confirm_sesskey()) {
-    $nman->enable_rule($urlparams->enable);
+    $nman->set_rule_visibility($urlparams->enable, 1);
 }
-// Disable
+// Disable..
 if ($urlparams->disable and confirm_sesskey()) {
-    $nman->disable_rule($urlparams->disable);
+    $nman->set_rule_visibility($urlparams->disable, 0);
 }
-// Delete
+// Delete.
 if ($urlparams->delete and confirm_sesskey()) {
     $nman->delete_rule($urlparams->delete);
 }
