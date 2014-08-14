@@ -25,10 +25,11 @@
  */
 class mod_dataform_entry_manager {
 
-    const SELECT_FIRST_PAGE = 0;
-    const SELECT_LAST_PAGE = -1;
-    const SELECT_NEXT_PAGE = -2;
-    const SELECT_RANDOM_PAGE = -3;
+    const SELECT_FIRST_PAGE = 1;
+    const SELECT_LAST_PAGE = 2;
+    const SELECT_NEXT_PAGE = 3;
+    const SELECT_RANDOM_PAGE = 4;
+    const SELECT_RANDOM_ENTRIES = 5;
 
     const COUNT_ALL = 0;
     const COUNT_VIEWABLE = 1;
@@ -51,6 +52,8 @@ class mod_dataform_entry_manager {
     protected $_countviewable = 0;
     /** @var int Number of entries viewable by the user with filters applied. */
     protected $_countfiltered = 0;
+    /** @var int Number of page of retrieved entries. */
+    protected $_page = 0;
 
     /**
      * Returns and caches (for the current script) if not already, an entries manager for the specified Dataform.
@@ -131,6 +134,7 @@ class mod_dataform_entry_manager {
         }
 
         $this->entries = !empty($entriesset->entries) ? $entriesset->entries : array();
+        $this->_page = !empty($entriesset->page) ? $entriesset->page : 0;
 
         $entriescount = count($this->entries);
         $this->_countviewable = !empty($entriesset->max) ? $entriesset->max : $entriescount;
@@ -145,70 +149,63 @@ class mod_dataform_entry_manager {
         global $DB, $USER;
 
         $df = mod_dataform_dataform::instance($this->dataformid);
-        if (!$view = $this->view_manager->get_view_by_id($this->viewid)) {
-            return null;
-        }
 
-        $fields = $view->get_fields();
-
-        // Params array for the sql
+        // Params array for the sql.
         $params = array();
         $params[] = $this->dataformid;
 
-        // Access base params: this dataform and this view
+        // Access base params: this dataform and this view.
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
 
-        // USER FILTERING
+        // USER FILTERING.
         $whereuser = '';
-        // Limit to requested users
-        if (!empty($filter->users)) {
+        // Limit to requested users.
+        if ($filter->users) {
             list($inusers, $userparams) = $DB->get_in_or_equal($filter->users);
             $whereuser .= " AND e.userid $inusers ";
             $params = array_merge($params, $userparams);
         }
-        // Exclude own entries
+        // Exclude own entries.
         if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryownview', $accessparams)) {
             $whereuser .= " AND e.userid <> ? ";
             $params[] = $USER->id;
         }
-        // Exclude guest/anonymous
+        // Exclude guest/anonymous.
         if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryanonymousview', $accessparams)) {
             $whereuser .= " AND e.userid <> ? ";
             $params[] = 0;
         }
-        // Exclude other entries
+        // Exclude other entries.
         $viewany = mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
         $entriesmanager = mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
         if (($df->individualized and !$entriesmanager) or !$viewany) {
             $whereuser .= " AND e.userid = ? ";
             $params[] = $USER->id;
         }
-        // GROUP FILTERING
+        // GROUP FILTERING.
         $wheregroup = '';
-        // Specific groups requested
+        // Specific groups requested.
         if (!empty($filter->groups)) {
             list($ingroups, $groupparams) = $DB->get_in_or_equal($filter->groups);
             $wheregroup .= " AND e.groupid $ingroups ";
             $params = array_merge($params, $groupparams);
         }
-        // Current group
+        // Current group.
         if ($df->currentgroup) {
             list($ingroups, $groupparams) = $DB->get_in_or_equal(array($df->currentgroup, 0));
             $wheregroup .= " AND e.groupid $ingroups ";
             $params = array_merge($params, $groupparams);
         }
 
-        // Sql for fetching the entries
+        // Sql for fetching the entries.
         $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid';
         $whatuser = user_picture::fields('u', array('idnumber', 'username'), 'uid ');
-        $whatgroup = 'g.idnumber AS groupidnumber, g.name AS groupname, g.hidepicture AS grouphidepic, g.picture AS grouppic';
 
         $tables = ' {dataform_entries} e
-                    JOIN {user} u ON u.id = e.userid
-                    LEFT JOIN {groups} g ON g.id = e.groupid ';
+                    JOIN {user} u ON u.id = e.userid ';
         $wheredfid = " e.dataid = ? ";
 
-        // Filter sql
+        // FILTER SQL.
         list(
             $searchtables,
             $searchwhere,
@@ -224,10 +221,10 @@ class mod_dataform_entry_manager {
             $dataformcontent,
             $joinwhat,
             $jointables,
-        ) = $filter->get_sql($fields);
+        ) = $filter->get_sql();
 
         $count = ' COUNT(e.id) ';
-        $whatsql = " DISTINCT $whatentry, $whatuser, $whatgroup $contentwhat $joinwhat";
+        $whatsql = " DISTINCT $whatentry, $whatuser $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
 
@@ -292,9 +289,11 @@ class mod_dataform_entry_manager {
         $entries->max = $maxcount;
         $entries->found = $searchcount;
         $entries->entries = null;
+        $entries->page = 0;
 
         if ($searchcount) {
-            if (!empty($filter->eids)) {
+            // Get the entry records.
+            if ($filter->eids) {
                 // Specific entries may be requested (eids)
                 $entryids = !is_array($filter->eids) ? explode(',', $filter->eids) : $filter->eids;
 
@@ -309,8 +308,7 @@ class mod_dataform_entry_manager {
 
             } else if (!$filter->groupby and $perpage = $filter->perpage) {
                 // Get perpage subset
-                // A random set (filter->selection == 1)
-                if (!empty($filter->selection)) {
+                if ($filter->selection == self::SELECT_RANDOM_ENTRIES) {
                     // Get ids of found entries
                     $sqlselect = "SELECT DISTINCT e.id FROM $sql->from WHERE $sql->where";
                     $entryids = $DB->get_records_sql($sqlselect, $sql->allparams);
@@ -323,24 +321,25 @@ class mod_dataform_entry_manager {
                     $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
                 } else {
                     // By page
-                    $page = isset($filter->page) ? $filter->page : 0;
+                    $page = $filter->page ? $filter->page : 0;
                     $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
 
-                    if (isset($filter->onpage)) {
-                        if ($filter->onpage == self::SELECT_FIRST_PAGE) {
+                    if ($filter->selection) {
+                        if ($filter->selection == self::SELECT_FIRST_PAGE) {
                             // First page
                             $page = 0;
-                        } else if ($filter->onpage == self::SELECT_LAST_PAGE) {
+                        } else if ($filter->selection == self::SELECT_LAST_PAGE) {
                             // Last page
                             $page = $numpages - 1;
-                        } else if ($filter->onpage == self::SELECT_NEXT_PAGE) {
+                        } else if ($filter->selection == self::SELECT_NEXT_PAGE) {
                             // Next page
-                            $page = $filter->page = ($page % $numpages);
-                        } else if ($filter->onpage == self::SELECT_RANDOM_PAGE) {
+                            $page = ($page % $numpages);
+                        } else if ($filter->selection == self::SELECT_RANDOM_PAGE) {
                             // Random page
                             $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
                         }
                     }
+                    $entries->page = $page;
                     $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams, $page * $perpage, $perpage);
                 }
             } else {
@@ -414,7 +413,7 @@ class mod_dataform_entry_manager {
             $params = $sql->allparams;
 
             // If specific entries requested (eids)
-            if (!empty($filter->eids)) {
+            if ($filter->eids) {
                 list($ineids, $eidparams) = $DB->get_in_or_equal($filter->eids);
                 $sqlcount .= " AND e.id $ineids ";
                 $params = array_merge($params, $eidparams);
@@ -969,10 +968,21 @@ class mod_dataform_entry_manager {
     }
 
     /**
+     * Returns the entries set.
      *
+     * @return stdClass
      */
     public function get_entries() {
         return $this->_entries;
+    }
+
+    /**
+     * Returns the page of the entries set.
+     *
+     * @return stdClass
+     */
+    public function get_page() {
+        return $this->_page;
     }
 
     /**

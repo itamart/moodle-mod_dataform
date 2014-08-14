@@ -50,7 +50,7 @@ abstract class dataformfield {
     public function __construct($field) {
 
         if (empty($field)) {
-            throw new coding_exception('Field object must be passed to field constructor.');
+            throw new \coding_exception('Field object must be passed to field constructor.');
         }
 
         $this->_field = $field;
@@ -797,7 +797,15 @@ abstract class dataformfield {
      * @return array
      */
     public function get_simple_search_elements() {
-        return array('content');
+        $elements = array();
+        if ($searchoptionsmenu = $this->search_options_menu) {
+            // Extract element names from the keys.
+            foreach (array_keys($searchoptionsmenu) as $pair) {
+                list($fieldid, $element) = explode(',', $pair);
+                $elements[] = $element;
+            }
+        }
+        return $elements;
     }
 
     /**
@@ -806,7 +814,7 @@ abstract class dataformfield {
      *
      * @return null|array
      */
-    public function get_entry_ids_for_content($sql, $params) {
+    public function get_entry_ids_for_content($sqlwhere, $params) {
         global $DB;
 
         $searchtable = $this->get_search_from_sql();
@@ -817,9 +825,8 @@ abstract class dataformfield {
                 {dataform_entries} e
                 $searchtable
             WHERE
-                $sql
+                $sqlwhere
         ";
-        $params[] = $this->id;
 
         if ($entryids = $DB->get_records_sql_menu($sql, $params)) {
             return array_keys($entryids);

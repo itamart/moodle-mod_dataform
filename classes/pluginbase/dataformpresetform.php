@@ -61,10 +61,10 @@ class dataformpresetform extends \moodleform {
                             'maxbytes' => $COURSE->maxbytes,
                             'maxfiles' => 1,
                             'accepted_types' => array('*.zip', '*.mbz'));
-        $mform->addElement('filepicker', 'uploadfile', null, null, $options);
+        $mform->addElement('filepicker', 'uploadfile', '<span class="hide">'. get_string('upload'). '</span>', null, $options);
         $mform->disabledIf('uploadfile', 'preset_source', 'neq', 'file');
 
-        $mform->addElement('submit', 'add', '    '. get_string('add'). '    ');
+        $mform->addElement('submit', 'add', get_string('add'));
     }
 
 }

@@ -47,7 +47,7 @@ class backup_dataform_activity_task extends backup_activity_task {
             if (!$users) {
                 $dependencies = $userssetting->get_dependencies();
                 foreach ($dependencies as &$dependent) {
-                    $dependentsetting = $dependent->get_dependentsetting();
+                    $dependentsetting = $dependent->get_dependent_setting();
                     $dependentsetting->set_value(0);
                 }
             }

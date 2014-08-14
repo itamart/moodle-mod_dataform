@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_commentmdl';
-$plugin->version  = 2014051300;
+$plugin->version = 2014081400;
 $plugin->requires = 2013111800;

@@ -238,15 +238,14 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
             $viewdescription = format_text($view->description, FORMAT_PLAIN);
 
-            // visible
-            if ($visible = $view->visible) {
-                $visibleicon = $hideicon;
-            } else {
-                $visibleicon = $showicon;
-            }
-            $viewvisible = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('visible' => $viewid)), $visibleicon);
+            // Visibility.
+            $visibility = $view::get_visibility_modes();
+            $selecturl = new moodle_url($actionbaseurl, $sessparam + array('visible' => $viewid));
+            $select = new single_select($selecturl, 'visibility', $visibility, $view->visible, null);
+            $selectedclass = !$view->visible ? 'disabled' : ($view->visible == $view::VISIBILITY_HIDDEN ? 'hidden' : 'visible');
+            $viewvisible = html_writer::tag('div', $this->output->render($select), array('class' => "viewvisibilityselector view$selectedclass"));
 
-            // default view
+            // Default view.
             if ($viewid == $df->defaultview) {
                 $viewdefault = $defaulticon;
             } else {
@@ -255,7 +254,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 $viewdefault = html_writer::link($defaulturl, $nodefaulticon, array('id' => $idsetdefault));
             }
 
-            // View filter
+            // View filter.
             if (!empty($filtersmenu)) {
                 $viewfilterid = $view->filterid;
                 if ($viewfilterid and !in_array($viewfilterid, array_keys($filtersmenu))) {
@@ -1053,7 +1052,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
 
         $viewjump = '';
 
-        if ($menuviews = $viewman->views_menu) {
+        if ($menuviews = $viewman->views_navigation_menu) {
             if (count($menuviews) == 1) {
                 $viewjump = reset($menuviews);
             } else {
@@ -1200,7 +1199,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
         $baseurl = $view->get_baseurl();
 
         // Typical groupby, one group per page case. show paging bar as per number of groups
-        if (isset($filter->pagenum)) {
+        if ($filter->pagenum) {
             $pagingbar = new paging_bar($filter->pagenum,
                                         $filter->page,
                                         1,

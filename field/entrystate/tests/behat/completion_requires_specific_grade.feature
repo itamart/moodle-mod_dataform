@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_entrystate @dataformfield_entrystate_completion
+@mod @dataform_no_mod @dataformfield @dataformfield_entrystate @dataformfield_entrystate_completion
 Feature: Completion
 
     @javascript
@@ -24,7 +24,8 @@ Feature: Completion
         Then I follow "Dataform completion requires specific grade"
         And I follow "Edit settings"
         And I expand all fieldsets
-        And I set the field "Grade" to "10"
+        And I set the field "id_modgrade_type" to "Point"
+        And I set the field "id_modgrade_point" to "10"
         And I set the field "Calculation" to "SUM(##2:State##)/2"
         And I press "Save and display"
 

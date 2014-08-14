@@ -50,13 +50,13 @@ class view_access extends base {
             return true;
         }
 
-        // Visible view
+        // Visible/Hidden view.
         $params['capabilities'] = array('mod/dataform:viewaccess');
         if ($view->visible and !parent::validate($params)) {
             return false;
         }
 
-        // Hidden view
+        // Disabled view.
         $params['capabilities'] = array('mod/dataform:viewaccesshidden');
         if (!$view->visible and !parent::validate($params)) {
             return false;

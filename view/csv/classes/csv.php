@@ -194,12 +194,14 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 return;
             }
 
-            // Process the csv content
+            // Process the csv content.
             $options = array(
                 'delimiter' => $formdata->delimiter,
                 'enclosure' => ($formdata->enclosure ? $formdata->enclosure : ''),
                 'encoding' => $formdata->encoding,
-                'settings' => $fieldsettings
+                'settings' => $fieldsettings,
+                'updateexisting' => !empty($formdata->updateexisting),
+                'addperparticipant' => !empty($formdata->addperparticipant),
             );
             $data = $this->process_csv($data, $csvcontent, $options);
 
@@ -322,7 +324,6 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         $delimiter = !empty($options['delimiter']) ? $options['delimiter'] : $this->_delimiter;
         $enclosure = !empty($options['enclosure']) ? $options['enclosure'] : $this->_enclosure;
         $encoding = !empty($options['encoding']) ? $options['encoding'] : $this->_encoding;
-        $updateexisting = !empty($options['updateexisting']) ? $options['updateexisting'] : false;
         $fieldsettings = !empty($options['settings']) ? $options['settings'] : array();
 
         $readcount = $cir->load_csv_content($csvcontent, $encoding, $delimiter);
@@ -332,33 +333,69 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             return $data;
         }
 
-        // csv column headers
+        // Csv column headers.
         if (!$fieldnames = $cir->get_columns()) {
             $data->errors[] = $cir->get_error();
             return $data;
         }
 
-        // process each csv record
-        $updateexisting = $updateexisting and !empty($csvfieldnames['entryid']);
+        // Are we updating existing entries?
+        $updateexisting = !empty($options['updateexisting']) and !empty($csvfieldnames['entryid']);
+
+        // Are we adding the imported entries to every participant?
+        $addperparticipant = (!empty($options['addperparticipant']) and $users = $this->df->get_gradebook_users());
+
         $i = 0;
         $cir->init();
 
         while ($csvrecord = $cir->next()) {
             $csvrecord = array_combine($fieldnames, $csvrecord);
-            // set the entry id
+
+            // Update an existing entry.
             if ($updateexisting and $csvrecord['entryid'] > 0) {
+
+                // Set the entry id.
                 $entryid = $csvrecord['entryid'];
-            } else {
-                $i--;
-                $entryid = $i;
+                $data->eids[$entryid] = $entryid;
+
+                // Iterate the fields and collate their entry content.
+                foreach ($fieldsettings as $fieldid => $importsettings) {
+                    $field = $this->df->field_manager->get_field_by_id($fieldid);
+                    $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
+                }
+                continue;
             }
-            // Iterate the fields and collate their entry content
+
+            // Add the entry for every participant.
+            if ($addperparticipant) {
+                foreach ($users as $userid => $unused) {
+
+                    // Set the entry id.
+                    $i++;
+                    $entryid = -$i;
+                    $data->eids[$entryid] = $entryid;
+                    $data->{"entry_{$entryid}_userid"} = $userid;
+
+                    // Iterate the fields and collate their entry content.
+                    foreach ($fieldsettings as $fieldid => $importsettings) {
+                        $field = $this->df->field_manager->get_field_by_id($fieldid);
+                        $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
+                    }
+                }
+                continue;
+            }
+
+            // Add a new entry.
+
+            $i++;
+            $entryid = -$i;
+            $data->eids[$entryid] = $entryid;
+
+            // Iterate the fields and collate their entry content.
             foreach ($fieldsettings as $fieldid => $importsettings) {
                 $field = $this->df->field_manager->get_field_by_id($fieldid);
                 $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
             }
-            // Register entry id
-            $data->eids[$entryid] = $entryid;
         }
         $cir->cleanup(true);
         $cir->close();
@@ -377,29 +414,36 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
     }
 
     /**
-     * Returns a fieldset of view options
+     * Generates the default view template for a new view instance or when reseting an existing instance.
+     * If content is specified, sets the template to the content.
+     *
+     * @param string $content HTML fragment.
+     * @return void
      */
-    protected function get_default_view_template() {
-        // Notifications
-        $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
+    public function set_default_view_template($content = null) {
+        if ($content === null) {
+            // Notifications
+            $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
-        // Export/import
-        $expimp = \html_writer::tag('div', '##exportall## | ##exportpage## | ##import##', array('class' => ''));
+            // Export/import
+            $expimp = \html_writer::tag('div', '##exportall## | ##exportpage## | ##import##', array('class' => ''));
 
-        // Add new entry
-        $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
+            // Add new entry
+            $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
 
-        // Filtering
-        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
+            // Filtering
+            $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
 
-        // Paging bar
-        $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
-        // Entries
-        $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
+            // Paging bar
+            $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
+            // Entries
+            $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
 
-        // Set the view template
-        $exporthide = \html_writer::tag('div', $expimp. $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
-        $this->section = \html_writer::tag('div', $exporthide. $entries);
+            // Set the view template
+            $exporthide = \html_writer::tag('div', $expimp. $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
+            $content = \html_writer::tag('div', $exporthide. $entries);
+        }
+        $this->section = $content;
     }
 
     // GETTERS
@@ -468,4 +512,5 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         }
         return $html;
     }
+
 }

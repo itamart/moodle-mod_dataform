@@ -15,14 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage ratingmdl
+ * @package dataformfield_ratingmdl
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__. '/../ratinglib.php');
 
+/**
+ *
+ */
 class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataformfield_nocontent
             implements mod_dataform\interfaces\grading, mod_dataform\interfaces\usingscale {
 
@@ -35,6 +37,9 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     const AGGREGATE_MIN = 4;
     const AGGREGATE_SUM = 5;
 
+    /**
+     *
+     */
     public function __construct($field) {
         parent::__construct($field);
 
@@ -247,8 +252,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return false;
     }
 
-
-    // SQL MANAGEMENT
+    // SQL MANAGEMENT.
     /**
      * Whether this field content resides in dataform_contents
      *
@@ -355,7 +359,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return array($sql, $params);
     }
 
-    // Sort
+    // Sort.
     /**
      *
      */
@@ -395,7 +399,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         );
     }
 
-    // Search
+    // Search.
     /**
      * Converts the given search string to its content representation.
      *
@@ -555,7 +559,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return $this->_allratings;
     }
 
-    // GRADING
+    // GRADING.
     /**
      * Returns the value replacement of the pattern for each user with content in the field.
      *
@@ -606,7 +610,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return $values;
     }
 
-    // USING SCALE
+    // USING SCALE.
     /**
      * Returns the database column used to store the scale.
      *
@@ -615,15 +619,25 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     public static function is_using_scale($scaleid, $dataformid = 0) {
         global $DB;
 
-        $params = array('type' => 'ratingmdl', 'param1' => -$scaleid);
+        $conds = array();
+        $params = array();
+        // Dataform.
         if ($dataformid) {
-            $params['dataid'] = $dataformid;
+            $conds[] = ' dataid = ? ';
+            $params[] = $dataformid;
         }
-        return $DB->record_exists('dataform_fields', $params);
+        // Field type.
+        $conds[] = ' type = ? ';
+        $params[] = 'ratingmdl';
+        // Scale id.
+        $conds[] = $DB->sql_compare_text('param1'). ' = ? ';
+        $params[] = -$scaleid;
+
+        $select = implode(' AND ', $conds);
+        return $DB->record_exists_select('dataform_fields', $select, $params);
     }
 
-    // GETTERS
-
+    // GETTERS.
     /**
      * Returns the effective scaleid, either from the entry or from the field settings.
      *
@@ -649,7 +663,5 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         }
         return null;
     }
-
-
 
 }

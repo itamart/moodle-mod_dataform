@@ -4,7 +4,7 @@ This Moodle module is a major enhancement of Moodle standard Database module act
 
 Release:
 --------
-2.6.3+ (Build: 20140518)
+2.6.4
 
 Documentation:
 --------------

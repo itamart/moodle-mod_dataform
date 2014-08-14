@@ -28,6 +28,13 @@ namespace mod_dataform\pluginbase;
  */
 class dataformview {
 
+    /** @const int View is available only to managers. */
+    const VISIBILITY_DISABLED = 0;
+    /** @const int View is available to all and appears in navigation. */
+    const VISIBILITY_VISIBLE = 1;
+    /** @const int View is available to all but does not appear in navigation. */
+    const VISIBILITY_HIDDEN = 2;
+
     /** @const int Show edited entries separate from non-edited */
     const EDIT_SEPARATE = 1;
     /** @const int Show edited entries inline with non-edited */
@@ -63,7 +70,7 @@ class dataformview {
     public function __construct($view) {
 
         if (empty($view)) {
-            throw new coding_exception('View object must be passed to dataformview constructor.');
+            throw new \coding_exception('View object must be passed to dataformview constructor.');
         }
 
         $this->_view = $view;
@@ -314,7 +321,7 @@ class dataformview {
             $filter->eids = $this->editentries;
         }
         $options['filter'] = $filter;
-        $this->entry_manager->set_content($options);
+        $this->set_entries_content($options);
 
         // Rewrite plugin file url
         $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
@@ -323,6 +330,17 @@ class dataformview {
         // Complie the view template
         $viewhtml = $this->compile_view_template($options);
         return $viewhtml;
+    }
+
+    /**
+     * Fetches target entries from database.
+     *
+     * @return void
+     */
+    protected function set_entries_content(array $options) {
+        $this->entry_manager->set_content($options);
+        // Adjust page in case changed by selection method (e.g. random selection).
+        $this->filter->page = $this->entry_manager->page;
     }
 
     /**
@@ -363,6 +381,19 @@ class dataformview {
      */
     public function get_typename() {
         return get_string('pluginname', "dataformview_{$this->type}");
+    }
+
+    /**
+     * Returns a menu list of visibility modes.
+     *
+     * @return array
+     */
+    public static function get_visibility_modes() {
+        return array(
+            self::VISIBILITY_DISABLED => get_string('viewdisabled', 'dataform'),
+            self::VISIBILITY_VISIBLE => get_string('viewvisible', 'dataform'),
+            self::VISIBILITY_HIDDEN => get_string('viewhidden', 'dataform'),
+        );
     }
 
     /**
@@ -440,8 +471,9 @@ class dataformview {
             if (!empty($filter->id)) {
                 $baseurlparams['filter'] = $filter->id;
             }
-            if (!empty($filter->eids)) {
-                $baseurlparams['eids'] = $filter->eids;
+            if ($filter->eids) {
+                $eids = is_array($filter->eids) ? implode(',', $filter->eids) : $filter->eids;
+                $baseurlparams['eids'] = $eids;
             }
             if ($filter->page) {
                 $baseurlparams['page'] = $filter->page;
@@ -954,10 +986,10 @@ class dataformview {
      */
     public function generate_default_view() {
         // Set the view template
-        $this->get_default_view_template();
+        $this->set_default_view_template();
 
         // Set the entry template
-        $this->get_default_entry_template();
+        $this->set_default_entry_template();
 
         // Set default submission settings
         $settings = array(
@@ -972,28 +1004,34 @@ class dataformview {
 
     /**
      * Generates the default view template for a new view instance or when reseting an existing instance.
+     * If content is specified, sets the template to the content.
      * View subtypes may need to override.
      *
+     * @param string $content HTML fragment.
      * @return void
      */
-    protected function get_default_view_template() {
-        // Notifications
-        $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
+    public function set_default_view_template($content = null) {
+        if ($content === null) {
+            // Notifications
+            $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
-        // Add new entry
-        $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
+            // Add new entry
+            $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
 
-        // Filtering
-        $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
+            // Filtering
+            $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
 
-        // Paging bar
-        $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
-        // Entries
-        $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
+            // Paging bar
+            $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
+            // Entries
+            $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
 
-        // Set the view template
-        $exporthide = \html_writer::tag('div', $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
-        $this->section = \html_writer::tag('div', $exporthide. $entries);
+            // Set the view template
+            $exporthide = \html_writer::tag('div', $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
+
+            $content = \html_writer::tag('div', $exporthide. $entries);
+        }
+        $this->section = $content;
     }
 
     /**
@@ -1002,7 +1040,7 @@ class dataformview {
      *
      * @return void
      */
-    protected function get_default_entry_template() {
+    public function set_default_entry_template($content = null) {
     }
 
     /**
@@ -1272,7 +1310,7 @@ class dataformview {
             'page' => $filter->page,
             'update' => $editentries
         );
-        if (!empty($filter->eids)) {
+        if ($filter->eids) {
             $actionparams['eids'] = $editentries;
         }
 
@@ -1313,29 +1351,46 @@ class dataformview {
     protected function process_calculations($text) {
         global $CFG;
 
-        if (preg_match_all("/%%F\d*:=[^%]+%%/", $text, $matches)) {
+        // HACK removing occurences of [[entryid]] because they are
+        // currently not resolved in new entries.
+        $text = str_replace('[[entryid]]', '', $text);
+
+        if (preg_match_all("/%%F\d*:=[^%]*%%/", $text, $matches)) {
             require_once("$CFG->libdir/mathslib.php");
             sort($matches[0]);
-            $replacements = array();
+
+            // List of formulas.
             $formulas = array();
+            // Formula replacements.
+            $replacements = array();
+
+            // Register all formulas according to formula identifier.
             foreach ($matches[0] as $pattern) {
                 $cleanpattern = trim($pattern, '%');
                 list($fid, $formula) = explode(':=', $cleanpattern, 2);
+                // Skip an empty formula.
+                if (empty($formula) and $formula !== 0) {
+                    continue;
+                }
                 isset($formulas[$fid]) or $formulas[$fid] = array();
-                // Enclose formula in brackets to preserve precedence
+                // Enclose formula in brackets to preserve precedence.
                 $formulas[$fid][] = "($formula)";
                 $replacements[$pattern] = $formula;
             }
 
-            // Process group formulas in formulas (e.g. _F1_)
+            // Process group formulas in formulas (e.g. _F1_).
+            // We put 0 if we can't find a replacement so that the formula could be calculated.
             foreach ($formulas as $fid => $formulae) {
                 foreach ($formulae as $key => $formula) {
-                    if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
+                    if (preg_match_all("/_F\d+_/", $formula, $frefs)) {
                         foreach ($frefs[0] as $fref) {
                             $fref = trim($fref, '_');
                             if (isset($formulas[$fref])) {
-                                $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
+                                $replace = implode(',', $formulas[$fref]);
+                            } else {
+                                $replace = 0;
                             }
+                            $formula = str_replace("_{$fref}_", $replace, $formula);
                         }
                         $formulae[$key] = $formula;
                     }
@@ -1343,40 +1398,44 @@ class dataformview {
                 $formulas[$fid] = $formulae;
             }
 
-            // Process group formulas in replacements (e.g. _F1_)
+            // Process group formulas in replacements (e.g. _F1_).
+            // We put 0 if we can't find a replacement so that the formula could be calculated.
             foreach ($replacements as $pattern => $formula) {
-                if (preg_match_all("/_F\d*_/", $formula, $frefs)) {
+                if (preg_match_all("/_F\d+_/", $formula, $frefs)) {
                     foreach ($frefs[0] as $fref) {
                         $fref = trim($fref, '_');
                         if (isset($formulas[$fref])) {
-                            $formula = str_replace("_{$fref}_", implode(',', $formulas[$fref]), $formula);
+                            $replace = implode(',', $formulas[$fref]);
+                        } else {
+                            $replace = 0;
                         }
+                        $formula = str_replace("_{$fref}_", $replace, $formula);
                     }
                     $replacements[$pattern] = $formula;
                 }
             }
 
-            // Calculate
+            // Calculate.
             foreach ($replacements as $pattern => $formula) {
-                // Number of decimals can be set as ;n at the end of the formula
+                // Number of decimals can be set as ;n at the end of the formula.
                 $decimals = null;
                 if (strpos($formula, ';')) {
                     list($formula, $decimals) = explode(';', $formula);
                 }
-
-                $calc = new calc_formula("=$formula");
+                $calc = new \calc_formula("=$formula");
                 $result = $calc->evaluate();
-                // False as result indicates some problem
+                // False as result indicates some problem.
                 if ($result === false) {
                     $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;'));
                 } else {
-                    // Set decimals
+                    // Set decimals.
                     if (is_numeric($decimals)) {
                         $result = sprintf("%4.{$decimals}f", $result);
                     }
                     $replacements[$pattern] = $result;
                 }
             }
+
             $text = str_replace(array_keys($replacements), $replacements, $text);
         }
         return $text;
@@ -1551,7 +1610,7 @@ class dataformview {
             $files = $fs->get_area_files($contextid, $component, $filearea, 0);
             if (count($files) > 1) {
                 foreach ($files as $file) {
-                    $filerec = new object;
+                    $filerec = new \stdClass;
                     $filerec->itemid = $this->id;
                     $fs->create_file_from_storedfile($filerec, $file);
                 }

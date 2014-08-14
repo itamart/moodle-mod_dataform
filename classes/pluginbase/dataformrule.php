@@ -185,9 +185,17 @@ class dataformrule {
     public function set_visibility($visibility) {
         global $DB;
 
+        $update = false;
         if ($config = $this->get_data()) {
-            if ($config->enabled != $visibility) {
+            if (empty($config->enabled) and $visibility) {
                 $config->enabled = $visibility;
+                $update = true;
+            } else if (!empty($config->enabled) and !$visibility) {
+                unset($config->enabled);
+                $update = true;
+            }
+
+            if ($update) {
                 $configdata = base64_encode(serialize($config));
                 $DB->set_field('block_instances', 'configdata', $configdata, array('id' => $this->_block->instance->id));
                 $this->_block->config->enabled = $visibility;

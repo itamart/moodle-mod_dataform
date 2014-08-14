@@ -47,49 +47,51 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
      *
      * @return void
      */
-    protected function get_default_entry_template() {
+    public function set_default_entry_template($content = null) {
         // get all the fields
         if (!$fields = $this->df->field_manager->get_fields()) {
             return; // you shouldn't get that far if there are no user fields
         }
 
-        $entryactions = get_string('fieldname', 'dataformfield_entryactions');
-        $entryauthor = get_string('fieldname', 'dataformfield_entryauthor');
+        if ($content === null) {
+            $entryactions = get_string('fieldname', 'dataformfield_entryactions');
+            $entryauthor = get_string('fieldname', 'dataformfield_entryauthor');
 
-        // set content table
-        $table = new html_table();
-        $table->attributes['align'] = 'center';
-        $table->attributes['cellpadding'] = '2';
-        $header = array();
-        $entry = array();
-        $align = array();
-        // author picture
-        $header[] = '';
-        $entry[] = "[[$entryauthor:picture]]";
-        $align[] = 'center';
-        // author name
-        $header[] = '';
-        $entry[] = "[[$entryauthor:name]]";
-        $align[] = 'left';
-        // fields
-        foreach ($fields as $field) {
-            if ($field->id > 0) {
-                $header[] = $field->name;
-                $entry[] = "[[$field->name]]";
-                $align[] = 'left';
+            // set content table
+            $table = new html_table();
+            $table->attributes['align'] = 'center';
+            $table->attributes['cellpadding'] = '2';
+            $header = array();
+            $entry = array();
+            $align = array();
+            // author picture
+            $header[] = '';
+            $entry[] = "[[$entryauthor:picture]]";
+            $align[] = 'center';
+            // author name
+            $header[] = '';
+            $entry[] = "[[$entryauthor:name]]";
+            $align[] = 'left';
+            // fields
+            foreach ($fields as $field) {
+                if ($field->id > 0) {
+                    $header[] = $field->name;
+                    $entry[] = "[[$field->name]]";
+                    $align[] = 'left';
+                }
             }
+            // multiedit
+            $header[] = "[[$entryactions:bulkedit]]&nbsp;[[$entryactions:bulkdelete]]&nbsp;[[$entryactions:selectallnone]]";
+            $entry[] = "[[$entryactions:edit]]&nbsp;[[$entryactions:delete]]&nbsp;[[$entryactions:select]]";
+            $align[] = 'center';
+
+            // construct the table
+            $table->head = $header;
+            $table->align = $align;
+            $table->data[] = $entry;
+            $content = html_writer::table($table);
         }
-        // multiedit
-        $header[] = "[[$entryactions:bulkedit]]&nbsp;[[$entryactions:bulkdelete]]&nbsp;[[$entryactions:selectallnone]]";
-        $entry[] = "[[$entryactions:edit]]&nbsp;[[$entryactions:delete]]&nbsp;[[$entryactions:select]]";
-        $align[] = 'center';
-
-        // construct the table
-        $table->head = $header;
-        $table->align = $align;
-        $table->data[] = $entry;
-        $this->param2 = html_writer::table($table);
-
+        $this->param2 = $content;
     }
 
     /**

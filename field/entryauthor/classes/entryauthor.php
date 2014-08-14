@@ -177,6 +177,13 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
     }
 
     /**
+     * @return string SQL fragment.
+     */
+    public function get_search_from_sql() {
+        return " JOIN {user} u ON u.id = e.userid ";
+    }
+
+    /**
      * Returns an array of distinct content of the field.
      *
      * @param string $element

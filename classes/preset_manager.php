@@ -111,6 +111,7 @@ class mod_dataform_preset_manager {
         $table->head = array($strs->name, $strs->description, $strs->screenshot, $strs->apply, implode('&nbsp;', $multiactions));
         $table->align = array('left', 'left', 'center', 'right', 'right');
         $table->wrap = array(false, false, false, false);
+        $table->attributes['class'] = 'generaltable coursepresets';
 
         foreach ($presets as $preset) {
             $presetname = $preset->shortname;
@@ -160,6 +161,7 @@ class mod_dataform_preset_manager {
         $table->align = array('left', 'left', 'center', 'right', 'right');
         $table->wrap = array(false, false, false, false, false);
 
+        $table->attributes['class'] = 'generaltable sitepresets';
         foreach ($presets as $preset) {
 
             $presetname = $preset->shortname;
