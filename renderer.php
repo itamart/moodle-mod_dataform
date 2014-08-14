@@ -1052,7 +1052,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
 
         $viewjump = '';
 
-        if ($menuviews = $viewman->views_menu) {
+        if ($menuviews = $viewman->views_navigation_menu) {
             if (count($menuviews) == 1) {
                 $viewjump = reset($menuviews);
             } else {
