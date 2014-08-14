@@ -324,6 +324,40 @@ class mod_dataform_view_manager {
     }
 
     /**
+     *
+     */
+    public function get_views_navigation_menu() {
+        global $DB;
+
+        $menu = array();
+
+        $params = array('dataid' => $this->_dataformid);
+        $views = $DB->get_records('dataform_views', $params, '', 'id,name,visible');
+
+        // Check access to the view.
+        $df = mod_dataform_dataform::instance($this->_dataformid);
+        $manager = has_capability('mod/dataform:manageviews', $df->context);
+        foreach ($views as $viewid => $view) {
+            // Skip hidden views.
+            if ($view->visible == \mod_dataform\pluginbase\dataformview::VISIBILITY_HIDDEN) {
+                continue;
+            }
+            if (!$manager) {
+                if (!$view->visible) {
+                    continue;
+                }
+                $accessparams = array('dataformid' => $this->_dataformid, 'viewid' => $viewid);
+                if (!mod_dataform\access\view_access::validate($accessparams)) {
+                    continue;
+                }
+            }
+            $menu[$view->id] = $view->name;
+        }
+
+        return $menu;
+    }
+
+    /**
      * Search for a field name and replaces it with another one in all the *
      * form templates. Set $newfieldname as '' if you want to delete the   *
      * field from the form.

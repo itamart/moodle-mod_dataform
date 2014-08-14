@@ -754,7 +754,7 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
 
     $df = mod_dataform_dataform::instance($cm->instance);
 
-    if ($views = $df->view_manager->views_menu) {
+    if ($views = $df->view_manager->views_navigation_menu) {
         foreach ($views as $viewid => $name) {
             $navigation->add($name, new moodle_url('/mod/dataform/view.php', array('d' => $df->id, 'view' => $viewid)));
         }
