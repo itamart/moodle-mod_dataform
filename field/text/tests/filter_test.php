@@ -40,18 +40,18 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
 
         $this->setAdminUser();
 
-        // Course
+        // Course.
         $courseid = $this->getDataGenerator()->create_course();
 
         // Dataform
         $dataform = $this->getDataGenerator()->create_module('dataform', array('course' => $courseid));
         $df = mod_dataform_dataform::instance($dataform->id);
 
-        // Add a field
+        // Add a field.
         $field = $df->field_manager->add_field('text');
-        // Add a view
+        // Add a view.
         $view = $df->view_manager->add_view('aligned');
-        // Get an entry manager
+        // Get an entry manager.
         $entryman = $view->entry_manager;
 
         $values = array(
@@ -61,7 +61,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
             '42',
         );
 
-        // Prepare data for processing
+        // Prepare data for processing.
         $fieldname = "field_{$field->id}_";
         $data = array('submitbutton_save' => 'Save');
         $eids = array();
@@ -72,32 +72,48 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
             $eids[] = $i;
         }
 
-        // Add entries
+        // Add entries.
         list(, $eids) = $entryman->process_entries('update', $eids, (object) $data, true);
 
         $numentries = count($values);
 
-        // No criteria
+        // No criteria.
         $filter = $view->filter;
         $expected = $numentries;
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // First entry specified
+        // First entry specified.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $filter->eids = reset($eids);
         $expected = 1;
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // All entries specified
+        // All entries specified.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $filter->eids = $eids;
         $expected = $numentries;
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // = 'Hello': 1
+        // NOT Empty: 4.
+        $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
+        $searchoptions = array($field->id => array('AND' => array(array('content', 'NOT', '', ''))));
+        $filter->append_search_options($searchoptions);
+        $expected = 4;
+        $actual = $entryman->count_entries(array('filter' => $filter));
+        $this->assertEquals($expected, $actual);
+
+        // NOT = 'Hello': 3.
+        $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
+        $searchoptions = array($field->id => array('AND' => array(array('content', 'NOT', '=', 'Hello'))));
+        $filter->append_search_options($searchoptions);
+        $expected = 3;
+        $actual = $entryman->count_entries(array('filter' => $filter));
+        $this->assertEquals($expected, $actual);
+
+        // = 'Hello': 1.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array($field->id => array('AND' => array(array('content', '', '=', 'Hello'))));
         $filter->append_search_options($searchoptions);
@@ -105,7 +121,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // = 'World': 1
+        // = 'World': 1.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array($field->id => array('AND' => array(array('content', '', '=', 'World'))));
         $filter->append_search_options($searchoptions);
@@ -113,7 +129,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // Like 'hello': 2
+        // Like 'hello': 2.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array($field->id => array('AND' => array(array('content', '', 'LIKE', 'Hello'))));
         $filter->append_search_options($searchoptions);
@@ -121,7 +137,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // 'Hello' and 'World': 0
+        // 'Hello' and 'World': 0.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array(
             $field->id => array(
@@ -136,7 +152,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // 'Hello' or 'World': 3
+        // 'Hello' or 'World': 3.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array(
             $field->id => array(
@@ -151,7 +167,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // Like 'llo' and Like 'rld' and ('42' or 'Hello'): 2
+        // Like 'llo' and Like 'rld' and ('42' or 'Hello'): 2.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array(
             $field->id => array(

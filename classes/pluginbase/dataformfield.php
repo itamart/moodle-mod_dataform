@@ -722,7 +722,7 @@ abstract class dataformfield {
         $params = array();
 
         if ($operator === '' and $not) {
-            list($sql, $params) = $DB->get_in_or_equal('', null, null, false);
+            list($sql, $params) = $DB->get_in_or_equal('', SQL_PARAMS_QM, '', false);
             $sql = " $varcharcontent $sql ";
         } else if ($operator === '=') {
             $searchvalue = trim($value);
@@ -756,8 +756,8 @@ abstract class dataformfield {
         if ($excludeentries) {
             // Get entry ids for entries that meet the criterion
             if ($eids = $this->get_entry_ids_for_content($sql, $params)) {
-                // Get NOT IN sql
-                list($notinids, $params) = $DB->get_in_or_equal($eids, null, null, false);
+                // Get NOT IN sql.
+                list($notinids, $params) = $DB->get_in_or_equal($eids, SQL_PARAMS_QM, '', false);
                 $sql = " e.id $notinids ";
                 return array($sql, $params, false);
             } else {
