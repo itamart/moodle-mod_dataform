@@ -39,26 +39,24 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
 
         $replacements = array_fill_keys(array_keys($patterns), '');
 
-        if ($edit) {
-            foreach ($patterns as $pattern => $cleanpattern) {
-                if ($noedit = $this->is_noedit($pattern)) {
-                    continue;
-                }
+        $editdisplayed = false;
+        foreach ($patterns as $pattern => $cleanpattern) {
+            // Edit.
+            if ($edit and !$editdisplayed and !$this->is_noedit($pattern)) {
                 $params = array('required' => $this->is_required($pattern));
                 if ($cleanpattern == "[[$fieldname:addnew]]") {
                     $params['addnew'] = true;
                 }
                 $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $params));
+                $editdisplayed = true;
+                continue;
             }
-            return $replacements;
-        }
 
-        // Browse mode
-        foreach ($patterns as $pattern => $cleanpattern) {
+            // Browse.
             if ($cleanpattern == "[[$fieldname:options]]") {
                 $replacements[$pattern] = $this->display_browse($entry, array('options' => true));
             } else if ($cleanpattern == "[[$fieldname:key]]") {
-                $replacements[$pattern] = $this->display_category($entry, array('key' => true));
+                $replacements[$pattern] = $this->display_browse($entry, array('key' => true));
             } else if ($cleanpattern == "[[$fieldname:cat]]") {
                 $replacements[$pattern] = $this->display_category($entry);
             } else {
@@ -138,7 +136,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
                 if ($selected) {
                     return $selected;
                 } else {
-                    return '';
+                    return '0';
                 }
             }
 
