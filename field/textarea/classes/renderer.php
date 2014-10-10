@@ -40,14 +40,15 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         $replacements = array_fill_keys(array_keys($patterns), '');
         if ($edit) {
             foreach ($patterns as $pattern => $cleanpattern) {
-                $params = null;
-                $required = $this->is_required($pattern);
                 if ($cleanpattern == "[[{$fieldname}:wordcount]]") {
                     $replacements[$pattern] = '';
                     continue;
                 }
-                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
-                break;
+                if (!$noedit = $this->is_noedit($pattern)) {
+                    $required = $this->is_required($pattern);
+                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
+                    break;
+                }
             }
 
         } else {
