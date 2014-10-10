@@ -1,4 +1,4 @@
-@mod @dataform_no_mod @dataformfield @dataformfield_entrystate @dataformfield_entrystate_completion
+@mod @dataform_no_mod @dataformfield @dataformfield_entrystate
 Feature: Completion
 
     @javascript
@@ -20,31 +20,13 @@ Feature: Completion
         And I set the field "Enable completion tracking" to "Yes"
         And I press "Save changes"
 
-        # Dataform grade
         Then I follow "Dataform completion requires specific grade"
-        And I follow "Edit settings"
-        And I expand all fieldsets
-        And I set the field "id_modgrade_type" to "Point"
-        And I set the field "id_modgrade_point" to "10"
-        And I set the field "Calculation" to "SUM(##2:State##)/2"
-        And I press "Save and display"
-
-        # Dataform completion enabling
-        Then I follow "Dataform completion requires specific grade"
-        And I follow "Edit settings"
-        And I expand all fieldsets
-        And I set the field "Completion tracking" to "Show activity as complete when conditions are met"
-        And I set the field "completionspecificgradeenabled" to "1"
-        And I set the field "completionspecificgrade" to "3"
-        And I press "Save and display"
 
         # Add a field with  Submitted and Approved  states
-        Given the following dataform "fields" exist:
-            | type         | dataform  | name  |
-            | entrystate   | dataform1 | State |
         Then I go to manage dataform "fields"
-        And I follow "State"
+        And I set the field "Add a field" to "entrystate"
         And I expand all fieldsets
+        And I set the field "Name" to "State"
         And I set the field "States" to
             """
             Draft
@@ -54,9 +36,25 @@ Feature: Completion
         And I press "Save changes"
 
         # Add a default view
-        Given the following dataform "views" exist:
-            | type      | dataform  | name    | default |
-            | aligned   | dataform1 | View 01 | 1       |
+        Then I go to manage dataform "views"
+        And I add a dataform view "aligned" with "View 01"
+        And I set "View 01" as default view
+
+        ## Activity grade
+        Then I follow "Edit settings"
+        And I expand all fieldsets
+        And I set the field "id_modgrade_type" to "Point"
+        And I set the field "id_modgrade_point" to "10"
+        And I set the field "Calculation" to "SUM(##2:State##)/2"
+        And I press "Save and display"
+
+        ## Completion
+        Then I follow "Edit settings"
+        And I expand all fieldsets
+        And I set the field "Completion tracking" to "Show activity as complete when conditions are met"
+        And I set the field "completionspecificgradeenabled" to "1"
+        And I set the field "completionspecificgrade" to "3"
+        And I press "Save and display"
 
         # Add some entries
         And the following dataform "entries" exist:
@@ -70,7 +68,6 @@ Feature: Completion
             | dataform1 | student3      |       |               |               |
             | dataform1 | teacher1      |       |               |               |
 
-        Then I follow "Browse"
         Then I log out
 
         # Student 1 not yet completed
@@ -122,10 +119,3 @@ Feature: Completion
         And I log in as "student1"
         And I follow "Course 1"
         And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Dataform completion requires specific grade']" "xpath_element"
-        And I log out
-
-        # Clean up
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Dataform completion requires specific grade"
-        And I delete this dataform

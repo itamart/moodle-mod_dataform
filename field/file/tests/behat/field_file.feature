@@ -7,10 +7,10 @@ Feature: Add dataform entries
 
     @javascript
     Scenario: Use required or noedit patterns
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Test file field"
         And I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Test file field"
 
         # Add fields
         When I go to manage dataform "fields"
@@ -58,6 +58,3 @@ Feature: Add dataform entries
         Then I do not see "Maximum size for new files:"
         And I press "Save"
         Then "id_editentry1" "link" should exist
-
-        #Clean up
-        And I delete this dataform

@@ -41,5 +41,3 @@ Feature: Manage Dataform components
         And I press "Continue"
         And I do not see "Filter 01"
 
-        # Clean up
-        And I delete this dataform

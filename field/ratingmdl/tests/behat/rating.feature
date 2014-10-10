@@ -5,15 +5,41 @@ Feature: Rating
     Scenario: Rate entries
         ### Background ###
 
-        Given I start afresh with dataform "Rating Test Dataform"
-        And the following dataform "fields" exist:
-            | type  | dataform       | name      | param1 |
-            | ratingmdl  | dataform1 | rating1   | 100    |
-            | ratingmdl  | dataform1 | rating2   | 24     |
+        Given I start afresh with dataform "Test ratingmdl field"
 
-        And the following dataform "views" exist:
-            | type      | dataform  | name         |
-            | grid   | dataform1 | View 01 |
+        # Teacher Set up
+        #---------------------------
+
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Test ratingmdl field"
+
+        ## Fields
+        And I go to manage dataform "fields"
+        And I set the field "Add a field" to "Dataform rating"
+        And I expand all fieldsets
+        And I set the field "Name" to "rating1"
+        And I set the field "Type" to "Point"
+        And I set the field "Maximum points" to "100"
+        And I press "Save changes"
+        
+        And I set the field "Add a field" to "Dataform rating"
+        And I expand all fieldsets
+        And I set the field "Name" to "rating2"
+        And I set the field "Type" to "Point"
+        And I set the field "Maximum points" to "24"
+        And I press "Save changes"
+        
+        ## View
+        And I go to manage dataform "views"
+        And I add a dataform view "grid" with "View 01"
+        And I follow "Edit View 01"
+        And I expand all fieldsets
+        And I replace in field "Entry template" "[[rating1]]" with "[[rating1]]<div>Rating1 avg: [[rating1:avg]]</div><div>Rating1 sum: [[rating1:sum]]</div><div>Rating1 count: [[rating1:count]]</div><div>Rating1 max: [[rating1:max]]</div><div>Rating1 min: [[rating1:min]]</div>"
+        And I replace in field "Entry template" "[[rating2]]" with "[[rating2]]<div>Rating2 avg: [[rating2:avg]]</div><div>Rating2 sum: [[rating2:sum]]</div><div>Rating2 count: [[rating2:count]]</div><div>Rating2 max: [[rating2:max]]</div><div>Rating2 min: [[rating2:min]]</div>"
+        And I press "Save changes"
+        
+        And I set "View 01" as default view
 
         And the following dataform "entries" exist:
             | dataform  | user          | group | timecreated   | timemodified  | Field Text                |
@@ -28,26 +54,10 @@ Feature: Rating
         #    | mod/dataform:entryownupdate   | Prevent       | student        | Activity module | dataform1 |
         #    | mod/dataform:entryowndelete   | Prevent       | student        | Activity module | dataform1 |
 
-        # Teacher Set up
-        #---------------------------
-
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Rating Test Dataform"
-        And I go to manage dataform "views"
-        And I follow "Edit View 01"
-        And I expand all fieldsets
-        And I replace in field "Entry template" "[[rating1]]" with "[[rating1]]<div>Rating1 avg: [[rating1:avg]]</div><div>Rating1 sum: [[rating1:sum]]</div><div>Rating1 count: [[rating1:count]]</div><div>Rating1 max: [[rating1:max]]</div><div>Rating1 min: [[rating1:min]]</div>"
-        And I replace in field "Entry template" "[[rating2]]" with "[[rating2]]<div>Rating2 avg: [[rating2:avg]]</div><div>Rating2 sum: [[rating2:sum]]</div><div>Rating2 count: [[rating2:count]]</div><div>Rating2 max: [[rating2:max]]</div><div>Rating2 min: [[rating2:min]]</div>"
-        And I press "Save changes"
-
-        Then I set "View 01" as default view
-
+        And I follow "Browse"
 
         # Teacher rating
         #---------------------------
-        Then I follow "Browse"
-
         Then I set the field "ratingmenu_1_1" to "95"
         And I see "Rating1 avg: 95"
         And I see "Rating1 sum: 95"
@@ -71,7 +81,7 @@ Feature: Rating
         #---------------------------
         And I log in as "student1"
         And I follow "Course 1"
-        And I follow "Rating Test Dataform"
+        And I follow "Test ratingmdl field"
 
         Then I set the field "ratingmenu_1_1" to "96"
         And I see "Rating1 avg: 90"

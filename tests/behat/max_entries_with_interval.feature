@@ -138,11 +138,3 @@ Feature: Dataform max entries
         Then I do not see "New entry"
         And "field_1_-1" "field" should not exist        
         
-        And I log out
-        
-        # Clean up
-        #---------------------------------------------
-        When I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-        Then I delete this dataform
