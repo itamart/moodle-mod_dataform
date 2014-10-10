@@ -156,7 +156,7 @@ class mod_dataform_generator extends testing_module_generator {
      */
     public function create_view($record, array $options = null) {
         $record = (object)(array)$record;
-        $df = mod_dataform_dataform::instance($record->dataid);
+        $df = new \mod_dataform_dataform($record->dataid);
         $view = $df->view_manager->get_view($record->type);
         $view->generate_default_view();
 
@@ -170,7 +170,7 @@ class mod_dataform_generator extends testing_module_generator {
 
         // Set as default if specified
         if (!empty($record->default)) {
-            $df->view_manager->process_views('default', $view->id, null, true);
+            $df->update(array('defaultview' => $view->id));
         }
         return $view->data;
     }
@@ -241,7 +241,7 @@ class mod_dataform_generator extends testing_module_generator {
      */
     public function create_field($record, array $options = null) {
         $record = (object)(array)$record;
-        $df = mod_dataform_dataform::instance($record->dataid);
+        $df = new \mod_dataform_dataform($record->dataid);
         $field = $df->field_manager->get_field($record->type);
         $field->name = $record->name;
 
@@ -273,7 +273,7 @@ class mod_dataform_generator extends testing_module_generator {
         $record['timecreated'] = !empty($record['timecreated']) ? strtotime($record['timecreated']) : 0;
         $record['timemodified'] = !empty($record['timemodified']) ? strtotime($record['timemodified']) : 0;
 
-        $df = \mod_dataform_dataform::instance($record['dataid']);
+        $df = new \mod_dataform_dataform($record['dataid']);
         $entry = \mod_dataform\pluginbase\dataformentry::blank_instance($df, (object)(array)$record);
         $entry->id = $DB->insert_record('dataform_entries', $entry);
 

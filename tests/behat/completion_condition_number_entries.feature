@@ -93,9 +93,3 @@ Feature: Set a certain number of entries as a completion condition for a datafor
         And I follow "Course 1"
         And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Dataform completion condition number entries']" "xpath_element"
 
-        And I log out
-
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Dataform completion condition number entries"
-        And I delete this dataform

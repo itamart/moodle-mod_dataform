@@ -68,10 +68,3 @@ Feature: Navigation tabs
         #Then I go to dataform page "preset/index.php?d=1"
         #And I see "error/accessdenied"
 
-        And I log out
-
-        # Clean up
-        Then I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-        And I delete this dataform

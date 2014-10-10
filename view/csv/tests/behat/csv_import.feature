@@ -3,10 +3,10 @@ Feature: Import entries
 
     @javascript
     Scenario: Add dataform entries
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Test csv import"
         And I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Test csv import"
 
         # Add a csv view and put author:username edit and delete patterns
         When I go to manage dataform "views"
@@ -24,17 +24,14 @@ Feature: Import entries
             [[EAC:delete]]
             """
         And I press "Save changes"       
-        Then I see "View 01"
 
-        When I set "View 01" as default view
-        Then I do not see "Default view is not set."
+        Then I set "View 01" as default view
 
-        When I follow "Browse"
-        Then I see "Import"
+        Then I follow "Browse"
         
-        When I follow "Import"
+        Then I follow "Import"
         And I expand all fieldsets
-        #When I upload "lib/tests/fixtures/upload_users.csv" file to "File" filemanager
+        ##When I upload "lib/tests/fixtures/upload_users.csv" file to "File" filemanager
         And I set the field "CSV Text" to 
             """
             EAU:username,EGR:idnumber,ETM:timecreated,ETM:timemodified
@@ -58,8 +55,3 @@ Feature: Import entries
         And I see "9 March 2014"
         And I see "10 March 2014"
 
-And I wait "10" seconds
-        # Clean up
-        And I delete this dataform
-        
-        

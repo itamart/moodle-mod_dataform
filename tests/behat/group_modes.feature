@@ -3,16 +3,22 @@ Feature: Group modes
 
     @javascript
     Scenario: Group modes
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Test group modes"
 
-        And the following dataform "fields" exist:
-            | type  | dataform  | name        |
-            | text  | dataform1 | Field Text  |
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Test group modes"
 
-        And the following dataform "views" exist:
-            | type      | dataform  | name    | default |
-            | aligned   | dataform1 | View 01 | 1       |
+        ## Field
+        And I go to manage dataform "fields"
+        And I add a dataform field "text" with "Field Text"
 
+        ## View
+        And I go to manage dataform "views"
+        And I add a dataform view "aligned" with "View Aligned"
+        And I set "View Aligned" as default view
+
+        ## Entries
         And the following dataform "entries" exist:
             | dataform  | user          | group | timecreated   | timemodified  | Field Text                |
             | dataform1 | student1      | G1    |               |               | 1 Entry by Student 01     |
@@ -21,10 +27,6 @@ Feature: Group modes
             | dataform1 | teacher1      |       |               |               | 4 Entry by Teacher 01     |
 
         # Visible groups
-        #================
-        When I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
 
         # Set separate participants
         #---------------------------
@@ -61,7 +63,7 @@ Feature: Group modes
         #---------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Test group modes"
 
         # Group 1
         Then I see "1 Entry by Student 01"
@@ -89,7 +91,7 @@ Feature: Group modes
         #================
         When I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Test group modes"
 
         # Set separate participants
         #---------------------------
@@ -126,7 +128,7 @@ Feature: Group modes
         #---------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Test group modes"
 
         # Only Group 1 is available
         Then I see "Separate groups: Group 1"
@@ -135,12 +137,3 @@ Feature: Group modes
         And I see "3 Entry by Student 03"
         And I see "4 Entry by Teacher 01"
 
-        And I log out
-
-
-        # Clean up
-        #---------------------------------------------
-        When I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test Dataform"
-        Then I delete this dataform

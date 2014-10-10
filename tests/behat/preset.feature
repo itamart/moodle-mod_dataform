@@ -3,17 +3,23 @@ Feature: Manage Dataform presets
 
     @javascript
     Scenario: Add presets
-
         Given a fresh site with dataform "Preset Dataform"
-        And the following dataform "fields" exist:
-            | type  | dataform  | name        |
-            | text  | dataform1 | Field Text  |
-            | file  | dataform1 | Field File  |
 
-        And the following dataform "views" exist:
-            | type      | dataform  | name    | default |
-            | aligned   | dataform1 | View 01 | 1        |
+        Then I log in as "admin"
+        And I follow "Course 1"
+        And I follow "Preset Dataform"
 
+        ## Field
+        And I go to manage dataform "fields"
+        And I add a dataform field "text" with "Field Text"
+        And I add a dataform field "file" with "Field File"
+
+        ## View
+        And I go to manage dataform "views"
+        And I add a dataform view "aligned" with "View 01"
+        And I set "View 01" as default view
+
+        ## Entries
         And the following dataform "entries" exist:
             | dataform  | user          | group | timecreated   | timemodified  | Field Text                |
             | dataform1 | student1      |       |               |               | 1 Entry by Student 01     |
@@ -25,9 +31,6 @@ Feature: Manage Dataform presets
             | Course 2 | C2        | 0         |
 
         # Go to the presets tab.
-        Then I log in as "admin"
-        And I follow "Course 1"
-        And I follow "Preset Dataform"
         And I go to manage dataform "presets"
 
         ## ADD PRESET ##
@@ -169,10 +172,3 @@ Feature: Manage Dataform presets
         And I click on "img[title=Apply]" "css_element" in the "Preset-dataform-preset" "table_row"
         And I see "View 01"
 
-        And I delete this dataform
-
-        ## CLEAN UP ##
-        Then I follow "Home"
-        And I follow "Course 1"
-        And I follow "Preset Dataform"
-        And I delete this dataform
