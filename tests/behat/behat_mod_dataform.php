@@ -190,7 +190,7 @@ class behat_mod_dataform extends behat_base {
     public function i_start_afresh_with_dataform($name) {
         $steps = $this->start_afresh_steps();
 
-        // Test dataform
+        // Test dataform.
         $data = array(
             '| activity | course | idnumber | name                 | intro                       |',
             "| dataform   | C1     | dataform1  | $name | Test dataform description |",
@@ -367,15 +367,15 @@ class behat_mod_dataform extends behat_base {
 
         $steps = array();
 
-        // Open the form
+        // Open the form.
         $steps[] = new Given('I set the field "' . get_string('fieldadd', 'dataform'). '" to "'. $pluginname. '"');
 
-        // Fill the form
+        // Fill the form.
         $func = "field_form_fill_steps_$type";
         $func = method_exists($this, $func) ? $func : "field_form_fill_steps_base";
         $steps = array_merge($steps, $this->$func($data));
 
-        // Save
+        // Save.
         $steps[] = new Given('I press "' . get_string('savechanges') . '"');
         $steps[] = new Given('I wait to be redirected');
 
@@ -419,10 +419,10 @@ class behat_mod_dataform extends behat_base {
 
         $steps = array();
 
-        // Open the form
+        // Open the form.
         $steps[] = new Given('I set the field "' . get_string('viewadd', 'dataform'). '" to "'. $pluginname. '"');
 
-        // Fill the form
+        // Fill the form.
         $formfields = array(
             'Name',
             'Description',
@@ -444,7 +444,7 @@ class behat_mod_dataform extends behat_base {
         $table = $this->convert_data_to_table($formfields, $data);
         $steps[] = new Given('I set the following fields to these values:', $table);
 
-        // Save
+        // Save.
         $steps[] = new Given('I press "' . get_string('savechanges') . '"');
         $steps[] = new Given('I wait to be redirected');
 
@@ -460,7 +460,7 @@ class behat_mod_dataform extends behat_base {
      * @param string $name
      */
     public function i_set_as_default_view($name) {
-        // Click the Default button of the view
+        // Click the Default button of the view.
         $idsetdefault = 'id_'. str_replace(' ', '_', $name). '_set_default';
         $steps[] = new Given('I follow "' . $idsetdefault. '"');
 
@@ -527,10 +527,10 @@ class behat_mod_dataform extends behat_base {
 
         $steps = array();
 
-        // Open the form
+        // Open the form.
         $steps[] = new Given('I follow "'. get_string('filteradd', 'dataform'). '"');
 
-        // Fill the form
+        // Fill the form.
         $formfields = array(
             'Name',
             'Description',
@@ -562,7 +562,7 @@ class behat_mod_dataform extends behat_base {
         $table = $this->convert_data_to_table($formfields, $data);
         $steps[] = new Given('I set the following fields to these values:', $table);
 
-        // Save
+        // Save.
         $steps[] = new Given('I press "' . get_string('savechanges') . '"');
         $steps[] = new Given('I wait to be redirected');
 
@@ -675,7 +675,7 @@ class behat_mod_dataform extends behat_base {
         $value = $field->get_value();
         $value = str_replace($text, $replacement, $value);
 
-        // Hack to remove new line characters from editor field value
+        // Hack to remove new line characters from editor field value.
         if (get_class($field) == 'behat_form_editor') {
             $value = str_replace(array("\n", "\r"), '', $value);
         }
@@ -810,7 +810,8 @@ class behat_mod_dataform extends behat_base {
         $steps = array();
 
         $steps[] = new Given('"Delete Entry '. $entryid. '" "link" does not exist');
-        $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&delete='. $entryid. '&sesskey='. sesskey(). '"');
+        $url = 'view.php?d='. $dataformid. '&view='. $viewid. '&delete='. $entryid. '&sesskey='. sesskey();
+        $steps[] = new Given('I go to dataform page "'. $url. '"');
         $steps[] = new Given('I see "'. $content. '"');
 
         return $steps;
@@ -994,7 +995,6 @@ class behat_mod_dataform extends behat_base {
             $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
             $steps[] = new Given('I expand all fieldsets');
             $steps[] = new Given('I set the field "Name" to "'. $viewname. '"');
-            // $steps[] = new Given('I click on ".exporthide" "css_element"');
             $steps[] = new Given('I click on "Image" "button"');
             $steps[] = new Given('I click on "Browse repositories..." "button"');
             $steps[] = new Given('I click on "Private files" "link"');
@@ -1042,7 +1042,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I add a dataform field "text" with "Field 01"');
 
         $steps[] = new Given('I log out');
-        
+
         $entryid = 0;
         foreach ($items as $item) {
             $entryids = array();
@@ -1234,7 +1234,6 @@ class behat_mod_dataform extends behat_base {
 
             // I shouldn't be able to edit via the url.
 
-
             // Delete the entries.
             foreach ($entryids as $entryid) {
                 $steps[] = new Given('I follow "Delete Entry '. $entryid. '"');
@@ -1262,7 +1261,6 @@ class behat_mod_dataform extends behat_base {
 
         $dataformname = "Field management";
 
-
         $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
 
         $steps[] = new Given('I log in as "teacher1"');
@@ -1274,16 +1272,16 @@ class behat_mod_dataform extends behat_base {
             $fieldtype = $item['fieldtype'];
             $fieldname = !empty($item['fieldname']) ? $item['fieldname'] : "field$fieldtype";
 
-            // Add
+            // Add.
             $steps[] = new Given('I add a dataform field "'. $fieldtype. '" with "'. $fieldname. '"');
             $steps[] = new Given('I see "'. $fieldname. '"');
-            // Edit
+            // Edit.
             $steps[] = new Given('I follow "Edit '. $fieldname. '"');
             $steps[] = new Given('I see "Editing \''. $fieldname. '\'"');
             $steps[] = new Given('I set the field "Description" to "'. $fieldname. ' modified"');
             $steps[] = new Given('I press "Save changes"');
             $steps[] = new Given('I see "'. $fieldname. ' modified"');
-            // Delete
+            // Delete.
             $steps[] = new Given('I follow "Delete '. $fieldname. '"');
             $steps[] = new Given('I press "Continue"');
             $steps[] = new Given('I do not see "'. $fieldname. '"');
@@ -1315,17 +1313,17 @@ class behat_mod_dataform extends behat_base {
 
         $steps[] = new Given('I follow "Access"');
 
-        // Add a rule
+        // Add a rule.
         $steps[] = new Given('I follow "id_add_'. $ruletype. '_access_rule"');
         $steps[] = new Given('I see "'. "New $typename rule". '"');
 
-        // Update the rule
+        // Update the rule.
         $steps[] = new Given('I follow "id_editaccess'. $ruletype. '1"');
         $steps[] = new Given('I set the field "Name" to "'. "New $typename rule". ' modified"');
         $steps[] = new Given('I press "Save changes"');
         $steps[] = new Given('I see "'. "New $typename rule". ' modified"');
 
-        // Delete the rule
+        // Delete the rule.
         $steps[] = new Given('I follow "id_deleteaccess'. $ruletype. '1"');
         $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
 
@@ -1355,11 +1353,11 @@ class behat_mod_dataform extends behat_base {
 
         $steps[] = new Given('I follow "Notifications"');
 
-        // Add a rule
+        // Add a rule.
         $steps[] = new Given('I follow "id_add_'. $ruletype. '_notification_rule"');
         $steps[] = new Given('I see "'. "New $typename rule". '"');
 
-        // Update the rule
+        // Update the rule.
         $steps[] = new Given('I follow "id_editnotification'. $ruletype. '1"');
         $steps[] = new Given('I set the field "Name" to "'. "New $typename rule". ' modified"');
         $steps[] = new Given('I set the field "Events" to "Entry created"');
@@ -1367,7 +1365,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I press "Save changes"');
         $steps[] = new Given('I see "'. "New $typename rule". ' modified"');
 
-        // Delete the rule
+        // Delete the rule.
         $steps[] = new Given('I follow "id_deletenotification'. $ruletype. '1"');
         $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
 
@@ -1528,7 +1526,7 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            // Fix value for text area
+            // Fix value for text area.
             if ($name == 'Options' or $name == 'Default values' and $val) {
                 $val = implode("\n", explode('\n', $val));
             }
@@ -1576,7 +1574,7 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            // Fix value for text area
+            // Fix value for text area.
             if ($name == 'Options' and $val) {
                 $val = implode("\n", explode('\n', $val));
             }
@@ -1601,13 +1599,13 @@ class behat_mod_dataform extends behat_base {
         }
 
         $formfields = array(
-            'Auto link', // Auto link
-            'param2', // Width
-            'param3', // Width unit
-            'Format', // alphanumeric|lettersonly|numeric|email|nopunctuation
-            'param5', // Number of character (minlength|maxlength|rangelength)
-            'param6', // Min (integer)
-            'param7', // Nax (integer)
+            'Auto link', // Auto link.
+            'param2', // Width.
+            'param3', // Width unit.
+            'Format', // alphanumeric|lettersonly|numeric|email|nopunctuation.
+            'param5', // Number of character (minlength|maxlength|rangelength).
+            'param6', // Min (integer).
+            'param7', // Nax (integer).
         );
 
         $vals = explode("\t", trim($data));
@@ -1639,8 +1637,8 @@ class behat_mod_dataform extends behat_base {
 
         $formfields = array(
             'Decimals',
-            'param2', // Width
-            'param3', // Width unit
+            'param2', // Width.
+            'param3', // Width unit.
         );
 
         $vals = explode("\t", trim($data));
@@ -1685,7 +1683,7 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            // Fix value for text area
+            // Fix value for text area.
             if ($name == 'Options' and $val) {
                 $val = implode("\n", explode('\n', $val));
             }

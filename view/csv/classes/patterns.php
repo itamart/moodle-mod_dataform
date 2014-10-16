@@ -96,7 +96,7 @@ class dataformview_csv_patterns extends mod_dataform\pluginbase\dataformviewpatt
                     if ($view->param5) {
                         $actionurl = new moodle_url($baseurl, array('importcsv' => 1));
                         $label = $label ? $label : html_writer::tag('span', get_string('import'));
-                        $replacements[$pattern] = html_writer::link($actionurl, $label, array('class' => 'actionlink exportall'));
+                        $replacements[$pattern] = html_writer::link($actionurl, $label, array('class' => 'actionlink import'));
                     } else {
                         $replacements[$pattern] = '';
                     }
