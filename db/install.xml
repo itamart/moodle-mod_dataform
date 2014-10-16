@@ -9,7 +9,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the activity."/>
-        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="The description of the activity. Used by feature MOD_INTRO."/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The description of the activity. Used by feature MOD_INTRO."/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The format of the description of the activity. Used by feature MOD_INTRO."/>       
         <FIELD NAME="inlineview" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Id of a dataformview of the activity. If set, the content of the view will be displayed on the course page instead of the activity link."/>
         <FIELD NAME="embedded" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true and inline view is set, the inline view display on the course page will be embedded in an iframe."/>
@@ -19,17 +19,17 @@
         <FIELD NAME="timeinterval" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time duration in seconds as activity interval. Requires timeavailable."/>
         <FIELD NAME="intervalcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Number of intervals for the activity. If there are multiple intervals, activity start time and end time are calculated for each interval."/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The maximum grade for the activity. A negative grade indicates the use of a scale."/>
-        <FIELD NAME="gradecalc" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="A grade calculation formula for direct grading method. Allows grade calculation for each user based on entries' content."/>
+        <FIELD NAME="gradecalc" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="A grade calculation formula for direct grading method. Allows grade calculation for each user based on entries' content."/>
         <FIELD NAME="maxentries" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="individualized" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="grouped" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="anonymous" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timelimit" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="-1" SEQUENCE="false"/>
-        <FIELD NAME="css" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="cssincludes" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="js" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="jsincludes" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="css" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="cssincludes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="js" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="jsincludes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="defaultview" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="defaultfilter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="completionentries" TYPE="int" LENGTH="9" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Nonzero if a certain number of entries are required to mark this activity complete for a user."/>
@@ -48,20 +48,20 @@
         <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="2" SEQUENCE="false"/>
         <FIELD NAME="editable" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
-        <FIELD NAME="label" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param3" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param4" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param5" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param6" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param7" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param8" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param9" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param10" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="label" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param1" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param2" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param3" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param4" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param5" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param6" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param7" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param8" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param9" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param10" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -77,24 +77,24 @@
         <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="perpage" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="groupby" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="filterid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="patterns" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="submission" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="section" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param3" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param4" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param5" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param6" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param7" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param8" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param9" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="param10" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="patterns" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="submission" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="section" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param1" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param2" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param3" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param4" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param5" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param6" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param7" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param8" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param9" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="param10" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -109,14 +109,14 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="perpage" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="10" SEQUENCE="false"/>
         <FIELD NAME="selection" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="groupby" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="search" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="customsort" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="customsearch" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="search" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="customsort" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="customsearch" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -143,11 +143,11 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="fieldid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="entryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="content" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="content1" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="content2" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="content3" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="content4" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="content1" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="content2" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="content3" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="content4" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

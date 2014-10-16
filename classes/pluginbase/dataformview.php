@@ -1424,9 +1424,10 @@ class dataformview {
                 }
                 $calc = new \calc_formula("=$formula");
                 $result = $calc->evaluate();
-                // False as result indicates some problem.
                 if ($result === false) {
-                    $replacements[$pattern] = \html_writer::tag('span', $formula, array('style' => 'color:red;'));
+                    // False as result indicates some problem.
+                    // We remove the formula altogether.
+                    $replacements[$pattern] = '';
                 } else {
                     // Set decimals.
                     if (is_numeric($decimals)) {

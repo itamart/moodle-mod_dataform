@@ -378,22 +378,22 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         $params = array();
         $params[] = $this->dataid;
 
+        $selectwhere = array(' dataid = ? ');
+
         // User
-        $selectuser = '';
         if ($userid) {
-            $selectuser = " userid = ? ";
+            $selectwhere[] = ' userid = ? ';
             $params[] = $userid;
         }
 
         // Entries
-        $selectentries = '';
         if ($entryids) {
             list($inids, $eparams) = $DB->get_in_or_equal($entryids);
-            $selectentries = " id $inids ";
+            $selectwhere[] = " id $inids ";
             $params = array_merge($params, $eparams);
         }
 
-        $select = "dataid = ? AND $selectuser AND $selectentries";
+        $select = implode(' AND ', $selectwhere);
         $values = array();
         if ($entries = $DB->get_records_select('dataform_entries', $select, $params, 'state', 'id,userid,state')) {
             foreach ($entries as $entryid => $entry) {
