@@ -91,7 +91,9 @@ class completion {
         $entryuserid = $event->relateduserid;
 
         $giid = $event->other['itemid'];
-        $gitem = \grade_item::fetch(array('id' => $giid));
+        if (!$gitem = \grade_item::fetch(array('id' => $giid, 'itemmodule' => 'dataform'))) {
+            return;
+        }
         $dataformid = $gitem->iteminstance;
 
         $df = \mod_dataform_dataform::instance($dataformid);
