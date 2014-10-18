@@ -37,12 +37,12 @@ class mod_dataform_filter_manager {
     protected $_filters;
 
     public static function instance($dataformid) {
-        static $instances = array();
-
-        if (empty($instances[$dataformid])) {
-            $instances[$dataformid] = new mod_dataform_filter_manager($dataformid);
+        if (!$instance = \mod_dataform_instance_store::instance($dataformid, 'filter_manager')) {
+            $instance = new mod_dataform_filter_manager($dataformid);
+            \mod_dataform_instance_store::register($dataformid, 'filter_manager', $instance);
         }
-        return $instances[$dataformid];
+
+        return $instance;
     }
 
     /**

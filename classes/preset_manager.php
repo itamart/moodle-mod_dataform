@@ -34,12 +34,12 @@ class mod_dataform_preset_manager {
     protected $_dataformid;
 
     public static function instance($dataformid) {
-        static $instances = array();
-
-        if (empty($instances[$dataformid])) {
-            $instances[$dataformid] = new mod_dataform_preset_manager($dataformid);
+        if (!$instance = \mod_dataform_instance_store::instance($dataformid, 'preset_manager')) {
+            $instance = new mod_dataform_preset_manager($dataformid);
+            \mod_dataform_instance_store::register($dataformid, 'preset_manager', $instance);
         }
-        return $instances[$dataformid];
+
+        return $instance;
     }
 
     /**
