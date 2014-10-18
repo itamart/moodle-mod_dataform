@@ -26,8 +26,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_dataform_events_testcase extends advanced_testcase {
-    protected $_course;
-
     /**
      * Test set up.
      *
@@ -35,28 +33,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
      */
     public function setUp() {
         $this->resetAfterTest();
-
-        // Create a course we are going to add a data module to.
-        $this->_course = $this->getDataGenerator()->create_course();
-    }
-
-    /**
-     * Sets up a dataform activity in a course.
-     *
-     * @return mod_dataform_dataform
-     */
-    protected function get_a_dataform($dataformid = null) {
+        advanced_testcase::resetAllData();
         $this->setAdminUser();
-
-        // The generator used to create a data module.
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
-
-        if (!$dataformid) {
-            // Create a dataform instance
-            $data = $generator->create_instance(array('course' => $this->_course));
-            $dataformid = $data->id;
-        }
-        return mod_dataform_dataform::instance($dataformid);
     }
 
     /**
@@ -69,8 +47,6 @@ class mod_dataform_events_testcase extends advanced_testcase {
         foreach ($viewtypes as $type) {
             $this->try_crud_view($type, $df);
         }
-
-        $df->delete();
     }
 
     /**
@@ -83,8 +59,6 @@ class mod_dataform_events_testcase extends advanced_testcase {
         foreach ($fieldtypes as $type) {
             $this->try_crud_field($type, $df);
         }
-
-        $df->delete();
     }
 
     /**
@@ -213,6 +187,22 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEventLegacyLogData($expected, $event);
 
         $df->delete();
+    }
+
+    /**
+     * Sets up a dataform activity in a course.
+     *
+     * @return mod_dataform_dataform
+     */
+    protected function get_a_dataform($course = null) {
+        $course = !$course ? $this->getDataGenerator()->create_course() : $course;
+
+        // Create a dataform instance.
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
+        $dataform = $generator->create_instance(array('course' => $course));
+        $dataformid = $dataform->id;
+
+        return \mod_dataform_dataform::instance($dataformid);
     }
 
     /**
