@@ -64,17 +64,18 @@ class mod_dataform_entry_manager {
     public static function instance($dataformid, $viewid) {
         global $DB;
 
-        static $instances = array();
         if (!$dataformid) {
             if (!$viewid or !$dataformid = $DB->get_field('dataform_views', 'dataid', array('id' => $viewid))) {
                 throw new moodle_exception('invaliddataform', 'dataform', null, null, "Dataform id: $dataformid");
             }
         }
 
-        if (empty($instances["$dataformid-$viewid"])) {
-            $instances["$dataformid-$viewid"] = new mod_dataform_entry_manager($dataformid, $viewid);
+        if (!$instance = \mod_dataform_instance_store::instance($dataformid, "entry_manager-$viewid")) {
+            $instance = new mod_dataform_entry_manager($dataformid, $viewid);
+            \mod_dataform_instance_store::register($dataformid, "entry_manager-$viewid", $instance);
         }
-        return $instances["$dataformid-$viewid"];
+
+        return $instance;
     }
 
     /**

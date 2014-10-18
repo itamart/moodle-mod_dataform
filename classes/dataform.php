@@ -72,18 +72,18 @@ class mod_dataform_dataform {
     public static function instance($dataformid, $cmid = 0, $autologinguest = false) {
         global $DB;
 
-        static $instances = array();
-
         if (!$dataformid) {
             if (!$cmid or !$dataformid = $DB->get_field('course_modules', 'instance', array('id' => $cmid))) {
                 throw new moodle_exception('invalidcoursemodule', 'dataform', null, null, "Cm id: $cmid");
             }
         }
 
-        if (empty($instances[$dataformid])) {
-            $instances[$dataformid] = new mod_dataform_dataform($dataformid, null, $autologinguest);
+        if (!$df = \mod_dataform_instance_store::instance($dataformid, 'dataform')) {
+            $df = new mod_dataform_dataform($dataformid, null, $autologinguest);
+            \mod_dataform_instance_store::register($dataformid, 'dataform', $df);
         }
-        return $instances[$dataformid];
+
+        return $df;
     }
 
     /**
@@ -679,10 +679,14 @@ class mod_dataform_dataform {
     public function delete() {
         global $DB;
 
-        // First reset everything
+        // First reset everything.
         $this->reset();
 
-        // Delete the instance itself
+        // Remove instance from local store.
+        // This removes also the mangers of this dataform instance.
+        \mod_dataform_instance_store::unregister($this->id);
+
+        // Delete the instance itself.
         return $DB->delete_records('dataform', array('id' => $this->id));
     }
 
@@ -692,13 +696,13 @@ class mod_dataform_dataform {
      * @return bool Always true
      */
     protected function reset() {
-        // Must have manage templates capability
+        // Must have manage templates capability.
         require_capability('mod/dataform:managetemplates', $this->context);
 
-        // Reset settings
+        // Reset settings.
         $this->reset_settings();
 
-        // Delete all component items
+        // Delete all component items.
         mod_dataform_field_manager::instance($this->id)->delete_fields();
         mod_dataform_view_manager::instance($this->id)->delete_views();
         mod_dataform_filter_manager::instance($this->id)->delete_filters();
@@ -706,21 +710,26 @@ class mod_dataform_dataform {
         mod_dataform_access_manager::instance($this->id)->delete_rules();
         mod_dataform_notification_manager::instance($this->id)->delete_rules();
 
-        // Reset user data
+        // Reset user data.
         $this->reset_user_data();
 
-        // Delete remaining files (e.g. css, js)
+        // Delete remaining files (e.g. css, js).
         $fs = get_file_storage();
         $fs->delete_area_files($this->context->id, 'mod_dataform');
 
-        // Clean up gradebook
+        // Clean up gradebook.
         dataform_grade_item_delete($this->data);
 
-        // Refresh events
+        // Refresh events.
         dataform_refresh_events($this->course->id);
 
-        // Delete context content
+        // Delete context content.
         $this->context->delete_content();
+
+        // Update instance store.
+        if (\mod_dataform_instance_store::instance($this->id, 'dataform')) {
+            \mod_dataform_instance_store::register($this->id, 'dataform', $this);
+        }
 
         return true;
     }
