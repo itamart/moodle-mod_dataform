@@ -45,38 +45,38 @@ abstract class dataformfieldrenderer {
     }
 
     /**
-     * Search and collate field patterns that occur in given text
+     * Search and collate field patterns that occur in given text.
      *
      * @param string Text that may contain field patterns
      * @param array Optional list of patterns to search in text
      * @return array Field patterns found in the text
      */
     public function search($text, array $patterns = null) {
-        $fieldid = $this->_field->id;
+        $field = $this->_field;
+        $fieldid = $field->id;
         $fieldname = $this->_field->name;
 
         $found = array();
 
-        // Capture label patterns
-        if (strpos($text, "[[$fieldname@]]") !== false and !empty($this->_field->label)) {
-            $found["[[$fieldname@]]"] = "[[$fieldname@]]";
+        // Capture label patterns.
+        if (strpos($text, "[[T@$fieldname]]") !== false and $field->label) {
+            $found["[[T@$fieldname]]"] = "[[T@$fieldname]]";
 
-            $text = str_replace("[[$fieldname@]]", $this->_field->label, $text);
+            $text = str_replace("[[T@$fieldname]]", $field->label, $text);
         }
-
-        // Search and collate field patterns
+        // Search and collate field patterns.
         $patterns = $patterns ? $patterns : array_keys($this->patterns());
 
         foreach ($patterns as $pattern) {
             if (strpos($text, $pattern) !== false) {
                 $found[$pattern] = $pattern;
             }
-            // With required rule *
+            // With required rule *.
             $patternrequired = '[['. self::PATTERN_REQUIRED. trim($pattern, '[');
             if (strpos($text, $patternrequired) !== false) {
                 $found[$patternrequired] = $patternrequired;
             }
-            // With noedit rule !
+            // With noedit rule !.
             $patternnoedit = '[['. self::PATTERN_NOEDIT. trim($pattern, '[');
             if (strpos($text, $patternnoedit) !== false) {
                 $found[$patternnoedit] = $patternnoedit;
@@ -160,21 +160,21 @@ abstract class dataformfieldrenderer {
      * @return array Associative array of associative arrays
      */
     public final function get_menu($showall = false) {
-        // the default menu category for fields
+        // The default menu category for fields.
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // which category
+                // Which category.
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('fields', 'dataform');
                 }
-                // prepare array
+                // Prepare array.
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // add tag
+                // Add tag.
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -197,31 +197,44 @@ abstract class dataformfieldrenderer {
         $editing = (!empty($options['edit']) and $field->is_editable($entry));
         $options['edit'] = $editing;
 
-        // Get the field replacements
+        // If we have a template put it aside for later.
+        if ($fieldtemplate = array_search("[[T@$fieldname]]", $patterns) or $fieldtemplate !== false) {
+            unset($patterns[$fieldtemplate]);
+        }
+
+        // Get the field replacements.
         $patterns = $this->add_clean_pattern_keys($patterns);
         $replacements = $this->replacements($patterns, $entry, $options);
 
-        // Do we need to set the template pattern?
-        if (!in_array("[[$fieldname@]]", $patterns) or !$field->label) {
+        // No field template.
+        if ($fieldtemplate === false) {
             return $replacements;
         }
 
-        // Set the template pattern
-        $templaterep = array();
+        // Empty field template.
+        if (!$field->label) {
+            $replacements["[[T@$fieldname]]"] = null;
+            return $replacements;
+        }
+
+        // Field template with content.
         if ($editing) {
-            $templaterep["[[$fieldname@]]"] = array(array($this , 'parse_label'), array($replacements));
+            // Editing.
+            $replacements["[[T@$fieldname]]"] = array(array($this , 'parse_template'), array($replacements));
+            return $replacements;
         } else {
+            // Browsing.
             $template = $field->label;
             foreach ($replacements as $pattern => $replacement) {
-                if (empty($replacement)) {
+                // Skip the template pattern.
+                if ($pattern == "[[T@$fieldname]]") {
                     continue;
                 }
+
                 $template = str_replace($pattern, $replacement, $template);
             }
-            $templaterep["[[$fieldname@]]"] = $template;
+            $replacements["[[T@$fieldname]]"] = $template;
         }
-        $replacements = array_merge($templaterep, $replacements);
-
         return $replacements;
     }
 
@@ -242,12 +255,13 @@ abstract class dataformfieldrenderer {
     /**
      * @param array $patterns array of arrays of pattern replacement pairs
      */
-    public function parse_label(&$mform, $definitions) {
+    public function parse_template(&$mform, $definitions) {
         $field = $this->_field;
         $patterns = array_keys($definitions);
+
         $delims = implode('|', $patterns);
 
-        // Escape [ and ] and the pattern rule character *
+        // Escape [ and ] and the pattern rule character *.
         $delims = quotemeta($delims);
 
         $parts = preg_split("/($delims)/", $field->label, null, PREG_SPLIT_DELIM_CAPTURE);
@@ -306,7 +320,7 @@ abstract class dataformfieldrenderer {
         $fieldname = $this->_field->name;
 
         $patterns = array();
-        $patterns["[[$fieldname@]]"] = array(true, $fieldname);
+        $patterns["[[T@$fieldname]]"] = array(true, $fieldname);
 
         return $patterns;
     }
