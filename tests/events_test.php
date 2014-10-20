@@ -33,14 +33,13 @@ class mod_dataform_events_testcase extends advanced_testcase {
      */
     public function setUp() {
         $this->resetAfterTest();
-        advanced_testcase::resetAllData();
-        $this->setAdminUser();
     }
 
     /**
      * Test view events for standard types.
      */
     public function test_view_events() {
+        $this->setAdminUser();
         $df = $this->get_a_dataform();
 
         $viewtypes = array_keys(core_component::get_plugin_list('dataformview'));
@@ -53,6 +52,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
      * Test field events for standard types.
      */
     public function test_field_events() {
+        $this->setAdminUser();
         $df = $this->get_a_dataform();
 
         $fieldtypes = array_keys(core_component::get_plugin_list('dataformfield'));
@@ -67,6 +67,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
     public function test_filter_events() {
         global $DB;
 
+        $this->setAdminUser();
         $df = $this->get_a_dataform();
         $filter = $df->filter_manager->get_filter_blank();
 
@@ -108,8 +109,6 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'filters delete', "filter/index.php?d=$df->id&amp;delete=$filter->id", $filter->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-
-        $df->delete();
     }
 
     /**
@@ -118,6 +117,7 @@ class mod_dataform_events_testcase extends advanced_testcase {
     public function test_entry_events() {
         global $DB;
 
+        $this->setAdminUser();
         $df = $this->get_a_dataform();
 
         // SETUP
@@ -185,8 +185,6 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
         $expected = array($df->course->id, 'dataform', 'entries delete', "view.php?d=$df->id&amp;view=$view->id", $entryid, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
-
-        $df->delete();
     }
 
     /**
