@@ -777,7 +777,7 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
 }
 
 /**
- * Adds module specific settings to the settings block
+ * Adds module specific settings to the settings block.
  *
  * @param settings_navigation $settings The settings navigation object
  * @param navigation_node $datanode The node to add module settings to
@@ -785,31 +785,38 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
 function dataform_extend_settings_navigation(settings_navigation $settings, navigation_node $dfnode) {
     global $PAGE;
 
-    // INDEX
+    // Index.
     $coursecontext = context_course::instance($PAGE->course->id);
     if (has_capability('mod/dataform:indexview', $coursecontext)) {
         $dfnode->add(get_string('index', 'dataform'), new moodle_url('/mod/dataform/index.php', array('id' => $PAGE->course->id)));
     }
 
-    // MANAGEMENT
-    // Must be activity manager
+    // MANAGEMENT.
+    // Must be activity manager.
     $df = \mod_dataform_dataform::instance(null, $PAGE->cm->id);
     if (!$manager = $df->user_manage_permissions) {
         return;
     }
 
-    // View gradebook
+    // View gradebook.
     if ($df->grade) {
         $dfnode->add(get_string('gradebook', 'grades'), new moodle_url('/grade/report/index.php', array('id' => $PAGE->course->id)));
     }
 
-    // delete
     if ($manager['templates']) {
+        // Renew activity.
         $dfnode->add(get_string('renewactivity', 'dataform'), new moodle_url('/mod/dataform/view.php', array('id' => $PAGE->cm->id, 'renew' => 1, 'sesskey' => sesskey())));
+        // Delete activity.
         $dfnode->add(get_string('deleteactivity', 'dataform'), new moodle_url('/course/mod.php', array('delete' => $PAGE->cm->id, 'sesskey' => sesskey())));
     }
 
-    // manage
+    // Module administration (requires site:config).
+    if (has_capability('moodle/site:config', context_system::instance())) {
+        $url = new \moodle_url('/admin/settings.php', array('section' => 'modsettingdataform'));
+        $dfnode->add(get_string('modulesettings', 'dataform'), $url);
+    }
+
+    // Manage.
     $manage = $dfnode->add(get_string('manage', 'dataform'));
 
     if ($manager['views']) {

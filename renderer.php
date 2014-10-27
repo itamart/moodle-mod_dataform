@@ -106,18 +106,19 @@ class mod_dataform_renderer extends plugin_renderer_base {
             return null;
         }
 
-        $df = mod_dataform_dataform::instance($this->_dataformid);
-
         $subplugintype = "dataform$dir";
+        $plugininfo = '\\mod_dataform\\plugininfo\\'. $subplugintype;
+
+        if (!$enabled = $plugininfo::get_enabled_plugins()) {
+            return null;
+        }
+
         $menu = array();
-        foreach (array_keys(core_component::get_plugin_list($subplugintype)) as $subpluginname) {
-            if (!empty($options['exclude']) and in_array($subpluginname, $options['exclude'])) {
+        foreach ($enabled as $name) {
+            if (!empty($options['exclude']) and in_array($name, $options['exclude'])) {
                 continue;
             }
-            $menu[$subpluginname] = get_string('pluginname', "{$subplugintype}_$subpluginname");
-        }
-        if ($asort) {
-            asort($menu); // sort in alphabetical order
+            $menu[$name] = get_string('pluginname', "{$subplugintype}_$name");
         }
 
         $params = array('d' => $this->_dataformid, 'sesskey' => sesskey());
