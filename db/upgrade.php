@@ -66,7 +66,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2013051101($dbman, $oldversion);
     xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
-    xmldb_dataform_upgrade_2014101900($dbman, $oldversion);
+    xmldb_dataform_upgrade_last($dbman, $oldversion);
 
     return true;
 }
@@ -1112,10 +1112,10 @@ function xmldb_dataform_upgrade_2014051301($dbman, $oldversion) {
     return true;
 }
 
-function xmldb_dataform_upgrade_2014101900($dbman, $oldversion) {
+function xmldb_dataform_upgrade_last($dbman, $oldversion) {
     global $CFG, $DB;
 
-    $newversion = 2014101900;
+    $newversion = 2014101903;
     if ($oldversion < $newversion) {
         // Replace field template pattern from [[fieldname@]] to [[T@fieldname]].
         if ($dataforms = $DB->get_records('dataform')) {
@@ -1123,7 +1123,7 @@ function xmldb_dataform_upgrade_2014101900($dbman, $oldversion) {
                 $sqlparams = array('dataid' => $dataformid);
 
                 // Get field names of the dataform fields.
-                if (!$fieldname = $DB->get_records_menu('dataform_fields', $sqlparams, '', 'id,name')) {
+                if (!$fieldnames = $DB->get_records_menu('dataform_fields', $sqlparams, '', 'id,name')) {
                     continue;
                 }
 
@@ -1142,6 +1142,16 @@ function xmldb_dataform_upgrade_2014101900($dbman, $oldversion) {
                 $df->view_manager->replace_patterns_in_views(array_keys($replacements), $replacements);
             }
         }
+
+        // Enable existing field plugins.
+        $type = 'dataformfield';
+        $enabled = array_keys(core_component::get_plugin_list($type));
+        set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
+
+        // Enable existing view plugins.
+        $type = 'dataformview';
+        $enabled = array_keys(core_component::get_plugin_list($type));
+        set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
 
         // Dataform savepoint reached.
         upgrade_mod_savepoint(true, $newversion, 'dataform');
