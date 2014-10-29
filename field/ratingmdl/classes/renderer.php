@@ -169,7 +169,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
      *
      */
     public function render_rating($entry) {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $field = $this->_field;
         $fieldname = $field->name;
@@ -215,7 +215,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         $submitbutton = html_writer::start_tag('span', array('class' => "ratingsubmit"));
         $submitbutton .= html_writer::empty_tag('input', $attributes);
         if (!$rating->settings->scale->isnumeric) {
-            $submitbutton .= $this->help_icon_scale($rating->settings->scale->courseid, $rating->settings->scale);
+            $submitbutton .= $OUTPUT->help_icon_scale($rating->settings->scale->courseid, $rating->settings->scale);
         }
         $submitbutton .= html_writer::end_tag('span');
 
