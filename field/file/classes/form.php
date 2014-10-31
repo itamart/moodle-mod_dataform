@@ -63,7 +63,6 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
         $mform =& $this->_form;
 
         // File settings
-        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
         // max bytes (param1)

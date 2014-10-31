@@ -26,7 +26,7 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
     /**
      *
      */
-    protected function content_names() {
+    public function content_names() {
         $optioncount = count(explode("\n", $this->param1));
         $contentnames = array('newvalue');
         foreach (range(1, $optioncount) as $key) {

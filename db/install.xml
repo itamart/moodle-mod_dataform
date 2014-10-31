@@ -10,7 +10,7 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the activity."/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The description of the activity. Used by feature MOD_INTRO."/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The format of the description of the activity. Used by feature MOD_INTRO."/>       
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The format of the description of the activity. Used by feature MOD_INTRO."/>
         <FIELD NAME="inlineview" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Id of a dataformview of the activity. If set, the content of the view will be displayed on the course page instead of the activity link."/>
         <FIELD NAME="embedded" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true and inline view is set, the inline view display on the course page will be embedded in an iframe."/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time when the settings of the activity were last modified."/>
@@ -52,6 +52,8 @@
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="2" SEQUENCE="false"/>
         <FIELD NAME="editable" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="label" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="defaultcontentmode" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="defaultcontent" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="param1" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="param2" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="param3" TYPE="text" NOTNULL="false" SEQUENCE="false"/>

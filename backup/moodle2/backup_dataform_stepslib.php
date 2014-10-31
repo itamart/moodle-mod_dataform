@@ -46,7 +46,8 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
 
         $fields = new backup_nested_element('fields');
         $field = new backup_nested_element('field', array('id'), array(
-            'type', 'name', 'description', 'visible', 'editable', 'label',
+            'type', 'name', 'description', 'visible', 'editable',
+            'label', 'defaultcontentmode', 'defaultcontent',
             'param1', 'param2', 'param3', 'param4', 'param5',
             'param6', 'param7', 'param8', 'param9', 'param10'));
 

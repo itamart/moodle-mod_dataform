@@ -33,13 +33,19 @@ class dataformfield_ratingmdl_form extends mod_dataform\pluginbase\dataformfield
         // Restrict name to alphanumeric
         $mform->addRule('name', null, 'alphanumeric', null, 'client');
 
-        // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-
         // Entry rating
         $mform->addElement('modgrade', 'param1', get_string('rating', 'dataformfield_ratingmdl'));
         $mform->setDefault('param1', 0);
 
+    }
+
+    /**
+     * The field default content fieldset.
+     * Overriding parent to display no defaults for this field.
+     *
+     * @return void
+     */
+    protected function definition_defaults() {
     }
 
     /**
