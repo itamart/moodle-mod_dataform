@@ -24,3 +24,4 @@ $string['pluginname'] = 'Select';
 $string['allowaddoption'] = 'Allow adding options';
 $string['optionsdefault'] = 'Default value';
 $string['options'] = 'Options';
+$string['invaliddefaultvalue'] = 'The value must match one of the field options';

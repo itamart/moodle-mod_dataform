@@ -30,9 +30,6 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-
         // Auto link
         $mform->addElement('selectyesno', 'param1', get_string('autolink', 'dataformfield_text'));
 
