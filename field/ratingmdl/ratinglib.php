@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod_dataform
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_ratingmdl
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -76,7 +76,7 @@ class ratingmdl_rating extends rating {
     }
 
     /**
-     * Returns this ratings aggregate value
+     * Returns this ratings aggregate value.
      *
      * @return string
      */
@@ -86,10 +86,10 @@ class ratingmdl_rating extends rating {
 
         if ($aggregate and $aggregation != RATING_AGGREGATE_COUNT) {
             if ($aggregation != RATING_AGGREGATE_SUM and !$this->settings->scale->isnumeric) {
-                // Round aggregate as we're using it as an index
+                // Round aggregate as we're using it as an index.
                 $aggregate = $this->settings->scale->scaleitems[round($aggregate)];
             } else {
-                // Aggregation is SUM or the scale is numeric
+                // Aggregation is SUM or the scale is numeric.
                 $aggregate = round($aggregate, 1);
             }
         }
@@ -100,7 +100,7 @@ class ratingmdl_rating extends rating {
 
 /**
  * The ratingmdl_rating_manager class extends the rating_manager class
- * so as to retrieve sets of ratings from the database for sets of entries
+ * so as to retrieve sets of ratings from the database for sets of entries.
  */
 class ratingmdl_rating_manager extends rating_manager {
 
@@ -108,16 +108,19 @@ class ratingmdl_rating_manager extends rating_manager {
      * Adds rating objects to an array of entries
      * Rating objects are available at $item->rating
      * @param stdClass $options {
-     *            context          => context the context in which the ratings exists [required]
-     *            component        => the component name ie mod_forum [required]
-     *            ratingarea       => the ratingarea we are interested in [required]
-     *            items            => array an array of items such as forum posts or glossary items. They must have an 'id' member ie $items[0]->id[required]
-     *            aggregate        => array an array of aggregation method to be applied. RATING_AGGREGATE_AVERAGE, RATING_AGGREGATE_MAXIMUM etc [optional]
-     *            scaleid          => int the scale from which the user can select a rating [required]
-     *            userid           => int the id of the current user [optional]
-     *            returnurl        => string the url to return the user to after submitting a rating. Can be left null for ajax requests [optional]
-     *            assesstimestart  => int only allow rating of items created after this timestamp [optional]
-     *            assesstimefinish => int only allow rating of items created before this timestamp [optional]
+     *      context          => context the context in which the ratings exists [required]
+     *      component        => the component name ie mod_forum [required]
+     *      ratingarea       => the ratingarea we are interested in [required]
+     *      items            => array an array of items such as forum posts or glossary items.
+     *                          They must have an 'id' member ie $items[0]->id[required]
+     *      aggregate        => array an array of aggregation method to be applied.
+     *                          RATING_AGGREGATE_AVERAGE, RATING_AGGREGATE_MAXIMUM etc [optional]
+     *      scaleid          => int the scale from which the user can select a rating [required]
+     *      userid           => int the id of the current user [optional]
+     *      returnurl        => string the url to return the user to after submitting a rating.
+     *                          Can be left null for ajax requests [optional]
+     *      assesstimestart  => int only allow rating of items created after this timestamp [optional]
+     *      assesstimefinish => int only allow rating of items created before this timestamp [optional]
      * @return array the array of items with their ratings attached at $items[0]->rating
      */
     public function get_ratings($options) {
@@ -171,21 +174,21 @@ class ratingmdl_rating_manager extends rating_manager {
     public function get_sql_aggregate($options) {
         global $DB, $USER;
 
-        // User id; default to current user
+        // User id; default to current user.
         if (empty($options->userid)) {
             $userid = $USER->id;
         } else {
             $userid = $options->userid;
         }
 
-        // Params
+        // Params.
         $params = array();
         $params['contextid'] = $options->context->id;
         $params['userid']    = $userid;
         $params['component']    = $options->component;
         $params['ratingarea'] = $options->ratingarea;
 
-        // Aggregation sql
+        // Aggregation sql.
         if (!empty($options->aggregate)) {
             if (!is_array($options->aggregate)) {
                 $option->aggregate = array($option->aggregate);
@@ -193,7 +196,7 @@ class ratingmdl_rating_manager extends rating_manager {
 
             $aggregatessql = array();
             foreach ($options->aggregate as $aggregation) {
-                // Skip empty or count
+                // Skip empty or count.
                 if (empty($aggregation) or $aggregation == RATING_AGGREGATE_COUNT) {
                     continue;
                 }
@@ -204,7 +207,7 @@ class ratingmdl_rating_manager extends rating_manager {
         }
         $aggregationsql = !empty($aggregatessql) ? implode(', ', $aggregatessql). ', ' : '';
 
-        // Sql for entry ids
+        // Sql for entry ids.
         $andwhereitems = '';
         if (!empty($options->items)) {
             $itemids = array_keys($options->items);
@@ -238,21 +241,21 @@ class ratingmdl_rating_manager extends rating_manager {
     public function get_sql_all($options) {
         global $DB, $USER;
 
-        // User id; default to current user
+        // User id; default to current user.
         if (empty($options->userid)) {
             $userid = $USER->id;
         } else {
             $userid = $options->userid;
         }
 
-        // Params
+        // Params.
         $params = array();
         $params['contextid'] = $options->context->id;
         $params['userid']    = $userid;
         $params['component']    = $options->component;
         $params['ratingarea'] = $options->ratingarea;
 
-        // Sql for entry ids
+        // Sql for entry ids.
         $andwhereitems = '';
         if (!empty($options->items)) {
             $itemids = array_keys($options->items);
@@ -280,7 +283,7 @@ class ratingmdl_rating_manager extends rating_manager {
      * @return array the array of items with their ratings attached at $items[0]->rating
      */
     public function get_rating_settings_object($options) {
-        // Ugly hack to work around the exception in generate_settings
+        // Ugly hack to work around the exception in generate_settings.
         if (empty($options->aggregate) or is_array($options->aggregate)) {
             $options->aggregate = RATING_AGGREGATE_COUNT;
         }
@@ -300,8 +303,8 @@ class ratingmdl_rating_manager extends rating_manager {
         $options->ratingarea = $rec->ratingarea;
         $options->itemid = $item->id;
         $options->settings = $rec->settings;
-        // Note: rec->scaleid = the id of scale at the time the rating was submitted
-        // May be different from the current scale id
+        // Note: rec->scaleid = the id of scale at the time the rating was submitted.
+        // May be different from the current scale id.
         $options->scaleid = $rec->scaleid;
 
         $options->userid = !empty($rec->userid) ? $rec->userid : 0;
@@ -313,7 +316,7 @@ class ratingmdl_rating_manager extends rating_manager {
         }
         $options->count = $rec->numratings;
 
-        // Aggregations
+        // Aggregations.
         foreach (array('avg', 'max', 'min', 'sum') as $aggregation) {
             $aggrmethod = "{$aggregation}ratings";
             if (isset($rec->$aggrmethod)) {

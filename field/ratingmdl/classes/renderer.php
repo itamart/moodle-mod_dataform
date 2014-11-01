@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage e_rating
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_ratingmdl
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
@@ -41,7 +40,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
 
         $found = parent::search($text);
 
-        // Search for counts
+        // Search for counts.
         $pattern = "\[\[$fieldname:count:\d+\]\]";
         preg_match_all("/$pattern/", $text, $matches);
         if (!empty($matches[0])) {
@@ -63,67 +62,63 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         $entryid = $entry->id;
         $edit = !empty($options['edit']);
 
-        // No edit mode
-        if ($edit or !$field->get_scaleid()) {
-            if ($patterns) {
-                $replacements = array();
-                foreach ($patterns as $pattern) {
-                    switch($pattern) {
-                        case "[[$fieldname:count]]":
-                        case "[[$fieldname:avg]]":
-                        case "[[$fieldname:max]]":
-                        case "[[$fieldname:min]]":
-                        case "[[$fieldname:sum]]":
-                            $str = '-';
-                            break;
-                        default:
-                            $str = '';
-                    }
-                    $replacements[$pattern] = $str;
-                }
-
-                return $replacements;
-
-            } else {
-                return null;
-            }
-        }
-
         $rating = $field->get_entry_rating($entry);
 
-        $replacements = array();
+        $replacements = array_fill_keys($patterns, '');
+
+        if (!$field->get_scaleid()) {
+            return $replacements;
+        }
+
         foreach ($patterns as $pattern) {
             if ($entry->id > 0 and $rating) {
                 $entry->rating = $rating;
+                $displayaggr = $field->get_rating_display_aggregates($rating);
+                $str = '';
 
-                if ($pattern == "[[$fieldname:count]]") {
-                    $str = !empty($rating->count) ? $rating->count : '-';
-                    $str = html_writer::tag('span', $str, array('id' => "ratingcount_{$fieldid}_$entryid"));
-
-                } else if (strpos($pattern, "[[$fieldname:count:") === 0) {
+                if (strpos($pattern, "[[$fieldname:count:") === 0) {
                     list(, , $value) = explode(':', trim($pattern, '[]'));
                     $str = $this->display_count_for_value($entry, $value);
 
+                } else if ($pattern == "[[$fieldname:count]]") {
+                    $str = $displayaggr->count ? $displayaggr->count : '';
+
                 } else if ($pattern == "[[$fieldname:avg]]") {
-                    $str = ($rating->count and !empty($rating->ratingavg)) ? round($rating->ratingavg, 2) : '-';
-                    $str = html_writer::tag('span', $str, array('id' => "ratingavg_{$fieldid}_$entryid"));
+                    $str = $displayaggr->avg ? $displayaggr->avg : '';
 
                 } else if ($pattern == "[[$fieldname:max]]") {
-                    $str = ($rating->count and !empty($rating->ratingmax)) ? round($rating->ratingmax, 2) : '-';
-                    $str = html_writer::tag('span', $str, array('id' => "ratingmax_{$fieldid}_$entryid"));
+                    $str = $displayaggr->max ? $displayaggr->max : '';
 
                 } else if ($pattern == "[[$fieldname:min]]") {
-                    $str = ($rating->count and !empty($rating->ratingmin)) ? round($rating->ratingmin, 2) : '-';
-                    $str = html_writer::tag('span', $str, array('id' => "ratingmin_{$fieldid}_$entryid"));
+                    $str = $displayaggr->min ? $displayaggr->min : '';
 
                 } else if ($pattern == "[[$fieldname:sum]]") {
-                    $str = ($rating->count and !empty($rating->ratingsum)) ? round($rating->ratingsum, 2) : '-';
+                    $str = $displayaggr->sum ? $displayaggr->sum : '';
+
+                } else if ($pattern == "[[$fieldname:view:count]]") {
+                    $str = $displayaggr->count;
+                    $str = html_writer::tag('span', $str, array('id' => "ratingcount_{$fieldid}_$entryid"));
+
+                } else if ($pattern == "[[$fieldname:view:avg]]") {
+                    $str = $displayaggr->avg;
+                    $str = html_writer::tag('span', $str, array('id' => "ratingavg_{$fieldid}_$entryid"));
+
+                } else if ($pattern == "[[$fieldname:view:max]]") {
+                    $str = $displayaggr->max;
+                    $str = html_writer::tag('span', $str, array('id' => "ratingmax_{$fieldid}_$entryid"));
+
+                } else if ($pattern == "[[$fieldname:view:min]]") {
+                    $str = $displayaggr->min;
+                    $str = html_writer::tag('span', $str, array('id' => "ratingmin_{$fieldid}_$entryid"));
+
+                } else if ($pattern == "[[$fieldname:view:sum]]") {
+                    $str = $displayaggr->sum;
                     $str = html_writer::tag('span', $str, array('id' => "ratingsum_{$fieldid}_$entryid"));
 
-                } else if ($pattern == "[[$fieldname:view]]" or $pattern == "[[$fieldname:viewurl]]") {
+                } else if ($pattern == "[[$fieldname:view]]" or $pattern == "[[$fieldname:view:url]]") {
                     $str = $this->display_view($entry, $pattern);
 
-                } else if ($pattern == "[[$fieldname:viewinline]]") {
+                } else if ($pattern == "[[$fieldname:view:inline]]") {
                     $str = $this->display_view_inline($entry);
 
                 } else if ($pattern == "[[$fieldname]]" or $pattern == "[[$fieldname:rate]]") {
@@ -136,9 +131,6 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
                 } else if ($pattern == "[[$fieldname:avg:star]]") {
                     $value = !empty($rating) ? round($rating->aggregate[dataformfield_ratingmdl_ratingmdl::AGGREGATE_AVG], 2) : 0;
                     $str = $this->display_star($entry, $value);
-
-                } else {
-                     $str = '';
                 }
                 $replacements[$pattern] = $str;
             }
@@ -185,10 +177,13 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         }
 
         $rating = $entry->rating;
-        $ratinghtml = ''; // the string we'll return
+
+        // The string we'll return.
+        $ratinghtml = '';
+
         $strrate = get_string("rate", "rating");
 
-        // Rating params
+        // Rating params.
         $rateparams = '';
         $rateurl = $rating->get_rate_url();
         $inputs = $rateurl->params();
@@ -197,7 +192,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
             $rateparams .= html_writer::empty_tag('input', $attributes);
         }
 
-        // Select dropdown
+        // Select dropdown.
         $scalearray = array(RATING_UNSET_RATING => $strrate. '...') + $rating->settings->scale->scaleitems;
         $scaleattrs = array(
             'class' => 'postratingmenu ratinginput',
@@ -205,7 +200,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         );
         $rateselect = html_writer::select($scalearray, 'rating', $rating->rating, false, $scaleattrs);
 
-        // Submit button
+        // Submit button.
         $attributes = array(
             'type' => 'submit',
             'class' => 'postratingmenusubmit',
@@ -221,7 +216,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
 
         $wrapper = html_writer::tag('div', $rateparams. $rateselect. $submitbutton, array('class' => 'ratingform'));
 
-        // Start the rating form
+        // Start the rating form.
         $formattrs = array(
             'id' => "ratingpost_{$fieldid}_$entryid",
             'class'  => 'postratingform',
@@ -230,7 +225,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         );
         $rateform = html_writer::tag('form', $wrapper, $formattrs);
 
-        // Initialize ajax
+        // Initialize ajax.
         $config = array(array('fieldid' => $fieldid, 'entryid' => $entryid));
         $PAGE->requires->yui_module('moodle-dataformfield_ratingmdl-rater', 'M.dataformfield_ratingmdl.rater.init', $config);
 
@@ -312,14 +307,15 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         $table->colclasses = array('', 'firstname', 'rating', 'time');
         $table->data = array();
 
-        // If the scale was changed after ratings were submitted some ratings may have a value above the current maximum
-        // We can't just do count($scalemenu) - 1 as custom scales start at index 1, not 0
+        // If the scale was changed after ratings were submitted,
+        // some ratings may have a value above the current maximum.
+        // We can't just do count($scalemenu) - 1 as custom scales start at index 1, not 0.
         $maxrating = $rating->settings->scale->max;
 
         foreach ($records as $raterecord) {
-            // Undo the aliasing of the user id column from user_picture::fields()
-            // we could clone the rating object or preserve the rating id if we needed it again
-            // but we don't
+            // Undo the aliasing of the user id column from user_picture::fields().
+            // We could clone the rating object or preserve the rating id if we needed it again,
+            // but we don't.
             $raterecord->id = $raterecord->userid;
 
             $row = new html_table_row();
@@ -373,9 +369,11 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
             $innerstyle = 'width:100%;height:19px;position:absolute;top:0;left:0;';
             $bgdiv = html_writer::tag('div', '.', array('style' => "background:#ccc;color:#ccc;$innerstyle"));
             $bar = html_writer::tag('div', $this->display_bar($entry, $value), array('style' => "z-index:5;$innerstyle"));
-            $stars = implode('', array_fill(0, $numstars, $OUTPUT->pix_icon('star_grey', '', 'dataformfield_ratingmdl', array('style' => 'float:left;'))));
+            $icon = $OUTPUT->pix_icon('star_grey', '', 'dataformfield_ratingmdl', array('style' => 'float:left;'));
+            $stars = implode('', array_fill(0, $numstars, $icon));
             $starsdiv = html_writer::tag('div', $stars, array('style' => "z-index:10;$innerstyle"));
-            $wrapper = html_writer::tag('div', "$bgdiv $bar $starsdiv", array('style' => "width:{$width}px;position:relative;"));
+            $wrapperattr = array('style' => "width:{$width}px;position:relative;");
+            $wrapper = html_writer::tag('div', "$bgdiv $bar $starsdiv", $wrapperattr);
             return $wrapper;
         }
         return '';
@@ -391,8 +389,15 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         $patterns["[[$fieldname]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:rate]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:view]]"] = array(true, $fieldname);
-        $patterns["[[$fieldname:viewurl]]"] = array(true, $fieldname);
-        $patterns["[[$fieldname:viewinline]]"] = array(true, $fieldname);
+        $patterns["[[$fieldname:view:url]]"] = array(true, $fieldname);
+        $patterns["[[$fieldname:view:inline]]"] = array(true, $fieldname);
+        // These patterns return the aggregage value wrapped in html for ajax display updates.
+        $patterns["[[$fieldname:view:avg]]"] = array(true, $fieldname);
+        $patterns["[[$fieldname:view:count]]"] = array(true, $fieldname);
+        $patterns["[[$fieldname:view:max]]"] = array(true, $fieldname);
+        $patterns["[[$fieldname:view:min]]"] = array(true, $fieldname);
+        $patterns["[[$fieldname:view:sum]]"] = array(true, $fieldname);
+        // These patterns return raw value of the aggregage.
         $patterns["[[$fieldname:avg]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:count]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:max]]"] = array(true, $fieldname);

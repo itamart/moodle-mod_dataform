@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield_ratingmdl
- * @copyright 2013 Itamar Tzadok
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,7 +26,7 @@ require_once(__DIR__. '/../ratinglib.php');
  *
  */
 class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataformfield_nocontent
-            implements mod_dataform\interfaces\grading, mod_dataform\interfaces\usingscale {
+            implements mod_dataform\interfaces\usingscale {
 
     protected $_scaleid = 0;
     protected $_allratings = null;
@@ -44,6 +44,64 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         parent::__construct($field);
 
         $this->_scaleid = $this->param1 ? $this->param1 : 0;
+    }
+
+    /**
+     * Update a field in the database.
+     * Overriding parent to adjust ratings where scale changes.
+     *
+     * @return bool
+     */
+    public function update($data) {
+        global $DB;
+
+        // The old scale id should still be in _scaleid.
+        $oldscaleid = $this->_scaleid;
+
+        if ($result = parent::update($data)) {
+            // Adjust ratings if needed.
+            $newscaleid = $this->param1;
+            if ($newscaleid != $oldscaleid) {
+                // Get all the rating records for this field instance.
+                $params = array(
+                    'contextid' => $this->df->context->id,
+                    'component' => 'mod_dataform',
+                    'ratingarea' => $this->name,
+                );
+
+                if ($ratings = $DB->get_records('rating', $params)) {
+                    foreach ($ratings as $rid => $rating) {
+                        // Adjust the rating scale id.
+                        $rating->scaleid = $newscaleid;
+
+                        if ($newscaleid < 0) {
+                            // Adjust rating rating for custom scale.
+                            if ($oldscaleid > 0) {
+                                // When switching from point to scale, delete 0 ratings,
+                                // because they have no meaning in scales.
+                                if ($rating->rating == 0) {
+                                    $DB->delete_records('rating', array('id' => $rid));
+                                    continue;
+                                }
+                            }
+
+                            $scale = $DB->get_record('scale', array('id' => -$newscaleid), '*', MUST_EXIST);
+                            $scalearray = explode(',', $scale->scale);
+                            if ($rating->rating > count($scalearray)) {
+                                $rating->rating = count($scalearray);
+                            }
+                        } else if ($rating->rating > $newscaleid) {
+                            // Adjust rating rating for point scale.
+                            $rating->rating = $newscaleid;
+                        }
+
+                        // Update rating in DB.
+                        $DB->update_record('rating', $rating);
+                    }
+                }
+            }
+        }
+        return $result;
     }
 
     /**
@@ -72,42 +130,42 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     public function validation($params) {
         global $DB, $USER;
 
-        // Check the component is mod_dataform
+        // Check the component is mod_dataform.
         if ($params['component'] != 'mod_dataform') {
             throw new rating_exception('invalidcomponent');
         }
 
         $ownentry = ($params['rateduserid'] == $USER->id);
         if ($ownentry) {
-            // You can't rate your own entries unless you have the capability
+            // You can't rate your own entries unless you have the capability.
             if (!has_capability('dataformfield/ratingmdl:ownrate', $params['context'])) {
                 throw new rating_exception('nopermissiontorate');
             }
         } else {
-            // You can't rate other entries unless you have the capability
+            // You can't rate other entries unless you have the capability.
             if (!has_capability('dataformfield/ratingmdl:anyrate', $params['context'])) {
                 throw new rating_exception('nopermissiontorate');
             }
         }
 
-        // If the supplied context doesnt match the item's context
+        // If the supplied context doesnt match the item's context.
         if ($params['context']->id != $this->df->context->id) {
             throw new rating_exception('invalidcontext');
         }
 
-        // Check the ratingarea is entry or activity
+        // Check the ratingarea is entry or activity.
         if ($params['ratingarea'] != $this->name) {
             throw new rating_exception('invalidratingarea');
         }
 
-        // Vaildate entry scale and rating range
+        // Vaildate entry scale and rating range.
         if ($params['scaleid'] != $this->_scaleid) {
             throw new rating_exception('invalidscaleid');
         }
 
-        // Upper limit
+        // Upper limit.
         if ($this->_scaleid < 0) {
-            // Its a custom scale
+            // Its a custom scale.
             $scalerecord = $DB->get_record('scale', array('id' => -$this->_scaleid));
             if ($scalerecord) {
                 $scalearray = explode(',', $scalerecord->scale);
@@ -118,26 +176,26 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
                 throw new rating_exception('invalidscaleid');
             }
         } else if ($params['rating'] > $this->_scaleid) {
-            // If its numeric and submitted rating is above maximum
+            // If its numeric and submitted rating is above maximum.
             throw new rating_exception('invalidnum');
         }
 
-        // Lower limit
+        // Lower limit.
         if ($params['rating'] < 0  and $params['rating'] != RATING_UNSET_RATING) {
             throw new rating_exception('invalidnum');
         }
 
-        // Make sure groups allow this user to see the item they're rating
+        // Make sure groups allow this user to see the item they're rating.
         $groupid = $this->df->currentgroup;
         if ($groupid > 0 and $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course)) {
-            // Groups are being used
+            // Groups are being used.
             if (!groups_group_exists($groupid)) {
-                // Can't find group
+                // Can't find group.
                 throw new rating_exception('cannotfindgroup');
             }
 
             if (!groups_is_member($groupid) and !has_capability('moodle/site:accessallgroups', $this->df->context)) {
-                // Do not allow rating of posts from other groups when in SEPARATEGROUPS or VISIBLEGROUPS
+                // Do not allow rating of posts from other groups when in SEPARATEGROUPS or VISIBLEGROUPS.
                 throw new rating_exception('notmemberofgroup');
             }
         }
@@ -158,7 +216,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             $userid = $USER->id;
         }
 
-        // You can't rate if you don't have the system cap
+        // You can't rate if you don't have the system cap.
         if (empty($entry->rating->settings->permissions->rate)) {
             return false;
         }
@@ -192,7 +250,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             $userid = $USER->id;
         }
 
-        // You can't view ratings if you don't have the system cap
+        // You can't view ratings if you don't have the system cap.
         if (empty($entry->rating->settings->permissions->viewall)) {
             return false;
         }
@@ -229,12 +287,12 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         // Is it your own entry?
         $ownentry = ($userid == $entry->userid);
 
-        // You can't view own aggregates if you don't have the system cap
+        // You can't view own aggregates if you don't have the system cap.
         if ($ownentry and empty($entry->rating->settings->permissions->view)) {
             return false;
         }
 
-        // You can't view any aggregates if you don't have the system cap
+        // You can't view any aggregates if you don't have the system cap.
         if (!$ownentry and empty($entry->rating->settings->permissions->viewany)) {
             return false;
         }
@@ -254,7 +312,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
 
     // SQL MANAGEMENT.
     /**
-     * Whether this field content resides in dataform_contents
+     * Whether this field content resides in dataform_contents.
      *
      * @return bool
      */
@@ -263,7 +321,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     }
 
     /**
-     * Whether this field provides join sql for fetching content
+     * Whether this field provides join sql for fetching content.
      *
      * @return bool
      */
@@ -308,10 +366,9 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         global $USER;
 
         $params = array();
-        // $params['ruserid']    = $USER->id;
-        // $params['rcontextid'] = $this->df->context->id;
-        // $params['rcomponent'] = 'mod_dataform';
-        // $params['ratingarea'] = $this->name;
+
+        // We cannot actually use params for the query b/c this query is joined
+        // with the entry queries and we cannot properly resolve un-named params.
         $userid = $USER->id;
         $contextid = $this->df->context->id;
         $component = 'mod_dataform';
@@ -413,13 +470,6 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     /**
      *
      */
-    public function get_search_sql($search) {
-        return parent::get_search_sql($search);
-    }
-
-    /**
-     *
-     */
     public function get_search_from_sql() {
         return null;
     }
@@ -440,8 +490,6 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return implode(' ', $searchparams);
     }
 
-    // Parent::get_sql_compare_text($element = 'content')
-
     /**
      *
      * @param object The entry whose rating is retrieved
@@ -460,7 +508,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         $context = $this->df->context;
         $fieldname = $this->name;
 
-        // Get entry rating objects
+        // Get entry rating objects.
         $scaleid = $this->get_scaleid($entry);
 
         $options = new object;
@@ -521,12 +569,12 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             if ($raterecord->itemid < $itemid) {
                 continue;
             }
-            // Break if we already found the respective records
+            // Break if we already found the respective records.
             if ($raterecord->itemid > $itemid) {
                 break;
             }
 
-            // Limit to specified rating value
+            // Limit to specified rating value.
             if ($rating !== null and $raterecord->rating != $rating) {
                 continue;
             }
@@ -557,57 +605,6 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             $this->_allratings = $DB->get_records_sql($sql, $params);
         }
         return $this->_allratings;
-    }
-
-    // GRADING.
-    /**
-     * Returns the value replacement of the pattern for each user with content in the field.
-     *
-     * @param string $pattern
-     * @param array $entryids The ids of entries the field values should be fetched from.
-     *      If not provided the method should return values from all applicable entries.
-     * @param int $userid   The id of the users whose field values are requested.
-     *      If not specified, should return values for all applicable users.
-     * @return null|array Array of userid => value pairs.
-     */
-    public function get_user_values($pattern, array $entryids = null, $userid = 0) {
-        $values = array();
-
-        if (!$aggrs = $this->renderer->get_aggregations(array($pattern))) {
-            return null;
-        }
-
-        $fieldname = $this->name;
-        $aggregation = reset($aggrs);
-
-        $options = new stdClass;
-        $options->component = 'mod_dataform';
-        $options->ratingarea = $fieldname;
-        $options->aggregationmethod = $aggregation;
-        $options->itemtable = 'dataform_entries';
-        $options->itemtableusercolumn = 'userid';
-        $options->modulename = 'dataform';
-        $options->moduleid   = $this->df->id;
-        $options->scaleid = $this->get_scaleid();
-
-        $rm = new ratingmdl_rating_manager();
-
-        $users = $userid ? array($userid) : array();
-
-        foreach ($users as $userid) {
-            $options->userid = $userid;
-            if ($usergrades = $rm->get_user_grades($options)) {
-                $uservalues = array_map(
-                    function($g) {
-                        return $g->rawgrade;
-                    },
-                    $usergrades
-                );
-                $values[$userid] = $uservalues[$userid];
-            }
-        }
-
-        return $values;
     }
 
     // USING SCALE.
@@ -662,6 +659,62 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             return $entry->$aliasedelem;
         }
         return null;
+    }
+
+    /**
+     *
+     */
+    public function get_rating_manager() {
+        return new ratingmdl_rating_manager();
+    }
+
+    /**
+     *
+     * @return stdClass
+     */
+    public function get_rating_display_aggregates($rating, $precision = 2) {
+        global $DB;
+
+        $aggr = (object) array(
+            'count' => '-',
+            'avg' => '-',
+            'max' => '-',
+            'min' => '-',
+            'sum' => '-',
+        );
+
+        if (empty($rating->count)) {
+            return $aggr;
+        }
+
+        $aggr->count = $rating->count;
+
+        // Add aggregations.
+        if ($rating->user_can_view_aggregate()) {
+            $aggr->avg = round($rating->ratingavg, $precision);
+            $aggr->max = round($rating->ratingmax, $precision);
+            $aggr->min = round($rating->ratingmin, $precision);
+            $aggr->sum = round($rating->ratingsum, $precision);
+
+            // For custom scales return text not the value.
+            // This scales weirdness will go away when scales are refactored.
+            if ($rating->settings->scale->id < 0) {
+                if ($scale = $DB->get_record('scale', array('id' => -$rating->settings->scale->id))) {
+                    $scalearray = array_merge(array(0 => ''), explode(',', $scale->scale));
+
+                    $aggr->avg = $scalearray[round($aggr->avg)];
+                    $aggr->max = $scalearray[round($aggr->max)];
+                    $aggr->min = $scalearray[round($aggr->min)];
+                    // For sum take the highest.
+                    if (round($aggr->sum, 1) > count($scalearray)) {
+                        $aggr->sum = count($scalearray);
+                    }
+                    $aggr->sum = $scalearray[round($aggr->sum)];
+                }
+            }
+        }
+
+        return $aggr;
     }
 
 }
