@@ -1118,7 +1118,8 @@ class mod_dataform_dataform {
     /**
      * Returns user's calculated grades in the dataform instance.
      *
-     * @param int $userid The user id whose grades should be retrieved or 0 for all grades
+     * @param int $userid The user id whose grades should be retrieved or 0 for all grades.
+     * @return array|null
      */
     public function get_user_grades_calculated($userid = 0) {
         global $CFG;
@@ -1130,10 +1131,10 @@ class mod_dataform_dataform {
         require_once("$CFG->libdir/mathslib.php");
         $formula = $this->gradecalc;
 
-        // Patterns container
+        // Patterns container.
         $patterns = array();
 
-        // Users container
+        // Users container.
         if ($userid) {
             $users = array($userid => array());
         } else {
@@ -1141,12 +1142,12 @@ class mod_dataform_dataform {
             $users = array_fill_keys(array_keys($gusers), array());
         }
 
-        // Must have users
+        // Must have users.
         if (!$users) {
             return null;
         }
 
-        // Grades container
+        // Grades container.
         $grades = array();
         foreach ($users as $userid => $unused) {
             $grades[$userid] = (object) array(
@@ -1156,7 +1157,7 @@ class mod_dataform_dataform {
             );
         }
 
-        // Num entries pattern
+        // Num entries pattern.
         if (strpos($formula, '##numentries##') !== false) {
             $patterns['##numentries##'] = 0;
             if ($numentries = $this->get_entries_count_per_user(self::COUNT_ALL, $userid)) {
@@ -1184,16 +1185,23 @@ class mod_dataform_dataform {
                     continue;
                 }
 
-                // The field must be an instance of interface grading
-                if (!($field instanceof mod_dataform\interfaces\grading)) {
-                    continue;
+                $uservalues = null;
+
+                // Get user values for the pattern.
+                // The field must either has helper\contentperuser component,
+                // or be an instance of interface grading.
+                $helper = "dataformfield_$field->type\\helper\\contentperuser";
+                if (class_exists($helper)) {
+                    $uservalues = $helper::get_content($field, $fieldpattern, $entryids);
+                } else if ($field instanceof mod_dataform\interfaces\grading) {
+                    // BC - this method for grading user values is depracated.
+                    $uservalues = $field->get_user_values($fieldpattern, $entryids, $userid);
                 }
 
-                // Get user values for the pattern
-                if (!$uservalues = $field->get_user_values($fieldpattern, $entryids, $userid)) {
+                // Leave pattern value at 0 if no user values.
+                if (!$uservalues) {
                     continue;
                 }
-
                 // Register pattern values for users
                 foreach ($uservalues as $userid => $values) {
                     if (empty($users[$userid])) {
