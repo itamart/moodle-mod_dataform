@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage ratingmdl
- * @copyright 2013 Itamar Tzadok
+ * @package dataformfield_ratingmdl
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,13 +28,13 @@ $string['avgratings'] = 'Average of ratings';
 $string['sumratings'] = 'Sum of ratings';
 $string['maxratings'] = 'Highest rating';
 $string['minratings'] = 'Lowest rating';
-// CAPABILITIES
+/* CAPABILITIES */
 $string['ratingmdl:ownrate'] = 'Own Entry - Rate';
 $string['ratingmdl:ownviewaggregate'] = 'Own Entry - View Rating Aggregates';
 $string['ratingmdl:ownviewratings'] = 'Own Entry - View Ratings';
 $string['ratingmdl:anyrate'] = 'Any Entry - Rate';
 $string['ratingmdl:anyviewaggregate'] = 'Any Entry - View Rating Aggregates';
 $string['ratingmdl:anyviewratings'] = 'Any Entry - View Ratings';
-// EVENTS
+/* EVENTS */
 $string['event_rating_created'] = 'Rating created';
 $string['event_rating_deleted'] = 'Rating deleted';
