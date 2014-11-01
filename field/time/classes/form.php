@@ -30,9 +30,6 @@ class dataformfield_time_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-
         // Date
         $mform->addElement('checkbox', 'param1', get_string('dateonly', 'dataformfield_time'));
         $mform->addHelpButton('param1', 'dateonly', 'dataformfield_time');

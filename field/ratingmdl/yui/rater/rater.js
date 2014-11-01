@@ -53,7 +53,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
             var inputssize = theinputs.size();
             for (var i = 0; i < inputssize; i++) {
                 if (theinputs.item(i).get("name") != "returnurl") {
-                    // Dont include return url for ajax requests
+                    // Dont include return url for ajax requests.
                     thedata[theinputs.item(i).get("name")] = theinputs.item(i).get("value");
                 }
             }
@@ -75,20 +75,17 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
                                     if (scope.ratingcount) {
                                         scope.ratingcount.set('innerHTML', data.ratingcount);
                                     }
-                                    // Update aggregations only if there are ratings
-                                    if (data.ratingcount) {
-                                        if (scope.ratingavg) {
-                                            scope.ratingavg.set('innerHTML', data.ratingavg);
-                                        }
-                                        if (scope.ratingmax) {
-                                            scope.ratingmax.set('innerHTML', data.ratingmax);
-                                        }
-                                        if (scope.ratingmin) {
-                                            scope.ratingmin.set('innerHTML', data.ratingmin);
-                                        }
-                                        if (scope.ratingsum) {
-                                            scope.ratingsum.set('innerHTML', data.ratingsum);
-                                        }
+                                    if (scope.ratingavg) {
+                                        scope.ratingavg.set('innerHTML', data.ratingavg);
+                                    }
+                                    if (scope.ratingmax) {
+                                        scope.ratingmax.set('innerHTML', data.ratingmax);
+                                    }
+                                    if (scope.ratingmin) {
+                                        scope.ratingmin.set('innerHTML', data.ratingmin);
+                                    }
+                                    if (scope.ratingsum) {
+                                        scope.ratingsum.set('innerHTML', data.ratingsum);
                                     }
                                 }
                                 return true;
@@ -113,7 +110,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
         }
     });
 
-    // Define a name space to call
+    // Define a name space to call.
     M.dataformfield_ratingmdl = M.dataformfield_ratingmdl || {};
     M.dataformfield_ratingmdl.rater = M.dataformfield_ratingmdl.rater || {};
     M.dataformfield_ratingmdl.rater.init = M.dataformfield_ratingmdl.rater.init || function(options) {

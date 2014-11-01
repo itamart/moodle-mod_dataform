@@ -79,28 +79,31 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $required = !empty($options['required']);
         $selected = !empty($entry->{"c{$fieldid}_content"}) ? (int) $entry->{"c{$fieldid}_content"} : 0;
 
-        // check for default value
-        if (!$selected and $defaultval = $field->param2) {
-            $selected = (int) array_search($defaultval, $menuoptions);
+        // Check for default value.
+        if (!$selected) {
+            $defaultcontent = $field->default_content;
+            if (!empty($defaultcontent['selected'])) {
+                $selected = (int) array_search($defaultcontent['selected'], $menuoptions);
+            }
         }
 
-        // Add element only if there are options
+        // Add element only if there are options.
         if ($menuoptions) {
             list($elem, $separators) = $this->render($mform, "{$fieldname}_selected", $menuoptions, $selected, $required);
-            // Add group or element
+            // Add group or element.
             if (is_array($elem)) {
                 $mform->addGroup($elem, $fieldname, null, $separators, false);
             } else {
                 $mform->addElement($elem);
             }
 
-            // Required
+            // Required.
             if ($required) {
                 $this->set_required($mform, $fieldname, $selected);
             }
         }
 
-        // Input field for adding a new option
+        // Input field for adding a new option.
         if (!empty($options['addnew'])) {
             if ($field->param4 or has_capability('mod/dataform:managetemplates', $field->get_df()->context)) {
                 $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));

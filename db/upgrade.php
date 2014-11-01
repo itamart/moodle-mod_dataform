@@ -1115,7 +1115,7 @@ function xmldb_dataform_upgrade_2014051301($dbman, $oldversion) {
 function xmldb_dataform_upgrade_last($dbman, $oldversion) {
     global $CFG, $DB;
 
-    $newversion = 2014101903;
+    $newversion = 2014101904;
     if ($oldversion < $newversion) {
         // Replace field template pattern from [[fieldname@]] to [[T@fieldname]].
         if ($dataforms = $DB->get_records('dataform')) {
@@ -1152,6 +1152,20 @@ function xmldb_dataform_upgrade_last($dbman, $oldversion) {
         $type = 'dataformview';
         $enabled = array_keys(core_component::get_plugin_list($type));
         set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
+
+        // Add defaultcontentmode column to dataform_fields.
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('defaultcontentmode', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'label');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add defaultcontent column to dataform_fields.
+        $table = new xmldb_table('dataform_fields');
+        $field = new xmldb_field('defaultcontent', XMLDB_TYPE_TEXT, null, null, null, null, null, 'defaultcontentmode');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
         // Dataform savepoint reached.
         upgrade_mod_savepoint(true, $newversion, 'dataform');

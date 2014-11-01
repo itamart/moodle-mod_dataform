@@ -25,7 +25,7 @@ class dataformfield_url_url extends mod_dataform\pluginbase\dataformfield {
     /**
      *
      */
-    protected function content_names() {
+    public function content_names() {
         return array('', 'alt');
     }
 

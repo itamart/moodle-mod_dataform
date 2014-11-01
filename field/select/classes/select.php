@@ -82,7 +82,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     /**
      *
      */
-    protected function content_names() {
+    public function content_names() {
         return array('selected', 'newvalue');
     }
 

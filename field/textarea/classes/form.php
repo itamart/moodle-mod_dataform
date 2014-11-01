@@ -32,9 +32,6 @@ class dataformfield_textarea_form extends mod_dataform\pluginbase\dataformfieldf
         $mform =& $this->_form;
 
         // Field settings
-        // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-
         // field width (cols)
         $mform->addElement('text', 'param2', get_string('cols', 'dataformfield_textarea'), array('size' => '8'));
         $mform->setType('param2', PARAM_INT);
@@ -57,7 +54,6 @@ class dataformfield_textarea_form extends mod_dataform\pluginbase\dataformfieldf
         $mform->addElement('selectyesno', 'param1', get_string('editorenable', 'dataform'));
 
         // Editor file settings
-        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
         // max bytes

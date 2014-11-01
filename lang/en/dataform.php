@@ -477,6 +477,10 @@ $string['fieldvisiblenone'] = 'Managers only';
 $string['fieldvisibleowner'] = 'Owner and managers';
 $string['fieldwidth'] = 'Width';
 $string['err_lowername'] = 'The name cannot contain uppercase letters.';
+$string['fielddefaultcontent'] = 'Default content';
+$string['fieldapplydefault'] = 'Apply default when editing';
+$string['fielddefaultnew'] = 'New entries only';
+$string['fielddefaultany'] = 'Any entry';
 
 $string['filesettings'] = 'File settings';
 $string['filemaxsize'] = 'Total size of uploded files';
