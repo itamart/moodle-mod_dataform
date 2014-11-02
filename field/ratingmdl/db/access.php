@@ -15,14 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage ratingmdl
- * @copyright 2013 Itamar Tzadok
+ * @package dataformfield_ratingmdl
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $capabilities = array(
-    // Own Entry - Rate
+    // Own Entry - Rate.
     'dataformfield/ratingmdl:ownrate' => array(
 
         'riskbitmask' => RISK_SPAM,
@@ -36,7 +35,7 @@ $capabilities = array(
         ),
     ),
 
-    // Own Entry View Aggregates
+    // Own Entry View Aggregates.
     'dataformfield/ratingmdl:ownviewaggregate' => array(
 
         'captype' => 'read',
@@ -49,7 +48,7 @@ $capabilities = array(
         ),
     ),
 
-    // Own Entry View Ratings
+    // Own Entry View Ratings.
     'dataformfield/ratingmdl:ownviewratings' => array(
 
         'captype' => 'read',
@@ -61,7 +60,7 @@ $capabilities = array(
         ),
     ),
 
-    // Any Entry - Rate
+    // Any Entry - Rate.
     'dataformfield/ratingmdl:anyrate' => array(
 
         'riskbitmask' => RISK_SPAM,
@@ -76,7 +75,7 @@ $capabilities = array(
         ),
     ),
 
-    // Any Entry View Aggregates
+    // Any Entry View Aggregates.
     'dataformfield/ratingmdl:anyviewaggregate' => array(
 
         'captype' => 'read',
@@ -89,7 +88,7 @@ $capabilities = array(
         ),
     ),
 
-    // Any Entry View Ratings
+    // Any Entry View Ratings.
     'dataformfield/ratingmdl:anyviewratings' => array(
 
         'captype' => 'read',
