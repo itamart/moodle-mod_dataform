@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Install the plugin.
  */
-function xmldb_mod_dataform_install() {
+function xmldb_dataform_install() {
     // Enable existing field plugins.
     $type = 'dataformfield';
     $enabled = array_keys(core_component::get_plugin_list($type));

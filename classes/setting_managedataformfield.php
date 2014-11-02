@@ -81,7 +81,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
             if (strpos(core_text::strtolower($plugin), $query) !== false) {
                 return true;
             }
-            $localised = get_string('pluginname', $plugin);
+            $localised = get_string('pluginname', "dataformfield_$plugin");
             if (strpos(core_text::strtolower($localised), $query) !== false) {
                 return true;
             }
