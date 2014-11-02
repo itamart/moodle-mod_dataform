@@ -139,7 +139,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
     /**
      *
      */
-    protected function content_names() {
+    public function content_names() {
         if ($this->is_editor()) {
             return array('editor');
         } else {

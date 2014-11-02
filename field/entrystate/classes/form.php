@@ -43,7 +43,6 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         $mform = &$this->_form;
 
         // Header
-        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'hdrstates', get_string('states', 'dataformfield_entrystate'));
         $mform->setExpanded('hdrstates');
 
@@ -110,7 +109,6 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         $notifystr = get_string('notify', 'dataformfield_entrystate');
 
         // Header
-        // -------------------------------------------------------------------------------
         $headerstr = get_string('transition', 'dataformfield_entrystate'). ": $statefrom - $stateto";
         $allowedsummary = $this->get_roles_summary($allowedtostr, $permission, $contextroles);
         $notificationsummary = $this->get_roles_summary($notifystr, $notification, $contextroles);

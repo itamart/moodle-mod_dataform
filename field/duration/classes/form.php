@@ -30,9 +30,6 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
 
         $mform = &$this->_form;
 
-        // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-
         // Displayed units.
         $units = array(
             604800 => get_string('weeks'),

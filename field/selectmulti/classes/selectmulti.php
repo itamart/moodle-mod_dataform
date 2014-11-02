@@ -140,7 +140,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     /**
      *
      */
-    protected function content_names() {
+    public function content_names() {
         return array('selected', 'newvalue');
     }
 

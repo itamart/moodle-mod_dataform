@@ -15,13 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage text
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_text
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform {
+class dataformfield_text_form extends \mod_dataform\pluginbase\dataformfieldform {
 
     /**
      *
@@ -30,13 +29,7 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'fieldattributeshdr', get_string('fieldattributes', 'dataform'));
-
-        // Auto link
-        $mform->addElement('selectyesno', 'param1', get_string('autolink', 'dataformfield_text'));
-
-        // field width
+        // Field width.
         $fieldwidthgrp = array();
         $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
         $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
@@ -44,12 +37,10 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
         $mform->setType('param2', PARAM_INT);
         $mform->addGroupRule('fieldwidthgrp', array('param2' => array(array(null, 'numeric', null, 'client'))));
         $mform->disabledIf('param3', 'param2', 'eq', '');
-        // $mform->addHelpButton('fieldwidthgrp', array("fieldwidth", get_string('fieldwidth', 'dataform'), 'dataform'));
         $mform->setDefault('param2', '');
         $mform->setDefault('param3', 'px');
 
-        // rules
-        // format rules
+        // Format rules.
         $options = array(
             '' => get_string('choosedots'),
             'alphanumeric' => get_string('err_alphanumeric', 'form'),
@@ -60,7 +51,7 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
         );
         $mform->addElement('select', 'param4', get_string('format'), $options);
 
-        // length (param5, 6, 7): min, max, range
+        // Length (param5, 6, 7): min, max, range.
         $options = array(
             '' => get_string('choosedots'),
             'minlength' => get_string('min', 'dataform'),
@@ -80,6 +71,23 @@ class dataformfield_text_form extends mod_dataform\pluginbase\dataformfieldform 
         $mform->disabledIf('param7', 'param5', 'eq', 'minlength');
         $mform->setType('param6', PARAM_INT);
         $mform->setType('param7', PARAM_INT);
+    }
+
+    /**
+     *
+     */
+    public function definition_default_content() {
+        $mform = &$this->_form;
+        $field = &$this->_field;
+
+        $defaultcontent = $field->default_content;
+
+        // Content elements.
+        $mform->addElement('text', 'contentdefault', get_string('text', 'dataformfield_text'));
+        $mform->setType('contentdefault', PARAM_TEXT);
+        if (!empty($defaultcontent[''])) {
+            $mform->setDefault('contentdefault', $defaultcontent['']);
+        }
     }
 
 }

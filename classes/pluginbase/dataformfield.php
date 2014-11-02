@@ -31,6 +31,9 @@ abstract class dataformfield {
     const VISIBLE_OWNER = 1;
     const VISIBLE_ALL = 2;
 
+    const DEFAULT_NEW = 0;
+    const DEFAULT_ANY = 1;
+
     protected $_field;
     protected $_renderer = null;
     protected $_distinctvalues = null;
@@ -102,6 +105,8 @@ abstract class dataformfield {
         $this->visible = isset($data->visible) ? $data->visible : 2;
         $this->editable = isset($data->editable) ? $data->editable : -1;
         $this->label = !empty($data->label) ? $data->label : '';
+        $this->defaultcontentmode = !empty($data->defaultcontentmode) ? $data->defaultcontentmode : 0;
+        $this->defaultcontent = !empty($data->defaultcontent) ? $data->defaultcontent : null;
         for ($i = 1; $i <= 10; $i++) {
             $this->{"param$i"} = !empty($data->{"param$i"}) ? trim($data->{"param$i"}) : null;
         }
@@ -489,6 +494,24 @@ abstract class dataformfield {
     }
 
     /**
+     * Returns default content if defined, for each content element.
+     * The content keys are specified in {@link dataformfield::content_names()}.
+     *
+     * @return array|null
+     */
+    public function get_default_content() {
+        if ($this->defaultcontent) {
+            // Unserialize if not done yet.
+            if (!is_array($this->defaultcontent)) {
+                $this->defaultcontent = unserialize(base64_decode($this->defaultcontent));
+            }
+
+            return $this->defaultcontent;
+        }
+        return null;
+    }
+
+    /**
      * Validate form data in entries form
      */
     public function validate($eid, $patterns, $formdata) {
@@ -507,7 +530,7 @@ abstract class dataformfield {
      *
      * @return array
      */
-    protected function content_names() {
+    public function content_names() {
         return array('');
     }
 
@@ -519,7 +542,7 @@ abstract class dataformfield {
      * @return string|array $content
      * @return bool
      */
-    protected function content_is_empty($contentname, $content) {
+    public function content_is_empty($contentname, $content) {
         if (is_string($content)) {
             trim($content);
         }
