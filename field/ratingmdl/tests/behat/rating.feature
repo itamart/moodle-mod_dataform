@@ -35,8 +35,8 @@ Feature: Rating
         And I add a dataform view "grid" with "View 01"
         And I follow "Edit View 01"
         And I expand all fieldsets
-        And I replace in field "Entry template" "[[rating1]]" with "[[rating1]]<div>Rating1 avg: [[rating1:avg]]</div><div>Rating1 sum: [[rating1:sum]]</div><div>Rating1 count: [[rating1:count]]</div><div>Rating1 max: [[rating1:max]]</div><div>Rating1 min: [[rating1:min]]</div>"
-        And I replace in field "Entry template" "[[rating2]]" with "[[rating2]]<div>Rating2 avg: [[rating2:avg]]</div><div>Rating2 sum: [[rating2:sum]]</div><div>Rating2 count: [[rating2:count]]</div><div>Rating2 max: [[rating2:max]]</div><div>Rating2 min: [[rating2:min]]</div>"
+        And I replace in field "Entry template" "[[rating1]]" with "[[rating1]]<div>Rating1 avg: [[rating1:view:avg]]</div><div>Rating1 sum: [[rating1:view:sum]]</div><div>Rating1 count: [[rating1:view:count]]</div><div>Rating1 max: [[rating1:view:max]]</div><div>Rating1 min: [[rating1:view:min]]</div>"
+        And I replace in field "Entry template" "[[rating2]]" with "[[rating2]]<div>Rating2 avg: [[rating2:view:avg]]</div><div>Rating2 sum: [[rating2:view:sum]]</div><div>Rating2 count: [[rating2:view:count]]</div><div>Rating2 max: [[rating2:view:max]]</div><div>Rating2 min: [[rating2:view:min]]</div>"
         And I press "Save changes"
         
         And I set "View 01" as default view
