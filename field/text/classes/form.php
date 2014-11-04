@@ -29,16 +29,8 @@ class dataformfield_text_form extends \mod_dataform\pluginbase\dataformfieldform
 
         $mform =& $this->_form;
 
-        // Field width.
-        $fieldwidthgrp = array();
-        $fieldwidthgrp[] = &$mform->createElement('text', 'param2', null, array('size' => '8'));
-        $fieldwidthgrp[] = &$mform->createElement('select', 'param3', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
-        $mform->addGroup($fieldwidthgrp, 'fieldwidthgrp', get_string('fieldwidth', 'dataform'), array(' '), false);
-        $mform->setType('param2', PARAM_INT);
-        $mform->addGroupRule('fieldwidthgrp', array('param2' => array(array(null, 'numeric', null, 'client'))));
-        $mform->disabledIf('param3', 'param2', 'eq', '');
-        $mform->setDefault('param2', '');
-        $mform->setDefault('param3', 'px');
+        // Field width (param2, param3).
+        $this->add_field_size_elements('width', get_string('fieldwidth', 'dataform'));
 
         // Format rules.
         $options = array(
@@ -80,14 +72,52 @@ class dataformfield_text_form extends \mod_dataform\pluginbase\dataformfieldform
         $mform = &$this->_form;
         $field = &$this->_field;
 
-        $defaultcontent = $field->default_content;
-
         // Content elements.
         $mform->addElement('text', 'contentdefault', get_string('text', 'dataformfield_text'));
         $mform->setType('contentdefault', PARAM_TEXT);
-        if (!empty($defaultcontent[''])) {
-            $mform->setDefault('contentdefault', $defaultcontent['']);
+    }
+
+    /**
+     *
+     */
+    public function data_preprocessing(&$data) {
+        $field = &$this->_field;
+
+        $data->width = !empty($data->param2) ? $data->param2 : null;
+        $data->widthunit = !empty($data->param3) ? $data->param3 : null;
+
+        // Default content.
+        $data->contentdefault = $field->default_content;
+    }
+
+    /**
+     * Returns the default content data.
+     *
+     * @param stdClass $data
+     * @return mix|null
+     */
+    protected function get_data_default_content(\stdClass $data) {
+        if (!empty($data->contentdefault)) {
+            return $data->contentdefault;
         }
+        return null;
+    }
+
+    /**
+     *
+     */
+    public function get_data() {
+        if ($data = parent::get_data()) {
+            // Field width (only numeric data).
+            $data->param2 = $data->param3 = null;
+            if (!empty($data->width) and is_numeric($data->width)) {
+                $data->param2 = $data->width;
+                if ($data->widthunit != 'px') {
+                    $data->param3 = $data->widthunit;
+                }
+            }
+        }
+        return $data;
     }
 
 }

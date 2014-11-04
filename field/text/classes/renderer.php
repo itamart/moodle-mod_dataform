@@ -92,16 +92,17 @@ class dataformfield_text_renderer extends \mod_dataform\pluginbase\dataformfield
         } else {
             // Default content.
             $defaultcontent = $field->default_content;
-            if (!empty($defaultcontent[''])) {
-                $content = $defaultcontent[''];
+            if (!empty($defaultcontent)) {
+                $content = $defaultcontent;
             }
         }
 
         $fieldattr = array();
 
-        // Style.
+        // Width.
         if ($field->param2) {
-            $fieldattr['style'] = 'width:'. s($field->param2). s($field->param3). ';';
+            $widthunit = !$field->param3 ? $field->param3 : 'px';
+            $fieldattr['style'] = 'width:'. s($field->param2). s($widthunit). ';';
         }
 
         // Class.
