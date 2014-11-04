@@ -21,7 +21,7 @@
  */
 
 /**
- * Define all the restore steps that will be used by the restore_dataform_activity_task
+ * Define all the restore steps that will be used by the restore_dataform_activity_task.
  */
 
 /**
@@ -35,7 +35,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     protected function define_structure() {
 
         $paths = array();
-        $userinfo = $this->get_setting_value('userinfo'); // restore content and user info (requires the backup users)
+        $userinfo = $this->get_setting_value('userinfo'); // Restore content and user info (requires the backup users).
 
         $paths[] = new restore_path_element('dataform', '/activity/dataform');
         $paths[] = new restore_path_element('dataform_field', '/activity/dataform/fields/field');
@@ -120,7 +120,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         // Insert the dataform_fields record.
         $newitemid = $DB->insert_record('dataform_fields', $data);
-        $this->set_mapping('dataform_field', $oldid, $newitemid, true); // files by this item id
+        $this->set_mapping('dataform_field', $oldid, $newitemid, true); // Files by this item id.
     }
 
     /**
@@ -164,7 +164,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         // Insert the dataform_filters record.
         $newitemid = $DB->insert_record('dataform_filters', $data);
-        $this->set_mapping('dataform_filter', $oldid, $newitemid, false); // no files associated
+        $this->set_mapping('dataform_filter', $oldid, $newitemid, false); // No files associated.
     }
 
     /**
@@ -283,6 +283,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
     }
 
     /**
+     * TODO Add preset related files, matching by itemname (data_content).
+     * $this->add_related_files('mod_dataform', 'course_presets', 'dataform');
      *
      */
     protected function after_execute() {
@@ -299,9 +301,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         // Add dataformfield related files, matching by item id (dataform_field).
         $this->add_related_dataformplugin_files('dataformfield', 'dataform_field');
-
-        // TODO Add preset related files, matching by itemname (data_content).
-        // $this->add_related_files('mod_dataform', 'course_presets', 'dataform');
 
         $dataformnewid = $this->get_new_parentid('dataform');
 
@@ -321,7 +320,8 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         // Update id of userinfo fields if needed.
         // TODO can we condition this on restore to new site?
-        if ($userinfofields = $DB->get_records('dataform_fields', array('dataid' => $dataformnewid, 'type' => 'userinfo'), '', 'id,param1,param2')) {
+        $params = array('dataid' => $dataformnewid, 'type' => 'userinfo');
+        if ($userinfofields = $DB->get_records('dataform_fields', $params, '', 'id,param1,param2')) {
             foreach ($userinfofields as $fieldid => $uifield) {
                 $infoid = $DB->get_field('user_info_field', 'id', array('shortname' => $uifield->param2));
                 if ($infoid != (int) $uifield->param1) {
