@@ -196,6 +196,59 @@ class dataformfieldform extends \moodleform {
     }
 
     /**
+     * Adds elements for setting field size where applicable. The group of elements consists
+     * of text input for the size number and a select element for units. Default units are px,
+     * em and % in that order. It is possible to pass an array of alternate units via
+     * $options['units']. The text element name is set with $name. The select element name is
+     * $name. 'unit'. For example, width and widthunit. The content of the elements should be
+     * set via {@link dataformfieldform::data_preprocessing()} and get via
+     * {@link dataformfieldform::get_data()}.
+     *
+     * @param string $name The element name.
+     * @param string $label The element label.
+     * @param array $options Additional options (e.g. array of size units to override the default).
+     * @return void
+     */
+    protected function add_field_size_elements($name, $label, array $options = null) {
+        $mform = &$this->_form;
+
+        if (empty($options['units'])) {
+            $units = array(
+                'px' => 'px',
+                'em' => 'em',
+                '%' => '%'
+            );
+        } else {
+            $units = $options['units'];
+        }
+
+        $nameunit = $name. 'unit';
+
+        $grp = array();
+        $grp[] = &$mform->createElement('text', $name, null, array('size' => '8'));
+        $grp[] = &$mform->createElement('select', $nameunit, null, $units);
+        $mform->addGroup($grp, 'grp', $label, array(' '), false);
+        $mform->setType($name, PARAM_INT);
+        $mform->addGroupRule('grp', array($name => array(array(null, 'numeric', null, 'client'))));
+        $mform->disabledIf($nameunit, $name, 'eq', '');
+        $mform->setDefault($name, '');
+    }
+
+    /**
+     *
+     */
+    public function data_preprocessing(&$data) {
+    }
+
+    /**
+     *
+     */
+    public function set_data($data) {
+        $this->data_preprocessing($data);
+        parent::set_data($data);
+    }
+
+    /**
      * A hook method for compiling field default content on saving field definition.
      * Needs to be overridden in any field whose content definition may require further processing.
      * Called from {@link dataformfieldform::get_data()}.
