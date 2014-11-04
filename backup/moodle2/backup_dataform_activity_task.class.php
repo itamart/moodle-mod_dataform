@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once($CFG->dirroot . '/mod/dataform/backup/moodle2/backup_dataform_stepslib.php'); // Because it exists (must)
+require_once($CFG->dirroot . '/mod/dataform/backup/moodle2/backup_dataform_stepslib.php');
 
 /**
  * data backup task that provides all the settings and steps to perform one
@@ -29,21 +29,21 @@ require_once($CFG->dirroot . '/mod/dataform/backup/moodle2/backup_dataform_steps
 class backup_dataform_activity_task extends backup_activity_task {
 
     /**
-     * Define (add) particular settings this activity can have
+     * Define (add) particular settings this activity can have.
      */
     protected function define_my_settings() {
         global $SESSION;
-        // No particular settings for this activity
+        // No particular settings for this activity.
 
-        // For preseting get root settings from SESSION and adjust root task
+        // For preseting get root settings from SESSION and adjust root task.
         if (isset($SESSION->{"dataform_{$this->moduleid}_preset"})) {
             list($users, $anon) = explode(' ', $SESSION->{"dataform_{$this->moduleid}_preset"});
             list($roottask, , ) = $this->plan->get_tasks();
-            // set users setting
+            // Set users setting.
             $userssetting = $roottask->get_setting('users');
             $userssetting->set_value($users);
             $this->plan->get_setting('users')->set_value($users);
-            // disable dependencies if needed
+            // Disable dependencies if needed.
             if (!$users) {
                 $dependencies = $userssetting->get_dependencies();
                 foreach ($dependencies as &$dependent) {
@@ -51,7 +51,7 @@ class backup_dataform_activity_task extends backup_activity_task {
                     $dependentsetting->set_value(0);
                 }
             }
-            // set anonymize
+            // Set anonymize.
             $anonsetting = $roottask->get_setting('anonymize');
             $anonsetting->set_value($anon);
             $this->plan->get_setting('anonymize')->set_value($anon);
@@ -60,27 +60,27 @@ class backup_dataform_activity_task extends backup_activity_task {
     }
 
     /**
-     * Define (add) particular steps this activity can have
+     * Define (add) particular steps this activity can have.
      */
     protected function define_my_steps() {
-        // Dataform only has one structure step
+        // Dataform only has one structure step.
         $this->add_step(new backup_dataform_activity_structure_step('dataform_structure', 'dataform.xml'));
     }
 
     /**
      * Code the transformations to perform in the activity in
-     * order to get transportable (encoded) links
+     * order to get transportable (encoded) links.
      */
     static public function encode_content_links($content) {
         global $CFG;
 
         $base = preg_quote($CFG->wwwroot, "/");
 
-        // Index: id
+        // Index: id.
         $search = "/(".$base."\/mod\/dataform\/index.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@DFINDEX*$2@$', $content);
 
-        // View/embed: d, view, filter
+        // View/embed: d, view, filter.
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)\&(amp;)filter\=([0-9]+)/"
@@ -88,7 +88,7 @@ class backup_dataform_activity_task extends backup_activity_task {
         $replacement = array('$@DFVIEWVIEWFILTER*$2*$4*$6@$', '$@DFEMBEDVIEWFILTER*$2*$4*$6@$');
         $content = preg_replace($search, $replacement, $content);
 
-        // View/embed: d, view
+        // View/embed: d, view.
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)view\=([0-9]+)/"
@@ -96,7 +96,7 @@ class backup_dataform_activity_task extends backup_activity_task {
         $replacement = array('$@DFVIEWVIEW*$2*$4@$', '$@DFEMBEDVIEW*$2*$4@$');
         $content = preg_replace($search, $replacement, $content);
 
-        // View/embed: d, eid
+        // View/embed: d, eid.
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)\&(amp;)eid\=([0-9]+)/"
@@ -104,7 +104,7 @@ class backup_dataform_activity_task extends backup_activity_task {
         $replacement = array('$@DFVIEWENTRY*$2*$4@$', '$@DFEMBEDENTRY*$2*$4@$');
         $content = preg_replace($search, $replacement, $content);
 
-        // View/embed: id
+        // View/embed: id.
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?id\=)([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?id\=)([0-9]+)/"
@@ -112,7 +112,7 @@ class backup_dataform_activity_task extends backup_activity_task {
         $replacement = array('$@DFVIEWBYID*$2@$', '$@DFEMBEDBYID*$2@$');
         $content = preg_replace($search, $replacement, $content);
 
-        // View/embed: d
+        // View/embed: d.
         $search = array(
             "/(".$base."\/mod\/dataform\/view.php\?d\=)([0-9]+)/",
             "/(".$base."\/mod\/dataform\/embed.php\?d\=)([0-9]+)/"

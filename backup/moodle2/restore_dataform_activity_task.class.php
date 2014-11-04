@@ -22,15 +22,16 @@
 
 defined('MOODLE_INTERNAL') or die;
 
-require_once("$CFG->dirroot/mod/dataform/backup/moodle2/restore_dataform_stepslib.php"); // Because it exists (must)
+require_once("$CFG->dirroot/mod/dataform/backup/moodle2/restore_dataform_stepslib.php");
 
 /**
  * dataform restore task that provides all the settings and steps to perform one
- * complete restore of the activity
+ * complete restore of the activity.
  */
 class restore_dataform_activity_task extends restore_activity_task {
 
-    protected $ownerid = 0; // user id of designated owner of content
+    /* @var int User id of designated owner of content. */
+    protected $ownerid = 0;
 
     /**
      *
@@ -54,22 +55,21 @@ class restore_dataform_activity_task extends restore_activity_task {
     }
 
     /**
-     *
+     * TODO Implement comment mapping itemname for non-dataformfield comments.
+     * $itemname = parent::get_comment_mapping_itemname($commentarea);
      */
     public function get_comment_mapping_itemname($commentarea) {
         return 'dataform_entry';
-        // TODO Implement comment mapping itemname for non-dataformfield comments
-        // $itemname = parent::get_comment_mapping_itemname($commentarea);
     }
 
     /**
-     * Override to remove the course module step if restoring a preset
+     * Override to remove the course module step if restoring a preset.
      */
     public function build() {
         parent::build();
 
         // If restoring into a given activity remove the module_info step b/c there
-        // is no need to create a module instance
+        // is no need to create a module instance.
         if ($this->get_activityid()) {
             $steps = array();
             foreach ($this->steps as $key => $step) {
@@ -83,48 +83,48 @@ class restore_dataform_activity_task extends restore_activity_task {
     }
 
     /**
-     * Override to remove the course module step if restoring a preset
+     * Override to remove the course module step if restoring a preset.
      */
     public function build1() {
 
         // If restoring into a given activity remove the module_info step b/c there
-        // is no need to create a module instance
+        // is no need to create a module instance.
         if ($this->get_activityid()) {
 
             // Here we add all the common steps for any activity and, in the point of interest
             // we call to define_my_steps() is order to get the particular ones inserted in place.
             $this->define_my_steps();
 
-            // Roles (optionally role assignments and always role overrides)
+            // Roles (optionally role assignments and always role overrides).
             $this->add_step(new restore_ras_and_caps_structure_step('course_ras_and_caps', 'roles.xml'));
 
-            // Filters (conditionally)
+            // Filters (conditionally).
             if ($this->get_setting_value('filters')) {
                 $this->add_step(new restore_filters_structure_step('activity_filters', 'filters.xml'));
             }
 
-            // Comments (conditionally)
+            // Comments (conditionally).
             if ($this->get_setting_value('comments')) {
                 $this->add_step(new restore_comments_structure_step('activity_comments', 'comments.xml'));
             }
 
-            // Grades (module-related, rest of gradebook is restored later if possible: cats, calculations...)
+            // Grades (module-related, rest of gradebook is restored later if possible: cats, calculations...).
             $this->add_step(new restore_activity_grades_structure_step('activity_grades', 'grades.xml'));
 
-            // Advanced grading methods attached to the module
+            // Advanced grading methods attached to the module.
             $this->add_step(new restore_activity_grading_structure_step('activity_grading', 'grading.xml'));
 
-            // Userscompletion (conditionally)
+            // Userscompletion (conditionally).
             if ($this->get_setting_value('userscompletion')) {
                 $this->add_step(new restore_userscompletion_structure_step('activity_userscompletion', 'completion.xml'));
             }
 
-            // Logs (conditionally)
+            // Logs (conditionally).
             if ($this->get_setting_value('logs')) {
                 $this->add_step(new restore_activity_logs_structure_step('activity_logs', 'logs.xml'));
             }
 
-            // At the end, mark it as built
+            // At the end, mark it as built.
             $this->built = true;
 
         } else {
@@ -133,22 +133,22 @@ class restore_dataform_activity_task extends restore_activity_task {
     }
 
     /**
-     * Define (add) particular settings this activity can have
+     * Define (add) particular settings this activity can have.
      */
     protected function define_my_settings() {
     }
 
     /**
-     * Define (add) particular steps this activity can have
+     * Define (add) particular steps this activity can have.
      */
     protected function define_my_steps() {
-        // Dataform only has one structure step
+        // Dataform only has one structure step.
         $this->add_step(new restore_dataform_activity_structure_step('dataform_structure', 'dataform.xml'));
     }
 
     /**
      * Define the contents in the activity that must be
-     * processed by the link decoder
+     * processed by the link decoder.
      */
     static public function define_decode_contents() {
         $contents = array();
@@ -170,7 +170,7 @@ class restore_dataform_activity_task extends restore_activity_task {
 
     /**
      * Define the decoding rules for links belonging
-     * to the activity to be executed by the link decoder
+     * to the activity to be executed by the link decoder.
      */
     static public function define_decode_rules() {
         $rules = array();
@@ -183,14 +183,20 @@ class restore_dataform_activity_task extends restore_activity_task {
         $rules[] = new restore_decode_rule('DFVIEWBYD', '/mod/dataform/view.php?d=$1', 'dataform');
         $rules[] = new restore_decode_rule('DFEMBEDBYD', '/mod/dataform/embed.php?d=$1', 'dataform');
 
-        $rules[] = new restore_decode_rule('DFVIEWVIEW', '/mod/dataform/view.php?d=$1&amp;view=$2', array('dataform', 'dataform_view'));
-        $rules[] = new restore_decode_rule('DFEMBEDVIEW', '/mod/dataform/embed.php?d=$1&amp;view=$2', array('dataform', 'dataform_view'));
+        $pattern = '/mod/dataform/view.php?d=$1&amp;view=$2';
+        $rules[] = new restore_decode_rule('DFVIEWVIEW', $pattern, array('dataform', 'dataform_view'));
+        $pattern = '/mod/dataform/embed.php?d=$1&amp;view=$2';
+        $rules[] = new restore_decode_rule('DFEMBEDVIEW', $pattern, array('dataform', 'dataform_view'));
 
-        $rules[] = new restore_decode_rule('DFVIEWVIEWFILTER', '/mod/dataform/view.php?d=$1&amp;view=$2&amp;filter=$3', array('dataform', 'dataform_view', 'dataform_filter'));
-        $rules[] = new restore_decode_rule('DFEMBEDVIEWFILTER', '/mod/dataform/embed.php?d=$1&amp;view=$2&amp;filter=$3', array('dataform', 'dataform_view', 'dataform_filter'));
+        $pattern = '/mod/dataform/view.php?d=$1&amp;view=$2&amp;filter=$3';
+        $rules[] = new restore_decode_rule('DFVIEWVIEWFILTER', $pattern, array('dataform', 'dataform_view', 'dataform_filter'));
+        $pattern = '/mod/dataform/embed.php?d=$1&amp;view=$2&amp;filter=$3';
+        $rules[] = new restore_decode_rule('DFEMBEDVIEWFILTER', $pattern, array('dataform', 'dataform_view', 'dataform_filter'));
 
-        $rules[] = new restore_decode_rule('DFVIEWENTRY', '/mod/dataform/view.php?d=$1&amp;eid=$2', array('dataform', 'dataform_entry'));
-        $rules[] = new restore_decode_rule('DFEMBEDENTRY', '/mod/dataform/embed.php?d=$1&amp;eid=$2', array('dataform', 'dataform_entry'));
+        $pattern = '/mod/dataform/view.php?d=$1&amp;eid=$2';
+        $rules[] = new restore_decode_rule('DFVIEWENTRY', $pattern, array('dataform', 'dataform_entry'));
+        $pattern = '/mod/dataform/embed.php?d=$1&amp;eid=$2';
+        $rules[] = new restore_decode_rule('DFEMBEDENTRY', $pattern, array('dataform', 'dataform_entry'));
 
         return $rules;
 
@@ -205,22 +211,53 @@ class restore_dataform_activity_task extends restore_activity_task {
     static public function define_restore_log_rules() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('dataform', 'add', 'view.php?d={dataform}&eid={dataform_entry}', '{dataform}');
-        $rules[] = new restore_log_rule('dataform', 'update', 'view.php?d={dataform}&eid={dataform_entry}', '{dataform}');
-        $rules[] = new restore_log_rule('dataform', 'view', 'view.php?id={course_module}', '{dataform}');
-        $rules[] = new restore_log_rule('dataform', 'entry delete', 'view.php?id={course_module}', '{dataform}');
-        $rules[] = new restore_log_rule('dataform', 'fields add', 'field/index.php?d={dataform}&fid={dataform_field}', '{dataform_field}');
-        $rules[] = new restore_log_rule('dataform', 'fields update', 'field/index.php?d={dataform}&fid={dataform_field}', '{dataform_field}');
-        $rules[] = new restore_log_rule('dataform', 'fields delete', 'field/index.php?d={dataform}', '[name]');
-        $rules[] = new restore_log_rule('dataform', 'views add', 'view/index.php?d={dataform}&vid={dataform_view}', '{dataform_view}');
-        $rules[] = new restore_log_rule('dataform', 'views update', 'view/index.php?d={dataform}&vid={dataform_view}', '{dataform_view}');
-        $rules[] = new restore_log_rule('dataform', 'views delete', 'view/index.php?d={dataform}', '[name]');
-        $rules[] = new restore_log_rule('dataform', 'filters add', 'filter/index.php?d={dataform}&fid={dataform_filter}', '{dataform_filter}');
-        $rules[] = new restore_log_rule('dataform', 'filters update', 'filter/index.php?d={dataform}&fid={dataform_filter}', '{dataform_filter}');
-        $rules[] = new restore_log_rule('dataform', 'filters delete', 'filter/index.php?d={dataform}', '[name]');
-        $rules[] = new restore_log_rule('dataform', 'rules add', 'rule/index.php?d={dataform}&rid={dataform_rule}', '{dataform_rule}');
-        $rules[] = new restore_log_rule('dataform', 'rules update', 'rule/index.php?d={dataform}&rid={dataform_rule}', '{dataform_rule}');
-        $rules[] = new restore_log_rule('dataform', 'rules delete', 'rule/index.php?d={dataform}', '[name]');
+        $pattern = 'view.php?d={dataform}&eid={dataform_entry}';
+        $rules[] = new restore_log_rule('dataform', 'add', $pattern, '{dataform}');
+
+        $pattern = 'view.php?d={dataform}&eid={dataform_entry}';
+        $rules[] = new restore_log_rule('dataform', 'update', $pattern, '{dataform}');
+
+        $pattern = 'view.php?id={course_module}';
+        $rules[] = new restore_log_rule('dataform', 'view', $pattern, '{dataform}');
+
+        $pattern = 'view.php?id={course_module}';
+        $rules[] = new restore_log_rule('dataform', 'entry delete', $pattern, '{dataform}');
+
+        $pattern = 'field/index.php?d={dataform}&fid={dataform_field}';
+        $rules[] = new restore_log_rule('dataform', 'fields add', $pattern, '{dataform_field}');
+
+        $pattern = 'field/index.php?d={dataform}&fid={dataform_field}';
+        $rules[] = new restore_log_rule('dataform', 'fields update', $pattern, '{dataform_field}');
+
+        $pattern = 'field/index.php?d={dataform}';
+        $rules[] = new restore_log_rule('dataform', 'fields delete', $pattern, '[name]');
+
+        $pattern = 'view/index.php?d={dataform}&vid={dataform_view}';
+        $rules[] = new restore_log_rule('dataform', 'views add', $pattern, '{dataform_view}');
+
+        $pattern = 'view/index.php?d={dataform}&vid={dataform_view}';
+        $rules[] = new restore_log_rule('dataform', 'views update', $pattern, '{dataform_view}');
+
+        $pattern = 'view/index.php?d={dataform}';
+        $rules[] = new restore_log_rule('dataform', 'views delete', $pattern, '[name]');
+
+        $pattern = 'filter/index.php?d={dataform}&fid={dataform_filter}';
+        $rules[] = new restore_log_rule('dataform', 'filters add', $pattern, '{dataform_filter}');
+
+        $pattern = 'filter/index.php?d={dataform}&fid={dataform_filter}';
+        $rules[] = new restore_log_rule('dataform', 'filters update', $pattern, '{dataform_filter}');
+
+        $pattern = 'filter/index.php?d={dataform}';
+        $rules[] = new restore_log_rule('dataform', 'filters delete', $pattern, '[name]');
+
+        $pattern = 'rule/index.php?d={dataform}&rid={dataform_rule}';
+        $rules[] = new restore_log_rule('dataform', 'rules add', $pattern, '{dataform_rule}');
+
+        $pattern = 'rule/index.php?d={dataform}&rid={dataform_rule}';
+        $rules[] = new restore_log_rule('dataform', 'rules update', $pattern, '{dataform_rule}');
+
+        $pattern = 'rule/index.php?d={dataform}';
+        $rules[] = new restore_log_rule('dataform', 'rules delete', $pattern, '[name]');
 
         return $rules;
     }

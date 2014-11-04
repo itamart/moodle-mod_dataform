@@ -21,21 +21,21 @@
  */
 
 /**
- * Define all the backup steps that will be used by the backup_dataform_activity_task
+ * Define all the backup steps that will be used by the backup_dataform_activity_task.
  */
 
 /**
- * Define the complete data structure for backup, with file and id annotations
+ * Define the complete data structure for backup, with file and id annotations.
  */
 class backup_dataform_activity_structure_step extends backup_activity_structure_step {
 
     protected function define_structure() {
         global $CFG;
 
-        // To know if we are including userinfo
+        // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
-        // Define each element separated
+        // Define each element separated.
         $dataform = new backup_nested_element('dataform', array('id'), array(
             'name', 'intro', 'introformat', 'inlineview', 'embedded',
             'timemodified', 'timeavailable', 'timedue', 'timeinterval', 'intervalcount',
@@ -76,7 +76,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $rating = new backup_nested_element('rating', array('id'), array(
             'component', 'ratingarea', 'scaleid', 'value', 'userid', 'timecreated', 'timemodified'));
 
-        // Build the tree
+        // Build the tree.
         $dataform->add_child($fields);
         $fields->add_child($field);
 
@@ -95,18 +95,18 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $entry->add_child($ratings);
         $ratings->add_child($rating);
 
-        // Define sources
+        // Define sources.
         $dataform->set_source_table('dataform', array('id' => backup::VAR_ACTIVITYID));
         $field->set_source_table('dataform_fields', array('dataid' => backup::VAR_PARENTID));
         $filter->set_source_table('dataform_filters', array('dataid' => backup::VAR_PARENTID));
         $view->set_source_table('dataform_views', array('dataid' => backup::VAR_PARENTID));
 
-        // All the rest of elements only happen if we are including user info
+        // All the rest of elements only happen if we are including user info.
         if ($userinfo) {
             $entry->set_source_table('dataform_entries', array('dataid' => backup::VAR_PARENTID));
             $content->set_source_table('dataform_contents', array('entryid' => backup::VAR_PARENTID));
 
-            // Entry ratings
+            // Entry ratings.
             $rating->set_source_table('rating', array(
                 'contextid'  => backup::VAR_CONTEXTID,
                 'itemid'     => backup::VAR_PARENTID,
@@ -114,21 +114,21 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
             $rating->set_source_alias('rating', 'value');
         }
 
-        // Define id annotations
+        // Define id annotations.
         $entry->annotate_ids('user', 'userid');
         $entry->annotate_ids('group', 'groupid');
 
         $rating->annotate_ids('scale', 'scaleid');
         $rating->annotate_ids('user', 'userid');
 
-        // Define file annotations
-        $dataform->annotate_files('mod_dataform', 'intro', null); // This file area hasn't itemid
-        $dataform->annotate_files('mod_dataform', 'activityicon', null); // This file area hasn't itemid
-        $content->annotate_files('mod_dataform', 'content', 'id'); // By content->id
-        $this->annotate_dataformplugin_files('dataformfield', $field); // By field->id
-        $this->annotate_dataformplugin_files('dataformview', $view); // By view->id
+        // Define file annotations.
+        $dataform->annotate_files('mod_dataform', 'intro', null); // This file area hasn't itemid.
+        $dataform->annotate_files('mod_dataform', 'activityicon', null); // This file area hasn't itemid.
+        $content->annotate_files('mod_dataform', 'content', 'id'); // By content->id.
+        $this->annotate_dataformplugin_files('dataformfield', $field); // By field->id.
+        $this->annotate_dataformplugin_files('dataformview', $view); // By view->id.
 
-        // Return the root element (data), wrapped into standard activity structure
+        // Return the root element (data), wrapped into standard activity structure.
         return $this->prepare_activity_structure($dataform);
     }
 
@@ -139,7 +139,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         foreach ($plugins as $type => $path) {
             $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
-                $bne->annotate_files($pluginclass, $filearea, 'id'); // By id
+                $bne->annotate_files($pluginclass, $filearea, 'id'); // By id.
             }
         }
     }
