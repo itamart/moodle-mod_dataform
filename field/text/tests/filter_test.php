@@ -43,7 +43,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         // Course.
         $courseid = $this->getDataGenerator()->create_course();
 
-        // Dataform
+        // Dataform.
         $dataform = $this->getDataGenerator()->create_module('dataform', array('course' => $courseid));
         $df = mod_dataform_dataform::instance($dataform->id);
 
@@ -113,7 +113,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // = 'Hello': 1.
+        // Equals 'Hello': 1.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array($field->id => array('AND' => array(array('content', '', '=', 'Hello'))));
         $filter->append_search_options($searchoptions);
@@ -121,7 +121,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // = 'World': 1.
+        // Equals 'World': 1.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array($field->id => array('AND' => array(array('content', '', '=', 'World'))));
         $filter->append_search_options($searchoptions);
@@ -137,7 +137,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // 'Hello' and 'World': 0.
+        // Equals 'Hello' and Equals 'World': 0.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array(
             $field->id => array(
@@ -152,7 +152,7 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $actual = $entryman->count_entries(array('filter' => $filter));
         $this->assertEquals($expected, $actual);
 
-        // 'Hello' or 'World': 3.
+        // Equals 'Hello' or LIKE 'World': 3.
         $filter = new \mod_dataform\pluginbase\dataformfilter($view->filter->instance);
         $searchoptions = array(
             $field->id => array(

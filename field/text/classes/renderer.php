@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage text
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_text
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
@@ -25,7 +24,7 @@ defined('MOODLE_INTERNAL') or die;
 /**
  *
  */
-class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldrenderer {
+class dataformfield_text_renderer extends \mod_dataform\pluginbase\dataformfieldrenderer {
 
     /**
      *
@@ -37,7 +36,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
 
         $replacements = array();
 
-        // Edit mode: display edit the first editable pattern and display browse the rest
+        // Edit mode: display edit the first editable pattern and display browse the rest.
         if ($edit) {
             $firstinput = false;
             foreach ($patterns as $pattern => $cleanpattern) {
@@ -52,10 +51,9 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
             return $replacements;
         }
 
-        // Browse mode
+        // Browse mode.
         foreach ($patterns as $pattern => $cleanpattern) {
-            // $noshow = $this->is_noshow($pattern);
-            $replacements[$pattern] = $this->display_browse($entry, array('pattern' => $cleanpattern));
+             $replacements[$pattern] = $this->display_browse($entry, array('pattern' => $cleanpattern));
         }
         return $replacements;
     }
@@ -71,7 +69,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         $formfieldname = "field_{$fieldid}_{$entryid}";
         $patterns = $this->add_clean_pattern_keys($patterns);
 
-        // only [[$fieldname]] is editable so check it if exists
+        // Only [[$fieldname]] is editable so check it if exists.
         if (array_key_exists("[[*$fieldname]]", $patterns) and isset($data->$formfieldname)) {
             if (!$content = clean_param($data->$formfieldname, PARAM_NOTAGS)) {
                 return array($formfieldname, get_string('fieldrequired', 'dataform'));
@@ -91,21 +89,27 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         $content = '';
         if ($entryid > 0 and !empty($entry->{"c{$fieldid}_content"})) {
             $content = $entry->{"c{$fieldid}_content"};
+        } else {
+            // Default content.
+            $defaultcontent = $field->default_content;
+            if (!empty($defaultcontent)) {
+                $content = $defaultcontent;
+            }
         }
 
         $fieldattr = array();
 
-        // style
+        // Width.
         if ($field->param2) {
-            $fieldattr['style'] = 'width:'. s($field->param2). s($field->param3). ';';
+            $widthunit = !$field->param3 ? $field->param3 : 'px';
+            $fieldattr['style'] = 'width:'. s($field->param2). s($widthunit). ';';
         }
 
-        // class
+        // Class.
         $classes = $field->name_normalized;
         if ($field->param4) {
             $classes .= ' '. s($field->param4);
         }
-
         $fieldattr['class'] = $classes;
 
         $fieldname = "field_{$fieldid}_{$entryid}";
@@ -116,10 +120,10 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
         if ($required) {
             $mform->addRule($fieldname, null, 'required', null, 'client');
         }
-        // format rule
+        // Format rule.
         if ($format = $field->param4) {
             $mform->addRule($fieldname, null, $format, null, 'client');
-            // Adjust type
+            // Adjust type.
             switch($format) {
                 case 'alphanumeric':
                     $mform->setType($fieldname, PARAM_ALPHANUM);
@@ -135,7 +139,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
                     break;
             }
         }
-        // length rule
+        // Length rule.
         if ($length = $field->param5) {
             ($min = $field->param6) or ($min = 0);
             ($max = $field->param7) or ($max = 64);
@@ -169,12 +173,6 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
             $options->para = false;
 
             $format = FORMAT_PLAIN;
-            if ($field->param1) {  // We are autolinking this field, so disable linking within us
-                $content = html_writer::tag('span', $content, array('class' => 'nolink'));
-                $format = FORMAT_PLAIN;
-                $options->filter = false;
-            }
-
             $str = format_text($content, $format, $options);
         } else {
             $str = '';
@@ -188,7 +186,7 @@ class dataformfield_text_renderer extends mod_dataform\pluginbase\dataformfieldr
      * to allow only the base pattern.
      */
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
-        // Only [[fieldname]] can be imported
+        // Only [[fieldname]] can be imported.
         if ($patternname != $this->_field->name) {
             return array(array(), array());
         }

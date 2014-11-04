@@ -228,8 +228,7 @@ class dataformfieldform extends \moodleform {
         $grp[] = &$mform->createElement('text', $name, null, array('size' => '8'));
         $grp[] = &$mform->createElement('select', $nameunit, null, $units);
         $mform->addGroup($grp, 'grp', $label, array(' '), false);
-        $mform->setType($name, PARAM_INT);
-        $mform->addGroupRule('grp', array($name => array(array(null, 'numeric', null, 'client'))));
+        $mform->setType($name, PARAM_TEXT);
         $mform->disabledIf($nameunit, $name, 'eq', '');
         $mform->setDefault($name, '');
     }
@@ -250,31 +249,16 @@ class dataformfieldform extends \moodleform {
 
     /**
      * A hook method for compiling field default content on saving field definition.
-     * Needs to be overridden in any field whose content definition may require further processing.
+     * Needs to be overridden in any field which implements default content. Whatever
+     * the field returns as default content is serialized and stored, and it is the field'
+     * reponsibility to process it properly.
      * Called from {@link dataformfieldform::get_data()}.
      *
      * @param stdClass $data
-     * @return stdClass
+     * @return mix|null
      */
     protected function get_data_default_content(\stdClass $data) {
-        $field = $this->_field;
-
-        $content = array();
-        foreach ($field->content_names() as $name) {
-            $delim = $name ? '_' : '';
-            $contentname = 'contentdefault'. $delim. $name;
-            if (isset($data->$contentname) and !$field->content_is_empty($contentname, $data->$contentname)) {
-                $content[$name] = $data->$contentname;
-            }
-        }
-
-        if ($content) {
-            $data->defaultcontent = base64_encode(serialize($content));
-        } else {
-            $data->defaultcontent = null;
-        }
-
-        return $data;
+        return null;
     }
 
     /**
@@ -282,22 +266,26 @@ class dataformfieldform extends \moodleform {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            $data = $this->get_data_default_content($data);
+            $content = $this->get_data_default_content($data);
+            if ($content) {
+                $data->defaultcontent = base64_encode(serialize($content));
+            } else {
+                $data->defaultcontent = null;
+            }
         }
         return $data;
     }
 
     /**
-     * A hook method for validating field default content. The method modifies an argument array
-     * of errors that is then returned in the validation method.
+     * A hook method for validating field default content. Returns array of errors.
      * Should be overridden in any field whose default content depends on some settings.
      * Called from {@link dataformfieldform::validation()}.
      *
      * @param array The form data
-     * @param array The list of errors
-     * @return void
+     * @return array
      */
-    protected function validation_default_content(array $data, array &$errors) {
+    protected function validation_default_content(array $data) {
+        return array();
     }
 
     /**
@@ -313,7 +301,9 @@ class dataformfieldform extends \moodleform {
         }
 
         // Validate default content.
-        $this->validation_default_content($data, $errors);
+        if ($err = $this->validation_default_content($data)) {
+            $errors = array_merge($errors, $err);
+        }
 
         return $errors;
     }

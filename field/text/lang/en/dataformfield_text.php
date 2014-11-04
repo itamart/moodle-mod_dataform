@@ -15,11 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage text
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_text
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'Text';
 $string['numcharsallowed'] = 'Number of characters';
-$string['autolink'] = 'Auto link';
+$string['text'] = 'Text';
