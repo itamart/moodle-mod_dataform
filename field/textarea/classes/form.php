@@ -15,57 +15,172 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage textarea
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_textarea
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class dataformfield_textarea_form extends mod_dataform\pluginbase\dataformfieldform {
+class dataformfield_textarea_form extends \mod_dataform\pluginbase\dataformfieldform {
 
     /**
-     *
+     * Field settings.
      */
     public function field_definition() {
         global $CFG;
 
         $mform =& $this->_form;
 
-        // Field settings
-        // field width (cols)
-        $mform->addElement('text', 'param2', get_string('cols', 'dataformfield_textarea'), array('size' => '8'));
-        $mform->setType('param2', PARAM_INT);
-        $mform->addRule('param2', null, 'numeric', null, 'client');
-
-        // field height (rows)
-        $mform->addElement('text', 'param3', get_string('rows', 'dataformfield_textarea'), array('size' => '8'));
-        $mform->setType('param3', PARAM_INT);
-        $mform->addRule('param3', null, 'numeric', null, 'client');
-
-        // Text format
-        // $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
-        // $mform->addElement('select', 'param7', get_string('filemaxsize', 'dataform'), $options);
-
-        // Trust text
-        $mform->addElement('selectyesno', 'param4', get_string('trusttext', 'dataformfield_textarea'));
-        // $mform->disabledIf('param4', 'param1', 'eq', 0);
-
-        // Enable editor
+        // Enable editor.
         $mform->addElement('selectyesno', 'param1', get_string('editorenable', 'dataform'));
 
-        // Editor file settings
+        // Size units.
+        $sizeunits = array(
+            'px' => 'px',
+            'em' => 'em',
+            '%' => '%'
+        );
+
+        // Field width.
+        $colsunit = array('cols' => get_string('cols', 'editor'));
+        $options = array(
+            'units' => $colsunit + $sizeunits,
+        );
+        $this->add_field_size_elements('width', get_string('width', 'editor'), $options);
+
+        // Field height.
+        $rowsunit = array('rows' => get_string('rows', 'editor'));
+        $options = array(
+            'units' => $rowsunit + $sizeunits,
+        );
+        $this->add_field_size_elements('height', get_string('height', 'editor'), $options);
+
+        // Trust text.
+        $mform->addElement('selectyesno', 'param4', get_string('trusttext', 'dataformfield_textarea'));
+
+        // Editor file settings.
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
-        // max bytes
+        // Max bytes.
         $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
         $mform->addElement('select', 'param5', get_string('filemaxsize', 'dataform'), $options);
         $mform->disabledIf('param5', 'param1', 'eq', 0);
 
-        // max files
+        // Max files.
         $range = range(1, 100);
         $options = array(-1 => get_string('unlimited')) + array_combine($range, $range);
         $mform->addElement('select', 'param6', get_string('filesmax', 'dataform'), $options);
         $mform->disabledIf('param6', 'param1', 'eq', 0);
 
     }
+
+    /**
+     *
+     */
+    public function definition_default_content() {
+        $mform = &$this->_form;
+        $field = &$this->_field;
+
+        if (!$field->is_editor()) {
+            // TEXTAREA.
+            $mform->addElement('textarea', 'contentdefault', get_string('content'));
+        } else {
+            // EDITOR.
+            $editoroptions = $field->editoroptions + array('collapsed' => true);
+            $mform->addElement('editor', 'contentdefault_editor', get_string('content'), null, $editoroptions);
+        }
+    }
+
+    /**
+     *
+     */
+    public function data_preprocessing(&$data) {
+        $field = &$this->_field;
+
+        // Width.
+        if (!empty($data->param2)) {
+            list($data->width, $data->widthunit) = explode(' ', $data->param2) + array(null);
+        }
+        // Height.
+        if (!empty($data->param3)) {
+            list($data->height, $data->heightunit) = explode(' ', $data->param3) + array(null);
+        }
+
+        // Default content.
+        if ($data->contentdefault = $field->default_content) {
+            // Adjust content for editor mode.
+            if ($field->is_editor()) {
+                $data->contentdefaultformat = FORMAT_HTML;
+
+                $data = file_prepare_standard_editor(
+                    $data,
+                    'contentdefault',
+                    $field->editoroptions,
+                    $field->df->context,
+                    'dataformfield_textarea',
+                    'content',
+                    $field->id
+                );
+            }
+        }
+
+    }
+
+    /**
+     * Returns the default content data.
+     *
+     * @param stdClass $data
+     * @return mix|null
+     */
+    protected function get_data_default_content(\stdClass $data) {
+        $field = &$this->_field;
+
+        if (!$field->is_editor()) {
+            // TEXTAREA.
+            if (!empty($data->contentdefault)) {
+                return $data->contentdefault;
+            }
+        } else {
+            // EDITOR.
+            $data = file_postupdate_standard_editor(
+                $data,
+                'contentdefault',
+                $field->editoroptions,
+                $field->df->context,
+                'dataformfield_textarea',
+                'content',
+                $field->id
+            );
+            if (!empty($data->contentdefault)) {
+                return $data->contentdefault;
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     */
+    public function get_data() {
+        if ($data = parent::get_data()) {
+            // Width.
+            $data->param2 = null;
+            if (!empty($data->width)) {
+                $data->param2 = $data->width;
+                if ($data->widthunit != 'cols') {
+                    $data->param2 .= ' '. $data->widthunit;
+                }
+            }
+
+            // Height.
+            $data->param3 = null;
+            if (!empty($data->height)) {
+                $data->param3 = $data->height;
+                if ($data->heightunit != 'rows') {
+                    $data->param3 .= ' '. $data->heightunit;
+                }
+            }
+        }
+        return $data;
+    }
+
 }

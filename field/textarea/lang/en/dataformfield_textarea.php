@@ -15,13 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage textarea
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_textarea
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Text area';
-$string['rows'] = 'Rows';
-$string['cols'] = 'Columns';
 $string['trusttext'] = 'Trust text';

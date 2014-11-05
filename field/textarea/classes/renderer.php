@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage textarea
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_textarea
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
@@ -58,12 +57,12 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
                         $replacements[$pattern] = $this->display_browse($entry);
                         break;
 
-                    // plain text, no links
+                    // Plain text, no links.
                     case "[[$fieldname:text]]":
                         $replacements[$pattern] = html_to_text($this->display_browse($entry, array('text' => true)));
                         break;
 
-                    // plain text, with links
+                    // Plain text, with links.
                     case "[[$fieldname:textlinks]]":
                         $replacements[$pattern] = $this->display_browse($entry, array('text' => true, 'links' => true));
                         break;
@@ -133,30 +132,72 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         $entryid = $entry->id;
         $fieldname = "field_{$fieldid}_{$entryid}";
 
-        // editor
-        $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-
         $attr = array();
-        $attr['cols'] = !$field->param2 ? 40 : $field->param2;
-        $attr['rows'] = !$field->param3 ? 20 : $field->param3;
+        $styles = array();
+        // Width.
+        if ($field->param2) {
+            list($size, $unit) = explode(' ', $field->param2) + array('cols');
+            if ($unit == 'cols') {
+                $attr['cols'] = $size;
+            } else {
+                $style[] = "width: $size$unit;";
+            }
+        }
+        // Height.
+        if ($field->param3) {
+            list($size, $unit) = explode(' ', $field->param3) + array('rows');
+            if ($unit == 'rows') {
+                $attr['rows'] = $size;
+            } else {
+                $style[] = "height: $size$unit;";
+            }
+        }
+        if ($styles) {
+            $attr['style'] = implode('', $styles);
+        }
 
-        $data = new object;
-        $data->$fieldname = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : '';
+        // Content.
+        $defaultcontent = $field->default_content;
+        $entrycontent = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : '';
+
         $required = !empty($options['required']);
 
         if (!$field->is_editor()) {
+            // TEXTAREA.
             $mform->addElement('textarea', $fieldname, null, $attr);
-            $mform->setDefault($fieldname, $data->$fieldname);
+            $content = $entrycontent ? $entrycontent : $defaultcontent;
+            $mform->setDefault($fieldname, $content);
             if ($required) {
                 $mform->addRule($fieldname, null, 'required', null, 'client');
             }
         } else {
-            // format
-            $data->{"{$fieldname}format"} = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
+            // EDITOR.
+            $component = 'mod_dataform';
+            $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
+            $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
 
-            $data = file_prepare_standard_editor($data, $fieldname, $field->get_editoroptions(), $field->get_df()->context, 'mod_dataform', 'content', $contentid);
+            $data = new \stdClass;
+            $data->$fieldname = $entrycontent ? $entrycontent : $defaultcontent;
+            $data->{"{$fieldname}format"} = $format;
 
-            $mform->addElement('editor', "{$fieldname}_editor", null, $attr , $field->get_editoroptions() + array('collapsed' => true));
+            // If we are using default content, adjust component and content id.
+            if ($defaultcontent and !$contentid) {
+                $component = 'dataformfield_textarea';
+                $contentid = $field->id;
+            }
+
+            $data = file_prepare_standard_editor(
+                $data,
+                $fieldname,
+                $field->editoroptions,
+                $field->df->context,
+                $component,
+                'content',
+                $contentid
+            );
+
+            $editoroptions = $field->get_editoroptions() + array('collapsed' => true);
+            $mform->addElement('editor', "{$fieldname}_editor", null, $attr, $editoroptions);
             $mform->setDefault("{$fieldname}_editor", $data->{"{$fieldname}_editor"});
             $mform->setDefault("{$fieldname}[text]", $data->$fieldname);
             $mform->setDefault("{$fieldname}[format]", $data->{"{$fieldname}format"});
@@ -194,7 +235,14 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
             $text = $entry->{"c{$fieldid}_content"};
             $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_PLAIN;
 
-            $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php', $field->get_df()->context->id, 'mod_dataform', 'content', $contentid);
+            $text = file_rewrite_pluginfile_urls(
+                $text,
+                'pluginfile.php',
+                $field->get_df()->context->id,
+                'mod_dataform',
+                'content',
+                $contentid
+            );
 
             $options = new stdClass;
             $options->para = false;
@@ -217,7 +265,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
      * to allow only the base pattern.
      */
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
-        // Only [[fieldname]] can be imported
+        // Only [[fieldname]] can be imported.
         if ($patternname != $this->_field->name) {
             return array(array(), array());
         }
@@ -226,7 +274,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
     }
 
     /**
-     * Array of patterns this field supports
+     * Array of patterns this field supports.
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
