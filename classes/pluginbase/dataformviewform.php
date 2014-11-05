@@ -16,7 +16,7 @@
 
 /**
  * @package dataformview
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,7 +32,8 @@ require_once("$CFG->libdir/formslib.php");
 class dataformviewform extends \moodleform {
     protected $_view = null;
 
-    public function __construct($view, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+    public function __construct($view, $action = null, $customdata = null, $method = 'post',
+                    $target = '', $attributes = null, $editable = true) {
         $this->_view = $view;
 
         parent::__construct($action, $customdata, $method, $target, $attributes, $editable);
@@ -42,37 +43,37 @@ class dataformviewform extends \moodleform {
      *
      */
     public function definition() {
+        global $CFG;
+
         $view = $this->_view;
         $mform = &$this->_form;
         $editoroptions = $view->editoroptions;
         $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
 
-        // buttons
-        // -------------------------------------------------------------------------------
+        // Buttons.
         $this->add_action_buttons();
 
-        // general
-        // -------------------------------------------------------------------------------
+        // General.
         $mform->addElement('header', 'general', get_string('viewgeneral', 'dataform'));
 
-        // Name
+        // Name.
         $mform->addElement('text', 'name', get_string('name'));
         $mform->setType('name', $paramtext);
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->setDefault('name', $this->get_default_view_name());
         $mform->addHelpButton('name', 'viewname', 'dataform');
 
-        // Description
+        // Description.
         $mform->addElement('textarea', 'description', get_string('description'));
         $mform->setType('description', $paramtext);
         $mform->addHelpButton('description', 'viewdescription', 'dataform');
 
-        // Visibility
+        // Visibility.
         $mform->addElement('select', 'visible', get_string('viewvisibility', 'dataform'), $view::get_visibility_modes());
         $mform->addHelpButton('visible', 'viewvisibility', 'dataform');
         $mform->setDefault('visible', 1);
 
-        // filter
+        // Filter.
         if (!$filtersmenu = \mod_dataform_filter_manager::instance($view->dataid)->get_filters(null, true)) {
             $filtersmenu = array(0 => get_string('filtersnonedefined', 'dataform'));
         } else {
@@ -82,7 +83,7 @@ class dataformviewform extends \moodleform {
         $mform->addHelpButton('filterid', 'viewfilter', 'dataform');
         $mform->setDefault('filterid', 0);
 
-        // entries per page
+        // Entries per page.
         $options = array(
             0 => get_string('choose'),
             1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 15 => 15,
@@ -92,22 +93,22 @@ class dataformviewform extends \moodleform {
         $mform->addElement('select', 'perpage', get_string('viewperpage', 'dataform'), $options);
         $mform->addHelpButton('perpage', 'viewperpage', 'dataform');
 
-        // group by
+        // Group by.
         if (!$fieldsmenu = $view->df->field_manager->get_fields_menu(array('exclude' => array('entry')))) {
             $fieldsmenu = array('' => get_string('fieldsnonedefined', 'dataform'));
         } else {
             $fieldsmenu = array('' => get_string('choose')) + $fieldsmenu;
         }
-        // $mform->addElement('select', 'groupby', get_string('viewgroupby', 'dataform'), $fieldsmenu);
-        // $mform->addHelpButton('groupby', 'viewgroupby', 'dataform');
+        // TODO $mform->addElement('select', 'groupby', get_string('viewgroupby', 'dataform'), $fieldsmenu);.
+        // TODO $mform->addHelpButton('groupby', 'viewgroupby', 'dataform');.
 
-        // View specific definition
+        // View specific definition.
         $this->definition_view_specific();
 
-        // Remove elements
+        // Remove elements.
         $this->definition_remove_elements();
 
-        // buttons
+        // Buttons.
         $this->add_action_buttons();
     }
 
@@ -115,10 +116,10 @@ class dataformviewform extends \moodleform {
      *
      */
     protected function definition_view_specific() {
-        // View template
+        // View template.
         $this->definition_view_template();
 
-        // Submission settings
+        // Submission settings.
         $this->definition_view_submission();
     }
 
@@ -131,11 +132,11 @@ class dataformviewform extends \moodleform {
 
         $editoroptions = $view->editoroptions;
 
-        // Header
+        // Header.
         $mform->addElement('header', 'viewtemplatehdr', get_string('viewtemplate', 'dataform'));
         $mform->addHelpButton('viewtemplatehdr', 'viewtemplate', 'dataform');
 
-        // Editor
+        // Editor.
         $mform->addElement('editor', 'section_editor', get_string('viewtemplate', 'dataform'), null, $editoroptions);
         $this->add_patterns_selectors('section_editor', array('view'));
     }
@@ -149,10 +150,10 @@ class dataformviewform extends \moodleform {
         $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
         $settings = $view->submission_settings;
 
-        // Header
+        // Header.
         $mform->addElement('header', 'viewsubmissionhdr', get_string('submission', 'dataform'));
 
-        // What to display when editing
+        // What to display when editing.
         $options = array(
             '' => get_string('modeeditonly', 'dataform'),
             dataformview::EDIT_SEPARATE => get_string('modeeditseparate', 'dataform'),
@@ -163,7 +164,7 @@ class dataformviewform extends \moodleform {
             $mform->setDefault('submissiondisplay', $settings['display']);
         }
 
-        // Save buttons
+        // Save buttons.
         $buttons = $view->submission_buttons;
         foreach ($buttons as $name) {
             $grp = array();
@@ -173,17 +174,17 @@ class dataformviewform extends \moodleform {
             $mform->addHelpButton($name.'buttongrp', $name.'button', 'dataform');
             $mform->setType($name.'button_label', $paramtext);
             $mform->disabledIf($name.'button_label', $name.'buttonenable', 'notchecked');
-            // Button settings
+            // Button settings.
             if (is_array($settings) and array_key_exists($name, $settings)) {
                 $mform->setDefault($name.'buttonenable', 1);
                 $mform->setDefault($name.'button_label', $settings[$name]);
             }
         }
 
-        // Redirect view after submission
+        // Redirect view after submission.
         $options = array('' => get_string('choosedots'));
         if ($viewsmenu = \mod_dataform_view_manager::instance($view->df->id)->views_menu) {
-            // Remove this view
+            // Remove this view.
             if ($view->id and !empty($viewsmenu[$view->id])) {
                 unset($viewsmenu[$view->id]);
             }
@@ -195,19 +196,19 @@ class dataformviewform extends \moodleform {
             $mform->setDefault('submissionredirect', $settings['redirect']);
         }
 
-        // Response timeout
+        // Response timeout.
         $options = range(0, 20);
         $options[0] = get_string('none');
         $mform->addElement('select', 'submissiontimeout', get_string('submissiontimeout', 'dataform'), $options);
         $mform->addHelpButton('submissiontimeout', 'submissiontimeout', 'dataform');
 
-        // Response for submission
+        // Response for submission.
         $mform->addElement('textarea', 'submissionmessage', get_string('submissionmessage', 'dataform'));
         $mform->setType('submissionmessage', $paramtext);
         $mform->disabledIf('submissionmessage', 'submissiontimeout', 'eq', 0);
         $mform->addHelpButton('submissionmessage', 'submissionmessage', 'dataform');
 
-        // Set default save and cancel for new views
+        // Set default save and cancel for new views.
         if (!$view->id) {
             $mform->setDefault('savebuttonenable', 1);
             $mform->setDefault('cancelbuttonenable', 1);
@@ -222,15 +223,15 @@ class dataformviewform extends \moodleform {
         $mform = &$this->_form;
 
         $buttonarray = array();
-        // save and display
+        // Save and display.
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        // save and continue
+        // Save and continue.
         $buttonarray[] = &$mform->createElement('submit', 'submitreturnbutton', get_string('savecont', 'dataform'));
-        // reset to default
+        // Reset to default.
         $buttonarray[] = &$mform->createElement('submit', 'resetdefaultbutton', get_string('viewresettodefault', 'dataform'));
         $mform->registerNoSubmitButton('resetdefaultbutton');
-        // switch editor
-        // cancel
+        // Switch editor.
+        // Cancel.
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
@@ -306,9 +307,72 @@ class dataformviewform extends \moodleform {
 
     /**
      *
+     *
+     * @param stdClass $data
+     * @return stdClass
+     */
+    protected function fix_patterns_in_href($data) {
+        $view = $this->_view;
+
+        // Get the field patterns.
+        $fieldpatterns = array();
+        $set = $view->get_pattern_set('field');
+        foreach ($set as $patterns) {
+            foreach ($patterns as $pattern) {
+                $key = '%5B%5B'. trim($pattern, '[]'). '%5D%5D';
+                $fieldpatterns[$key] = $pattern;
+            }
+        }
+        // HACK: Add the [[entryid]] pattern.
+        $fieldpatterns['%5B%5Bentryid%5D%5D'] = '[[entryid]]';
+
+        // Get the view patterns.
+        $set = $view->get_pattern_set('view');
+        foreach ($set as $key => $pattern) {
+            $set[$key] = '#%23'. trim($pattern, '#'). '%23%23';
+        }
+        $viewpatterns = array_flip($set);
+
+        // Fix patterns in each editor.
+        foreach ($view->editors as $editor) {
+            $editorname = $editor. '_editor';
+            if (empty($data->$editorname)) {
+                continue;
+            }
+
+            if (empty($data->{$editorname}['text'])) {
+                continue;
+            }
+            $content = $data->{$editorname}['text'];
+
+            // We want to process only a tags.
+            preg_match_all('/<a [^>]+>/', $content, $matches);
+            if (empty($matches[0])) {
+                continue;
+            }
+
+            // Generate replacements for the a tags.
+            $replacements = array();
+            foreach ($matches[0] as $match) {
+                $replacement = str_replace(array_keys($fieldpatterns), $fieldpatterns, $match);
+                $replacement = str_replace(array_keys($viewpatterns), $viewpatterns, $replacement);
+                $replacements[$match] = $replacement;
+            }
+
+            // Adjust the content of the editor text.
+            $content = str_replace(array_keys($replacements), $replacements, $content);
+            $data->{$editorname}['text'] = $content;
+        }
+
+        return $data;
+    }
+
+    /**
+     *
      */
     public function data_preprocessing(&$data) {
-        // Submission
+        // Fix patterns in href attributes.
+        $this->fix_patterns_in_href($data);
     }
 
     /**
@@ -324,13 +388,13 @@ class dataformviewform extends \moodleform {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // Collate submission settings
+            // Collate submission settings.
             $settings = array();
-            // Submission display
+            // Submission display.
             if (!empty($data->submissiondisplay)) {
                 $settings['display'] = $data->submissiondisplay;
             }
-            // Buttons
+            // Buttons.
             $buttons = $this->_view->get_submission_buttons();
             foreach ($buttons as $name) {
                 $buttonenable = $name.'buttonenable';
@@ -340,7 +404,7 @@ class dataformviewform extends \moodleform {
                 }
             }
 
-            // Submission Redirect
+            // Submission Redirect.
             if (!empty($data->submissionredirect)) {
                 $settings['redirect'] = $data->submissionredirect;
             }
