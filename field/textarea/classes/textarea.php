@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage textarea
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_textarea
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -25,6 +24,13 @@ require_once($CFG->dirroot.'/lib/filelib.php');
 require_once($CFG->dirroot.'/repository/lib.php');
 
 class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfield {
+    /**
+     * @return array List of the field file areas
+     */
+    public static function get_file_areas() {
+        return array('contentdefault');
+    }
+
     /**
      *
      */
@@ -64,7 +70,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
 
         $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
 
-        // Delete if old content but not new
+        // Delete if old content but not new.
         if ($contentid and empty($values)) {
             return $this->delete_content($entry->id);
         }
@@ -78,20 +84,28 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
         }
 
         if ($this->is_editor()) {
-            // Editor content
+            // Editor content.
             $data = (object) $values;
             $data->{'editor_editor'} = $data->editor;
 
-            $data = file_postupdate_standard_editor($data, 'editor', $this->editoroptions, $this->df->context, 'mod_dataform', 'content', $rec->id);
+            $data = file_postupdate_standard_editor(
+                $data,
+                'editor',
+                $this->editoroptions,
+                $this->df->context,
+                'mod_dataform',
+                'content',
+                $rec->id
+            );
 
             $rec->content = $data->editor;
             $rec->content1 = $data->{'editorformat'};
 
         } else {
-            // Text area content
+            // Text area content.
             $value = reset($values);
             if (is_array($value)) {
-                // Import: One value as array of text,format,trust, so take the text
+                // Import: One value as array of text,format,trust, so take the text.
                 $value = reset($value);
             }
             $rec->content = clean_param($value, PARAM_NOTAGS);
@@ -117,7 +131,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
 
         if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
             $iseditor = $this->is_editor();
-            // For editors reformat in editor structure
+            // For editors reformat in editor structure.
             if ($iseditor) {
                 $valuearr = explode('##', $data->{"field_{$fieldid}_{$entryid}"});
                 $content = array();
@@ -127,7 +141,7 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
                 $data->{"field_{$fieldid}_{$entryid}_editor"} = $content;
                 unset($data->{"field_{$fieldid}_{$entryid}"});
             }
-            // For simple text replace \r\n with new line
+            // For simple text replace \r\n with new line.
             if (!$iseditor) {
                 $data->{"field_{$fieldid}_{$entryid}"} = str_replace('\r\n', "\n", $data->{"field_{$fieldid}_{$entryid}"});
             }

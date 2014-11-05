@@ -160,11 +160,18 @@ abstract class dataformfield {
         global $DB;
 
         if ($this->id) {
-            if ($filearea = $this->filearea()) {
-                $fs = get_file_storage();
-                $fs->delete_area_files($this->df->context->id, 'mod_dataform', $filearea);
+            // Delete field deinition files.
+            $component = 'dataformfield_'. $this->type;
+            $fs = get_file_storage();
+            $contextid = $this->df->context->id;
+            foreach ($this::get_file_areas() as $filearea) {
+                $fs->delete_area_files($contextid, $component, $filearea, $this->id);
             }
+
+            // Delete field content.
             $this->delete_content();
+
+            // Delete the field record.
             $DB->delete_records('dataform_fields', array('id' => $this->id));
 
             // Trigger an event for updating this field.
