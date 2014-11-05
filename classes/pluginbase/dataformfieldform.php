@@ -63,17 +63,23 @@ class dataformfieldform extends \moodleform {
      *
      */
     protected function definition_general() {
+        global $CFG;
+
         $mform = &$this->_form;
+        $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
 
         // Header.
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Name.
         $mform->addElement('text', 'name', get_string('name'), array('size' => '32'));
+        $mform->setType('name', $paramtext);
         $mform->addRule('name', null, 'required', null, 'client');
+        $mform->setDefault('name', $this->get_default_field_name());
 
         // Description.
         $mform->addElement('text', 'description', get_string('description'), array('size' => '64'));
+        $mform->setType('description', $paramtext);
 
         // Visible.
         $options = array(
@@ -91,18 +97,8 @@ class dataformfieldform extends \moodleform {
 
         // Template.
         $mform->addElement('textarea', 'label', get_string('fieldtemplate', 'dataform'), array('cols' => 60, 'rows' => 5));
+        $mform->setType('label', $paramtext);
         $mform->addHelpButton('label', 'fieldtemplate', 'dataform');
-
-        // Strings strip tags.
-        if (!empty($CFG->formatstringstriptags)) {
-            $mform->setType('name', PARAM_TEXT);
-            $mform->setType('description', PARAM_TEXT);
-            $mform->setType('label', PARAM_TEXT);
-        } else {
-            $mform->setType('name', PARAM_CLEANHTML);
-            $mform->setType('description', PARAM_CLEANHTML);
-            $mform->setType('label', PARAM_CLEANHTML);
-        }
     }
 
     /**
@@ -231,6 +227,25 @@ class dataformfieldform extends \moodleform {
         $mform->setType($name, PARAM_TEXT);
         $mform->disabledIf($nameunit, $name, 'eq', '');
         $mform->setDefault($name, '');
+    }
+
+    /**
+     * Returns a default field name for a new field.
+     *
+     * @return string
+     */
+    protected function get_default_field_name() {
+        $field = $this->_field;
+        $df = $field->df;
+        $fieldname = $field->type;
+
+        $i = 1;
+        while ($df->name_exists('fields', $fieldname, $field->id)) {
+            $fieldname = "$fieldname$i";
+            $i++;
+        }
+
+        return $fieldname;
     }
 
     /**
