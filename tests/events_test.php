@@ -22,6 +22,7 @@ defined('MOODLE_INTERNAL') || die();
  * @package    mod_dataform
  * @category   phpunit
  * @group      mod_dataform
+ * @group      mod_dataform_events
  * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -81,7 +82,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\filter_created', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'filters add', "filter/index.php?d=$df->id&amp;fid=$filter->id", $filter->id, $df->cm->id);
+        $url = "filter/index.php?d=$df->id&amp;fid=$filter->id";
+        $expected = array($df->course->id, 'dataform', 'filters add', $url, $filter->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // UPDATE
@@ -94,7 +96,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\filter_updated', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'filters update', "filter/index.php?d=$df->id&amp;fid=$filter->id", $filter->id, $df->cm->id);
+        $url = "filter/index.php?d=$df->id&amp;fid=$filter->id";
+        $expected = array($df->course->id, 'dataform', 'filters update', $url, $filter->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // DELETE
@@ -107,7 +110,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\filter_deleted', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'filters delete', "filter/index.php?d=$df->id&amp;delete=$filter->id", $filter->id, $df->cm->id);
+        $url = "filter/index.php?d=$df->id&amp;delete=$filter->id";
+        $expected = array($df->course->id, 'dataform', 'filters delete', $url, $filter->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
     }
 
@@ -121,22 +125,23 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $df = $this->get_a_dataform();
 
         // SETUP
-        // Add a field
+        // Add a field.
         $field = $df->field_manager->add_field('text');
-        // Add a view
+        $fieldid = $field->id;
+
+        // Add a view.
         $view = $df->view_manager->add_view('aligned');
 
+        // Get the entry manager of the view.
         $entryman = $view->entry_manager;
-
-        $data = (object) array('submitbutton_save' => 'Save');
 
         // CREATE
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
+        $data = (object) array('submitbutton_save' => 'Save');
         list(, $eids) = $entryman->process_entries('update', array(-1), $data, true);
         $events = $sink->get_events();
         $event = reset($events);
-
         $entryid = reset($eids);
         $filter = $view->filter;
         $filter->eids = $entryid;
@@ -145,12 +150,14 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\entry_created', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'entries add', "view.php?d=$df->id&amp;view=$view->id&amp;eids=$entryid", $entryid, $df->cm->id);
+        $url = "view.php?d=$df->id&amp;view=$view->id&amp;eids=$entryid";
+        $expected = array($df->course->id, 'dataform', 'entries add', $url, $entryid, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // UPDATE
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
+        $data = (object) array('submitbutton_save' => 'Save');
         $entryman->process_entries('update', array($entryid), $data, true);
         $events = $sink->get_events();
         $event = reset($events);
@@ -158,20 +165,30 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\entry_updated', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'entries update', "view.php?d=$df->id&amp;view=$view->id&amp;eids=$entryid", $entryid, $df->cm->id);
+        $url = "view.php?d=$df->id&amp;view=$view->id&amp;eids=$entryid";
+        $expected = array($df->course->id, 'dataform', 'entries update', $url, $entryid, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // UPDATE FIELD CONTENT
-        $entry = (object) array('id' => $entryid);
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
-        $field->update_content($entry, array('Hello world'));
+        $data = (object) array(
+            "field_{$fieldid}_$entryid" => 'Hello world',
+            'submitbutton_save' => 'Save'
+        );
+        $entryman->process_entries('update', array($entryid), $data, true);
         $events = $sink->get_events();
-        $event = reset($events);
+        // We expect two events here.
+        // Event 0 is entry updated.
+        $event0 = $events[0];
+        // Event 1 is field content updated.
+        $event1 = $events[1];
 
         // Check that the event data is valid.
-        $this->assertInstanceOf('\mod_dataform\event\field_content_updated', $event);
-        $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
+        $this->assertInstanceOf('\mod_dataform\event\entry_updated', $event0);
+        $this->assertEquals(context_module::instance($df->cm->id), $event0->get_context());
+        $this->assertInstanceOf('\mod_dataform\event\field_content_updated', $event1);
+        $this->assertEquals(context_module::instance($df->cm->id), $event1->get_context());
 
         // DELETE
         // Trigger and capture the event.
@@ -183,7 +200,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\entry_deleted', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'entries delete', "view.php?d=$df->id&amp;view=$view->id", $entryid, $df->cm->id);
+        $url = "view.php?d=$df->id&amp;view=$view->id";
+        $expected = array($df->course->id, 'dataform', 'entries delete', $url, $entryid, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
     }
 
@@ -219,7 +237,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\view_created', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'views add', "view/index.php?d=$df->id&amp;vedit=$view->id", $view->id, $df->cm->id);
+        $url = "view/index.php?d=$df->id&amp;vedit=$view->id";
+        $expected = array($df->course->id, 'dataform', 'views add', $url, $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // READ (view)
@@ -232,7 +251,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\view_viewed', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'views view', "view.php?d=$df->id&amp;view=$view->id", $view->id, $df->cm->id);
+        $url = "view.php?d=$df->id&amp;view=$view->id";
+        $expected = array($df->course->id, 'dataform', 'views view', $url, $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // UPDATE
@@ -245,7 +265,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\view_updated', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'views update', "view/index.php?d=$df->id&amp;vedit=$view->id", $view->id, $df->cm->id);
+        $url = "view/index.php?d=$df->id&amp;vedit=$view->id";
+        $expected = array($df->course->id, 'dataform', 'views update', $url, $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // DELETE
@@ -258,7 +279,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\view_deleted', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'views delete', "view/index.php?d=$df->id&amp;delete=$view->id", $view->id, $df->cm->id);
+        $url = "view/index.php?d=$df->id&amp;delete=$view->id";
+        $expected = array($df->course->id, 'dataform', 'views delete', $url, $view->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
     }
 
@@ -278,7 +300,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\field_created', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'fields add', "field/index.php?d=$df->id&amp;fid=$field->id", $field->id, $df->cm->id);
+        $url = "field/index.php?d=$df->id&amp;fid=$field->id";
+        $expected = array($df->course->id, 'dataform', 'fields add', $url, $field->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // UPDATE
@@ -291,7 +314,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\field_updated', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'fields update', "field/index.php?d=$df->id&amp;fid=$field->id", $field->id, $df->cm->id);
+        $url = "field/index.php?d=$df->id&amp;fid=$field->id";
+        $expected = array($df->course->id, 'dataform', 'fields update', $url, $field->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
 
         // DELETE
@@ -304,7 +328,8 @@ class mod_dataform_events_testcase extends advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_dataform\event\field_deleted', $event);
         $this->assertEquals(context_module::instance($df->cm->id), $event->get_context());
-        $expected = array($df->course->id, 'dataform', 'fields delete', "field/index.php?d=$df->id&amp;delete=$field->id", $field->id, $df->cm->id);
+        $url = "field/index.php?d=$df->id&amp;delete=$field->id";
+        $expected = array($df->course->id, 'dataform', 'fields delete', $url, $field->id, $df->cm->id);
         $this->assertEventLegacyLogData($expected, $event);
     }
 
