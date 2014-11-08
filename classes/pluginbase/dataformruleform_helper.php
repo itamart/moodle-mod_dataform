@@ -73,6 +73,22 @@ class dataformruleform_helper {
     /**
      *
      */
+    public static function fields_selection_definition($mform, $dataformid, $prefix = null) {
+        $options = array(0 => get_string('all'), 1 => get_string('selected', 'form'));
+        $mform->addElement('select', $prefix. 'fieldselection', get_string('fields', 'dataform'), $options);
+
+        $items = array();
+        if ($items = \mod_dataform_field_manager::instance($dataformid)->fields_menu) {
+            $items = array_combine($items, $items);
+        }
+        $select = &$mform->addElement('select', $prefix. 'fields', null, $items);
+        $select->setMultiple(true);
+        $mform->disabledIf($prefix. 'fields', $prefix. 'fieldselection', 'eq', 0);
+    }
+
+    /**
+     *
+     */
     public static function entries_filter_definition($mform, $dataformid, $customsearch, $prefix = null) {
         $options = array('' => get_string('choosedots'));
         $fm = \mod_dataform_filter_manager::instance($dataformid);

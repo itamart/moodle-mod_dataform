@@ -192,6 +192,26 @@ class dataformfilter {
     /**
      *
      */
+    public function get_customsearch() {
+        if (!is_array($this->instance->customsearch)) {
+            $this->instance->customsearch =unserialize($this->instance->customsearch);
+        }
+        return $this->instance->customsearch;
+    }
+
+    /**
+     *
+     */
+    public function get_customsort() {
+        if (!is_array($this->instance->customsort)) {
+            $this->instance->customsort =unserialize($this->instance->customsort);
+        }
+        return $this->instance->customsort;
+    }
+
+    /**
+     *
+     */
     public function get_sql() {
         $this->init_filter_sql();
 
@@ -237,16 +257,9 @@ class dataformfilter {
         $eaufieldid = \dataformfield_entryauthor_entryauthor::INTERNALID;
 
         $this->_filteredtables = array($eaufieldid);
-        $this->_searchfields = array();
-        $this->_sortfields = array();
+        $this->_searchfields = $this->customsearch ? $this->customsearch : array();
+        $this->_sortfields = $this->customsort ? $this->customsort : array();
         $this->_joins = array();
-
-        if ($this->customsearch) {
-            $this->_searchfields = is_array($this->customsearch) ? $this->customsearch : unserialize($this->customsearch);
-        }
-        if ($this->customsort) {
-            $this->_sortfields = is_array($this->customsort) ? $this->customsort : unserialize($this->customsort);
-        }
     }
 
     /**
@@ -547,7 +560,7 @@ class dataformfilter {
      */
     public function append_sort_options(array $sorties) {
         if ($sorties) {
-            $sortoptions = $this->customsort ? unserialize($this->customsort) : array();
+            $sortoptions = $this->customsort ? $this->customsort : array();
             foreach ($sorties as $fieldid => $sortdir) {
                 $sortoptions[$fieldid] = $sortdir;
             }
@@ -560,7 +573,7 @@ class dataformfilter {
      */
     public function prepend_sort_options(array $sorties) {
         if ($sorties) {
-            $sortoptions = $this->customsort ? unserialize($this->customsort) : array();
+            $sortoptions = $this->customsort ? $this->customsort : array();
             foreach ($sorties as $fieldid => $sortdir) {
                 if (array_key_exists($fieldid)) {
                     $sortoptions[$fieldid] = $sortdir;
@@ -588,7 +601,7 @@ class dataformfilter {
 
         if (is_array($searchies)) {
             // Custom search expects an array
-            $searchoptions = $this->customsearch ? unserialize($this->customsearch) : array();
+            $searchoptions = $this->customsearch ? $this->customsearch : array();
             foreach ($searchies as $fieldid => $searchy) {
                 if (empty($searchoptions[$fieldid])) {
                     $searchoptions[$fieldid] = $searchies[$fieldid];
