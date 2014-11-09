@@ -37,4 +37,16 @@ class dataformfield_radiobutton_radiobutton extends dataformfield_select_select 
         );
     }
 
+    /**
+     * Returns the field configured separator.
+     *
+     * @return string
+     */
+    public function get_separator() {
+        $separatortypes = $this->separator_types;
+
+        $selected = (int) $this->param3;
+        return $separatortypes[$selected]['chr'];
+    }
+
 }
