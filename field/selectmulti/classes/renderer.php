@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage selectmulti
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_selectmulti
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
@@ -78,32 +77,28 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
             $selected = array();
         }
 
-        // check for default values
-        if (!$selected and $field->param2) {
-            $selected = $field->default_values();
+        // Check for default values.
+        if (!$selected and $defaultcontent = $field->default_content) {
+            $selected = $defaultcontent;
         }
 
-        // Add a fake element so that the field is processed
-        // $mform->addElement('hidden', $fieldname, 1);
-        // $mform->setType($fieldname, PARAM_INT);
-
-        // Add selector only if there are menu options
+        // Add selector only if there are menu options.
         if ($menuoptions) {
             list($elem, $separators) = $this->render($mform, "{$fieldname}_selected", $menuoptions, $selected, $required);
-            // Add group or element
+            // Add group or element.
             if (is_array($elem)) {
                 $mform->addGroup($elem, $fieldname, null, $separators, false);
             } else {
                 $mform->addElement($elem);
             }
 
-            // Required rule
+            // Required rule.
             if ($required) {
                 $this->set_required($mform, $fieldname, $selected);
             }
         }
 
-        // Input field for adding a new option
+        // Input field for adding a new option.
         if (!empty($options['addnew'])) {
             if ($field->param4 or has_capability('mod/dataform:managetemplates', $field->get_df()->context)) {
                 $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
@@ -180,7 +175,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         $fieldid = $field->id;
         $fieldname = $field->name;
 
-        // Only [[fieldname]] can be imported
+        // Only [[fieldname]] can be imported.
         if ($patternname != $fieldname) {
             return array(array(), array());
         }
@@ -213,7 +208,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
     }
 
     /**
-     * Array of patterns this field supports
+     * Array of patterns this field supports.
      */
     protected function patterns() {
         $fieldname = $this->_field->name;
