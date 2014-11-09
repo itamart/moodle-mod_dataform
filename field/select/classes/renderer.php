@@ -81,9 +81,9 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
 
         // Check for default value.
         if (!$selected) {
-            $defaultcontent = $field->default_content;
-            if (!empty($defaultcontent['selected'])) {
-                $selected = (int) array_search($defaultcontent['selected'], $menuoptions);
+            $defaultcontent = $field->defaultcontent;
+            if (!empty($defaultcontent)) {
+                $selected = $defaultcontent;
             }
         }
 
