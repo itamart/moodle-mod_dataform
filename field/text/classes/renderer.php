@@ -91,10 +91,7 @@ class dataformfield_text_renderer extends \mod_dataform\pluginbase\dataformfield
             $content = $entry->{"c{$fieldid}_content"};
         } else {
             // Default content.
-            $defaultcontent = $field->default_content;
-            if (!empty($defaultcontent)) {
-                $content = $defaultcontent;
-            }
+            $content = $field->defaultcontent;
         }
 
         $fieldattr = array();

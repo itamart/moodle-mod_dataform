@@ -87,7 +87,7 @@ class dataformfield_text_form extends \mod_dataform\pluginbase\dataformfieldform
         $data->widthunit = !empty($data->param3) ? $data->param3 : null;
 
         // Default content.
-        $data->contentdefault = $field->default_content;
+        $data->contentdefault = $field->defaultcontent;
     }
 
     /**

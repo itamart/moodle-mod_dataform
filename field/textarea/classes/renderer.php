@@ -157,7 +157,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         }
 
         // Content.
-        $defaultcontent = $field->default_content;
+        $defaultcontent = $field->defaultcontent;
         $entrycontent = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : '';
 
         $required = !empty($options['required']);
