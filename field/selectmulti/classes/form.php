@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage selectmulti
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_selectmulti
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,17 +30,84 @@ class dataformfield_selectmulti_form extends mod_dataform\pluginbase\dataformfie
         $mform = &$this->_form;
         $field = $this->_field;
 
-        // options
-        $mform->addElement('textarea', 'param1', get_string('options', 'dataformfield_selectmulti'), 'wrap="virtual" rows="10" cols="50"');
+        // Options.
+        $label = get_string('options', 'dataformfield_selectmulti');
+        $mform->addElement('textarea', 'param1', $label, 'wrap="virtual" rows="10" cols="50"');
 
-        // default options
-        $mform->addElement('textarea', 'param2', get_string('optionsdefault', 'dataformfield_selectmulti'), 'wrap="virtual" rows="5" cols="50"');
+        // Options separator.
+        $label = get_string('optionsseparator', 'dataformfield_selectmulti');
+        $mform->addElement('select', 'param3', $label, array_map('current', $field->separator_types));
 
-        // options separator
-        $mform->addElement('select', 'param3', get_string('optionsseparator', 'dataformfield_selectmulti'), array_map('current', $field->separator_types));
-
-        // allow add option
-        $mform->addElement('selectyesno', 'param4', get_string('allowaddoption', 'dataformfield_selectmulti'));
+        // Allow add option.
+        $label = get_string('allowaddoption', 'dataformfield_selectmulti');
+        $mform->addElement('selectyesno', 'param4', $label);
 
     }
+
+    /**
+     *
+     */
+    public function definition_default_content() {
+        $mform = &$this->_form;
+        $field = &$this->_field;
+
+        // Content elements.
+        $label = get_string('optionsdefault', 'dataformfield_select');
+        $options = $field->options_menu();
+        $select = $mform->addElement('select', 'contentdefault', $label, $options);
+        $select->setMultiple(true);
+        $mform->disabledIf('contentdefault', 'param1', 'eq', '');
+    }
+
+    /**
+     *
+     */
+    public function data_preprocessing(&$data) {
+        $field = &$this->_field;
+
+        // Default content.
+        $data->contentdefault = $field->default_content;
+    }
+
+    /**
+     * Returns the default content data.
+     *
+     * @param stdClass $data
+     * @return mix|null
+     */
+    protected function get_data_default_content(\stdClass $data) {
+        if (!empty($data->contentdefault)) {
+            return implode("\n", $data->contentdefault);
+        }
+        return null;
+    }
+
+    /**
+     * A hook method for validating field default content. Returns list of errors.
+     *
+     * @param array The form data
+     * @return void
+     */
+    protected function validation_default_content(array $data) {
+        $errors = array();
+
+        if (!empty($data['contentdefault'])) {
+            $errmsg = get_string('invaliddefaultvalue', 'dataformfield_select');
+            $options = !empty($data['param1']) ? explode("\n", $data['param1']) : null;
+            // The default cannot be a valid option if there are no options.
+            if (!$options) {
+                $errors['contentdefault'] = $errmsg;
+            }
+            foreach ($data['contentdefault'] as $key) {
+                // The default must be a valid option.
+                if ($key > count($options)) {
+                    $errors['contentdefault'] = get_string('invaliddefaultvalue', 'dataformfield_select');
+                    break;
+                }
+            }
+        }
+
+        return $errors;
+    }
+
 }

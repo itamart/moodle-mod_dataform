@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage selectmulti
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_selectmulti
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -75,14 +74,14 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     public function get_search_sql($search) {
         list($element, $not, $operator, $value) = $search;
 
-        // If no options, no search
+        // If no options, no search.
         if (!$options = $this->options_menu()) {
             return null;
         }
 
         $optionkeys = array_keys($options);
 
-        // Search with all required
+        // Search with all required.
         if ($value == '-000-') {
             $value = '#'. implode('#', $optionkeys). '#';
             $search = array($element, $not, $operator, $value);
@@ -91,23 +90,23 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
 
         $searchedvalues = array_map('trim', explode('|', $value));
 
-        // Search equal to given list
+        // Search equal to given list.
         if ($operator == '=') {
             $searchedoptions = array_intersect($options, $searchedvalues);
-            // If we are searching for a value that is not in options, search for the impossible
+            // If we are searching for a value that is not in options, search for the impossible.
             if (count($searchedoptions) != count($searchedvalues)) {
                 $search = array($element, $not, $operator, '##');
                 return parent::get_search_sql($search);
             }
 
-            // All searched values are there
+            // All searched values are there.
             $value = '#'. implode('#', array_keys($searchedoptions)). '#';
             $search = array($element, $not, $operator, $value);
             return parent::get_search_sql($search);
 
         }
 
-        // Search Like to given list
+        // Search Like to given list.
         $sql = '';
         $params = array();
         if ($operator == 'LIKE') {
@@ -152,16 +151,16 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         $oldcontents = array();
         $contents = array();
 
-        // old contents
+        // Old contents.
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
 
-        // parse values
+        // Parse values.
         $selected = !empty($values['selected']) ? $values['selected'] : array();
         $newvalues = !empty($values['newvalue']) ? explode('#', $values['newvalue']) : array();
 
-        // update new values in field type
+        // Update new values in field type.
         if ($newvalues) {
             $options = $this->options_menu();
             $update = false;
@@ -179,7 +178,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
             }
         }
 
-        // new contents
+        // New contents.
         if (!empty($selected)) {
             $contents[] = '#'. implode('#', $selected). '#';
         }
@@ -208,31 +207,34 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     /**
      *
      */
-    public function default_values() {
-        $rawdefaults = explode("\n", $this->param2);
-        $options = $this->options_menu();
-
-        $defaults = array();
-        foreach ($rawdefaults as $default) {
-            $default = trim($default);
-            if ($default and $key = array_search($default, $options)) {
-                $defaults[] = $key;
-            }
+    public function get_default_content() {
+        if (!$defaultcontent = $this->defaultcontent) {
+            return null;
         }
-        return $defaults;
+        return explode("\n", $defaultcontent);
     }
 
-    // IMPORT EXPORT
+    /**
+     *
+     */
+    public function set_defaultcontent($value) {
+        if (is_array($value)) {
+            $value = implode("\n", $value);
+        }
+        $this->data->defaultcontent = $value;
+    }
+
+    // IMPORT EXPORT.
     /**
      *
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
-        // import only from csv
+        // Import only from csv.
         if (!$csvrecord) {
             return $data;
         }
 
-        // There is only one import pattern for this field
+        // There is only one import pattern for this field.
         $importsetting = reset($importsettings);
 
         $fieldid = $this->id;
