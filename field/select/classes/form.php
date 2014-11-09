@@ -46,39 +46,60 @@ class dataformfield_select_form extends mod_dataform\pluginbase\dataformfieldfor
         $mform = &$this->_form;
         $field = &$this->_field;
 
-        $defaultcontent = $field->default_content;
-
         // Content elements.
-        $mform->addElement('text', 'contentdefault_selected', get_string('optionsdefault', 'dataformfield_select'));
-        $mform->setType('contentdefault_selected', PARAM_TEXT);
-        $mform->disabledIf('contentdefault_selected', 'param1', 'eq', '');
-        if (!empty($defaultcontent['selected'])) {
-            $mform->setDefault('contentdefault_selected', $defaultcontent['selected']);
-        }
+        $label = get_string('optionsdefault', 'dataformfield_select');
+        $options = array('' => get_string('choosedots')) + $field->options_menu();
+        $mform->addElement('select', 'contentdefault', $label, $options);
+        $mform->disabledIf('contentdefault', 'param1', 'eq', '');
     }
 
     /**
-     * A hook method for validating field default content. The method modifies an argument array
-     * of errors that is then returned in the validation method.
+     *
+     */
+    public function data_preprocessing(&$data) {
+        $field = &$this->_field;
+
+        // Default content.
+        $data->contentdefault = $field->defaultcontent;
+    }
+
+    /**
+     * Returns the default content data.
+     *
+     * @param stdClass $data
+     * @return mix|null
+     */
+    protected function get_data_default_content(\stdClass $data) {
+        if (!empty($data->contentdefault)) {
+            return $data->contentdefault;
+        }
+        return null;
+    }
+
+    /**
+     * A hook method for validating field default content. Returns list of errors.
      *
      * @param array The form data
-     * @param array The list of errors
      * @return void
      */
-    protected function validation_default_content(array $data, array &$errors) {
-        if (!empty($data['contentdefault_selected'])) {
-            $defaultselected = trim($data['contentdefault_selected']);
+    protected function validation_default_content(array $data) {
+        $errors = array();
+
+        if (!empty($data['contentdefault'])) {
+            $selected = $data['contentdefault'];
             // Get the options.
             if (!empty($data['param1'])) {
-                $options = array_map('trim', explode("\n", $data['param1']));
+                $options = explode("\n", $data['param1']);
             } else {
                 $options = null;
             }
 
             // The default must be a valid option.
-            if (!$options or !in_array($defaultselected, $options)) {
-                $errors['contentdefault_selected'] = get_string('invaliddefaultvalue', 'dataformfield_select');
+            if (!$options or $selected > count($options)) {
+                $errors['contentdefault'] = get_string('invaliddefaultvalue', 'dataformfield_select');
             }
         }
+
+        return $errors;
     }
 }
