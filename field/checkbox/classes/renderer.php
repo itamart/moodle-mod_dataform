@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage checkbox
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_checkbox
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die;
@@ -41,7 +40,7 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
                 $cb->setChecked(true);
             }
         }
-        // add checkbox controller
+        // Add checkbox controller.
 
         return array($grp, array($field->separator));
     }
@@ -53,7 +52,7 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
         global $PAGE;
 
         $mform->addRule($fieldname, null, 'required', null, 'client');
-        // JS Error message
+        // JS Error message.
         $options = array(
             'fieldname' => $fieldname,
             'message' => get_string('err_required', 'form'),
@@ -78,7 +77,7 @@ class dataformfield_checkbox_renderer extends dataformfield_selectmulti_renderer
 
         $formfieldname = "field_{$fieldid}_{$entryid}_selected";
 
-        // only [[$fieldname]] is editable so check it if exists
+        // Only [[$fieldname]] is editable so check it if exists.
         if (in_array("[[*$fieldname]]", $tags)) {
             $emptyfield  = true;
             foreach ($field->options_menu() as $key => $unused) {

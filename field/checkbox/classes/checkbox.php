@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage checkbox
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_checkbox
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,7 +31,7 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
         foreach (range(1, $optioncount) as $key) {
             $contentnames[] = "selected_$key";
         }
-        // Add contentname selected for import
+        // Add contentname selected for import.
         $contentnames[] = 'selected';
 
         return $contentnames;
@@ -45,12 +44,12 @@ class dataformfield_checkbox_checkbox extends dataformfield_selectmulti_selectmu
         $fieldid = $this->id;
         $entryid = $entry->id;
 
-        // When called by import values are already collated in selected
+        // When called by import values are already collated in selected.
         if (!empty($values['selected'])) {
             return parent::format_content($entry, $values);
         }
 
-        // When called by form submission collate the selected to one array
+        // When called by form submission collate the selected to one array.
         $selected = array();
         if (!empty($values)) {
             $optioncount = count(explode("\n", $this->param1));
