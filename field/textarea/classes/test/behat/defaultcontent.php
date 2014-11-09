@@ -81,6 +81,7 @@ class defaultcontent {
         $dataformname = $options['dataformname'];
         $viewname = $options['viewname'];
         $fieldname = !empty($options['fieldname']) ? $options['fieldname'] : 'textareafield';
+        $fieldid = $options['fieldid'];
 
         $defaultcontent = "Hello world";
         $newdefaultcontent = "Hello new world";
@@ -101,7 +102,7 @@ class defaultcontent {
         // 3. Add an entry with clearing its content.
         $steps[] = new Given('I follow "Browse"');
         $steps[] = new Given('I follow "Add a new entry"');
-        $steps[] = new Given('I set the field "field_1_-1" to ""');
+        $steps[] = new Given('I set the field "field_'. $fieldid. '_-1" to ""');
         $steps[] = new Given('I press "Save"');
 
         // Outcome: An entry added with the changed content.
@@ -116,7 +117,7 @@ class defaultcontent {
 
         // 5. Add an entry with changing its content.
         $steps[] = new Given('I follow "Add a new entry"');
-        $steps[] = new Given('I set the field "field_1_-1" to "'. $somecontent. '"');
+        $steps[] = new Given('I set the field "field_'. $fieldid. '_-1" to "'. $somecontent. '"');
         $steps[] = new Given('I press "Save"');
 
         // Outcome: An entry added with the changed content.
@@ -149,7 +150,7 @@ class defaultcontent {
         $steps[] = new Given('I follow "Add a new entry"');
 
         // Outcome: No default content.
-        $steps[] = new Given('the field "field_1_-1" matches value ""');
+        $steps[] = new Given('the field "field_'. $fieldid. '_-1" matches value ""');
 
         return $steps;
     }

@@ -106,7 +106,7 @@ class dataformfield_textarea_form extends \mod_dataform\pluginbase\dataformfield
         }
 
         // Default content.
-        if ($data->contentdefault = $field->default_content) {
+        if ($data->contentdefault = $field->defaultcontent) {
             // Adjust content for editor mode.
             if ($field->is_editor()) {
                 $data->contentdefaultformat = FORMAT_HTML;

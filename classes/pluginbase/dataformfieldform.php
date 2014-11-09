@@ -281,9 +281,8 @@ class dataformfieldform extends \moodleform {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            $content = $this->get_data_default_content($data);
-            if ($content) {
-                $data->defaultcontent = base64_encode(serialize($content));
+            if ($content = $this->get_data_default_content($data)) {
+                $data->defaultcontent = $content;
             } else {
                 $data->defaultcontent = null;
             }

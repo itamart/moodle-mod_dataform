@@ -501,24 +501,6 @@ abstract class dataformfield {
     }
 
     /**
-     * Returns default content if defined, for each content element.
-     * The content keys are specified in {@link dataformfield::content_names()}.
-     *
-     * @return array|null
-     */
-    public function get_default_content() {
-        if ($this->defaultcontent) {
-            // Unserialize if not done yet.
-            if (!is_array($this->defaultcontent)) {
-                $this->defaultcontent = unserialize(base64_decode($this->defaultcontent));
-            }
-
-            return $this->defaultcontent;
-        }
-        return null;
-    }
-
-    /**
      * Validate form data in entries form
      */
     public function validate($eid, $patterns, $formdata) {
