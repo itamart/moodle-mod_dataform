@@ -316,22 +316,26 @@ class dataformviewform extends \moodleform {
 
         // Get the field patterns.
         $fieldpatterns = array();
-        $set = $view->get_pattern_set('field');
-        foreach ($set as $patterns) {
-            foreach ($patterns as $pattern) {
-                $key = '%5B%5B'. trim($pattern, '[]'). '%5D%5D';
-                $fieldpatterns[$key] = $pattern;
+        if ($set = $view->get_pattern_set('field')) {
+            foreach ($set as $patterns) {
+                foreach ($patterns as $pattern) {
+                    $key = '%5B%5B'. trim($pattern, '[]'). '%5D%5D';
+                    $fieldpatterns[$key] = $pattern;
+                }
             }
         }
+
         // HACK: Add the [[entryid]] pattern.
         $fieldpatterns['%5B%5Bentryid%5D%5D'] = '[[entryid]]';
 
         // Get the view patterns.
-        $set = $view->get_pattern_set('view');
-        foreach ($set as $key => $pattern) {
-            $set[$key] = '#%23'. trim($pattern, '#'). '%23%23';
+        $viewpatterns = array();
+        if ($set = $view->get_pattern_set('view')) {
+            foreach ($set as $key => $pattern) {
+                $set[$key] = '#%23'. trim($pattern, '#'). '%23%23';
+            }
+            $viewpatterns = array_flip($set);
         }
-        $viewpatterns = array_flip($set);
 
         // Fix patterns in each editor.
         foreach ($view->editors as $editor) {
