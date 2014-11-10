@@ -60,7 +60,11 @@ class contentperuser {
 
         $rm = $field->rating_manager;
 
-        $users = $userid ? array($userid) : array();
+        if (!$userentryids and !$userentryids = $field->df->get_entry_ids_per_user()) {
+            return $values;
+        }
+
+        $users = array_keys($userentryids);
 
         foreach ($users as $userid) {
             $options->userid = $userid;

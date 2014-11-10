@@ -122,7 +122,9 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
                     $str = $this->display_view_inline($entry);
 
                 } else if ($pattern == "[[$fieldname]]" or $pattern == "[[$fieldname:rate]]") {
-                    $str = $this->render_rating($entry);
+                    if (!$edit) {
+                        $str = $this->render_rating($entry);
+                    }
 
                 } else if ($pattern == "[[$fieldname:avg:bar]]") {
                     $value = !empty($rating) ? round($rating->aggregate[dataformfield_ratingmdl_ratingmdl::AGGREGATE_AVG], 2) : 0;
