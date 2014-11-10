@@ -7,21 +7,23 @@ Feature: Dataform view general patterns
         Given I start afresh with dataform "Test view general patterns"
 
         ## Set up
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type      | dataform   |
+            | Field Text   | text      | dataform1  |
+
+        ## View
+        And the following dataform "views" exist:
+            | name         | type      | dataform   | default |
+            | List view    | aligned   | dataform1  | 1       |
+            | Single view  | grid      | dataform1  |         |
+            | Entry edit   | grid      | dataform1  |         |
+
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test view general patterns"
-
-        ## field
-        And I go to manage dataform "fields"
-        And I add a dataform field "text" with "Field Text"
-
-        ## views
         And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "List view"
-        And I add a dataform view "grid" with "Single view"
-        And I add a dataform view "grid" with "Entry edit"
-
-        Then I set "List view" as default view
 
         # Adjust the List view
         And I follow "Edit List view"

@@ -1,5 +1,6 @@
 @mod @mod_dataform @dataformfield
 Feature: Field management
+
     @javascript
     Scenario: Field management
         Given I run dataform scenario "field management" with:
