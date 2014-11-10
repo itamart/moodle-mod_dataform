@@ -3,10 +3,10 @@ Feature: Dataform activity individualized
 
     @javascript
     Scenario: Students cannot see teacher's entries or other students' entries
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Dataform separate participants test"
         And I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform separate participants test"
 
         # As teacher1 add a dataform and an entry
         #---------------------------------------------
@@ -19,7 +19,6 @@ Feature: Dataform activity individualized
 
         When I go to manage dataform "views"
         And I set the field "Add a view" to "aligned"
-        And I wait to be redirected
         And I expand all fieldsets
         And I set the field "Name" to "View 01"
         And I fill textarea "Entry template" with "[[EAU:username]]\n[[EAC:edit]]\n[[EAC:delete]]"
@@ -40,12 +39,11 @@ Feature: Dataform activity individualized
         #---------------------------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
 
         When I follow "Add a new entry"
         And I press "Save"
-        And I wait to be redirected
         Then I see "student1"
         And I do not see "teacher1"
 
@@ -55,13 +53,12 @@ Feature: Dataform activity individualized
         #---------------------------------------------
         When I log in as "assistant1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
         And I do not see "student1"
 
         When I follow "Add a new entry"
         And I press "Save"
-        And I wait to be redirected
         Then I see "assistant1"
         And I do not see "teacher1"
         And I do not see "student1"
@@ -72,14 +69,13 @@ Feature: Dataform activity individualized
         #---------------------------------------------
         When I log in as "student2"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
         And I do not see "assistant1"
         And I do not see "student1"
 
         When I follow "Add a new entry"
         And I press "Save"
-        And I wait to be redirected
         Then I see "student2"
         And I do not see "student1"
         And I do not see "assistant1"
@@ -91,7 +87,7 @@ Feature: Dataform activity individualized
         #---------------------------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
         And I do not see "assistant1"
         And I do not see "student2"
@@ -115,7 +111,7 @@ Feature: Dataform activity individualized
         #---------------------------------------------
         When I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Dataform separate participants test"
         Then I see "teacher1"
         And I see "assistant1"
         And I see "student1"

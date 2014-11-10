@@ -138,6 +138,8 @@ class defaultcontent {
         $steps[] = new Given('the field "id_field_'. $fieldid. '_-1_selected_3" matches value ""');
         $steps[] = new Given('the field "id_field_'. $fieldid. '_-1_selected_4" matches value ""');
 
+        $steps[] = new Given('I press "Cancel"');
+
         return $steps;
     }
 

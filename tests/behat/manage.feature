@@ -8,10 +8,10 @@ Feature: Manage Dataform components
     Scenario: Add update delete
         # N steps
 
-        Given a fresh site with dataform "Test Dataform"
+        Given a fresh site with dataform "Basic Dataform Management"
         Then I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Basic Dataform Management"
         And I follow "Manage"
 
         # Views

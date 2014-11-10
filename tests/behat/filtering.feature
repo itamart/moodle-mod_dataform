@@ -1,24 +1,24 @@
-@mod @mod_dataform @dataformactivity
+@dataformfilter
 Feature: Filtering
 
     @javascript
     Scenario: Filtering
         Given a fresh site with dataform "Test dataform filtering"
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test dataform filtering"
 
         ## Add a text field.
-        And the following dataform "fields" exist:
-            | name         | type      | dataform   |
-            | Text field   | text      | dataform1  |
+        Then I go to manage dataform "fields"
+        And I add a dataform field "text" with "Text field"
 
         ## Add an aligned view.
-        And the following dataform "views" exist:
-            | name         | type      | dataform   | default |
-            | Aligned view | aligned   | dataform1  | 1       |
-
         Then I go to manage dataform "views"
+        And I add a dataform view "aligned" with "Aligned view"
+        And I set "Aligned view" as default view
+
+        ## Adjust the aligned view.
         And I follow "Edit Aligned view"
         And I expand all fieldsets
         And I prepend "<p>##advancedfilter##</p>" to field "View template"

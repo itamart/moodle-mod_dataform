@@ -65,7 +65,6 @@ Feature: Rating
         And I see "Rating1 max: 95"
         And I see "Rating1 min: 95"
 
-        And I wait "1" seconds
 
         Then I set the field "ratingmenu_1_1" to "84"
         And I see "Rating1 avg: 84"
@@ -74,7 +73,6 @@ Feature: Rating
         And I see "Rating1 max: 84"
         And I see "Rating1 min: 84"
 
-        And I wait "1" seconds
         And I log out
 
         # Student rating
@@ -90,4 +88,3 @@ Feature: Rating
         And I see "Rating1 max: 96"
         And I see "Rating1 min: 84"
 
-        And I wait "1" seconds

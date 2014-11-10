@@ -1324,17 +1324,14 @@ class behat_mod_dataform extends behat_base {
 
         $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
 
-        // Add a grid view.
-        $views = array(
-            '| name         | type      | dataform  | default   | param3 |',
-            "| $viewname    | tabular   | dataform1 | 1         | 1      |"
-        );
-        $table = new TableNode(implode("\n", $views));
-        $steps[] = new Given('the following dataform "views" exist:', $table);
-
         $steps[] = new Given('I log in as "teacher1"');
         $steps[] = new Given('I follow "Course 1"');
         $steps[] = new Given('I follow "'. $dataformname. '"');
+
+        // Add a tabular view.
+        $steps[] = new Given('I go to manage dataform "views"');
+        $steps[] = new Given('I add a dataform view "tabular" with "'. $viewname. '"');
+        $steps[] = new Given('I set "'. $viewname. '" as default view');
 
         $options = array(
             'dataformname' => $dataformname,
@@ -1360,8 +1357,6 @@ class behat_mod_dataform extends behat_base {
 
             $testcount++;
             $steps = array_merge($steps, $itemsteps);
-
-            $steps[] = new Given('I follow "'. $dataformname. '"');
 
             // Delete all entries.
             $steps[] = new Given('I set the field "entryselectallnone" to "checked"');
