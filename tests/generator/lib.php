@@ -170,7 +170,7 @@ class mod_dataform_generator extends testing_module_generator {
 
         // Set as default if specified
         if (!empty($record->default)) {
-            $df->update(array('defaultview' => $view->id));
+            $df->view_manager->process_views('default', $view->id, null, true);
         }
         return $view->data;
     }
@@ -243,16 +243,30 @@ class mod_dataform_generator extends testing_module_generator {
         $record = (object)(array)$record;
         $df = new \mod_dataform_dataform($record->dataid);
         $field = $df->field_manager->get_field($record->type);
-        $field->name = $record->name;
 
-        // Params
-        for ($i = 1; $i <= 10; $i++) {
-            $parami = "param$i";
-            if (isset($record->$parami)) {
-                $value = $record->$parami;
-                // Really ugly hack: make new lines in string.
-                $value = str_replace('\r\n', "\n", $value);
-                $field->$parami = $value;
+        // Add data from record.
+        foreach ($record as $var => $value) {
+            $field->$var = $value;
+        }
+
+        // HACK: make new lines in string.
+        $nlconversionfields = array(
+            'label',
+            'param1',
+            'param2',
+            'param3',
+            'param4',
+            'param5',
+            'param6',
+            'param7',
+            'param8',
+            'param9',
+            'param10',
+        );
+        foreach ($nlconversionfields as $var) {
+            if ($field->$var) {
+                $value = str_replace('\\\n', "\n", $field->$var);
+                $field->$var = $value;
             }
         }
 

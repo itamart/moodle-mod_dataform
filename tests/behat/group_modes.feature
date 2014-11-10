@@ -5,18 +5,15 @@ Feature: Group modes
     Scenario: Group modes
         Given I start afresh with dataform "Test group modes"
 
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test group modes"
-
         ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "text" with "Field Text"
+        And the following dataform "fields" exist:
+            | name         | type      | dataform   |
+            | Field Text   | text      | dataform1  |
 
         ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View Aligned"
-        And I set "View Aligned" as default view
+        And the following dataform "views" exist:
+            | name         | type      | dataform   | default |
+            | View Aligned | aligned   | dataform1  | 1       |
 
         ## Entries
         And the following dataform "entries" exist:
@@ -25,6 +22,10 @@ Feature: Group modes
             | dataform1 | student2      | G2    |               |               | 2 Entry by Student 02     |
             | dataform1 | student3      | G1    |               |               | 3 Entry by Student 03     |
             | dataform1 | teacher1      |       |               |               | 4 Entry by Teacher 01     |
+
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Test group modes"
 
         # Visible groups
 

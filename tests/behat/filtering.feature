@@ -9,45 +9,33 @@ Feature: Filtering
         And I follow "Test dataform filtering"
 
         ## Add a text field.
-        Then I go to manage dataform "fields"
-        And I add a dataform field "text" with "Text field"
+        And the following dataform "fields" exist:
+            | name         | type      | dataform   |
+            | Text field   | text      | dataform1  |
 
         ## Add an aligned view.
+        And the following dataform "views" exist:
+            | name         | type      | dataform   | default |
+            | Aligned view | aligned   | dataform1  | 1       |
+
         Then I go to manage dataform "views"
-        And I set the field "Add a view" to "aligned"
+        And I follow "Edit Aligned view"
         And I expand all fieldsets
-        And I set the field "Name" to "Aligned view"
         And I prepend "<p>##advancedfilter##</p>" to field "View template"
         And I press "Save changes"
 
-        Then I set "Aligned view" as default view
+        ## Add entries.
+        And the following dataform "entries" exist:
+            | dataform  | user          | group | timecreated   | timemodified  | Text field   |
+            | dataform1 | teacher1      |       |               |               | Entry 01     |
+            | dataform1 | teacher1      |       |               |               | Entry 02     |
+            | dataform1 | teacher1      |       |               |               | Entry 03     |
+            | dataform1 | teacher1      |       |               |               | Entry 04     |
+            | dataform1 | teacher1      |       |               |               | Entry 05     |
+            | dataform1 | teacher1      |       |               |               | Entry 06     |
+
 
         Then I follow "Browse"
-        
-        ## Add entries.
-        Then I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 01"
-        And I press "Save"
-
-        Then I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 02"
-        And I press "Save"
-
-        Then I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 03"
-        And I press "Save"
-
-        Then I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 04"
-        And I press "Save"
-
-        Then I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 05"
-        And I press "Save"
-
-        Then I follow "Add a new entry"
-        And I set the field "field_1_-1" to "Entry 06"
-        And I press "Save"
 
         ### Quick filtering ###
 

@@ -74,11 +74,12 @@ class behat_mod_dataform extends behat_base {
     /**
      * Runs the specified scenario if exists.
      *
+     * @Given /^I run dataform scenario "(?P<scenario_name_string>(?:[^"]|\\")*)"$/
      * @Given /^I run dataform scenario "(?P<scenario_name_string>(?:[^"]|\\")*)" with:$/
      * @param string $name
      * @param TableNode $data
      */
-    public function i_run_dataform_scenario_with($name, $data) {
+    public function i_run_dataform_scenario_with($name, TableNode $data = null) {
         $scenarioname = 'scenario_'. str_replace(' ', '_', $name);
         if (method_exists($this, $scenarioname)) {
             return $this->$scenarioname($data);
@@ -139,7 +140,7 @@ class behat_mod_dataform extends behat_base {
             '| username     | firstname | lastname  | email                 |',
             '| teacher1     | Teacher   | 1         | teacher1@asd.com      |',
             '| assistant1   | Assistant | 1         | assistant1@asd.com    |',
-            '| assistant2   | Assistant | 1         | assistant2@asd.com    |',
+            '| assistant2   | Assistant | 2         | assistant2@asd.com    |',
             '| student1     | Student   | 1         | student1@asd.com      |',
             '| student2     | Student   | 2         | student2@asd.com      |',
             '| student3     | Student   | 3         | student3@asd.com      |',
@@ -152,6 +153,7 @@ class behat_mod_dataform extends behat_base {
             '| user         | course | role             |',
             '| teacher1     | C1     | editingteacher   |',
             '| assistant1   | C1     | teacher          |',
+            '| assistant2   | C1     | teacher          |',
             '| student1     | C1     | student          |',
             '| student2     | C1     | student          |',
         );
@@ -1285,6 +1287,96 @@ class behat_mod_dataform extends behat_base {
             $steps[] = new Given('I follow "Delete '. $fieldname. '"');
             $steps[] = new Given('I press "Continue"');
             $steps[] = new Given('I do not see "'. $fieldname. '"');
+        }
+
+        return $steps;
+    }
+
+    /**
+     * Returns list of steps for field default content scenario.
+     *
+     * @param TableNode $data Scenario data.
+     * @return array Array of Given objects.
+     */
+    protected function scenario_field_default_content(TableNode $data = null) {
+        $steps = array();
+
+        if ($data) {
+            if (!$items = $data->getHash()) {
+                return $steps;
+            }
+        } else {
+            // Try to get all field types.
+            if ($plugins = core_component::get_plugin_list('dataformfield')) {
+                $items = array();
+                foreach (array_keys($plugins) as $fieldtype) {
+                    $items[] = array(
+                        'fieldtype' => $fieldtype,
+                    );
+                }
+            } else {
+                return $steps;
+            }
+        }
+
+        $dataformname = "Field default content";
+        $viewname = 'View01';
+
+        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
+
+        // Add a grid view.
+        $views = array(
+            '| name         | type      | dataform  | default   | param3 |',
+            "| $viewname    | tabular   | dataform1 | 1         | 1      |"
+        );
+        $table = new TableNode(implode("\n", $views));
+        $steps[] = new Given('the following dataform "views" exist:', $table);
+
+        $steps[] = new Given('I log in as "teacher1"');
+        $steps[] = new Given('I follow "Course 1"');
+        $steps[] = new Given('I follow "'. $dataformname. '"');
+
+        $options = array(
+            'dataformname' => $dataformname,
+            'viewname' => $viewname,
+        );
+
+        $testcount = 0;
+        foreach ($items as $item) {
+            $fieldtype = $item['fieldtype'];
+            $stepsclass = "\\dataformfield_$fieldtype\\test\\behat\\defaultcontent";
+
+            if (!class_exists($stepsclass)) {
+                continue;
+            }
+
+            $fieldname = !empty($item['fieldname']) ? $item['fieldname'] : null;
+            $options['fieldname'] = $fieldname;
+            $options['fieldid'] = $testcount + 1;
+
+            if (!$itemsteps = $stepsclass::steps($options)) {
+                continue;
+            }
+
+            $testcount++;
+            $steps = array_merge($steps, $itemsteps);
+
+            $steps[] = new Given('I follow "'. $dataformname. '"');
+
+            // Delete all entries.
+            $steps[] = new Given('I set the field "entryselectallnone" to "checked"');
+            $steps[] = new Given('I follow "id_entry_bulkaction_delete"');
+            $steps[] = new Given('I press "Continue"');
+
+            // Delete all fields.
+            $steps[] = new Given('I go to manage dataform "fields"');
+            $steps[] = new Given('I set the field "fieldselectallnone" to "checked"');
+            $steps[] = new Given('I follow "id_field_bulkaction_delete"');
+            $steps[] = new Given('I press "Continue"');
+        }
+
+        if (!$testcount) {
+            return array();
         }
 
         return $steps;
