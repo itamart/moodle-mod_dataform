@@ -137,6 +137,8 @@ class defaultcontent {
         // Outcome: No default content.
         $steps[] = new Given('the field "field_'. $fieldid. '_-1_selected" matches value ""');
 
+        $steps[] = new Given('I press "Cancel"');
+
         return $steps;
     }
 

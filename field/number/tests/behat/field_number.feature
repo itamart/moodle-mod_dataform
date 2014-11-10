@@ -94,7 +94,6 @@ Feature: Add dataform entries
         When I follow "Add a new entry"
         And I set the field "field_1_-1" to "<input>"
         And I press "Save"
-        And I wait to be redirected
         Then I see "<result>"
         
     Examples:

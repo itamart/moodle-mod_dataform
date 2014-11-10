@@ -5,10 +5,10 @@ Feature: Navigation tabs
 
     @javascript
     Scenario: Follow the navigation tabs
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Navigation tabs test"
         And I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Navigation tabs test"
 
         Then I see "Browse"
         And I see "Manage"
@@ -34,7 +34,7 @@ Feature: Navigation tabs
 
         Then I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Navigation tabs test"
 
         And I do not see "Browse"
         And I do not see "Manage"

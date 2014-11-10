@@ -5,11 +5,11 @@ Feature: Dataform max entries
     Scenario: Students cannot add more than max entries
         # 69 steps
 
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Max Entries test"
         And I log in as "teacher1"
         And I follow "Course 1"
 
-        When I follow "Test Dataform"
+        When I follow "Max Entries test"
         And I follow "Edit settings"
         And I expand all fieldsets
         And I set the field "Maximum entries" to "1"
@@ -55,7 +55,7 @@ Feature: Dataform max entries
         #---------------------------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Max Entries test"
         Then I see "Entry 01"
         And I see "Entry 02"
 

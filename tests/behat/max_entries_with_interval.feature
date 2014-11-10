@@ -5,10 +5,10 @@ Feature: Dataform max entries
     Scenario: Students cannot add more than max entries every interval
         # 125 steps
         
-        Given I start afresh with dataform "Test Dataform"
+        Given I start afresh with dataform "Max entries with interval"
         And I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Max entries with interval"
         Then I see "This dataform appears to be new or with incomplete setup"
         
         When I follow "Edit settings"
@@ -67,7 +67,7 @@ Feature: Dataform max entries
         #---------------------------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Max entries with interval"
         Then I see "Entry 01"
         And I see "Entry 02"
         
@@ -92,7 +92,7 @@ Feature: Dataform max entries
         #---------------------------
         When I log in as "teacher1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Max entries with interval"
         Then I see "Add a new entry"
 
         When I follow "Add a new entry"
@@ -116,7 +116,7 @@ Feature: Dataform max entries
         #---------------------------------------------
         When I log in as "student1"
         And I follow "Course 1"
-        And I follow "Test Dataform"
+        And I follow "Max entries with interval"
         Then I see "Teacher Entry 01"
         And I see "Teacher Entry 02"
         And I see "Student Entry 01"
