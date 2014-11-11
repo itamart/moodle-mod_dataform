@@ -29,7 +29,7 @@ function xmldb_dataformfield_ratingmdl_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    $newversion = 2014101907;
+    $newversion = 2014111000;
     if ($oldversion < $newversion) {
         // Replace field patterns.
         if ($dataforms = $DB->get_records('dataform')) {

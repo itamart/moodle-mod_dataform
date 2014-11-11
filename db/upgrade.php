@@ -66,7 +66,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2013051101($dbman, $oldversion);
     xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
-    xmldb_dataform_upgrade_last($dbman, $oldversion);
+    xmldb_dataform_upgrade_2014111000($dbman, $oldversion);
 
     return true;
 }
@@ -1112,10 +1112,10 @@ function xmldb_dataform_upgrade_2014051301($dbman, $oldversion) {
     return true;
 }
 
-function xmldb_dataform_upgrade_last($dbman, $oldversion) {
+function xmldb_dataform_upgrade_2014111000($dbman, $oldversion) {
     global $CFG, $DB;
 
-    $newversion = 2014101904;
+    $newversion = 2014111000;
     if ($oldversion < $newversion) {
         // Replace field template pattern from [[fieldname@]] to [[T@fieldname]].
         if ($dataforms = $DB->get_records('dataform')) {
