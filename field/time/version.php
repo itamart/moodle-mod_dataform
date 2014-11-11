@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_time';
-$plugin->version = 2014072100;
-$plugin->requires = 2014051200;
+$plugin->version = 2014111000;
+$plugin->requires = 2014111000;

@@ -4,8 +4,8 @@ This Moodle module is a major enhancement of Moodle standard Database module act
 
 Release:
 --------
-2.7
+2.8
 
 Documentation:
 --------------
-http://docs.moodle.org/27/en/Dataform_module
+http://docs.moodle.org/28/en/Dataform_module

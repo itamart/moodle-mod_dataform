@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_ratingmdl';
-$plugin->version = 2014101907;
-$plugin->requires = 2014051200;
+$plugin->version = 2014111000;
+$plugin->requires = 2014111000;

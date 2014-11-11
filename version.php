@@ -26,8 +26,7 @@
  */
 
 $plugin->component = 'mod_dataform';
-$plugin->release  = '2.8 Beta';
-$plugin->version = 2014110100;
-$plugin->requires = 2014051200;
+$plugin->release  = '2.8';
+$plugin->version = 2014111000;
+$plugin->requires = 2014111000;
 $plugin->maturity = MATURITY_STABLE;
-// $plugin->cron     = 60;
