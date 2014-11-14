@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage time
- * @copyright 2012 Itamar Tzadok
+ * @package dataformfield_time
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['pluginname'] = 'Time';
+$string['time:addinstance'] = 'Add a new Time dataformfield';
 $string['dateonly'] = 'Date only';
 $string['dateonly_help'] = 'Select this option to display only the date portion of the field value and a date only selector when the field is edited.';
 $string['displayformat'] = 'Display format';
@@ -28,7 +29,6 @@ $string['displayformat_help'] = 'You can set a custom display format for the fie
 $string['stopyear'] = 'Stop year';
 $string['stopyear_help'] = 'Year value (YYYY). This value determines the max year value in the date/time selector in editing mode. Leave 0 or empty to use Moodle default.';
 $string['fromtimestamp'] = 'From timestamp: ';
-$string['pluginname'] = 'Time';
 $string['startyear'] = 'Start year';
 $string['startyear_help'] = 'Year value (YYYY). This value determines the min year value in the date/time selector in editing mode. Leave 0 or empty to use Moodle default.';
 $string['day'] = 'Day';

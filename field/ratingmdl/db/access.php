@@ -21,6 +21,19 @@
  */
 
 $capabilities = array(
+    // Add Instance.
+    'dataformfield/ratingmdl:addinstance' => array(
+
+        'riskbitmask' => RISK_SPAM,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+    ),
+
     // Own Entry - Rate.
     'dataformfield/ratingmdl:ownrate' => array(
 

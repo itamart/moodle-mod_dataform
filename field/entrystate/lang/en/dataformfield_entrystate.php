@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage entrystate
- * @copyright 2013 Itamar Tzadok
+ * @package dataformfield_entrystate
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Entry state';
+$string['entrystate:addinstance'] = 'Add a new Entry state dataformfield';
 $string['state'] = 'State';
 $string['states'] = 'States';
 $string['states_help'] = 'State names, one per line. Example:<p>Draft<br />Submitted<br />Approved</p>The list of states should be saved before transitions can added.';

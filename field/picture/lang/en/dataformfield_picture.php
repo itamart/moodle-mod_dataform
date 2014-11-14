@@ -15,16 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage picture
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_picture
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+$string['pluginname'] = 'Picture';
+$string['picture:addinstance'] = 'Add a new Picture dataformfield';
 $string['displaydimensions'] = 'Display dimensions';
 $string['displaydimensions_help'] = 'The size of the displayed image. Aspect ratio is preserved if only width or height are specified.';
 $string['maxdimensions'] = 'Max size';
 $string['maxdimensions_help'] = 'The max size (in pixels) of the stored images. If specified, larger images will be cropped.';
-$string['pluginname'] = 'Picture';
 $string['resizingimages'] = 'Resizing image thumbnails...';
 $string['thumbdimensions'] = 'Thumb size';
 $string['thumbdimensions_help'] = 'The thumb size (in pixels of the stored images. If not specified, thumbs are not generated.';

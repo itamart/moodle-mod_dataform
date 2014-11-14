@@ -113,11 +113,24 @@ class mod_dataform_renderer extends plugin_renderer_base {
             return null;
         }
 
+        $context = \mod_dataform_dataform::instance($this->_dataformid)->context;
+        if (!$instantiable = $plugininfo::get_instantiable_plugins($context)) {
+            return null;
+        }
+
         $menu = array();
         foreach ($enabled as $name) {
+            // Must be instantiable.
+            if (!array_key_exists($name, $instantiable)) {
+                continue;
+            }
+
+            // Must not be excluded.
             if (!empty($options['exclude']) and in_array($name, $options['exclude'])) {
                 continue;
             }
+
+            // Add to list.
             $menu[$name] = get_string('pluginname', "{$subplugintype}_$name");
         }
 

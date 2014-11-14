@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformview
- * @subpackage grid
- * @copyright Itamar Tzadok
+ * @package dataformview_grid
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Grid';
+$string['grid:addinstance'] = 'Add a new Grid dataformview';
 $string['gridsettings'] = 'Grid settings';
 $string['cols'] = 'Number of columns';
 $string['rows'] = 'Aligned rows';

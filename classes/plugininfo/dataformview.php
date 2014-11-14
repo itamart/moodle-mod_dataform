@@ -41,6 +41,30 @@ class dataformview extends base {
         return array_combine($enabled, $enabled);
     }
 
+    /**
+     * Finds all plugins the user can instantiate in the context. The result may include missing plugins.
+     * Calls {@link \mod_dataform\plugininfo\dataformview::is_instantiable()}.
+     * Returns an associative list $pluginname => $pluginname, or null if no plugin is instantiable.
+     *
+     * @param context $context Either course or dataform (module) context.
+     * @return array|null
+     */
+    public static function get_instantiable_plugins($context) {
+        $return = array();
+
+        if (!$plugins = \core_plugin_manager::instance()->get_plugins_of_type('dataformview')) {
+            return null;
+        }
+
+        foreach ($plugins as $name => $plugin) {
+            if ($plugin->is_instantiable($context)) {
+                $return[$name] = $name;
+            }
+        }
+
+        return $return;
+    }
+
     public function is_enabled() {
         $enabled = get_config('mod_dataform', 'enabled_dataformview');
         if (!$enabled) {
@@ -49,6 +73,23 @@ class dataformview extends base {
 
         $enabled = array_flip(explode(',', $enabled));
         return isset($enabled[$this->name]);
+    }
+
+    /**
+     * Checks if the plugin is instantiable by the current user in the specified context.
+     * Checks capability addinstance. If the plugin doesn't have the capability, it cannot be instantiated.
+     *
+     * @param context $context Either course or dataform (module) context.
+     * @return boolean
+     */
+    public function is_instantiable($context) {
+        $capability = 'dataformview/' . $this->name . ':addinstance';
+        if (!get_capability_info($capability)) {
+            // If the capability does not exist, the plugin cannot be instantiated.
+            return false;
+        }
+
+        return has_capability($capability, $context);
     }
 
     public function is_uninstall_allowed() {

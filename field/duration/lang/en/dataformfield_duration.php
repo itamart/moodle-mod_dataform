@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage duration
- * @copyright 2013 Itamar Tzadok
+ * @package dataformfield_duration
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'Duration';
+$string['duration:addinstance'] = 'Add a new Duration dataformfield';
 $string['fixedunit'] = 'Fixed unit';
 $string['limitunitsto'] = 'Limit units to';

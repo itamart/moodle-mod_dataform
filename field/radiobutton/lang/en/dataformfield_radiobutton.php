@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage radiobutton
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_radiobutton
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 $string['pluginname'] = 'Radio button';
+$string['radiobutton:addinstance'] = 'Add a new Radio button dataformfield';

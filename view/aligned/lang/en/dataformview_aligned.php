@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformview
- * @subpackage aligned
- * @copyright Itamar Tzadok
+ * @package dataformview_aligned
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Aligned';
+$string['aligned:addinstance'] = 'Add a new Aligned dataformview';
 $string['entrytemplate'] = 'Entry template';
 $string['entrytemplate_help'] = 'The entry template of the Aligned view is a simplified definition of a table row. It consists of a list of column definitions, each column definition in a new line. The column definition format: fieldpattern|column header (optional)|cell css class (optional). For example, the following definition will display the entries in a headerless table with 3 columns and the specified field patterns in order:
 <p>

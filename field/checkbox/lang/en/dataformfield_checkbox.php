@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage checkbox
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_checkbox
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'Checkbox';
+$string['checkbox:addinstance'] = 'Add a new Checkbox dataformfield';

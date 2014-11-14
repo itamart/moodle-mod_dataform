@@ -40,6 +40,10 @@ if ($urlparams->fid) {
     $field = $df->field_manager->get_field($urlparams->type);
 }
 
+// Must have add instance capability in the dataform context.
+$requiredcapability = "dataformfield/$field->type:addinstance";
+require_capability($requiredcapability, $df->context);
+
 $mform = $field->get_form();
 
 if ($mform->is_cancelled()) {

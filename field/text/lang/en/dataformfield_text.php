@@ -19,6 +19,8 @@
  * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 $string['pluginname'] = 'Text';
+$string['text:addinstance'] = 'Add a new Text dataformfield';
 $string['numcharsallowed'] = 'Number of characters';
 $string['text'] = 'Text';
