@@ -21,4 +21,5 @@
  */
 
 $string['pluginname'] = 'Text area';
+$string['textarea:addinstance'] = 'Add a new Text area dataformfield';
 $string['trusttext'] = 'Trust text';

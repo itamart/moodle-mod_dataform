@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage url
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_url
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['pluginname'] = 'Url';
+$string['url:addinstance'] = 'Add a new Url dataformfield';
 $string['applymediafilter'] = 'Apply media filter';
 $string['alttext'] = 'Alt text';
 $string['forcename'] = 'Force name for the link';
 $string['makelink'] = 'Make the url a link';
 $string['makeimage'] = 'Make the url an image';
-$string['pluginname'] = 'Url';
 $string['usepicker'] = 'Use url picker when editing';

@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage commentmdl
- * @copyright 2013 Itamar Tzadok
+ * @package dataformfield_commentmdl
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Dataform comment';
+$string['pluginname'] = 'Comment (moodle)';
 // CAPABILITIES
+$string['commentmdl:addinstance'] = 'Add a new Comment (moodle) dataformfield';
 $string['commentmdl:addcomment'] = 'Add Comment';
 $string['commentmdl:deleteowncomment'] = 'Delete Own Comment';
 $string['commentmdl:deleteanycomment'] = 'Delete Any Comment';

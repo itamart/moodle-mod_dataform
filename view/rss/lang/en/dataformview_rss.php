@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformview
- * @subpackage rss
- * @copyright 2013 Itamar Tzadok {@link http://substantialmethods.com}
+ * @package dataformview_rss
+ * @copyright 2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'RSS';
+$string['rss:addinstance'] = 'Add a new Rss dataformview';
 $string['feedtemplate'] = 'Feed template';
 $string['feedtemplate_help'] = 'Feed template';
 $string['feedtitle'] = 'Feed title';

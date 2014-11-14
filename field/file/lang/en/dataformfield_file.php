@@ -15,14 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage file
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_file
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+$string['pluginname'] = 'File';
+$string['file:addinstance'] = 'Add a new File dataformfield';
 $string['alttext'] = 'Alt text';
 $string['clearcontent'] = 'Clear content';
-$string['pluginname'] = 'File';
 $string['newline'] = 'New line';
 $string['filesseparator'] = 'Separator';
 $string['filesseparator_help'] = 'Select New line to display multiple files in separate lines.';

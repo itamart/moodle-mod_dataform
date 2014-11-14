@@ -44,6 +44,10 @@ if ($urlparams->vedit) {
     $view->generate_default_view();
 }
 
+// Must have add instance capability in the dataform context.
+$requiredcapability = "dataformview/$view->type:addinstance";
+require_capability($requiredcapability, $df->context);
+
 $mform = $view->get_form();
 
 // Form cancelled

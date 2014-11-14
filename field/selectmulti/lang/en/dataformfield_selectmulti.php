@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage selectmulti
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_selectmulti
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 $string['pluginname'] = 'Select (multiple)';
+$string['selectmulti:addinstance'] = 'Add a new Select (multiple) dataformfield';
 $string['newline'] = 'New line';
 $string['space'] = 'Space';
 $string['comma'] = 'Comma';

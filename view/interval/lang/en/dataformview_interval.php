@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformview
- * @subpackage interval
- * @copyright 2012 Itamar Tzadok
+ * @package dataformview_interval
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['pluginname'] = 'Interval';
+$string['interval:addinstance'] = 'Add a new Interval dataformview';
 $string['interval'] = 'Interval';
 $string['custom'] = 'Custom';
 $string['daily'] = 'Daily';
@@ -29,7 +30,6 @@ $string['hourly'] = 'Hourly';
 $string['lastpage'] = 'Last page';
 $string['monthly'] = 'Monthly';
 $string['nextpage'] = 'Next page';
-$string['pluginname'] = 'Interval';
 $string['randompage'] = 'Random page';
 $string['randomentries'] = 'Random entries';
 $string['refresh'] = 'Refresh';

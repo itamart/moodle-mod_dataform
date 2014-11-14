@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Dataform rating';
+$string['pluginname'] = 'Rating (moodle)';
 $string['rating'] = 'Rating';
 $string['usersrating'] = 'User rating';
 $string['numratings'] = 'Number of ratings';
@@ -29,6 +29,7 @@ $string['sumratings'] = 'Sum of ratings';
 $string['maxratings'] = 'Highest rating';
 $string['minratings'] = 'Lowest rating';
 /* CAPABILITIES */
+$string['ratingmdl:addinstance'] = 'Add a new Rating (moodle) dataformfield';
 $string['ratingmdl:ownrate'] = 'Own Entry - Rate';
 $string['ratingmdl:ownviewaggregate'] = 'Own Entry - View Rating Aggregates';
 $string['ratingmdl:ownviewratings'] = 'Own Entry - View Ratings';

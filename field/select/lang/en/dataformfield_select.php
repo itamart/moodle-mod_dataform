@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage select
- * @copyright 2013 Itamar Tzadok
+ * @package dataformfield_select
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 $string['pluginname'] = 'Select';
+$string['select:addinstance'] = 'Add a new Select dataformfield';
 $string['allowaddoption'] = 'Allow adding options';
 $string['optionsdefault'] = 'Default value';
 $string['options'] = 'Options';

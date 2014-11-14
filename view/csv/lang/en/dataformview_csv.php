@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformview
- * @subpackage csv
- * @copyright 2012 Itamar Tzadok
+ * @package dataformview_csv
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'CSV';
+$string['csv:addinstance'] = 'Add a new Csv dataformview';
 $string['csv'] = 'CSV';
 $string['ods'] = 'Calc (Open Office)';
 $string['xls'] = 'Excel';

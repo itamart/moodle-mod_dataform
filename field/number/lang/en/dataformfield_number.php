@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage number
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_number
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['decimals'] = 'Decimals';
+
 $string['pluginname'] = 'Number';
+$string['number:addinstance'] = 'Add a new Number dataformfield';
+$string['decimals'] = 'Decimals';

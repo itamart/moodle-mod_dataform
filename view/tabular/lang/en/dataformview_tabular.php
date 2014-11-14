@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformview
- * @subpackage tabular
- * @copyright 2011 Itamar Tzadok
+ * @package dataformview_tabular
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Tabular';
+$string['tabular:addinstance'] = 'Add a new Tabular dataformview';
 $string['headerrow'] = 'Table with header row';
 $string['headerrow_help'] = 'If set to Yes, it is assumed that the first row in the table template is a header row.';
 $string['table'] = 'Table design';
