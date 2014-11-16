@@ -16,14 +16,14 @@ Feature: Rating
 
         ## Fields
         And I go to manage dataform "fields"
-        And I set the field "Add a field" to "Dataform rating"
+        And I set the field "Add a field" to "ratingmdl"
         And I expand all fieldsets
         And I set the field "Name" to "rating1"
         And I set the field "Type" to "Point"
         And I set the field "Maximum points" to "100"
         And I press "Save changes"
         
-        And I set the field "Add a field" to "Dataform rating"
+        And I set the field "Add a field" to "ratingmdl"
         And I expand all fieldsets
         And I set the field "Name" to "rating2"
         And I set the field "Type" to "Point"
