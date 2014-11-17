@@ -107,9 +107,6 @@ class field_view extends base {
 
         // Anonymous entry.
         if (\mod_dataform\pluginbase\dataformentry::is_anonymous($entry)) {
-            if (!$df->anonymous) {
-                return false;
-            }
             $params['capabilities'] = array('mod/dataform:entryanonymousview');
             return parent::validate($params);
         }

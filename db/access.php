@@ -445,6 +445,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
             'archetypes' => array(
+                'guest' => CAP_ALLOW,
                 'frontpage' => CAP_ALLOW,
                 'student' => CAP_ALLOW,
                 'teacher' => CAP_ALLOW,
@@ -459,6 +460,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
             'archetypes' => array(
+                'guest' => CAP_ALLOW,
                 'frontpage' => CAP_ALLOW,
                 'student' => CAP_ALLOW,
                 'teacher' => CAP_ALLOW,

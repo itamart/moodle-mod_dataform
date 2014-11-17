@@ -91,9 +91,6 @@ class field_update extends base {
 
         // Anonymous entry.
         if (\mod_dataform\pluginbase\dataformentry::is_anonymous($entry)) {
-            if (!$df->anonymous) {
-                return false;
-            }
             $params['capabilities'] = array('mod/dataform:entryanonymousupdate');
             return parent::validate($params);
         }
