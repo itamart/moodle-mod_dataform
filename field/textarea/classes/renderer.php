@@ -136,20 +136,22 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
         $styles = array();
         // Width.
         if ($field->param2) {
-            list($size, $unit) = explode(' ', $field->param2) + array('cols');
+            $sizeandunit = array_merge(explode(' ', $field->param2), array('cols'));
+            list($size, $unit) = $sizeandunit;
             if ($unit == 'cols') {
                 $attr['cols'] = $size;
             } else {
-                $style[] = "width: $size$unit;";
+                $styles[] = "width: $size$unit;";
             }
         }
         // Height.
         if ($field->param3) {
-            list($size, $unit) = explode(' ', $field->param3) + array('rows');
+            $sizeandunit = array_merge(explode(' ', $field->param3), array('rows'));
+            list($size, $unit) = $sizeandunit;
             if ($unit == 'rows') {
                 $attr['rows'] = $size;
             } else {
-                $style[] = "height: $size$unit;";
+                $styles[] = "height: $size$unit;";
             }
         }
         if ($styles) {
