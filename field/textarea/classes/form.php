@@ -98,11 +98,13 @@ class dataformfield_textarea_form extends \mod_dataform\pluginbase\dataformfield
 
         // Width.
         if (!empty($data->param2)) {
-            list($data->width, $data->widthunit) = explode(' ', $data->param2) + array(null);
+            $sizeandunit = array_merge(explode(' ', $data->param2), array(null));
+            list($data->width, $data->widthunit) = $sizeandunit;
         }
         // Height.
         if (!empty($data->param3)) {
-            list($data->height, $data->heightunit) = explode(' ', $data->param3) + array(null);
+            $sizeandunit = array_merge(explode(' ', $data->param3), array(null));
+            list($data->height, $data->heightunit) = $sizeandunit;
         }
 
         // Default content.
