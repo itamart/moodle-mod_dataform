@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ class dataformfield_ratingmdl_form extends mod_dataform\pluginbase\dataformfield
 
         $mform =& $this->_form;
 
-        // Restrict name to alphanumeric
+        // Restrict name to alphanumeric.
         $mform->addRule('name', null, 'alphanumeric', null, 'client');
 
-        // Entry rating
+        // Entry rating.
         $mform->addElement('modgrade', 'param1', get_string('rating', 'dataformfield_ratingmdl'));
         $mform->setDefault('param1', 0);
 
@@ -54,7 +54,7 @@ class dataformfield_ratingmdl_form extends mod_dataform\pluginbase\dataformfield
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Name must be lower case
+        // Name must be lower case.
         if (strtolower($data['name']) != $data['name']) {
             $errors['name'] = get_string('err_lowername', 'dataform');
         }

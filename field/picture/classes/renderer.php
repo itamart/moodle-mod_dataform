@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,15 +35,15 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
         $fieldname = $field->name;
         $edit = !empty($options['edit']);
 
-        // there is only one possible pattern here so no check
+        // There is only one possible pattern here so no check.
         $replacements = parent::replacements($patterns, $entry, $options);
 
         if ($edit) {
-            // Just return because the edite pattern has already been processed by the parent
+            // Just return because the edite pattern has already been processed by the parent.
             return $replacements;
         }
 
-        // Browse mode
+        // Browse mode.
         foreach ($patterns as $pattern => $cleanpattern) {
             $displaybrowse = '';
             switch ($cleanpattern) {
@@ -98,17 +98,17 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
             $imgattr = array('style' => array());
 
             if (!empty($params['tn'])) {
-                // decline if the file is not really a thumbnail
+                // Decline if the file is not really a thumbnail.
                 if (strpos($filename, 'thumb_') === false) {
                     return '';
                 }
             } else {
-                // decline if the file is a thumbnail
+                // Decline if the file is a thumbnail.
                 if (strpos($filename, 'thumb_') !== false) {
                     return '';
                 }
 
-                // the picture's display dimension may be set in the field
+                // The picture's display dimension may be set in the field.
                 if ($field->appearance->dispw) {
                     $imgattr['style'][] = 'width:'. s($field->appearance->dispw). s($field->appearance->dispu);
                 }
@@ -117,7 +117,7 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
                 }
             }
 
-            // calculate src: either moodle url or base64
+            // Calculate src: either moodle url or base64.
             if (!empty($params['download'])) {
                 return $this->display_link($file, $path, $altname, $params);
             } else if (!empty($params['base64'])) {
@@ -126,7 +126,7 @@ class dataformfield_picture_renderer extends dataformfield_file_renderer {
                 $pluginfileurl = new moodle_url('/pluginfile.php');
                 $src = moodle_url::make_file_url($pluginfileurl, "$path/$filename");
 
-                // for url request return it here
+                // For url request return it here.
                 if (!empty($params['url'])) {
                     return $src;
                 }

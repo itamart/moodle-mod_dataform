@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ class dataformfield_entrytime_renderer extends mod_dataform\pluginbase\dataformf
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
 
-        // no edit mode
+        // No edit mode.
         $replacements = array();
 
         foreach ($patterns as $pattern) {
-            // display nothing on new entries
+            // Display nothing on new entries.
             if ($entry->id < 0) {
                 $replacements[$pattern] = '';
 
@@ -89,19 +89,19 @@ class dataformfield_entrytime_renderer extends mod_dataform\pluginbase\dataformf
         foreach (array('timecreated', 'timemodified') as $timevar) {
             $patterns["[[$fieldname:$timevar]]"] = array(true, $cat);
             $patterns["[[$fieldname:$timevar:date]]"] = array(true, $cat);
-            // Minute (M)
+            // Minute (M).
             $patterns["[[$fieldname:$timevar:minute]]"] = array(false);
-            // Hour (H)
+            // Hour (H).
             $patterns["[[$fieldname:$timevar:hour]]"] = array(false);
-            // Day (a)
+            // Day (a).
             $patterns["[[$fieldname:$timevar:day]]"] = array(false);
             $patterns["[[$fieldname:$timevar:d]]"] = array(false);
-            // Week (W)
+            // Week (W).
             $patterns["[[$fieldname:$timevar:week]]"] = array(false);
-            // Month (b)
+            // Month (b).
             $patterns["[[$fieldname:$timevar:month]]"] = array(false);
             $patterns["[[$fieldname:$timevar:m]]"] = array(false);
-            // Year (G)
+            // Year (G).
             $patterns["[[$fieldname:$timevar:year]]"] = array(false);
             $patterns["[[$fieldname:$timevar:Y]]"] = array(false);
         }

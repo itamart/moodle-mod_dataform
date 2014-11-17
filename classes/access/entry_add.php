@@ -44,19 +44,20 @@ class entry_add extends base {
 
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // Cannot add in a view that does not allow submission
+        // Cannot add in a view that does not allow submission.
         if (!empty($params['viewid'])) {
             $view = $df->view_manager->get_view_by_id($params['viewid']);
             if (!$view or !$view->allows_submission()) {
                 return false;;
             }
         }
-        // User at max entries (per interval)
+        // User at max entries (per interval).
         if ($df->user_at_max_entries(true)) {
-            return false;    // no more entries for you (come back next interval or so)
+            // No more entries for you (come back next interval or so).
+            return false;
         }
 
-        // Early entries
+        // Early entries.
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlyadd');
             if (!parent::validate($params)) {
@@ -64,7 +65,7 @@ class entry_add extends base {
             }
         }
 
-        // Late entries
+        // Late entries.
         if ($df->is_past_due()) {
             $params['capabilities'] = array('mod/dataform:entrylateadd');
             if (!parent::validate($params)) {
@@ -74,13 +75,13 @@ class entry_add extends base {
 
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
 
-        // Own entry
+        // Own entry.
         if (\mod_dataform\pluginbase\dataformentry::is_own($entry)) {
             $params['capabilities'] = array('mod/dataform:entryownadd');
             return parent::validate($params);
         }
 
-        // Group entry
+        // Group entry.
         if (\mod_dataform\pluginbase\dataformentry::is_grouped($entry)) {
             if (groups_is_member($entry->groupid)) {
                 $params['capabilities'] = array('mod/dataform:entrygroupadd');
@@ -88,7 +89,7 @@ class entry_add extends base {
             }
         }
 
-        // Anonymous entry
+        // Anonymous entry.
         if (\mod_dataform\pluginbase\dataformentry::is_anonymous($entry)) {
             if ((isguestuser() or !isloggedin()) and $df->anonymous) {
                 return true;
@@ -97,7 +98,7 @@ class entry_add extends base {
             return parent::validate($params);
         }
 
-        // Any entry
+        // Any entry.
         if (\mod_dataform\pluginbase\dataformentry::is_others($entry)) {
             $params['capabilities'] = array('mod/dataform:entryanyadd');
             return parent::validate($params);

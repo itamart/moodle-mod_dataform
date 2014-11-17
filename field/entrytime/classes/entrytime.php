@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
 
-        // Time created and modified
+        // Time created and modified.
         $timecreated = $timemodified = 0;
         foreach (array('timecreated', 'timemodified') as $timevar) {
             $csvname = '';
@@ -187,11 +187,11 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
             if (((string) (int) $timestr === $timestr)
                     && ($timestr <= PHP_INT_MAX)
                     && ($timestr >= ~PHP_INT_MAX)) {
-                // It's a timestamp
+                // It's a timestamp.
                 return $timestr;
 
             } else if ($timestr = strtotime($timestr)) {
-                // It's a valid time string
+                // It's a valid time string.
                 return $timestr;
             }
         }

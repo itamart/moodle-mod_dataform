@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,25 +23,25 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);           // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);
+$urlparams->id = optional_param('id', 0, PARAM_INT);
 
-// views list actions
+// Views list actions.
 $urlparams->run    = optional_param('run', '', PARAM_PLUGIN);  // tool plugin to run
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
 $df->require_manage_permission('tools');
 
 $df->set_page('tool/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/tool/index.php', array('id' => $df->cm->id)));
 
-// DATA PROCESSING
+// DATA PROCESSING.
 if ($urlparams->run and confirm_sesskey()) {  // Run selected tool
     $tooldir = "$CFG->dirroot/mod/dataform/tool/$urlparams->run";
     $toolclass = "dataformtool_$urlparams->run";
@@ -57,7 +57,7 @@ if ($urlparams->run and confirm_sesskey()) {  // Run selected tool
     }
 }
 
-// Get the list of tools
+// Get the list of tools.
 $tools = array();
 foreach (array_keys(core_component::get_plugin_list('dataformtool')) as $subpluginname) {
     $tools[$subpluginname] = (object) array(
@@ -67,7 +67,7 @@ foreach (array_keys(core_component::get_plugin_list('dataformtool')) as $subplug
 }
 ksort($tools);    // sort in alphabetical order
 
-// any notifications?
+// Any notifications?
 if (!$tools) {
     $df->notifications = array('problem' => array('toolnoneindataform' => get_string('toolnoneindataform', 'dataform')));
 }
@@ -75,12 +75,12 @@ if (!$tools) {
 $output = $df->get_renderer();
 echo $output->header(array('tab' => 'tools', 'heading' => $df->name, 'urlparams' => $urlparams));
 
-// if there are tools print admin style list of them
+// If there are tools print admin style list of them.
 if ($tools) {
     $actionbaseurl = '/mod/dataform/tool/index.php';
     $linkparams = array('d' => $df->id, 'sesskey' => sesskey());
 
-    // table headings
+    // Table headings.
     $strname = get_string('name');
     $strdesc = get_string('description');
     $strrun = get_string('toolrun', 'dataform');

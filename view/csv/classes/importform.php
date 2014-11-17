@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -138,14 +138,14 @@ class dataformview_csv_importform extends moodleform {
         $mform = &$this->_form;
         $view = $this->_view;
 
-        // CSV content header
+        // CSV content header.
         $mform->addElement('header', 'csvcontenthdr', get_string('csvcontent', 'dataformview_csv'));
         $mform->setExpanded('csvcontenthdr');
 
-        // upload file
+        // Upload file.
         $mform->addElement('filepicker', 'importfile', get_string('uploadfile', 'dataformview_csv'));
 
-        // upload text
+        // Upload text.
         $mform->addElement('textarea', 'csvtext', get_string('uploadtext', 'dataformview_csv'), array('wrap' => 'virtual', 'rows' => '5', 'style' => 'width:100%;'));
     }
 
@@ -163,10 +163,10 @@ class dataformview_csv_importform extends moodleform {
         $mform->addElement('selectyesno', 'addperparticipant', get_string('addperparticipant', 'dataformview_csv'));
 
         // Update existing entries.
-        // $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_csv'));
+        // $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_csv'));.
 
         // Edit after import.
-        // $mform->addElement('selectyesno', 'editafter', get_string('importeditimported', 'dataformview_csv'));
+        // $mform->addElement('selectyesno', 'editafter', get_string('importeditimported', 'dataformview_csv'));.
     }
 
     /**
@@ -174,7 +174,7 @@ class dataformview_csv_importform extends moodleform {
      */
     public function data_preprocessing(&$data) {
         $view = $this->_view;
-        // CSV settings
+        // CSV settings.
         $csvsettings = $view->param1 ? $view->param1 : $view->get_default_csv_settings();
         list(
             $data->delimiter,

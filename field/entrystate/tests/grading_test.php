@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,17 +51,17 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
 
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
 
-        // Teacher
+        // Teacher.
         $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
         $this->teacher = $user;
 
-        // Student 1
+        // Student 1.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student1'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
         $this->student1 = $user;
 
-        // Student 2
+        // Student 2.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student2'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
         $this->student2 = $user;
@@ -76,10 +76,10 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
 
         $this->setAdminUser();
 
-        // Course
+        // Course.
         $courseid = $this->course->id;
 
-        // Dataform
+        // Dataform.
         $params = array(
             'course' => $courseid,
             'grade' => 100,
@@ -88,18 +88,18 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $dataform = $this->getDataGenerator()->create_module('dataform', $params);
         $df = mod_dataform_dataform::instance($dataform->id);
 
-        // Add a field
+        // Add a field.
         $field = $df->field_manager->add_field('entrystate');
         $field->param1 = base64_encode(serialize(array('states' => "Submitted\nApproved")));
         $field->update($field->data);
 
-        // Add a view
+        // Add a view.
         $view = $df->view_manager->add_view('aligned');
 
-        // Get an entry manager
+        // Get an entry manager.
         $entryman = $view->entry_manager;
 
-        // Fetch the grade item
+        // Fetch the grade item.
         $params = array(
             'itemtype' => 'mod',
             'itemmodule' => 'dataform',
@@ -109,7 +109,7 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         );
         $gitem = grade_item::fetch($params);
 
-        // No grade yet for Student 1
+        // No grade yet for Student 1.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(null, $grade->finalgrade);
 
@@ -123,11 +123,11 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryid3 = $eids[2];
         $entryid4 = $eids[3];
 
-        // Grade 0 for Student 1
+        // Grade 0 for Student 1.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(0, $grade->finalgrade);
 
-        // Teacher approves 1 entry for Student 1
+        // Teacher approves 1 entry for Student 1.
         $this->setUser($this->teacher);
         $data = array(
             'submitbutton_save' => 'Save',
@@ -136,11 +136,11 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryman->set_content(array('filter' => $view->filter));
         $entryman->process_entries('update', array($entryid1), (object) $data, true);
 
-        // Grade for Student 1 is 1
+        // Grade for Student 1 is 1.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(1, $grade->finalgrade);
 
-        // Teacher approves two more entries for Student 1
+        // Teacher approves two more entries for Student 1.
         $data = array(
             'submitbutton_save' => 'Save',
             "field_{$field->id}_{$entryid2}" => 1,
@@ -149,11 +149,11 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryman->set_content(array('filter' => $view->filter));
         $entryman->process_entries('update', array($entryid2, $entryid3), (object) $data, true);
 
-        // Grade for Student 1 is 3
+        // Grade for Student 1 is 3.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(3, $grade->finalgrade);
 
-        // Teacher disapprove one entry for Student 1
+        // Teacher disapprove one entry for Student 1.
         $data = array(
             'submitbutton_save' => 'Save',
             "field_{$field->id}_{$entryid1}" => 0,
@@ -161,18 +161,18 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryman->set_content(array('filter' => $view->filter));
         $entryman->process_entries('update', array($entryid1), (object) $data, true);
 
-        // Grade for Student 1 is 2
+        // Grade for Student 1 is 2.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(2, $grade->finalgrade);
 
-        // Teacher changes calculation
+        // Teacher changes calculation.
         $df->update((object) array('gradecalc' => 'SUM(##:entrystate##)*2'));
 
-        // Grade for Student 1 is 4
+        // Grade for Student 1 is 4.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(2, $grade->finalgrade);
 
-        // Grade for Student 2 is 0
+        // Grade for Student 2 is 0.
         $grade = $gitem->get_grade($this->student2->id, false);
         $this->assertEquals(0, $grade->finalgrade);
 

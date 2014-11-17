@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -134,9 +134,9 @@ class dataformview {
         $csort = !empty($options['csort']) ? $options['csort'] : null;
         $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
 
-        // Url options
+        // Url options.
         if ($urloptions = ($this->is_active() ? $fm::get_filter_options_from_url() : null)) {
-            // Options that do not require permission
+            // Options that do not require permission.
             $eids = $eids ? $eids : (!empty($urloptions['eids']) ? $urloptions['eids'] : null);
             $users = $users ? $users : (!empty($urloptions['users']) ? $urloptions['users'] : null);
             $groups = $groups ? $groups : (!empty($urloptions['groups']) ? $urloptions['groups'] : null);
@@ -145,7 +145,7 @@ class dataformview {
             // Options that require permission
             // $params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
             // If (\mod_dataform\access\view_filter_override::validate($params)) {
-            // }
+            // }.
         }
 
         if ($this->filterid) {
@@ -154,54 +154,54 @@ class dataformview {
 
         $filter = $fm->get_filter_by_id($fid, array('view' => $this));
 
-        // Set specific entry id
+        // Set specific entry id.
         if ($eids) {
             $filter->eids = $eids;
         }
-        // Set specific users
+        // Set specific users.
         if ($users) {
             $filter->users = is_array($users) ? $users : explode(',', $users);
         }
-        // Set specific groups
+        // Set specific groups.
         if ($groups) {
             $filter->groups = is_array($groups) ? $groups : explode(',', $groups);
         }
-        // Add view specific perpage
+        // Add view specific perpage.
         if ($perpage) {
             $filter->perpage = $perpage;
         }
-        // Add view specific groupby
+        // Add view specific groupby.
         if ($groupby) {
             $filter->groupby = $groupby;
         }
 
-        // Add page
+        // Add page.
         if ($page) {
             $filter->page = $page;
         }
-        // Append sort options
+        // Append sort options.
         if ($customsort) {
             $filter->append_sort_options($customsort);
         }
-        // Append search options
+        // Append search options.
         if ($search) {
             $filter->append_search_options($search);
         }
-        // Append custom search options
+        // Append custom search options.
         if ($customsearch) {
             $filter->append_search_options($customsearch);
         }
 
-        // Append custom sort options
+        // Append custom sort options.
         if ($csort) {
             $filter->append_sort_options($csort);
         }
-        // Append custom search options
+        // Append custom search options.
         if ($csearch) {
             $filter->append_search_options($csearch);
         }
 
-        // Content fields
+        // Content fields.
         if ($patternfields = $this->get_pattern_set('field')) {
             $filter->contentfields = array_keys($patternfields);
         }
@@ -209,7 +209,7 @@ class dataformview {
         $this->_filter = $filter;
     }
 
-    // VIEW DISPLAY
+    // VIEW DISPLAY.
     /**
      * Sets the view filter and any page settings before output.
      *
@@ -217,7 +217,7 @@ class dataformview {
      */
     public function set_page($pagefile = null, array $options = null) {
 
-        // Filter
+        // Filter.
         $foptions = !empty($options['filter']) ? array('id' => $options['filter']) : null;
         $this->set_viewfilter($foptions);
     }
@@ -230,7 +230,7 @@ class dataformview {
     public function process_portfolio_export() {
         global $CFG;
 
-        // Proces export requests
+        // Proces export requests.
         $export = optional_param('export', '', PARAM_TAGLIST);  // Comma delimited entry ids or -1 for all entries in view
         if ($export and confirm_sesskey()) {
             if (!empty($CFG->enableportfolios)) {
@@ -258,25 +258,25 @@ class dataformview {
      * @return void
      */
     public function process_data() {
-        // Process portfolio export request if any
+        // Process portfolio export request if any.
         $this->process_portfolio_export();;
 
-        // New/update entries request
+        // New/update entries request.
         if ($editentries = optional_param('editentries', '', PARAM_TAGLIST)) {
             $this->editentries = $editentries;
             return;
         }
 
-        // Process entries data
+        // Process entries data.
         if ($processed = $this->process_entries_data()) {
             list($strnotify, $processedeids) = $processed;
 
-            // Redirect base url
+            // Redirect base url.
             $redirecturl = $this->baseurl;
             $redirecturl->remove_params('eids');
             $redirecturl->remove_params('editentries');
 
-            // Submission time out and target view
+            // Submission time out and target view.
             $submission = $this->submission_settings;
             $timeout = !empty($submission['timeout']) ? $submission['timeout'] : 0;
             if (!empty($submission['redirect'])) {
@@ -286,14 +286,14 @@ class dataformview {
                 }
             }
 
-            // Submission response
+            // Submission response.
             if ($processedeids) {
                 $response = !empty($submission['message']) ? $submission['message'] : $strnotify;
             } else {
                 $response = $strnotify;
             }
 
-            // Return to form if needed (editentries is set in continue_editing() as needed)
+            // Return to form if needed (editentries is set in continue_editing() as needed).
             if ($processedeids and $editentries = $this->editentries) {
                 $redirecturl->param('editentries', $editentries);
             }
@@ -314,7 +314,7 @@ class dataformview {
         $event->add_record_snapshot('dataform_views', $this->data);
         $event->trigger();
 
-        // Set content
+        // Set content.
         $filter = clone($this->filter);
         if ($this->user_is_editing() and !$this->in_edit_display_mode()) {
             // Display only the edited entries.
@@ -323,11 +323,11 @@ class dataformview {
         $options['filter'] = $filter;
         $this->set_entries_content($options);
 
-        // Rewrite plugin file url
+        // Rewrite plugin file url.
         $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
         $this->rewrite_pluginfile_urls($pluginfileurl);
 
-        // Complie the view template
+        // Complie the view template.
         $viewhtml = $this->compile_view_template($options);
         return $viewhtml;
     }
@@ -350,13 +350,13 @@ class dataformview {
         $formatoptions = array('para' => false, 'allowid' => true, 'trusted' => true, 'noclean' => true);
         $html = format_text($this->section, FORMAT_HTML, $formatoptions);
 
-        // Replace view patterns including entry field patterns
+        // Replace view patterns including entry field patterns.
         if ($patterns = $this->get_pattern_set('view')) {
             $replacements = $this->renderer->get_replacements($patterns, null, $options);
             $html = str_replace(array_keys($replacements), $replacements, $html);
         }
 
-        // Process calculations
+        // Process calculations.
         $html = $this->process_calculations($html);
 
         $dataformviewtype = "dataformview-$this->type";
@@ -365,7 +365,7 @@ class dataformview {
 
     }
 
-    // GETTERS
+    // GETTERS.
 
     /**
      * Returns the view instance (DB) data.
@@ -431,7 +431,7 @@ class dataformview {
      */
     public function get_patterns() {
         if (!empty($this->_view->patterns)) {
-            // Unserialize if not done yet
+            // Unserialize if not done yet.
             if (!is_array($this->_view->patterns)) {
                 $this->_view->patterns = unserialize($this->_view->patterns);
             }
@@ -448,7 +448,7 @@ class dataformview {
      */
     public function get_submission_settings() {
         if (!empty($this->_view->submission)) {
-            // Unserialize if not done yet
+            // Unserialize if not done yet.
             if (!is_array($this->_view->submission)) {
                 $this->_view->submission = unserialize(base64_decode($this->_view->submission));
             }
@@ -599,7 +599,7 @@ class dataformview {
         );
     }
 
-    // ATTRIBUTES
+    // ATTRIBUTES.
 
     /**
      *
@@ -638,7 +638,7 @@ class dataformview {
 
         $allowed = false;
 
-        // Save buttons
+        // Save buttons.
         foreach ($this->submission_buttons as $name) {
             if ($name == 'cancel') {
                 continue;
@@ -699,7 +699,7 @@ class dataformview {
         return null;
     }
 
-    // HELPERS
+    // HELPERS.
     /**
      * Returns a list of fields registered in the view templates.
      * Fields may be excluded from the returned list by passing
@@ -745,10 +745,10 @@ class dataformview {
         $patterns = $this->get_patterns_from_templates();
         $storedpatterns = $this->patterns;
 
-        // View patterns
+        // View patterns.
         $viewupdates = array();
         if (!empty($patterns['view']) or !empty($storedpatterns['view'])) {
-            // Stored
+            // Stored.
             if (!$viewupdates and !empty($patterns['view']) and empty($storedpatterns['view'])) {
                 foreach ($patterns['view'] as $pattern) {
                     $viewupdates[] = array(
@@ -786,7 +786,7 @@ class dataformview {
             }
         }
 
-        // Field patterns
+        // Field patterns.
         $fieldupdates = array();
         if (!empty($patterns['field']) or !empty($storedpatterns['field'])) {
             if (!$fieldupdates and !empty($patterns['field']) and empty($storedpatterns['field'])) {
@@ -845,11 +845,11 @@ class dataformview {
 
         }
 
-        // Anything else that looks like a pattern
+        // Anything else that looks like a pattern.
         $otherupdates = array();
-        // Get the templates text
+        // Get the templates text.
         $text = $this->get_templates_text();
-        // Remove found patterns from text
+        // Remove found patterns from text.
         if (!empty($patterns['view'])) {
             $text = str_replace($patterns['view'], '', $text);
         }
@@ -858,7 +858,7 @@ class dataformview {
                 $text = str_replace($fieldpatterns, '', $text);
             }
         }
-        // Find patterns of form ##...## and [[...]]
+        // Find patterns of form ##...## and [[...]].
         preg_match_all("/##[^#]+##|\[\[[^\]]+\]\]/", $text, $matches);
         if (!empty($matches[0])) {
             foreach ($matches[0] as $pattern) {
@@ -884,7 +884,7 @@ class dataformview {
      */
     public function rewrite_pluginfile_urls($pluginfileurl = null) {
         foreach ($this->editors as $editor) {
-            // Export with files should provide the file path
+            // Export with files should provide the file path.
             if ($pluginfileurl) {
                 $this->$editor = str_replace('@@PLUGINFILE@@/', $pluginfileurl, $this->$editor);
             } else {
@@ -902,12 +902,12 @@ class dataformview {
      *
      */
     public function get_pattern_set($set = null) {
-        // Must have patterns
+        // Must have patterns.
         if (!$patterns = $this->patterns) {
             return null;
         }
 
-        // BC convert internal field ids where needed
+        // BC convert internal field ids where needed.
         if (!empty($patterns['field'])) {
             $patterns['field'] = $this->convert_internal_field_pattern_ids($patterns['field']);
             $this->patterns = $patterns;
@@ -943,7 +943,7 @@ class dataformview {
         $files = array();
         $fs = get_file_storage();
 
-        // View files
+        // View files.
         if (empty($set) or $set == 'view') {
             foreach ($this->editors as $editor) {
                 $files = array_merge($files, $fs->get_area_files($this->df->context->id,
@@ -955,9 +955,9 @@ class dataformview {
             }
         }
 
-        // Field files
+        // Field files.
         if (empty($set) or $set == 'field') {
-            // Find which fields actually display files/images in the view
+            // Find which fields actually display files/images in the view.
             $fids = array();
             if ($fieldpatterns = $this->get_pattern_set('field')) {
                 $fields = $this->get_fields();
@@ -967,7 +967,7 @@ class dataformview {
                     }
                 }
             }
-            // Get the files from the entries
+            // Get the files from the entries.
             if ($this->entry_manager->entries and !empty($fids)) {  // Set_content must have been called
                 $files = array_merge($files, $this->entry_manager->get_embedded_files($fids));
             }
@@ -976,7 +976,7 @@ class dataformview {
         return $files;
     }
 
-    // TEMPLATES //
+    // TEMPLATES.
 
     /**
      * Generates a default view for a new view instance or when reseting an existing instance.
@@ -985,13 +985,13 @@ class dataformview {
      * @return void
      */
     public function generate_default_view() {
-        // Set the view template
+        // Set the view template.
         $this->set_default_view_template();
 
-        // Set the entry template
+        // Set the entry template.
         $this->set_default_entry_template();
 
-        // Set default submission settings
+        // Set default submission settings.
         $settings = array(
             'save' => '',
             'cancel' => '',
@@ -1012,21 +1012,21 @@ class dataformview {
      */
     public function set_default_view_template($content = null) {
         if ($content === null) {
-            // Notifications
+            // Notifications.
             $notifications = \html_writer::tag('div', '##notifications##', array('class' => ''));
 
-            // Add new entry
+            // Add new entry.
             $addnewentry = \html_writer::tag('div', '##addnewentry##', array('class' => 'addnewentry-wrapper'));
 
-            // Filtering
+            // Filtering.
             $quickfilters = \html_writer::tag('div', $this->get_default_filtering_template(), array('class' => 'quickfilters-wrapper'));
 
-            // Paging bar
+            // Paging bar.
             $pagingbar = \html_writer::tag('div', '##paging:bar##', array('class' => ''));
-            // Entries
+            // Entries.
             $entries = \html_writer::tag('div', '##entries##', array('class' => ''));
 
-            // Set the view template
+            // Set the view template.
             $exporthide = \html_writer::tag('div', $addnewentry. $quickfilters. $pagingbar, array('class' => 'exporthide'));
 
             $content = \html_writer::tag('div', $exporthide. $entries);
@@ -1068,7 +1068,7 @@ class dataformview {
             return array();
         }
 
-        // HACK Adding [[entryid]] here so that it is available for display
+        // HACK Adding [[entryid]] here so that it is available for display.
         $definitions = array('[[entryid]]' => $entry->id);
         foreach ($fieldpatterns as $fieldid => $patterns) {
             if (!isset($fields[$fieldid])) {
@@ -1087,7 +1087,7 @@ class dataformview {
      */
     protected function split_tags($patterns, $subject) {
         $delims = implode('|', $patterns);
-        // Escape [ and ] and the pattern rule character *
+        // Escape [ and ] and the pattern rule character *.
         $delims = quotemeta($delims);
 
         $elements = preg_split("/($delims)/", $subject, null, PREG_SPLIT_DELIM_CAPTURE);
@@ -1095,7 +1095,7 @@ class dataformview {
         return $elements;
     }
 
-    // VIEW ENTRIES
+    // VIEW ENTRIES.
     /**
      *
      */
@@ -1106,10 +1106,10 @@ class dataformview {
         $entryman = $this->entry_manager;
 
         // Direct url params; not from form
-        // The following actions may require confirmation
+        // The following actions may require confirmation.
         $confirmed = optional_param('confirmed', 0, PARAM_BOOL);
 
-        // Duplicate any requested entries (comma delimited eids)
+        // Duplicate any requested entries (comma delimited eids).
         if ($duplicate = optional_param('duplicate', '', PARAM_SEQUENCE)) {
             if (confirm_sesskey()) {
                 return $entryman->process_entries('duplicate', $duplicate, null, $confirmed);
@@ -1117,7 +1117,7 @@ class dataformview {
             return null;
         }
 
-        // Delete any requested entries (comma delimited eids)
+        // Delete any requested entries (comma delimited eids).
         if ($delete = optional_param('delete', '', PARAM_SEQUENCE)) {
             if (confirm_sesskey()) {
                 return $entryman->process_entries('delete', $delete, null, $confirmed);
@@ -1125,10 +1125,10 @@ class dataformview {
             return null;
         }
 
-        // Check if returning from form
+        // Check if returning from form.
         if ($update = optional_param('update', '', PARAM_TAGLIST)) {
             if (confirm_sesskey()) {
-                // Check if returning from cancelled form
+                // Check if returning from cancelled form.
                 $entriesform = $this->get_entries_form();
                 if ($entriesform->is_cancelled()) {
                     $this->editentries = '';
@@ -1136,7 +1136,7 @@ class dataformview {
                 }
 
                 $this->editentries = $update;
-                // Get entries only if updating existing entries
+                // Get entries only if updating existing entries.
                 if ($update != -1) {
                     $filter = clone($this->filter);
                     $filter->eids = explode(',', $update);
@@ -1146,16 +1146,16 @@ class dataformview {
                     $elements = $this->get_entries_definition(array());
                 }
 
-                // Get the form
+                // Get the form.
                 $entriesform = $this->get_entries_form(array('elements' => $elements));
 
                 // Process the form if not cancelled
-                // HACK Work around MDL-44446: get_data returns null if no input is submitted
+                // HACK Work around MDL-44446: get_data returns null if no input is submitted.
                 if ($entriesform->is_submitted() and $entriesform->is_validated()) {
                     if (!$data = $entriesform->get_data()) {
                         $data = new \stdClass;
                     }
-                    // Validated successfully so process request
+                    // Validated successfully so process request.
                     list($strnotify, $processedeids) = $entryman->process_entries('update', $update, $data, true);
 
                     $this->editentries = $this->continue_editing($data, $processedeids);
@@ -1182,7 +1182,7 @@ class dataformview {
 
         if ($editing) {
             if ($this->in_edit_display_mode(self::EDIT_SEPARATE)) {
-                // Extract the edited and non-edited entries from the set
+                // Extract the edited and non-edited entries from the set.
                 $editentries = explode(',', $this->editentries);
                 $edited = array();
                 $nonedited = array();
@@ -1195,29 +1195,29 @@ class dataformview {
                     }
                 }
 
-                // Get the form html for the edited entries
+                // Get the form html for the edited entries.
                 if ($elements = $this->get_entries_definition($edited)) {
                     if ($this->editentries) {
                         $entriesform = $this->get_entries_form(array('elements' => $elements));
                         $html .= $entriesform->render();
                     } else {
-                        // Turns out that all requested edits are not allowed
+                        // Turns out that all requested edits are not allowed.
                         $html .= implode('', $elements);
                     }
                 }
 
-                // Add the rest
+                // Add the rest.
                 $elements = $this->get_entries_definition($nonedited, false);
                 $html .= implode('', $elements);
 
             } else {
-                // Get the form html for all entries
+                // Get the form html for all entries.
                 if ($elements = $this->get_entries_definition($entryman->entries)) {
                     if ($this->editentries) {
                         $entriesform = $this->get_entries_form(array('elements' => $elements));
                         $html .= $entriesform->render();
                     } else {
-                        // Turns out that all requested edits are not allowed
+                        // Turns out that all requested edits are not allowed.
                         $html .= implode('', $elements);
                     }
                 }
@@ -1226,11 +1226,11 @@ class dataformview {
             return $html;
         }
 
-        // Not editing so fetch the entries and display html
+        // Not editing so fetch the entries and display html.
         $elements = $this->get_entries_definition($entryman->entries, false);
         $html .= implode('', $elements);
 
-        // RM ??? Replace pluginfile urls if needed (e.g. in export)
+        // RM ??? Replace pluginfile urls if needed (e.g. in export).
         $pluginfileurl = isset($options['pluginfileurl']) ? $options['pluginfileurl'] : null;
         if ($pluginfileurl) {
             $pluginfilepath = \moodle_url::make_file_url("/pluginfile.php", "/{$this->df->context->id}/mod_dataform/content");
@@ -1253,7 +1253,7 @@ class dataformview {
 
         foreach ($this->get_display_definition($entries) as $name => $entriesset) {
             $definitions = array();
-            // New entry set
+            // New entry set.
             if ($name == 'newentry' and $allowedit) {
                 foreach ($entriesset as $entryid => $unused) {
                     $definitions[$entryid] = $this->new_entry_definition($entryid);
@@ -1262,7 +1262,7 @@ class dataformview {
                 continue;
             }
 
-            // Existing entries set
+            // Existing entries set.
             foreach ($entriesset as $entryid => $editthisone) {
                 if (!empty($entries[$entryid])) {
                     $options = $allowedit ? array('edit' => $editthisone) : null;
@@ -1272,15 +1272,15 @@ class dataformview {
             }
             $groupedelements[$name] = $this->group_entries_definition($definitions, $name);
         }
-        // Free up memory
+        // Free up memory.
         unset($definitions);
         unset($entrieset);
 
-        // Flatten the elements
+        // Flatten the elements.
         $elements = array();
         foreach ($groupedelements as $group) {
             $elements = array_merge($elements, $group);
-            // Free up memory
+            // Free up memory.
             unset($group);
         }
 
@@ -1302,7 +1302,7 @@ class dataformview {
         $filter = $this->filter;
         $editentries = !empty($options['editentries']) ? $options['editentries'] : $this->editentries;
 
-        // Prepare params for form
+        // Prepare params for form.
         $actionparams = array(
             'd' => $this->dataid,
             'view' => $this->id,
@@ -1321,7 +1321,7 @@ class dataformview {
             'update' => $editentries
         );
 
-        // Pass elements if given
+        // Pass elements if given.
         if (!empty($options['elements'])) {
             $customdata['elements'] = $options['elements'];
         }
@@ -1337,7 +1337,7 @@ class dataformview {
      */
     public function get_new_entry_form() {
         $elements = $this->new_entry_definition();
-        // Wrap with entriesview
+        // Wrap with entriesview.
         array_unshift($elements, \html_writer::start_tag('div', array('class' => 'entriesview')));
         array_push($elements, \html_writer::end_tag('div'));
 
@@ -1472,7 +1472,7 @@ class dataformview {
         $editnewentries = null;
         $editentries = null;
 
-        // Display a new entry to add in its own group
+        // Display a new entry to add in its own group.
         if ($this->editentries < 0) {
             $editnewentries = $this->editentries;
             $accessparams = array('dataformid' => $this->dataid, 'viewid' => $this->id);
@@ -1489,13 +1489,13 @@ class dataformview {
             $editentries = array_combine($editentries, $editentries);
         }
 
-        // Compile entries if any
+        // Compile entries if any.
         if ($entries) {
             $groupname = '';
             $groupdefinition = array();
 
             foreach ($entries as $entryid => $entry) {
-                // Is this entry edited
+                // Is this entry edited.
                 if ($editthisone = $editentries ? !empty($editentries[$entryid]) : false) {
                     $accessparams = array('dataformid' => $this->dataid, 'viewid' => $this->id);
                     if (!$editthisone = \mod_dataform\access\entry_update::validate($accessparams + array('entry' => $entry))) {
@@ -1503,11 +1503,11 @@ class dataformview {
                     }
                 }
 
-                // Add to the current entries group
+                // Add to the current entries group.
                 $groupdefinition[$entryid] = $editthisone;
 
             }
-            // Collect remaining definitions (all of it if no groupby)
+            // Collect remaining definitions (all of it if no groupby).
             $displaydefinition[$groupname] = $groupdefinition;
         }
 
@@ -1523,7 +1523,7 @@ class dataformview {
         return 'mod_dataform\pluginbase\entriesform';
     }
 
-    // SUBMISSION SETTINGS
+    // SUBMISSION SETTINGS.
 
     /**
      * Returns list of submission button names.
@@ -1541,7 +1541,7 @@ class dataformview {
         );
     }
 
-    // HELPERS and BACKWARD COMPATIBILITY
+    // HELPERS and BACKWARD COMPATIBILITY.
 
     /**
      *
@@ -1586,7 +1586,7 @@ class dataformview {
         return $newfieldpatterns;
     }
 
-    // VIEW TYPE
+    // VIEW TYPE.
 
     /**
      * Insert a new view into the database
@@ -1603,7 +1603,7 @@ class dataformview {
 
         $this->id = $viewid;
 
-        // Update item id of files area
+        // Update item id of files area.
         $fs = get_file_storage();
         $contextid = $this->df->context->id;
         $component = $this->component;
@@ -1684,7 +1684,7 @@ class dataformview {
         $data = clone($this->data);
         unset($data->id);
         $data->name = $name;
-        // Make sure patterns are serialized
+        // Make sure patterns are serialized.
         if ($data->patterns and is_array($data->patterns)) {
             $data->patterns = serialize($data->patterns);
         }
@@ -1693,7 +1693,7 @@ class dataformview {
             return false;
         }
 
-        // Duplicate view files
+        // Duplicate view files.
         $fs = get_file_storage();
         $contextid = $this->df->context->id;
         foreach ($this::get_file_areas() as $filearea) {
@@ -1741,7 +1741,7 @@ class dataformview {
     public function to_form($data = null) {
         $data = $data ? $data : $this->data;
 
-        // Prepare view editors
+        // Prepare view editors.
         $data = $this->prepare_view_editors($data);
 
         return $data;
@@ -1849,7 +1849,7 @@ class dataformview {
             $this->patterns = serialize($patterns);
         }
 
-        // Compile submission settings
+        // Compile submission settings.
         if (empty($data->submission)) {
             $this->submission = null;
         } else if (is_array($data->submission)) {
@@ -1892,7 +1892,7 @@ class dataformview {
             $trust = !empty($data->{$editor.'trust'}) ? $data->{$editor.'trust'} : 1;
             $text = !empty($data->$editor) ? $data->$editor : '';
 
-            // Replace \n in non text format
+            // Replace \n in non text format.
             if ($format != FORMAT_PLAIN) {
                 $text = str_replace("\n", "", $text);
             }
@@ -1916,14 +1916,14 @@ class dataformview {
     protected function get_patterns_from_templates() {
         $patterns = array();
 
-        // Extract view and field patterns from editor text
+        // Extract view and field patterns from editor text.
         $text = $this->get_templates_text();
         if (trim($text)) {
-            // This view patterns
+            // This view patterns.
             if ($viewpatterns = $this->renderer->search($text)) {
                 $patterns['view'] = $viewpatterns;
             }
-            // Field patterns
+            // Field patterns.
             if ($fields = $this->df->field_manager->get_fields(array('forceget' => true))) {
                 foreach ($fields as $fieldid => $field) {
                     if ($fieldpatterns = $field->renderer->search($text)) {

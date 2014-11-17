@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
         $field = $this->_field;
         $mform = &$this->_form;
 
-        // Header
+        // Header.
         $mform->addElement('header', '', get_string($action, 'dataformfield_entryactions'));
 
-        // Target view (param1)
+        // Target view (param1).
         $viewman = mod_dataform_view_manager::instance($field->dataid);
         $options = array('' => get_string('default'));
         if ($viewsmenu = $viewman->views_menu) {
@@ -56,25 +56,25 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
         $mform->addElement('select', "targetview_$action", get_string('targetview', 'dataformfield_entryactions'), $options);
         $mform->addHelpButton("targetview_$action", 'targetview', 'dataformfield_entryactions');
 
-        // Additional action params
+        // Additional action params.
         $mform->addElement('text', "actionparams_$action", get_string('actionparams', 'dataformfield_entryactions'));
         $mform->setType("actionparams_$action", PARAM_TEXT);
         $mform->addHelpButton("actionparams_$action", 'targetview', 'dataformfield_entryactions');
 
-        // Theme icon
+        // Theme icon.
         $mform->addElement('text', "themeicon_$action", get_string('themeicon', 'dataformfield_entryactions'));
         $mform->setType("themeicon_$action", PARAM_TEXT);
         $mform->addHelpButton("themeicon_$action", 'targetview', 'dataformfield_entryactions');
 
         /*
-        // Custom icon
+        // Custom icon.
         $options = array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes, 'maxfiles' => 1, 'accepted_types' => array('image'));
         $draftitemid = file_get_submitted_draft_itemid('customicon');
         file_prepare_draft_area($draftitemid, $this->context->id, 'mod_dataform', "field_{$action}icon", 0, $options);
         $mform->addElement('filemanager', 'customicon', get_string('activityicon', 'dataform'), null, $options);
         $mform->setDefault('customicon', $draftitemid);
 
-        // Entry condition (filter)
+        // Entry condition (filter).
         */
     }
 

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ class dataformfield_radiobutton_renderer extends dataformfield_select_renderer {
         global $PAGE;
 
         $mform->addRule($fieldname, null, 'required', null, 'client');
-        // JS Error message
+        // JS Error message.
         $options = array(
             'fieldname' => $fieldname,
             'message' => get_string('err_required', 'form'),

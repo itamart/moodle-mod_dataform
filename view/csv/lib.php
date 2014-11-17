@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// PLUGIN FUNCTIONS WHICH ARE CALLED FROM OUTSIDE THE PLUGIN
+// PLUGIN FUNCTIONS WHICH ARE CALLED FROM OUTSIDE THE PLUGIN.
 
 defined('MOODLE_INTERNAL') or die;
 
@@ -47,7 +47,7 @@ function dataformview_csv_pluginfile($course, $cm, $context, $filearea, $args, $
         $viewid = (int) array_shift($args);
         $dataformid = $cm->instance;
 
-        // Confirm user access
+        // Confirm user access.
         $params = array('dataformid' => $dataformid, 'viewid' => $viewid);
         if (!mod_dataform\access\view_access::validate($params)) {
             return false;
@@ -61,8 +61,8 @@ function dataformview_csv_pluginfile($course, $cm, $context, $filearea, $args, $
             return false;
         }
 
-        // finally send the file
-        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+        // Finally send the file.
+        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
     }
     return false;
 }

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
             if (!is_object($this->_field->param4)) {
                 $appearance = unserialize(base64_decode($this->_field->param4));
 
-                // Add defaults
+                // Add defaults.
                 foreach ($this->appearance_defaults as $key => $default) {
                     if (!isset($appearance->$key)) {
                         $appearance->$key = $default;
@@ -71,7 +71,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
     public function update($data) {
         global $DB, $OUTPUT;
 
-        // Get the old field data so that we can check whether the thumbnail dimensions have changed
+        // Get the old field data so that we can check whether the thumbnail dimensions have changed.
         $oldappearance = $this->appearance;
         if (!parent::update($data)) {
             echo $OUTPUT->notification('updating of new field failed!');
@@ -82,12 +82,12 @@ class dataformfield_picture_picture extends dataformfield_file_file {
         $updatefile = ($oldappearance->maxw != $this->appearance->maxw or $oldappearance->maxh != $this->appearance->maxh);
         $updatethumb = ($oldappearance->thumbw != $this->appearance->thumbw or $oldappearance->thumbh != $this->appearance->thumbh);
         if ($oldappearance and ($updatefile or $updatethumb)) {
-            // Check through all existing records and update the thumbnail
+            // Check through all existing records and update the thumbnail.
             if ($contents = $DB->get_records('dataform_contents', array('fieldid' => $this->id))) {
                 if (count($contents) > 20) {
                     echo $OUTPUT->notification(get_string('resizingimages', 'dataformfield_picture'), 'notifysuccess');
                     echo "\n\n";
-                    // To make sure that ob_flush() has the desired effect
+                    // To make sure that ob_flush() has the desired effect.
                     ob_flush();
                 }
                 foreach ($contents as $content) {
@@ -113,18 +113,18 @@ class dataformfield_picture_picture extends dataformfield_file_file {
             return;
         }
 
-        // update dimensions and regenerate thumbs
+        // Update dimensions and regenerate thumbs.
         foreach ($files as $file) {
 
             if ($file->is_valid_image() and strpos($file->get_filename(), 'thumb_') === false) {
-                // original first
+                // Original first.
                 if ($updatefile) {
                     $maxwidth  = $this->appearance->maxw ? $this->appearance->maxw : 0;
                     $maxheight = $this->appearance->maxh ? $this->appearance->maxh : 0;
 
-                    // If either width or height try to (re)generate
+                    // If either width or height try to (re)generate.
                     if ($maxwidth or $maxheight) {
-                        // this may fail for various reasons
+                        // This may fail for various reasons.
                         try {
                             $filerec = array(
                                 'contextid' => $file->get_contextid(),
@@ -135,9 +135,9 @@ class dataformfield_picture_picture extends dataformfield_file_file {
                                 'userid' => $file->get_userid()
                             );
                             $tempfile = $fs->convert_image($filerec, $file, $maxwidth, $maxheight, true);
-                            // Delete the original file
+                            // Delete the original file.
                             $file->delete();
-                            // Regenerate from tempfile
+                            // Regenerate from tempfile.
                             $filerec['filearea'] = 'content';
                             $file = $fs->create_file_from_storedfile($filerec, $tempfile);
                             $tempfile->delete();
@@ -147,7 +147,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
                     }
                 }
 
-                // thumbnail next
+                // Thumbnail next.
                 if ($updatethumb) {
                     $thumbwidth  = $this->appearance->thumbw ? $this->appearance->thumbw : '';
                     $thumbheight = $this->appearance->thumbh ? $this->appearance->thumbh : '';
@@ -157,7 +157,7 @@ class dataformfield_picture_picture extends dataformfield_file_file {
                         $thumbfile->delete();
                     }
 
-                    // If either width or height try to (re)generate, otherwise delete what exists
+                    // If either width or height try to (re)generate, otherwise delete what exists.
                     if ($thumbwidth or $thumbheight) {
 
                         $filerec = array(

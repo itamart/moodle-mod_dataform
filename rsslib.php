@@ -39,36 +39,36 @@ function dataform_rss_get_feed($context, $args) {
         return null;
     }
 
-    // Validate context
+    // Validate context.
     $dataformid = clean_param($args[3], PARAM_INT);
     $cm = get_coursemodule_from_instance('dataform', $dataformid, 0, false, MUST_EXIST);
     if ($cm) {
         $modcontext = context_module::instance($cm->id);
 
-        // context id from db should match the submitted one
+        // Context id from db should match the submitted one.
         if ($context->id != $modcontext->id) {
             return null;
         }
     }
 
-    // Check RSS enbabled for instance
+    // Check RSS enbabled for instance.
     $dataform = $DB->get_record('dataform', array('id' => $dataformid), '*', MUST_EXIST);
     if (!rss_enabled_for_mod('dataform', $dataform, false, false)) {
         return null;
     }
 
-    // Get the target view
+    // Get the target view.
     $viewid = clean_param($args[4], PARAM_INT);
     $viewdata = $DB->get_record('dataform_views', array('id' => $viewid), '*', MUST_EXIST);
     $viewman = mod_dataform_view_manager::instance($dataformid);
     $view = $viewman->get_view_by_id($viewid);
-    // if (!($view instanceof 'mod_dataform\interfaces\rss')) {
+    // If (!($view instanceof 'mod_dataform\interfaces\rss')) {
         // return null;
-    // }
+    // }.
 
     // Get the cache file info
     // The cached file name is formatted dfid_viewid_contentstamp,
-    // where contentstamp is provided by the view
+    // where contentstamp is provided by the view.
     $componentid = $dataformid. "_$viewid";
     $cachedfilepath = dataform_rss_get_cached_file_path($componentid);
     $contentstamp = $cachedfilepath ? dataform_rss_get_cached_content_stamp($cachedfilepath) : null;
@@ -76,30 +76,30 @@ function dataform_rss_get_feed($context, $args) {
     $newcontentstamp = $view->get_content_stamp();
     $hasnewcontent = ($newcontentstamp !== $contentstamp);
 
-    // Neither existing nor new
+    // Neither existing nor new.
     if (!$cachedfilepath and !$hasnewcontent) {
         return null;
     }
 
     if ($cachedfilepath) {
-        // Use cache under 60 seconds
+        // Use cache under 60 seconds.
         $cachetime = filemtime($cachedfilepath);
         if ((time() - $cachetime) < 60) {
             return $cachedfilepath;
         }
 
-        // Use cache if there is nothing new
+        // Use cache if there is nothing new.
         if (!$hasnewcontent) {
             return $cachedfilepath;
         }
 
-        // Cached file is outdated so delete it
+        // Cached file is outdated so delete it.
         $instance = (object) array('id' => $componentid);
         rss_delete_file('mod_dataform', $instance);
     }
 
     // Still here, fetch new content.
-    // Each article is an stdclass {title, descrition, pubdate, entrylink}
+    // Each article is an stdclass {title, descrition, pubdate, entrylink}.
     if (!$items = $view->get_rss_items()) {
         return null;
     }
@@ -119,7 +119,7 @@ function dataform_rss_get_feed($context, $args) {
         return null;
     }
 
-    // All's good, save the content to file
+    // All's good, save the content to file.
     $articles = rss_add_items($items);
     $rss = $header.$articles.$footer;
     $filename = $componentid. "_$newcontentstamp";
@@ -172,7 +172,7 @@ function dataform_rss_get_cached_content_stamp($cachedfilepath) {
         return null;
     }
     $filename = pathinfo($cachedfilepath, PATHINFO_FILENAME);
-    // Strip the .xml extension
+    // Strip the .xml extension.
     if (substr($filename, -4) === '.xml') {
         $filename = substr($filename, 0, strlen($filename) - 4);
     }

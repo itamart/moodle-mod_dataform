@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
      *
      */
     public function field_definition() {
-        // Appearance
+        // Appearance.
         $this->definition_appearance();
 
-        // File settings
+        // File settings.
         $this->definition_file_settings();
     }
 
@@ -41,11 +41,11 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
         $field = &$this->_field;
         $mform = &$this->_form;
 
-        // Appearance
+        // Appearance.
         $mform->addElement('header', 'appearancehdr', get_string('appearance'));
         $mform->setExpanded('appearancehdr');
 
-        // Files separator (param4)
+        // Files separator (param4).
         $options = array(
             '' => get_string('none'),
             '<br />' => get_string('newline', 'dataformfield_file')
@@ -62,21 +62,21 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // File settings
+        // File settings.
         $mform->addElement('header', 'filesettingshdr', get_string('filesettings', 'dataform'));
 
-        // max bytes (param1)
+        // Max bytes (param1).
         $options = get_max_upload_sizes($CFG->maxbytes, $this->_field->df->course->maxbytes);
         $mform->addElement('select', 'param1', get_string('filemaxsize', 'dataform'), $options);
 
-        // max files (param2)
+        // Max files (param2).
         $range = range(1, 100);
         $options = array_combine($range, $range);
         $options[-1] = get_string('unlimited');
         $mform->addElement('select', 'param2', get_string('filesmax', 'dataform'), $options);
         $mform->setDefault('param2', -1);
 
-        // accetped types
+        // Accetped types.
         $this->definition_filetypes();
 
     }
@@ -88,7 +88,7 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
 
         $mform =& $this->_form;
 
-        // accetped types (param3)
+        // Accetped types (param3).
         $options = array();
         $options['*'] = get_string('filetypeany', 'dataform');
         $options['*.jpg,*.gif,*.png'] = get_string('filetypeimage', 'dataform');

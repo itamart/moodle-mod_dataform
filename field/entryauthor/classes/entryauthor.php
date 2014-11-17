@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
 
         $csvname = '';
 
-        // Author id
+        // Author id.
         if (!empty($importsettings['id'])) {
             $setting = $importsettings['id'];
             if (!empty($setting['name'])) {
@@ -69,7 +69,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
             }
         }
 
-        // Author username
+        // Author username.
         if (!empty($importsettings['username'])) {
             $setting = $importsettings['username'];
             if (!empty($setting['name'])) {
@@ -84,7 +84,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
             }
         }
 
-        // Author idnumber
+        // Author idnumber.
         if (!empty($importsettings['idnumber'])) {
             $setting = $importsettings['idnumber'];
             if (!empty($setting['name'])) {
@@ -116,20 +116,20 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
     public function get_search_sql($search) {
         global $USER;
 
-        // Set search current user entries entries
+        // Set search current user entries entries.
         if ($search[0] == 'currentuser') {
             $search[0] = 'id';
             $search[3] = $USER->id;
             if ($search[1] == '' and $search[2] == '') {
-                // IS EMPTY == NOT equal
+                // IS EMPTY == NOT equal.
                 $search[1] = 'NOT';
                 $search[2] = '=';
             } else if ($search[1] == 'NOT' and $search[2] == '') {
-                // NOT EMPTY == IS equal
+                // NOT EMPTY == IS equal.
                 $search[1] = '';
                 $search[2] = '=';
             } else {
-                // No other settings for this element should be processed
+                // No other settings for this element should be processed.
                 return null;
             }
         }

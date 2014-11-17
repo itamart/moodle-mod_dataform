@@ -36,7 +36,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
                 return;
             }
             this.selector.on('change', this.submit_rating, this);
-            // Hide the submit buttons
+            // Hide the submit buttons.
             Y.one('#ratingpostsubmit_' + fieldid + '_' + entryid).setStyle('display', 'none');
 
             this.ratingcount = Y.one('#ratingcount_' + fieldid + '_' + entryid);

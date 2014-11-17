@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ class dataformfield_url_form extends mod_dataform\pluginbase\dataformfieldform {
 
         $mform =& $this->_form;
 
-        // use url picker
+        // Use url picker.
         $mform->addElement('selectyesno', 'param1', get_string('usepicker', 'dataformfield_url'));
 
-        // force link name
+        // Force link name.
         $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size' => '32'));
         $mform->setType('param2', PARAM_TEXT);
     }

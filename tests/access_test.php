@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,22 +48,22 @@ class mod_dataform_access_testcase extends advanced_testcase {
 
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
 
-        // Teacher
+        // Teacher.
         $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
         $this->teacher = $user;
 
-        // Assistant
+        // Assistant.
         $user = $this->getDataGenerator()->create_user(array('username' => 'assistant'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['teacher']);
         $this->assistant = $user;
 
-        // Student
+        // Student.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
         $this->student = $user;
 
-        // Guest
+        // Guest.
         $user = $DB->get_record('user', array('username' => 'guest'));
         $this->guest = $user;
     }
@@ -80,7 +80,7 @@ class mod_dataform_access_testcase extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
 
         if (!$dataformid) {
-            // Create a dataform instance
+            // Create a dataform instance.
             $data = $generator->create_instance(array('course' => $this->course));
             $dataformid = $data->id;
         }
@@ -122,10 +122,10 @@ class mod_dataform_access_testcase extends advanced_testcase {
         for ($r = 0; $r < $cases->getRowCount(); $r++) {
             $case = (object) array_combine($columns, $cases->getRow($r));
 
-            // Set teacher user for initial setup
+            // Set teacher user for initial setup.
             $this->setUser($this->teacher);
 
-            // Set the dataform
+            // Set the dataform.
             $args = array(
                 'timeavailable' => ($case->timeavailable ? strtotime($case->timeavailable) : 0),
                 'timedue' => ($case->timedue ? strtotime($case->timedue) : 0),
@@ -133,11 +133,11 @@ class mod_dataform_access_testcase extends advanced_testcase {
             );
             $df->update($args);
 
-            // Set the view
+            // Set the view.
             $view->visible = $case->viewvisible;
             $view->update($view->data);
 
-            // Set the entry
+            // Set the entry.
             if ($entryuser = $case->entryuser) {
                 $params['entry']->userid = $this->$entryuser->id;
             }
@@ -145,10 +145,10 @@ class mod_dataform_access_testcase extends advanced_testcase {
                 $params['entry']->gropuid = $entrygroup;
             }
 
-            // Set the user
+            // Set the user.
             $this->set_user($case->user);
 
-            // Check access
+            // Check access.
             $access = "mod_dataform\access\\$case->event";
             $result = $access::validate($params);
             $this->assertEquals(filter_var($case->expected, FILTER_VALIDATE_BOOLEAN), $result);

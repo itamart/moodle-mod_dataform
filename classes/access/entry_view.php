@@ -43,12 +43,12 @@ class entry_view extends base {
 
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // Unspecified entry
+        // Unspecified entry.
         if (empty($params['entry'])) {
             return self::has_capability('mod/dataform:entryanyview', $params);
         }
 
-        // Early entries
+        // Early entries.
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlyview');
             if (!parent::validate($params)) {
@@ -56,7 +56,7 @@ class entry_view extends base {
             }
         }
 
-        // Late entries
+        // Late entries.
         if ($df->is_past_due()) {
             $params['capabilities'] = array('mod/dataform:entrylateview');
             if (!parent::validate($params)) {
@@ -66,19 +66,19 @@ class entry_view extends base {
 
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
 
-        // Own entry
+        // Own entry.
         if (\mod_dataform\pluginbase\dataformentry::is_own($entry)) {
             $params['capabilities'] = array('mod/dataform:entryownview');
             return parent::validate($params);
         }
 
-        // Group entry
+        // Group entry.
         if (\mod_dataform\pluginbase\dataformentry::is_grouped($entry)) {
             $params['capabilities'] = array('mod/dataform:entrygroupview');
             return parent::validate($params);
         }
 
-        // Anonymous entry
+        // Anonymous entry.
         if (\mod_dataform\pluginbase\dataformentry::is_anonymous($entry)) {
             if (!$df->anonymous) {
                 return false;
@@ -87,7 +87,7 @@ class entry_view extends base {
             return parent::validate($params);
         }
 
-        // Any entry
+        // Any entry.
         if (\mod_dataform\pluginbase\dataformentry::is_others($entry)) {
             $params['capabilities'] = array('mod/dataform:entryanyview');
             return parent::validate($params);

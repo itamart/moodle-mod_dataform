@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ function dataform_add_instance($data) {
         $data->gradecalc = null;
     }
 
-    // Max entries
+    // Max entries.
     if (!isset($data->maxentries) or $data->maxentries < -1) {
         $data->maxentries = -1;
     }
@@ -64,9 +64,9 @@ function dataform_add_instance($data) {
         return false;
     }
 
-    // Activity icon
+    // Activity icon.
     if (!empty($data->activityicon)) {
-        // we need to use context now, so we need to make sure all needed info is already in db
+        // We need to use context now, so we need to make sure all needed info is already in db.
         $DB->set_field('course_modules', 'instance', $data->id, array('id' => $data->coursemodule));
         $context = context_module::instance($data->coursemodule);
         $options = array('subdirs' => 0,
@@ -76,11 +76,11 @@ function dataform_add_instance($data) {
         file_save_draft_area_files($data->activityicon, $context->id, 'mod_dataform', 'activityicon', 0, $options);
     }
 
-    // Calendar
+    // Calendar.
     dataform_calendar_helper::update_event_timeavailable($data);
     dataform_calendar_helper::update_event_timedue($data);
 
-    // Grading
+    // Grading.
     dataform_grade_item_update($data);
     return $data->id;
 }
@@ -104,7 +104,7 @@ function dataform_update_instance($data) {
         $data->gradecalc = null;
     }
 
-    // Max entries
+    // Max entries.
     if ($CFG->dataform_maxentries == 0) {
         $data->maxentries = 0;
     } else if ($CFG->dataform_maxentries > 0 and ($data->maxentries > $CFG->dataform_maxentries or $data->maxentries < 0)) {
@@ -118,7 +118,7 @@ function dataform_update_instance($data) {
         return false;
     }
 
-    // Activity icon
+    // Activity icon.
     $context = context_module::instance($data->coursemodule);
     $options = array('subdirs' => 0,
                     'maxbytes' => $COURSE->maxbytes,
@@ -126,11 +126,11 @@ function dataform_update_instance($data) {
                     'accepted_types' => array('image'));
     file_save_draft_area_files($data->activityicon, $context->id, 'mod_dataform', 'activityicon', 0, $options);
 
-    // Calendar
+    // Calendar.
     dataform_calendar_helper::update_event_timeavailable($data);
     dataform_calendar_helper::update_event_timedue($data);
 
-    // Grading
+    // Grading.
     dataform_update_grades($data);
 
     return true;
@@ -264,12 +264,12 @@ function dataform_get_coursemodule_info($cm) {
 
     $cminfo = new cached_cm_info();
 
-    // Activity custom icon
+    // Activity custom icon.
     if ($customiconurl = dataform_get_custom_icon_url($cm->id)) {
         $cminfo->iconurl = $customiconurl;
     }
 
-    // Inline view
+    // Inline view.
     if (!empty($dataform->inlineview)) {
         $cminfo->customdata = $dataform;
         return $cminfo;
@@ -293,7 +293,7 @@ function dataform_get_coursemodule_info($cm) {
  */
 function dataform_cm_info_dynamic(cm_info $cm) {
     if ($customdata = $cm->customdata and !empty($customdata->inlineview)) {
-        // the field 'customdata' is not empty IF AND ONLY IF we display content inline
+        // The field 'customdata' is not empty IF AND ONLY IF we display content inline.
         $cm->set_no_view_link();
     }
 }
@@ -311,7 +311,7 @@ function dataform_cm_info_view(cm_info $cm) {
         return;
     }
 
-    // Default content if not displaying inline view
+    // Default content if not displaying inline view.
     if (!$dataform = $cm->customdata or empty($dataform->inlineview)) {
         return;
     }
@@ -363,14 +363,14 @@ function dataform_get_custom_icon_url($cmid) {
 function dataform_get_completion_state($course, $cm, $userid, $type) {
     global $DB;
 
-    // Get dataform details
+    // Get dataform details.
     if (!($dataform = $DB->get_record('dataform', array('id' => $cm->instance)))) {
         throw new Exception("Can't find dataform {$cm->instance}");
     }
 
     $result = $type;
 
-    // Required entries
+    // Required entries.
     if ($dataform->completionentries) {
         $entriescount = $DB->count_records('dataform_entries', array('dataid' => $dataform->id, 'userid' => $userid));
         $value = ($entriescount >= $dataform->completionentries);
@@ -381,7 +381,7 @@ function dataform_get_completion_state($course, $cm, $userid, $type) {
         }
     }
 
-    // Required specific grade
+    // Required specific grade.
     if ($dataform->completionspecificgrade) {
         // Get the user's grade.
         $params = array(
@@ -405,9 +405,7 @@ function dataform_get_completion_state($course, $cm, $userid, $type) {
     return $result;
 }
 
-// ------------------------------------------------------------
-// BACKUP/RESTORE
-// ------------------------------------------------------------
+// BACKUP/RESTORE.
 
 /**
  * Checks if a scale is being used by a dataform,
@@ -467,9 +465,7 @@ function dataform_scale_used_anywhere($scaleid) {
     return false;
 }
 
-// ------------------------------------------------------------
-// RESET
-// ------------------------------------------------------------
+// RESET.
 
 /**
  * prints the form elements that control
@@ -519,12 +515,12 @@ function dataform_reset_userdata($data) {
 
     foreach (array_keys($dataforms) as $dataformid) {
         $df = mod_dataform_dataform::instance($dataformid);
-        // Delete all user data
+        // Delete all user data.
         if (!empty($data->reset_dataform_data)) {
             $df->reset_user_data();
             $status['entriesdeleteall'] = array('component' => $componentstr, 'item' => $entriesdeleteallstr, 'error' => false);
         }
-        // Delete user data for not enrolled users
+        // Delete user data for not enrolled users.
         if (!empty($data->reset_dataform_notenrolled)) {
             $sql = "
                 SELECT
@@ -560,7 +556,7 @@ function dataform_reset_userdata($data) {
                 $status['deletenotenrolled'] = array('component' => $componentstr, 'item' => $deletenotenrolledstr, 'error' => false);
             }
         }
-        // Updating dates - shift may be negative too
+        // Updating dates - shift may be negative too.
         if ($data->timeshift) {
             shift_course_mod_dates('dataform', array('timeavailable', 'timedue'), $data->timeshift, $data->courseid);
             $status['datechanged'] = array('component' => $componentstr, 'item' => $datechangedstr, 'error' => false);
@@ -592,9 +588,7 @@ function dataform_reset_gradebook($courseid, $type='') {
     }
 }
 
-// ------------------------------------------------------------
-// PERMISSIONS AND NAVIGATION
-// ------------------------------------------------------------
+// PERMISSIONS AND NAVIGATION.
 
 /**
  * Returns all other caps used in module
@@ -640,7 +634,7 @@ function dataform_get_file_areas($course, $cm, $context) {
 function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $CFG, $DB, $USER;
 
-    // DATAFORM activity icon
+    // DATAFORM activity icon.
     if ($filearea === 'activityicon' and $context->contextlevel == CONTEXT_MODULE) {
         $relativepath = implode('/', $args);
         $fullpath = "/$context->id/mod_dataform/activityicon/$relativepath";
@@ -649,11 +643,11 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
             return false;
         }
-        // finally send the file
-        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+        // Finally send the file.
+        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
     }
 
-    // FIELD CONTENT files
+    // FIELD CONTENT files.
     if ($filearea === 'content' and $context->contextlevel == CONTEXT_MODULE) {
 
         $contentid = (int)array_shift($args);
@@ -677,11 +671,11 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         }
 
         if ($dataform->id != $cm->instance) {
-            // hacker attempt - context does not match the contentid
+            // Hacker attempt - context does not match the contentid.
             return false;
         }
 
-        // group access
+        // Group access.
         if ($entry->groupid) {
             $groupmode = groups_get_activity_groupmode($cm, $course);
             if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
@@ -691,7 +685,7 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             }
         }
 
-        // Separate participants
+        // Separate participants.
         if ($dataform->individualized) {
             if (empty($USER->id)) {
                 return false;
@@ -708,11 +702,11 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
             return false;
         }
-        // finally send the file
-        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+        // Finally send the file.
+        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
     }
 
-    // PRESET files
+    // PRESET files.
     if (($filearea === 'course_presets' or $filearea === 'site_presets')) {
         require_course_login($course, true, $cm);
 
@@ -724,8 +718,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             return false;
         }
 
-        // finally send the file
-        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+        // Finally send the file.
+        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
     }
 
     if (($filearea === 'js' or $filearea === 'css')) {
@@ -739,8 +733,8 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
             return false;
         }
 
-        // finally send the file
-        send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+        // Finally send the file.
+        send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
     }
 
     return false;
@@ -760,7 +754,7 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
         }
     }
 
-    // RSS links
+    // RSS links.
     if (!empty($CFG->enablerssfeeds) and !empty($CFG->dataform_enablerssfeeds)) {
         if ($rssviews = $df->get_rss_views()) {
             require_once("$CFG->libdir/rsslib.php");
@@ -856,9 +850,7 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
     }
 }
 
-// ------------------------------------------------------------
-// INFO
-// ------------------------------------------------------------
+// INFO.
 
 /**
  * returns a list of participants of this dataform
@@ -999,9 +991,7 @@ function dataform_user_complete($course, $user, $mod, $dataform) {
     return true;
 }
 
-// ------------------------------------------------------------
-// Participantion Reports
-// ------------------------------------------------------------
+// Participantion Reports.
 
 /**
  */
@@ -1015,9 +1005,7 @@ function dataform_get_post_actions() {
     return array('add', 'update', 'record delete');
 }
 
-// ------------------------------------------------------------
-// COMMENTS
-// ------------------------------------------------------------
+// COMMENTS.
 
 /**
  * Running addtional permission check on plugin, for example, plugins
@@ -1064,9 +1052,7 @@ function dataform_comment_validate($commentparam) {
     return false;
 }
 
-// ------------------------------------------------------------
-// RATINGS
-// ------------------------------------------------------------
+// RATINGS.
 
 /**
  * Return rating related permissions
@@ -1109,9 +1095,7 @@ function dataform_rating_validate($params) {
     return $rating->validation($params);
 }
 
-// ------------------------------------------------------------
-// GRADING
-// ------------------------------------------------------------
+// GRADING.
 
 /**
  * Lists all gradable areas for the advanced grading methods gramework
@@ -1186,12 +1170,13 @@ function dataform_upgrade_grades() {
              WHERE m.name='dataform' AND m.id=cm.module AND cm.instance=d.id";
     $rs = $DB->get_recordset_sql($sql);
     if ($rs->valid()) {
-        // too much debug output
+        // Too much debug output.
         $pbar = new progress_bar('dataupgradegrades', 500, true);
         $i = 0;
         foreach ($rs as $data) {
             $i++;
-            upgrade_set_timeout(60 * 5); // set up timeout, may also abort execution
+            // Set up timeout, may also abort execution.
+            upgrade_set_timeout(60 * 5);
             dataform_update_grades($data, 0, false);
             $pbar->update($i, $count, "Updating Dataform grades ($i/$count).");
         }

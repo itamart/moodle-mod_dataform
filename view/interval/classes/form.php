@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,16 +27,16 @@ class dataformview_interval_form extends dataformview_grid_form {
      *
      */
     protected function definition_view_specific() {
-        // View template
+        // View template.
         $this->definition_view_template();
 
-        // Entry template
+        // Entry template.
         $this->definition_entry_template();
 
-        // View interval
+        // View interval.
         $this->definition_view_interval();
 
-        // Submission settings
+        // Submission settings.
         $this->definition_view_submission();
     }
 
@@ -46,11 +46,10 @@ class dataformview_interval_form extends dataformview_grid_form {
     protected function definition_view_interval() {
         $mform =& $this->_form;
 
-        // specifications
-        // -------------------------------------------------------------------------------
+        // Specifications.
         $mform->addElement('header', 'intervalsettingshdr', get_string('interval', 'dataformview_interval'));
 
-        // interval
+        // Interval.
         $intervals = array(0 => get_string('always'),
                         'hourly' => get_string('hourly', 'dataformview_interval'),
                         'daily' => get_string('daily', 'dataformview_interval'),
@@ -72,7 +71,7 @@ class dataformview_interval_form extends dataformview_grid_form {
         $mform->disabledIf('customhours', 'param5', 'neq', 'custom');
         $mform->disabledIf('customdays', 'param5', 'neq', 'custom');
 
-        // selection type
+        // Selection type.
         $types = array(
             \mod_dataform_entry_manager::SELECT_FIRST_PAGE => get_string('firstpage', 'dataformview_interval'),
             \mod_dataform_entry_manager::SELECT_LAST_PAGE => get_string('lastpage', 'dataformview_interval'),
@@ -82,7 +81,7 @@ class dataformview_interval_form extends dataformview_grid_form {
         );
         $mform->addElement('select', 'param4', get_string('selection', 'dataformview_interval'), $types);
 
-        // reset next
+        // Reset next.
         $mform->addElement('text', 'param8', get_string('resetnext', 'dataformview_interval'), array('size' => 8));
         $mform->setType('param8', PARAM_INT);
         $mform->setDefault('param8', 100);
@@ -121,7 +120,7 @@ class dataformview_interval_form extends dataformview_grid_form {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // set custom refresh (param6)
+            // Set custom refresh (param6).
             $customrefreshsecs = 0;
             if (!empty($data->customminutes)) {
                 $customrefreshsecs += ($data->customminutes * 60);

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,15 +43,14 @@ class dataformfilterform_advanced extends dataformfilterform_standard {
 
         $mform = &$this->_form;
 
-        // -------------------------------------------------------------------------------
-        // $mform->addElement('header', 'advancedfilterhdr', get_string('filteradvanced', 'dataform'));
+        // $mform->addElement('header', 'advancedfilterhdr', get_string('filteradvanced', 'dataform'));.
 
-        // name and description
+        // Name and description.
         $mform->addElement('text', 'name', get_string('name'));
         $mform->setType('name', PARAM_TEXT);
         $mform->setDefault('name', $name);
 
-        // entries per page
+        // Entries per page.
         $options = array(
             0 => get_string('choose'),
             1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 15 => 15,
@@ -61,24 +60,24 @@ class dataformfilterform_advanced extends dataformfilterform_standard {
         $mform->addElement('select', 'perpage', get_string('viewperpage', 'dataform'), $options);
         $mform->setDefault('perpage', $filter->perpage);
 
-        // selection method
+        // Selection method
         // $options = array(0 => get_string('filterbypage', 'dataform'), 1 => get_string('random', 'dataform'));
         // $mform->addElement('select', 'selection', get_string('filterselection', 'dataform'), $options);
         // $mform->setDefault('selection', $filter->selection);
-        // $mform->disabledIf('selection', 'perpage', 'eq', '0');
+        // $mform->disabledIf('selection', 'perpage', 'eq', '0');.
 
-        // search
+        // Search.
         $mform->addElement('text', 'search', get_string('search'));
         $mform->setType('search', PARAM_TEXT);
         $mform->setDefault('search', $filter->search);
 
-        // custom sort
+        // Custom sort.
         $this->custom_sort_definition($filter->customsort, $fields, true);
 
-        // custom search
+        // Custom search.
         $this->custom_search_definition($filter->customsearch, $fields, true);
 
-        // Save button
+        // Save button.
         $grp = array();
         $grp[] = &$mform->createElement('submit', 'savebutton', get_string('savechanges'));
         $grp[] = &$mform->createElement('submit', 'newbutton', get_string('newfilter', 'filters'));

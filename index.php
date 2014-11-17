@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ $id             = required_param('id', PARAM_INT);   // course
 // $hide           = optional_param('hide', 0, PARAM_INT);
 // $show           = optional_param('show', 0, PARAM_INT);
 // $movetosection  = optional_param('movetosection', 0, PARAM_INT);
-// $delete         = optional_param('delete', 0, PARAM_INT);
+// $delete         = optional_param('delete', 0, PARAM_INT);.
 
 if (!$course = $DB->get_record('course', array('id' => $id))) {
     throw new moodle_exception('invalidcourseid');
@@ -44,7 +44,7 @@ if (!$course = $DB->get_record('course', array('id' => $id))) {
 $context = context_course::instance($course->id);
 require_course_login($course);
 
-// Must have viewindex capability
+// Must have viewindex capability.
 require_capability('mod/dataform:indexview', $context);
 
 $modulename = get_string('modulename', 'dataform');
@@ -73,32 +73,32 @@ $table->attributes['cellpadding'] = '2';
 $table->head  = array ();
 $table->align = array ();
 
-// section
+// Section.
 if ($usesections) {
     $table->head[] = get_string('sectionname', 'format_'.$course->format);
     $table->align[] = 'center';
 }
 
-// name
+// Name.
 $table->head[] = get_string('name');
 $table->align[] = 'left';
 
-// description
+// Description.
 $table->head[] = get_string('description');
 $table->align[] = 'left';
 
-// number of entries
+// Number of entries.
 $table->head[] = get_string('entries', 'dataform');
 $table->align[] = 'center';
 
-// rss
+// Rss.
 $rss = (!empty($CFG->enablerssfeeds) and !empty($CFG->dataform_enablerssfeeds));
 if ($rss) {
     $table->head[] = get_string('rss');
     $table->align[] = 'center';
 }
 
-// actions
+// Actions.
 if ($showeditbuttons = $PAGE->user_allowed_editing()) {
     $table->head[] = '';
     $table->align[] = 'center';
@@ -121,7 +121,7 @@ foreach ($dataforms as $dataform) {
         continue;
     }
 
-    // section
+    // Section.
     if ($usesections) {
         if ($dataform->section !== $currentsection) {
             if ($currentsection !== null) {
@@ -134,20 +134,20 @@ foreach ($dataforms as $dataform) {
         }
     }
 
-    // name (linked; dim if not visible)
+    // Name (linked; dim if not visible).
     $linkparams = !$dataform->visible ? array('class' => 'dimmed') : null;
     $linkedname = html_writer::link(new moodle_url('/mod/dataform/view.php', array('id' => $dataform->coursemodule)),
                                 format_string($dataform->name, true),
                                 $linkparams);
     $tablerow[] = $linkedname;
 
-    // description
+    // Description.
     $tablerow[] = format_text($dataform->intro, $dataform->introformat, $options);
 
-    // number of entries
+    // Number of entries.
     $tablerow[] = $df->get_entries_count(mod_dataform_dataform::COUNT_ALL);
 
-    // rss
+    // Rss.
     $rsslinks = array();
     if ($rss and $rssviews = $df->get_rss_views()) {
         foreach ($rssviews as $view) {

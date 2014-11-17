@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class dataformpresetform extends \moodleform {
 
         $mform->addElement('header', 'presetshdr', get_string('presetadd', 'dataform'));
 
-        // Preset current Dataform
+        // Preset current Dataform.
         if ($indataform) {
             $grp = array();
             $grp[] = &$mform->createElement('radio', 'preset_source', null, get_string('presetfromdataform', 'dataform'), 'current');
@@ -56,7 +56,7 @@ class dataformpresetform extends \moodleform {
             $mform->setDefault('preset_source', 'current');
         }
 
-        // Upload preset
+        // Upload preset.
         $options = array('subdirs' => 0,
                             'maxbytes' => $COURSE->maxbytes,
                             'maxfiles' => 1,

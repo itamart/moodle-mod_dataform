@@ -56,7 +56,7 @@ abstract class base {
         $accessman = \mod_dataform_access_manager::instance($dataformid);
         $accesstype = get_called_class();
 
-        // If capabilities not specified, use the access class default
+        // If capabilities not specified, use the access class default.
         if (empty($params['capabilities'])) {
             $params['capabilities'] = $accesstype::get_capabilities();
         }

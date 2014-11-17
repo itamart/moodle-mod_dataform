@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,25 +33,25 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
      * @return void
      */
     public function set_default_entry_template($content = null) {
-        // get all the fields
+        // Get all the fields.
         if (!$fields = $this->df->field_manager->get_fields()) {
-            return; // you shouldn't get that far if there are no user fields
+            return;
         }
 
         if ($content === null) {
-            // set content
+            // Set content.
             $content = '';
-            // Author
+            // Author.
             $fieldname = get_string('fieldname', 'dataformfield_entryauthor');
             $content .= "[[$fieldname:picture]]\n[[$fieldname:name]]";
-            // Fields
+            // Fields.
             foreach ($fields as $field) {
                 if ($field->id > 0) {
                     $fieldname = $field->name;
                     $content .= "\n[[$fieldname]]";
                 }
             }
-            // actions
+            // Actions.
             $fieldname = get_string('fieldname', 'dataformfield_entryactions');
             $content .= "\n[[$fieldname:edit]]\n[[$fieldname:delete]]";
         }
@@ -71,7 +71,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
                     continue;
                 }
                 $arr = explode("|", $column);
-                $tag = $arr[0]; // Must exist
+                $tag = $arr[0];
                 $header = !empty($arr[1]) ? $arr[1] : '';
                 $class = !empty($arr[2]) ? $arr[2] : '';
 
@@ -98,7 +98,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
         global $OUTPUT;
         $elements = array();
 
-        // Generate the header row
+        // Generate the header row.
         $tableheader = '';
         if ($this->has_headers()) {
             $columns = $this->get_columns();
@@ -109,22 +109,22 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
             $tableheader = html_writer::tag('thead', html_writer::tag('tr', $tableheader));
 
         }
-        // Open table and wrap header with thead
+        // Open table and wrap header with thead.
         $elements[] = html_writer::start_tag('table', array('class' => 'generaltable')). $tableheader;
 
-        // flatten the set to a list of elements, wrap with tbody and close table
+        // Flatten the set to a list of elements, wrap with tbody and close table.
         $elements[] = html_writer::start_tag('tbody');
         foreach ($entriesset as $entryid => $entrydefinitions) {
             $elements = array_merge($elements, $entrydefinitions);
         }
         $elements[] = html_writer::end_tag('tbody'). html_writer::end_tag('table');
 
-        // Add group heading
+        // Add group heading.
         $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
         if ($name) {
             array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
         }
-        // Wrap with entriesview
+        // Wrap with entriesview.
         array_unshift($elements, html_writer::start_tag('div', array('class' => 'entriesview')));
         array_push($elements, html_writer::end_tag('div'));
 
@@ -136,28 +136,28 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
      */
     protected function entry_definition($fielddefinitions, array $options = null) {
         $elements = array();
-        // Get the columns definition from the view template
+        // Get the columns definition from the view template.
         $columns = $this->get_columns();
 
         $htmlcontent = '';
 
-        // Generate entry table row
+        // Generate entry table row.
         $htmlcontent .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
             list($tag, , $class) = array_map('trim', $column);
             if (isset($fielddefinitions[$tag])) {
                 $fielddefinition = $fielddefinitions[$tag];
                 if (!is_array($fielddefinition)) {
-                    // Collect consecutive html to reduce number of elements
+                    // Collect consecutive html to reduce number of elements.
                     $htmlcontent .= html_writer::tag('td', $fielddefinition, array('class' => $class));
                 } else {
-                    // Open cell, add html element and reset html content
+                    // Open cell, add html element and reset html content.
                     $htmlcontent .= html_writer::start_tag('td', array('class' => $class));
                     $elements[] = $htmlcontent;
                     $htmlcontent = '';
-                    // Add the non html definition
+                    // Add the non html definition.
                     $elements[] = $fielddefinition;
-                    // Close cell
+                    // Close cell.
                     $htmlcontent .= html_writer::end_tag('td');
                 }
             } else {
@@ -175,10 +175,10 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
 
-        // Get the columns definition from the view template
+        // Get the columns definition from the view template.
         $columns = $this->get_columns();
 
-        // Get field definitions for new entry
+        // Get field definitions for new entry.
         $fields = $this->get_fields();
         $entry = (object) array('id' => $entryid);
         $fielddefinitions = array();
@@ -193,7 +193,7 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
             }
         }
 
-        // Generate entry table row
+        // Generate entry table row.
         $elements[] = html_writer::start_tag('tr');
         foreach ($columns as $column) {
             list($tag, , $class) = array_map('trim', $column);

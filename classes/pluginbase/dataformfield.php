@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -184,7 +184,7 @@ abstract class dataformfield {
         return false;
     }
 
-    // GETTERS/SETTERS
+    // GETTERS/SETTERS.
 
     /**
      * Returns the type name of the field
@@ -278,7 +278,7 @@ abstract class dataformfield {
         return $this->_renderer;
     }
 
-    // CONTENT MANAGEMENT
+    // CONTENT MANAGEMENT.
     /**
      * Returns true if current user is allowed to see the field's content.
      *
@@ -331,7 +331,7 @@ abstract class dataformfield {
 
         list($contents, $oldcontents) = $this->format_content($entry, $values);
 
-        // Delete if old content but not new
+        // Delete if old content but not new.
         if ($contentid and empty($contents)) {
             return $this->delete_content($entry->id);
         }
@@ -351,20 +351,20 @@ abstract class dataformfield {
 
         $updated = false;
         if ($savenew) {
-            // Insert if saving an existing entry to a new one
+            // Insert if saving an existing entry to a new one.
             $rec->id = $DB->insert_record('dataform_contents', $rec);
             $updated = true;
 
         } else if (is_null($contentid) and !empty($contents)) {
-            // insert only if no old contents and there is new contents
+            // Insert only if no old contents and there is new contents.
             $rec->id = $DB->insert_record('dataform_contents', $rec);
             $updated = true;
 
         } else {
-            // update if new is different from old
+            // Update if new is different from old.
             foreach ($contents as $key => $content) {
                 if (!isset($oldcontents[$key]) or $content !== $oldcontents[$key]) {
-                    $rec->id = $contentid; // MUST_EXIST
+                    $rec->id = $contentid;
                     $DB->update_record('dataform_contents', $rec);
                     $updated = true;
                     break;
@@ -433,7 +433,7 @@ abstract class dataformfield {
                     $DB->update_record('dataform_contents', $content);
                 }
 
-                // rename content dir if exists
+                // Rename content dir if exists.
                 $path = $CFG->dataroot.'/'.$this->df->course->id.'/'.$CFG->moddata.'/dataform/'.$this->df->id;
                 $olddir = "$path/". $this->id;
                 $newdir = "$path/$tofieldid";
@@ -546,11 +546,11 @@ abstract class dataformfield {
         $oldcontents = array();
         $contents = array();
 
-        // old content
+        // Old content.
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
-        // new content
+        // New content.
         if (!empty($values)) {
             $content = reset($values);
             $contents[] = (string) clean_param($content, PARAM_NOTAGS);
@@ -576,7 +576,7 @@ abstract class dataformfield {
         return $filearea;
     }
 
-    // IMPORT EXPORT
+    // IMPORT EXPORT.
     /**
      * Adds to the data the import content for the field.
      * Assumes one applicable pattern for the field. If there are more or none,
@@ -603,7 +603,7 @@ abstract class dataformfield {
         return $data;
     }
 
-    // SQL MANAGEMENT
+    // SQL MANAGEMENT.
     /**
      * Whether this field content resides in dataform_contents
      *
@@ -674,7 +674,7 @@ abstract class dataformfield {
         return "c$fieldid";
     }
 
-    // Sort
+    // Sort.
     /**
      *
      */
@@ -712,7 +712,7 @@ abstract class dataformfield {
         );
     }
 
-    // Search
+    // Search.
     /**
      * Converts the given search string to its content representation.
      *
@@ -762,11 +762,11 @@ abstract class dataformfield {
         // which don't meet the positive criterion
         // because some fields may not have content records
         // and the respective entries may be filter out
-        // despite meeting the criterion
+        // despite meeting the criterion.
         $excludeentries = (($not and $operator !== '') or (!$not and $operator === ''));
 
         if ($excludeentries) {
-            // Get entry ids for entries that meet the criterion
+            // Get entry ids for entries that meet the criterion.
             if ($eids = $this->get_entry_ids_for_content($sql, $params)) {
                 // Get NOT IN sql.
                 list($notinids, $params) = $DB->get_in_or_equal($eids, SQL_PARAMS_QM, '', false);

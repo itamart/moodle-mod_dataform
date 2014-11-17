@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,43 +24,48 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d          = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id         = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->d          = optional_param('d', 0, PARAM_INT);
+$urlparams->id         = optional_param('id', 0, PARAM_INT);
 
-// items list actions
-$urlparams->type = optional_param('type', '', PARAM_ALPHA);          // Type of a rule to add
-$urlparams->biid = optional_param('biid', 0, PARAM_INT);   // Block id of rule to edit
-$urlparams->update = optional_param('update', 0, PARAM_INT);   // update item
+// Items list actions.
+// Type of a rule to add.
+$urlparams->type = optional_param('type', '', PARAM_ALPHA);
+// Block id of rule to edit.
+$urlparams->biid = optional_param('biid', 0, PARAM_INT);
+// Update item.
+$urlparams->update = optional_param('update', 0, PARAM_INT);
 $urlparams->cancel = optional_param('cancel', 0, PARAM_BOOL);
-
-$urlparams->enable = optional_param('enable', 0, PARAM_INT);     // Enable context (show block)
-$urlparams->disable = optional_param('disable', 0, PARAM_INT);     // Disable context (hide block)
-$urlparams->delete = optional_param('delete', 0, PARAM_INT);   // Delete context (delete block)
+// Enable context (show block).
+$urlparams->enable = optional_param('enable', 0, PARAM_INT);
+// Disable context (hide block).
+$urlparams->disable = optional_param('disable', 0, PARAM_INT);
+// Delete context (delete block).
+$urlparams->delete = optional_param('delete', 0, PARAM_INT);
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
 $df->require_manage_permission('access');
 
 $df->set_page('access/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/access/index.php', array('id' => $df->cm->id)));
 
 $aman = mod_dataform_access_manager::instance($df->id);
 
 // DATA PROCESSING
-// Enable
+// Enable.
 if ($urlparams->enable and confirm_sesskey()) {
     $aman->set_rule_visibility($urlparams->enable, 1);
 }
-// Disable
+// Disable.
 if ($urlparams->disable and confirm_sesskey()) {
     $aman->set_rule_visibility($urlparams->disable, 0);
 }
-// Delete
+// Delete.
 if ($urlparams->delete and confirm_sesskey()) {
     $aman->delete_rule($urlparams->delete);
 }

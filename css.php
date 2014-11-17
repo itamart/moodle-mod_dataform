@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@
 require_once('../../config.php');
 
 $urlparams = new object;
-$urlparams->d = optional_param('d', 0, PARAM_INT);   // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);   // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);
+$urlparams->id = optional_param('id', 0, PARAM_INT);
 $urlparams->cssedit = optional_param('cssedit', 0, PARAM_BOOL);   // edit mode
 
 if ($urlparams->cssedit) {
@@ -42,23 +42,21 @@ if ($urlparams->cssedit) {
 
             $mform = &$this->_form;
 
-            // buttons
-            // -------------------------------------------------------------------------------
+            // Buttons.
             $this->add_action_buttons(true);
 
-            // css
-            // -------------------------------------------------------------------------------
+            // Css.
             $mform->addElement('header', 'generalhdr', get_string('headercss', 'dataform'));
 
-            // includes
+            // Includes.
             $attributes = array('wrap' => 'virtual', 'rows' => 3, 'style' => 'width:95%');
             $mform->addElement('textarea', 'cssincludes', get_string('cssincludes', 'dataform'), $attributes);
 
-            // code
+            // Code.
             $attributes = array('wrap' => 'virtual', 'rows' => 5, 'style' => 'width:95%');
             $mform->addElement('textarea', 'css', get_string('csscode', 'dataform'), $attributes);
 
-            // uploads
+            // Uploads.
             $options = array(
                 'subdirs' => 0,
                 'maxbytes' => $COURSE->maxbytes,
@@ -67,32 +65,31 @@ if ($urlparams->cssedit) {
             );
             $mform->addElement('filemanager', 'cssupload', get_string('cssupload', 'dataform'), null, $options);
 
-            // buttons
-            // -------------------------------------------------------------------------------
+            // Buttons.
             $this->add_action_buttons(true);
         }
 
     }
 
-    // Set a dataform object
+    // Set a dataform object.
     $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
     $df->require_manage_permission('css');
 
     $df->set_page('css', array('urlparams' => $urlparams));
 
-    // activate navigation node
+    // Activate navigation node.
     navigation_node::override_active_url(new moodle_url('/mod/dataform/css.php', array('id' => $df->cm->id, 'cssedit' => 1)));
 
     $mform = new mod_dataform_css_form(new moodle_url('/mod/dataform/css.php', array('d' => $df->id, 'cssedit' => 1)));
 
     if ($data = $mform->get_data()) {
-        // update the dataform
+        // Update the dataform.
         $rec = new stdClass;
         $rec->css = $data->css;
         $rec->cssincludes = $data->cssincludes;
         $df->update($rec, get_string('csssaved', 'dataform'));
 
-        // add uploaded files
+        // Add uploaded files.
         $options = array(
             'subdirs' => 0,
             'maxbytes' => $COURSE->maxbytes,
@@ -121,10 +118,11 @@ if ($urlparams->cssedit) {
     echo $output->footer();
 
 } else {
+    // Session not used here.
+    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true);
 
-    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true); // session not used here
-
-    $lifetime  = 600;                                   // Seconds to cache this stylesheet
+    // Seconds to cache this stylesheet.
+    $lifetime  = 600;
 
     $PAGE->set_url('/mod/dataform/css.php', array('d' => $urlparams->d));
 
@@ -133,7 +131,8 @@ if ($urlparams->cssedit) {
         header('Expires: ' . gmdate("D, d M Y H:i:s", time() + $lifetime) . ' GMT');
         header('Cache-control: max_age = '. $lifetime);
         header('Pragma: ');
-        header('Content-type: text/css; charset=utf-8');  // Correct MIME type
+        // Correct MIME type.
+        header('Content-type: text/css; charset=utf-8');
 
         echo $cssdata;
     }

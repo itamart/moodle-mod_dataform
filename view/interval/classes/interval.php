@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -83,9 +83,9 @@ class dataformview_interval_interval extends dataformview_grid_grid {
      */
     public function get_cache_filter_options() {
         $options = array();
-        // setting the cache may change page number
+        // Setting the cache may change page number.
         if ($this->page > 0) {
-            // next is used and page advances
+            // Next is used and page advances.
             $options['page'] = $this->page;
         }
         return $options;
@@ -108,7 +108,7 @@ class dataformview_interval_interval extends dataformview_grid_grid {
      */
     protected function set_cache() {
 
-        // assumes we are caching and interval is set
+        // Assumes we are caching and interval is set.
         $now = time();
         if ($this->param7) {
             $this->cache = unserialize($this->param7);
@@ -116,12 +116,12 @@ class dataformview_interval_interval extends dataformview_grid_grid {
                 $this->page = $this->cache->next;
             }
         } else {
-            // first time
+            // First time.
             $this->cache = new stdClass;
             $this->cache->time = 0;
         }
 
-        // get checktime
+        // Get checktime.
         switch ($this->interval) {
             case 'monthly':
                 $checktime = mktime(0, 0, 0, date('m'), 1, date('Y'));

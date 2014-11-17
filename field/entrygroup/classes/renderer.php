@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $field = $this->_field;
         $edit = !empty($options['edit']);
 
-        // Set the group object
+        // Set the group object.
         $group = new stdClass;
         if ($entry->id < 0) { // new record (0)
             $entry->groupid = $field->df->currentgroup;
@@ -74,9 +74,9 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
                     $replacements[$pattern] = $group->name;
                     break;
 
-                // case 'description':
+                // Case 'description':
                     // $replacements[$pattern] = $group->description;
-                    // break;
+                    // break;.
 
                 case 'picture':
                     $replacements[$pattern] = print_group_picture($group, $field->get_df()->course->id, false, true);
@@ -154,7 +154,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $patterns["[[$fieldname:id]]"] = array(true, $cat);
         $patterns["[[$fieldname:name]]"] = array(true, $cat);
         $patterns["[[$fieldname:idnumber]]"] = array(true, $cat);
-        // $patterns["[[$fieldname:description]]"] = array(true, $cat);
+        // $patterns["[[$fieldname:description]]"] = array(true, $cat);.
         $patterns["[[$fieldname:picture]]"] = array(true, $cat);
         $patterns["[[$fieldname:picturelarge]]"] = array(false, $cat);
         $patterns["[[$fieldname:edit]]"] = array(true, $cat);

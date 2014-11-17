@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ class mod_dataform_view_manager {
             }
         }
 
-        // Either no view or forceget so get the view from DB
+        // Either no view or forceget so get the view from DB.
         if ($view = $DB->get_record('dataform_views', array('dataid' => $this->_dataformid, 'name' => $viewname))) {
             $this->_items[$view->id] = $view;
             return $this->get_view($view);
@@ -187,7 +187,7 @@ class mod_dataform_view_manager {
             return $this->get_view($this->_items[$viewid]);
         }
 
-        // Not stored so get the view from DB
+        // Not stored so get the view from DB.
         if ($view = $DB->get_record('dataform_views', array('id' => $viewid))) {
             $this->_items[$view->id] = $view;
             return $this->get_view($view);
@@ -387,7 +387,7 @@ class mod_dataform_view_manager {
 
         require_capability('mod/dataform:manageviews', $df->context);
 
-        // Get array of ids
+        // Get array of ids.
         if (!is_array($vids)) {
             $vids = explode(',', $vids);
         }
@@ -405,7 +405,7 @@ class mod_dataform_view_manager {
                 $output = $df->get_renderer();
                 echo $output->header('views');
 
-                // Print a confirmation page
+                // Print a confirmation page.
                 echo $output->confirm(get_string("viewsconfirm$action", 'dataform', count($views)),
                         new moodle_url('/mod/dataform/view/index.php', array('d' => $this->_dataformid,
                                                                         $action => implode(',', array_keys($views)),
@@ -417,7 +417,7 @@ class mod_dataform_view_manager {
                 exit;
 
             } else {
-                // go ahead and perform the requested action
+                // Go ahead and perform the requested action.
                 switch ($action) {
                     case 'visible':
                         $strnotify = '';
@@ -457,7 +457,7 @@ class mod_dataform_view_manager {
                             if ($filterid != $view->filterid) {
                                 $view->filterid = ($filterid == -1 ? 0 : $filterid);
 
-                                // Update
+                                // Update.
                                 if ($view->update($view->data)) {
                                     $processedvids[] = $vid;
                                 }
@@ -469,10 +469,10 @@ class mod_dataform_view_manager {
 
                     case 'reset':
                         foreach ($views as $vid => $view) {
-                            // Generate default view and update
+                            // Generate default view and update.
                             $view->generate_default_view();
 
-                            // Update
+                            // Update.
                             if ($view->update($view->data)) {
                                 $processedvids[] = $vid;
                             }
@@ -487,14 +487,14 @@ class mod_dataform_view_manager {
                                 break;
                             }
 
-                            // Get new name
+                            // Get new name.
                             $i = 1;
                             while ($df->name_exists('views', $view->name. "_$i")) {
                                 $i++;
                             }
                             $viewname = $view->name. "_$i";
 
-                            // Update
+                            // Update.
                             if ($view->duplicate($viewname)) {
                                 $processedvids[] = $vid;
                             }
@@ -509,7 +509,7 @@ class mod_dataform_view_manager {
                             unset($this->_items[$vid]);
                             $processedvids[] = $vid;
 
-                            // Reset default view if needed
+                            // Reset default view if needed.
                             if ($view->id == $df->defaultview) {
                                 $df->update((object) array('defaultiview' => 0));
                             }
@@ -518,7 +518,7 @@ class mod_dataform_view_manager {
                         break;
 
                     case 'default':
-                        foreach ($views as $vid => $view) { // there should be only one
+                        foreach ($views as $vid => $view) {
                             if (!$view->visible) {
                                 $updateview = new stdClass;
                                 $updateview->id = $vid;
@@ -528,6 +528,7 @@ class mod_dataform_view_manager {
 
                             $df->update((object) array('defaultview' => $vid));
                             $processedvids[] = $vid;
+                            // There should be only one, so break.
                             break;
                         }
                         $strnotify = '';
@@ -572,7 +573,7 @@ class mod_dataform_view_manager {
 
         require_once("$CFG->dirroot/mod/dataform/view/patternsform.php");
 
-        // Get the Dataforms
+        // Get the Dataforms.
         if ($dataformid == -1) {
             if (!$dataformids = $DB->get_records('dataform', array(), '', 'id')) {
                 return false;
@@ -582,11 +583,11 @@ class mod_dataform_view_manager {
             $dataformids = array($dataformid);
         }
 
-        // Collate the broken patterns
+        // Collate the broken patterns.
         $brokenpatterns = array();
         foreach ($dataformids as $dfid) {
             $df = mod_dataform_dataform::instance($dfid);
-            // Get the views
+            // Get the views.
             if ($viewid == -1) {
                 if (!$views = $df->view_manager->get_views()) {
                     continue;
@@ -609,15 +610,15 @@ class mod_dataform_view_manager {
             redirect($PAGE->url);
         }
 
-        // Get the form
+        // Get the form.
         $mform = new mod_dataform_view_patternsform(null, array('patterns' => $brokenpatterns));
 
-        // Cancelled
+        // Cancelled.
         if ($mform->is_cancelled()) {
             redirect($PAGE->url);
         }
 
-        // Clean up
+        // Clean up.
         if ($data = $mform->get_data()) {
             if (!empty($data->replacements)) {
                 $patterns = array_keys($data->replacements);
@@ -635,16 +636,16 @@ class mod_dataform_view_manager {
                     }
                 }
             }
-            // Redirect to refresh the form
+            // Redirect to refresh the form.
             $url = new moodle_url($PAGE->url, array('patternscleanup' => $viewid));
             redirect($url);
 
         }
 
-        // Heading
+        // Heading.
         echo html_writer::tag('h3', get_string('patternsreplacement', 'dataform'));
 
-        // Display the form
+        // Display the form.
         $actionurl = new moodle_url($PAGE->url, array('patternscleanup' => $viewid));
         $customdata = array('patterns' => $brokenpatterns);
         $mform = new mod_dataform_view_patternsform($actionurl, $customdata);

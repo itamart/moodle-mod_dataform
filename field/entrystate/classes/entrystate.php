@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,11 +36,11 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         if (!empty($this->_field->param1)) {
             if (!is_array($this->_field->param1)) {
                 $this->_field->param1 = unserialize(base64_decode($this->_field->param1));
-                // Explode states
+                // Explode states.
                 if (!empty($this->_field->param1['states'])) {
                     $this->_field->param1['states'] = array_map('trim', explode("\n", $this->_field->param1['states']));
                 }
-                // Add 'from to' keys to transitions
+                // Add 'from to' keys to transitions.
                 if (!empty($this->_field->param1['transitions'])) {
                     $transitions = array();
                     foreach ($this->_field->param1['transitions'] as $transition) {
@@ -205,7 +205,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         $transitions = $this->transitions;
         $oldstate = $entry->state;
 
-        // No notifications defined for this transition
+        // No notifications defined for this transition.
         if (empty($transitions["$oldstate $newstate"]['notification'])) {
             return;
         }
@@ -228,12 +228,12 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
             }
         }
 
-        // Add role users if needed
+        // Add role users if needed.
         if ($roleids and $roleusers = get_role_users($roleids, $this->df->context)) {
             $recipients = $recipients + $roleusers;
         }
 
-        // Send
+        // Send.
         if ($recipients) {
             $data = array();
             $note = (object) array('id' => $entry->id, 'old' => $states[$oldstate], 'new' => $states[$newstate]);
@@ -263,7 +263,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         $newstate = reset($values);
 
         if ($newstate == $oldstate) {
-            // Do nothing
+            // Do nothing.
             return false;
         }
 
@@ -280,7 +280,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
         global $DB;
 
-        // Only one imported pattern ''
+        // Only one imported pattern ''.
         $settings = reset($importsettings);
 
         if (!empty($settings['name'])) {
@@ -303,14 +303,14 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
 
         $state = $search[3];
 
-        // State may be searched by name
+        // State may be searched by name.
         $statekey = array_search($state, $this->states);
         if ($statekey !== false) {
             $search[3] = $statekey;
             return parent::get_search_sql($search);
         }
 
-        // State may be searched by index
+        // State may be searched by index.
         if (is_numeric($state) and $state < count($this->states)) {
             return parent::get_search_sql($search);
         }
@@ -352,7 +352,7 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         return 'e';
     }
 
-    // GRADING
+    // GRADING.
     /**
      * Returns the value replacement of the pattern for each user with content in the field.
      *
@@ -380,13 +380,13 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
 
         $selectwhere = array(' dataid = ? ');
 
-        // User
+        // User.
         if ($userid) {
             $selectwhere[] = ' userid = ? ';
             $params[] = $userid;
         }
 
-        // Entries
+        // Entries.
         if ($entryids) {
             list($inids, $eparams) = $DB->get_in_or_equal($entryids);
             $selectwhere[] = " id $inids ";

@@ -48,23 +48,23 @@ class mod_dataform_backup_restore_testcase extends advanced_testcase {
         // Create a course.
         $course = $generator->create_course();
 
-        // DATAFORM 1
+        // DATAFORM 1.
         $params = array('course' => $course->id, 'grade' => 100);
         $dataform1 = $dataformgenerator->create_instance($params);
         $df1 = mod_dataform_dataform::instance($dataform1->id);
-        // Add fields
+        // Add fields.
         $fieldtypes = array_keys(core_component::get_plugin_list('dataformfield'));
         $fieldtypescount = count($fieldtypes);
         foreach ($fieldtypes as $type) {
             $df1->field_manager->add_field($type);
         }
-        // Add views
+        // Add views.
         $viewtypes = array_keys(core_component::get_plugin_list('dataformview'));
         $viewtypescount = count($viewtypes);
         foreach ($viewtypes as $type) {
             $df1->view_manager->add_view($type);
         }
-        // Fetch the grade item
+        // Fetch the grade item.
         $params = array(
             'itemtype' => 'mod',
             'itemmodule' => 'dataform',
@@ -87,7 +87,7 @@ class mod_dataform_backup_restore_testcase extends advanced_testcase {
 
         // Check number of filters.
         // $this->assertEquals(2, $DB->count_records('dataform_filters'));
-        // $this->assertEquals(2, $DB->count_records('dataform_filters', array('dataid' => $dataform1->id)));
+        // $this->assertEquals(2, $DB->count_records('dataform_filters', array('dataid' => $dataform1->id)));.
 
         // DUPLICATE the dataform instance.
         $dataform2 = $dataformgenerator->duplicate_instance($course, $dataform1->cmid);
@@ -108,9 +108,9 @@ class mod_dataform_backup_restore_testcase extends advanced_testcase {
         // Check number of filters.
         // $this->assertEquals(4, $DB->count_records('dataform_filters');
         // $this->assertEquals(2, $DB->count_records('dataform_filters', array('dataid' => $dataform1->id));
-        // $this->assertEquals(2, $DB->count_records('dataform_filters', array('dataid' => $dataform2->id));
+        // $this->assertEquals(2, $DB->count_records('dataform_filters', array('dataid' => $dataform2->id));.
 
-        // Dataform cleanup
+        // Dataform cleanup.
         $dataformgenerator->delete_all_instances();
     }
 }

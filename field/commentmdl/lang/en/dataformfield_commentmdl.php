@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  */
 
 $string['pluginname'] = 'Comment (moodle)';
-// CAPABILITIES
+// CAPABILITIES.
 $string['commentmdl:addinstance'] = 'Add a new Comment (moodle) dataformfield';
 $string['commentmdl:addcomment'] = 'Add Comment';
 $string['commentmdl:deleteowncomment'] = 'Delete Own Comment';

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,13 +27,13 @@ class dataformview_aligned_form extends mod_dataform\pluginbase\dataformviewform
      *
      */
     protected function definition_view_specific() {
-        // View template
+        // View template.
         $this->definition_view_template();
 
-        // Entry template
+        // Entry template.
         $this->definition_entry_template();
 
-        // Submission settings
+        // Submission settings.
         $this->definition_view_submission();
     }
 
@@ -43,11 +43,11 @@ class dataformview_aligned_form extends mod_dataform\pluginbase\dataformviewform
     protected function definition_entry_template() {
         $mform = &$this->_form;
 
-        // Header
+        // Header.
         $mform->addElement('header', 'entrytemplatehdr', get_string('entrytemplate', 'dataform'));
         $mform->addHelpButton('entrytemplatehdr', 'entrytemplate', 'dataform');
 
-        // Template editor (param2)
+        // Template editor (param2).
         $mform->addElement('textarea', 'param2', get_string('entrytemplate', 'dataform'), array('cols' => 40, 'rows' => 12));
         $mform->addHelpButton('param2', 'entrytemplate', 'dataformview_aligned');
         $this->add_patterns_selectors('param2', array('view', 'field'));

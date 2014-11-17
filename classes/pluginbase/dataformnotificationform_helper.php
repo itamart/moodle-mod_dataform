@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,34 +35,32 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
 
         $paramtext = (!empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN);
 
-        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'messagehdr', get_string('message', 'message'));
         $mform->setExpanded('messagehdr');
 
-        // Message type
+        // Message type.
         $options = array(
             0 => get_string('notification', 'dataform'),
             1 => get_string('conversation', 'dataform'),
         );
         $mform->addElement('select', $prefix. 'messagetype', get_string('type', 'dataform'), $options);
 
-        // Subject
+        // Subject.
         $mform->addElement('text', $prefix. 'subject', get_string('subject', 'dataform'));
         $mform->setType($prefix. 'subject', $paramtext);
 
-        // Message
+        // Message.
         $mform->addElement('textarea', $prefix. 'message', get_string('message', 'dataform'));
         $mform->setType($prefix. 'message', $paramtext);
 
-        // Format
+        // Format.
         $options = array(
             FORMAT_PLAIN => get_string('formatplain'),
             FORMAT_HTML => get_string('formathtml'),
         );
         $mform->addElement('select', $prefix. 'messageformat', get_string('format'), $options);
 
-        // Sender: Entry author, manager
-        // -------------------------------------------------------------------------------
+        // Sender: Entry author, manager.
         $mform->addElement('header', 'senderhdr', get_string('from'));
         $mform->setExpanded('senderhdr');
 
@@ -76,23 +74,22 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
         );
         $mform->addElement('select', $prefix. 'sender', get_string('from'), $options);
 
-        // Recipient
-        // -------------------------------------------------------------------------------
+        // Recipient.
         $mform->addElement('header', 'recipientshdr', get_string('to'));
         $mform->setExpanded('recipientshdr');
 
-        // Admin
+        // Admin.
         $mform->addElement('advcheckbox', $prefix. 'recipientadmin', get_string('admin'));
-        // Support
+        // Support.
         $mform->addElement('advcheckbox', $prefix. 'recipientsupport', get_string('supportcontact', 'admin'));
-        // Entry author
+        // Entry author.
         $mform->addElement('advcheckbox', $prefix. 'recipientauthor', get_string('author', 'dataform'));
-        // Role (mod/dataform:notification permission in context)
+        // Role (mod/dataform:notification permission in context).
         $mform->addElement('advcheckbox', $prefix. 'recipientrole', get_string('role'));
-        // Username (comma delimited)
+        // Username (comma delimited).
         $mform->addElement('text', $prefix. 'recipientusername', get_string('username'));
         $mform->setType($prefix. 'recipientusername', $paramtext);
-        // Email (comma delimited)
+        // Email (comma delimited).
         $mform->addElement('text', $prefix. 'recipientemail', get_string('email'));
         $mform->setType($prefix. 'recipientemail', $paramtext);
 
@@ -104,7 +101,7 @@ class dataformnotificationform_helper extends  dataformruleform_helper {
     public static function notification_validation($data, $files, $prefix = null) {
         $errors = array();
 
-        // Must have a recipient
+        // Must have a recipient.
         if (empty($data[$prefix.'recipientadmin'])
                 and empty($data[$prefix.'recipientsupport'])
                 and empty($data[$prefix.'recipientauthor'])

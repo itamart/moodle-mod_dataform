@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,14 +46,12 @@ class dataformfilterform_standard extends dataformfilterform {
 
         $mform->addElement('html', get_string('filterurlquery', 'dataform'). ': '. $this->get_url_query($fields));
 
-        // buttons
-        // -------------------------------------------------------------------------------
+        // Buttons.
         $this->add_action_buttons(true);
 
-        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // name and description
+        // Name and description.
         $mform->addElement('text', 'name', get_string('name'));
         $mform->addElement('textarea', 'description', get_string('description'));
         $mform->setType('name', PARAM_TEXT);
@@ -61,15 +59,11 @@ class dataformfilterform_standard extends dataformfilterform {
         $mform->setDefault('name', $name);
         $mform->setDefault('description', $description);
 
-        // visibility
+        // Visibility.
         $mform->addElement('selectyesno', 'visible', get_string('visible'));
         $mform->setDefault('visible', 1);
 
-        // -------------------------------------------------------------------------------
-        // $mform->addElement('header', 'filterhdr', get_string('viewfilter', 'dataform'));
-        // $mform->setExpanded('filterhdr');
-
-        // entries per page
+        // Entries per page.
         $options = array(
             0 => get_string('choose'),
             1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 15 => 15,
@@ -79,38 +73,35 @@ class dataformfilterform_standard extends dataformfilterform {
         $mform->addElement('select', 'perpage', get_string('viewperpage', 'dataform'), $options);
         $mform->setDefault('perpage', $filter->perpage);
 
-        // selection method
+        // Selection method
         // $options = array(0 => get_string('filterbypage', 'dataform'), 1 => get_string('random', 'dataform'));
         // $mform->addElement('select', 'selection', get_string('filterselection', 'dataform'), $options);
         // $mform->setDefault('selection', $filter->selection);
-        // $mform->disabledIf('selection', 'perpage', 'eq', '0');
+        // $mform->disabledIf('selection', 'perpage', 'eq', '0');.
 
-        // group by
+        // Group by
         // $mform->addElement('select', 'groupby', get_string('filtergroupby', 'dataform'), $fieldoptions);
-        // $mform->setDefault('groupby', $filter->groupby);
+        // $mform->setDefault('groupby', $filter->groupby);.
 
-        // Sort options
-        // -------------------------------------------------------------------------------
+        // Sort options.
         $mform->addElement('header', 'customsorthdr', get_string('filtercustomsort', 'dataform'));
         $mform->setExpanded('customsorthdr');
 
         $this->custom_sort_definition($filter->customsort, $fields, true);
 
-        // Search options
-        // -------------------------------------------------------------------------------
+        // Search options.
         $mform->addElement('header', 'customsearchhdr', get_string('filtercustomsearch', 'dataform'));
         $mform->setExpanded('customsearchhdr');
 
-        // General search
+        // General search.
         $mform->addElement('text', 'search', get_string('search'));
         $mform->setType('search', PARAM_TEXT);
         $mform->setDefault('search', $filter->search);
 
-        // Custom search
+        // Custom search.
         $this->custom_search_definition($filter->customsearch, $fields, true);
 
-        // buttons
-        // -------------------------------------------------------------------------------
+        // Buttons.
         $this->add_action_buttons(true);
     }
 
@@ -121,12 +112,12 @@ class dataformfilterform_standard extends dataformfilterform {
         $mform = &$this->_form;
 
         $buttonarray = array();
-        // Save changes
+        // Save changes.
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        // Continue
+        // Continue.
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton_continue', get_string('continue'));
         $mform->registerNoSubmitButton('submitbutton_continue');
-        // Cancel
+        // Cancel.
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', ' ', false);
         $mform->closeHeaderBefore('buttonar');
@@ -141,7 +132,7 @@ class dataformfilterform_standard extends dataformfilterform {
         $filter = $this->_filter;
         $df = \mod_dataform_dataform::instance($filter->dataid);
 
-        // validate unique name
+        // Validate unique name.
         if (empty($data['name']) or $df->name_exists('filters', $data['name'], $filter->id)) {
             $errors['name'] = get_string('invalidname', 'dataform', get_string('filter', 'dataform'));
         }

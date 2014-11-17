@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,25 +52,25 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             return $replacements;
         }
 
-        // Browse mode
+        // Browse mode.
         foreach ($patterns as $pattern => $cleanpattern) {
             $displaybrowse = '';
             if ($cleanpattern == "[[$fieldname]]") {
                 $displaybrowse = $this->display_browse($entry);
             } else if ($cleanpattern == "[[{$fieldname}:url]]") {
-                // url
+                // Url.
                 $displaybrowse = $this->display_browse($entry, array('url' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:alt]]") {
-                // alt
+                // Alt.
                 $displaybrowse = $this->display_browse($entry, array('alt' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:size]]") {
-                // size
+                // Size.
                 $displaybrowse = $this->display_browse($entry, array('size' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:download]]") {
-                // download
+                // Download.
                 $displaybrowse = $this->display_browse($entry, array('download' => 1));
             } else if ($cleanpattern == "[[{$fieldname}:downloadcount]]") {
-                // download count
+                // Download count.
                 $displaybrowse = $this->display_browse($entry, array('downloadcount' => 1));
             }
 
@@ -107,7 +107,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $draftitemid = file_get_submitted_draft_itemid("{$fieldname}_filemanager");
         file_prepare_draft_area($draftitemid, $field->get_df()->context->id, 'mod_dataform', 'content', $contentid, $fmoptions);
 
-        // file manager
+        // File manager.
         $mform->addElement('filemanager', "{$fieldname}_filemanager", $field->name, null, $fmoptions);
         $mform->setDefault("{$fieldname}_filemanager", $draftitemid);
         $required = !empty($options['required']);
@@ -115,10 +115,10 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             $mform->addRule("{$fieldname}_filemanager", null, 'required', null, 'client');
         }
 
-        // alt text
+        // Alt text
         // $altoptions = array();
         // $mform->addElement('text', "{$fieldname}_alttext", get_string('alttext', 'dataformfield_file'), $altoptions);
-        // $mform->setDefault("{$fieldname}_alttext", s($content1));
+        // $mform->setDefault("{$fieldname}_alttext", s($content1));.
     }
 
     /**
@@ -244,7 +244,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $fieldid = $field->id;
         $fieldname = $field->name;
 
-        // Only [[fieldname]] can be imported
+        // Only [[fieldname]] can be imported.
         if ($patternname != $fieldname) {
             return array(array(), array());
         }
@@ -253,7 +253,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
 
         list($grp, $labels) = parent::get_pattern_import_settings($mform, $patternname, $header);
 
-        // File picker
+        // File picker.
         $fmoptions = array(
             'subdirs' => 0,
             'maxbytes' => $field->get_df()->course->maxbytes,

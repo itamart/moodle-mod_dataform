@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
 
         $replacements = array_fill_keys(array_keys($patterns), '');
 
-        // no edit mode for this field so just return html
+        // No edit mode for this field so just return html.
         if ($entry->id > 0 and !empty($CFG->usecomments)) {
             foreach ($patterns as $pattern) {
                 switch($pattern) {
@@ -74,7 +74,7 @@ class dataformfield_commentmdl_renderer extends mod_dataform\pluginbase\dataform
         $fieldid = $field->id;
         $df = $field->get_df();
 
-        // Only for existing entries
+        // Only for existing entries.
         if (!($entry->id > 0)) {
             return '';
         }

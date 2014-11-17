@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,17 +43,17 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
      * @return void
      */
     public function set_default_entry_template($content = null) {
-        // get all the fields
+        // Get all the fields.
         if (!$fields = $this->df->field_manager->get_fields()) {
-            return; // you shouldn't get that far if there are no user fields
+            return;
         }
 
         if ($content === null) {
-            // set content
+            // Set content.
             $table = new html_table();
             $table->attributes['align'] = 'center';
             $table->attributes['cellpadding'] = '2';
-            // fields
+            // Fields.
             foreach ($fields as $field) {
                 if ($field->id > 0) {
                     $name = new html_table_cell($field->name. ':');
@@ -64,14 +64,14 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
                     $table->data[] = $row;
                 }
             }
-            // actions
+            // Actions.
             $row = new html_table_row();
             $entryactions = get_string('fieldname', 'dataformfield_entryactions');
             $actions = new html_table_cell("[[$entryactions:edit]]  [[$entryactions:delete]]");
             $actions->colspan = 2;
             $row->cells = array($actions);
             $table->data[] = $row;
-            // construct the table
+            // Construct the table.
             $entrydefault = html_writer::table($table);
             $content = html_writer::tag('div', $entrydefault, array('class' => 'entry'));
         }
@@ -86,17 +86,17 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
 
         $elements = array();
 
-        // flatten the set to a list of elements
+        // Flatten the set to a list of elements.
         foreach ($entriesset as $entrydefinitions) {
             $elements = array_merge($elements, $entrydefinitions);
         }
 
-        // Add group heading
+        // Add group heading.
         $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
         if ($name) {
             array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
         }
-        // Wrap with entriesview
+        // Wrap with entriesview.
         array_unshift($elements, html_writer::start_tag('div', array('class' => 'entriesview')));
         array_push($elements, html_writer::end_tag('div'));
 
@@ -109,14 +109,14 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     protected function entry_definition($fielddefinitions, array $options = null) {
         $elements = array();
 
-        // If not editing, do simple replacement and return the html
+        // If not editing, do simple replacement and return the html.
         if (empty($options['edit'])) {
             $elements[] = str_replace(array_keys($fielddefinitions), $fielddefinitions, $this->param2);
             return $elements;
         }
 
         // Editing so split the entry template to tags and html
-        // split the entry template to tags and html
+        // split the entry template to tags and html.
         $tags = array_keys($fielddefinitions);
         $parts = $this->split_tags($tags, $this->param2);
 
@@ -138,7 +138,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     protected function new_entry_definition($entryid = -1) {
         $elements = array();
 
-        // get patterns definitions
+        // Get patterns definitions.
         $fields = $this->get_fields();
         $tags = array();
         $patterndefinitions = array();
@@ -156,7 +156,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
             }
         }
 
-        // split the entry template to tags and html
+        // Split the entry template to tags and html.
         $parts = $this->split_tags($tags, $this->param2);
 
         foreach ($parts as $part) {
@@ -173,7 +173,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     }
 
 
-    // RSS METHODS
+    // RSS METHODS.
 
     /**
      * Returns a specific rss link.
@@ -182,7 +182,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
      */
     public function get_rss_link() {
         global $CFG, $USER;
-        // Link to the RSS feed
+        // Link to the RSS feed.
         if (!empty($CFG->enablerssfeeds) && !empty($CFG->dataform_enablerssfeeds)) {
             $dataformid = $this->df->id;
             $viewid = $this->id;
@@ -199,7 +199,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     public function get_content_stamp() {
         $entryman = $this->entry_manager;
 
-        // Generate the stamp from entry ids
+        // Generate the stamp from entry ids.
         $newstamp = null;
         $entryman->set_content(array('filter' => $this->filter));
         if ($entryman->entries) {
@@ -222,7 +222,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     public function get_rss_items() {
         $items = array();
 
-        // Create all the articles
+        // Create all the articles.
         if ($entries = $this->entry_manager->entries) {
             foreach ($entries as $entryid => $entry) {
                 $item = new stdclass;
@@ -317,7 +317,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
         if ($this->param3) {
             $url->param('view', $this->param3);
         }
-        // Add the entry id
+        // Add the entry id.
         $url->param('eids', $entry->id);
 
         return $url->out(false);
