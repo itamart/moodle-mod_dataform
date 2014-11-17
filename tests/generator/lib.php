@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -168,7 +168,7 @@ class mod_dataform_generator extends testing_module_generator {
         // Add the view.
         $view->add($view->data);
 
-        // Set as default if specified
+        // Set as default if specified.
         if (!empty($record->default)) {
             $df->view_manager->process_views('default', $view->id, null, true);
         }
@@ -188,7 +188,7 @@ class mod_dataform_generator extends testing_module_generator {
         // Append sort options if specified.
         if (!empty($record->sortoptions)) {
             // Convert fieldid sortdir to
-            // fieldid => sortdir
+            // fieldid => sortdir.
             $sorties = array();
             foreach (explode(',', $record->sortoptions) as $sortoption) {
                 list($fieldid, $sortdir) = explode(' ', $sortoption);
@@ -199,7 +199,7 @@ class mod_dataform_generator extends testing_module_generator {
         // Append search options if specified.
         if (!empty($record->searchoptions)) {
             // Convert AND|OR,fieldid,element,[NOT],operator,value to
-            // fieldid => (endor => (element, not, operator, value))
+            // fieldid => (endor => (element, not, operator, value)).
             $searchoptions = array_map(
                 function ($a) {
                     list($andor, $fieldid, $element, $isnot, $op, $value) = explode(',', $a);
@@ -283,7 +283,7 @@ class mod_dataform_generator extends testing_module_generator {
     public function create_entry($record, array $options = null) {
         global $DB;
 
-        // Convert timecreated and timemodified
+        // Convert timecreated and timemodified.
         $record['timecreated'] = !empty($record['timecreated']) ? strtotime($record['timecreated']) : 0;
         $record['timemodified'] = !empty($record['timemodified']) ? strtotime($record['timemodified']) : 0;
 
@@ -291,7 +291,7 @@ class mod_dataform_generator extends testing_module_generator {
         $entry = \mod_dataform\pluginbase\dataformentry::blank_instance($df, (object)(array)$record);
         $entry->id = $DB->insert_record('dataform_entries', $entry);
 
-        // Add content
+        // Add content.
         if ($fields = $df->field_manager->get_fields()) {
             foreach ($fields as $field) {
                 if (!empty($record[$field->name])) {

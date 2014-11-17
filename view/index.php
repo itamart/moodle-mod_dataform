@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ $urlparams->d = optional_param('d', 0, PARAM_INT);             // Dataform id.
 $urlparams->id = optional_param('id', 0, PARAM_INT);           // Course module id.
 $urlparams->vedit = optional_param('vedit', 0, PARAM_INT);     // View id to edit.
 
-// List actions
+// List actions.
 $urlparams->default = optional_param('default', 0, PARAM_INT);  // Id of view to default.
 $urlparams->visible = optional_param('visible', 0, PARAM_INT);     // Id of view whose visibility to change.
 $urlparams->visibility = optional_param('visibility', 0, PARAM_INT);     // Visibility mode.

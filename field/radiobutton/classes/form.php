@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class dataformfield_radiobutton_form extends dataformfield_select_form {
 
         $mform = &$this->_form;
 
-        // options separator
+        // Options separator.
         $mform->addElement(
             'select',
             'param3',

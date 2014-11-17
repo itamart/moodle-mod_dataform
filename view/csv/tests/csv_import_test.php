@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ class dataformview_csv_import_testcase extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
 
         if (!$dataformid) {
-            // Create a dataform instance
+            // Create a dataform instance.
             $data = $generator->create_instance(array('course' => $this->_course));
             $dataformid = $data->id;
         }
@@ -76,7 +76,7 @@ class dataformview_csv_import_testcase extends advanced_testcase {
 
         $df = $this->get_a_dataform();
 
-        // Add fields
+        // Add fields.
         $text = $df->field_manager->add_field('text');
         $textarea = $df->field_manager->add_field('textarea');
         $checkbox = $df->field_manager->add_field('checkbox');
@@ -91,7 +91,7 @@ class dataformview_csv_import_testcase extends advanced_testcase {
         $df->field_manager->add_field('entrystate');
         $this->assertEquals(12, $DB->count_records('dataform_fields'));
 
-        // Add csv view
+        // Add csv view.
         $importview = $df->view_manager->add_view('csv');
         $this->assertEquals(1, $DB->count_records('dataform_views'));
         $importview->param2 = "EAU:id\n". $importview->param2;
@@ -99,7 +99,7 @@ class dataformview_csv_import_testcase extends advanced_testcase {
 
         $this->assertEquals(0, $DB->count_records('dataform_entries'));
 
-        // Import entries
+        // Import entries.
         $eaufieldid = dataformfield_entryauthor_entryauthor::INTERNALID;
         $options = array(
             'settings' => array(
@@ -124,12 +124,12 @@ class dataformview_csv_import_testcase extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('dataform_entries'));
         $this->assertEquals(4, $DB->count_records('dataform_contents'));
 
-        // Text content
+        // Text content.
         $contents = array_values($DB->get_records_menu('dataform_contents', array('fieldid' => $text->id), 'id', 'id,content'));
         $this->assertEquals('Hello', $contents[0]);
         $this->assertEquals('World', $contents[1]);
 
-        // Textarea content
+        // Textarea content.
         $contents = array_values($DB->get_records_menu('dataform_contents', array('fieldid' => $textarea->id), 'id', 'id,content'));
         $this->assertEquals('Oh my god', $contents[0]);
         $this->assertEquals('It wasn\'t me', $contents[1]);

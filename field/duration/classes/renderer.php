@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
             return $replacements;
         }
 
-        // Browse mode
+        // Browse mode.
         foreach ($patterns as $pattern => $cleanpattern) {
             switch ($cleanpattern) {
                 case "[[$fieldname]]":
@@ -94,7 +94,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
             $number = $entry->{"c{$fieldid}_content"};
         }
 
-        // Field width
+        // Field width.
         $fieldattr = array();
         if ($field->param2) {
             $fieldattr['style'] = 'width:'. s($field->param2). s($field->param3). ';';
@@ -111,7 +111,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
         $required = !empty($options['required']);
         if ($required) {
             $mform->addRule($fieldname, null, 'required', null, 'client');
-            // JS Error message
+            // JS Error message.
             $options = array(
                 'fieldname' => $fieldname,
                 'message' => get_string('err_required', 'form'),
@@ -179,7 +179,7 @@ class dataformfield_duration_renderer extends mod_dataform\pluginbase\dataformfi
         $formfieldname = "field_{$fieldid}_{$entryid}";
         $patterns = $this->add_clean_pattern_keys($patterns);
 
-        // only [[$fieldname]] is editable so check if exists
+        // Only [[$fieldname]] is editable so check if exists.
         if (array_key_exists("[[*$fieldname]]", $patterns) and isset($data->$formfieldname)) {
             if (!$content = clean_param($data->$formfieldname, PARAM_INT)) {
                 return array($fieldname, get_string('fieldrequired', 'dataform'));

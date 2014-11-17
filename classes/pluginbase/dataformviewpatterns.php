@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ class dataformviewpatterns {
 
         $found = array();
 
-        // Prepare for regexp patterns
+        // Prepare for regexp patterns.
         $regexppatterns = array();
         foreach ($this->patterns() as $tag => $attrs) {
             if (!empty($attrs[2])) {
@@ -68,14 +68,14 @@ class dataformviewpatterns {
 
         foreach ($patterns as $pattern) {
             if (in_array($pattern, $regexppatterns)) {
-                // Regexp pattern
+                // Regexp pattern.
                 if (preg_match_all("%$pattern%", $text, $matches)) {
                     foreach ($matches[0] as $match) {
                         $found[$match] = $match;
                     }
                 }
             } else {
-                // Fixed string pattern
+                // Fixed string pattern.
                 if (strpos($text, $pattern) !== false) {
                     $found[$pattern] = $pattern;
                 }
@@ -91,26 +91,26 @@ class dataformviewpatterns {
      * @return array
      */
     public final function get_list($showall = false) {
-        // All
+        // All.
         if ($showall) {
             return array_keys($this->patterns());
         }
 
-        // Only visible
+        // Only visible.
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // Which category
+                // Which category.
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('views', 'dataform');
                 }
-                // Prepare array
+                // Prepare array.
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // Add tag
+                // Add tag.
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -123,21 +123,21 @@ class dataformviewpatterns {
      * @return array Associative array of associative arrays
      */
     public final function get_menu($showall = false) {
-        // the default menu category for views
+        // The default menu category for views.
         $patternsmenu = array();
         foreach ($this->patterns() as $tag => $pattern) {
             if ($showall or $pattern[self::PATTERN_SHOW_IN_MENU]) {
-                // which category
+                // Which category.
                 if (!empty($pattern[self::PATTERN_CATEGORY])) {
                     $cat = $pattern[self::PATTERN_CATEGORY];
                 } else {
                     $cat = get_string('views', 'dataform');
                 }
-                // prepare array
+                // Prepare array.
                 if (!isset($patternsmenu[$cat])) {
                     $patternsmenu[$cat] = array();
                 }
-                // add tag
+                // Add tag.
                 $patternsmenu[$cat][$tag] = $tag;
             }
         }
@@ -163,7 +163,7 @@ class dataformviewpatterns {
         $options['baseurl'] = new \moodle_url($view->get_baseurl(), array('sesskey' => sesskey()));
         $edit = !empty($options['edit']) ? $options['edit'] : false;
 
-        // ##entries## ##editentry## ##newentry## should be processed first
+        // ##entries## ##editentry## ##newentry## should be processed first.
         $unshiftpatterns = array();
         foreach (array('##entries##', '##editentry##', '##newentry##') as $unshiftpattern) {
             if ($key = array_search($unshiftpattern, $patterns) or $key === 0) {
@@ -206,7 +206,7 @@ class dataformviewpatterns {
 
         $replacement = '';
         switch ($tag) {
-            // Print notifications
+            // Print notifications.
             case '##notifications##':
                 if ($notes = $view->df->get_notifications()) {
                     $notifications = array();
@@ -236,7 +236,7 @@ class dataformviewpatterns {
                 break;
 
             case '##newentry##':
-                // Get the form
+                // Get the form.
                 $mform = $view->get_new_entry_form();
                 $replacement = $mform->render();
                 break;
@@ -258,7 +258,7 @@ class dataformviewpatterns {
                     $view->editentries = $entryid;
                     $replacement = $view->get_entries_display($options);
                 }
-                // Notify something
+                // Notify something.
                 break;
 
             case '##entries##':
@@ -284,30 +284,30 @@ class dataformviewpatterns {
             return $output->render_filters_menu($this->_view);
         }
 
-        // This view url
+        // This view url.
         if ($tag == '##viewurl##') {
             return $this->get_viewurl_replacement($this->_view->name);
         }
 
-        // Named view url
+        // Named view url.
         if (strpos($tag, '##viewurl:') === 0) {
             list(, $viewname) = explode(':', trim($tag, '#'));
             return $this->get_viewurl_replacement($viewname);
         }
 
-        // Named view link
+        // Named view link.
         if (strpos($tag, '##viewlink:') === 0) {
             list(, $args) = explode(':', trim($tag, '#'), 2);
             return $this->get_viewlink_replacement($args);
         }
 
-        // Named view session link
+        // Named view session link.
         if (strpos($tag, '##viewsesslink:') === 0) {
             list(, $args) = explode(':', trim($tag, '#'), 2);
             return $this->get_viewlink_replacement($args, true);
         }
 
-        // Named view content
+        // Named view content.
         if (strpos($tag, '##viewcontent:') === 0) {
             list(, $viewname) = explode(':', trim($tag, '#'));
             return $this->get_viewcontent_replacement($viewname);
@@ -331,7 +331,7 @@ class dataformviewpatterns {
             $output = $PAGE->get_renderer('mod_dataform', 'dataformview');
 
             switch ($tag) {
-                // Deprecate (at some point)
+                // Deprecate (at some point).
                 case '##advancedfilter##':
                     return $output->render_advanced_filter($view);
                 case '##quicksearch##':
@@ -356,10 +356,10 @@ class dataformviewpatterns {
         $filter = $view->get_filter();
         $baseurl = new \moodle_url($view->get_baseurl(), array('sesskey' => sesskey()));
 
-        // Add entries
+        // Add entries.
         if ($tag == '##addnewentry##' or $tag == '##addnewentries##') {
             $baseurl = new \moodle_url($view->get_baseurl());
-            // Can this user registered or anonymous add entries
+            // Can this user registered or anonymous add entries.
             if ($view->user_is_editing() or !$view->allows_submission()) {
                 return '';
             }
@@ -404,9 +404,9 @@ class dataformviewpatterns {
     protected function get_fieldview_replacement($tag, $entry = null, array $options = null) {
         $view = $this->_view;
 
-        // Get the field name
+        // Get the field name.
         list($fieldname) = explode(':', trim($tag, '#[]'));
-        // Get the field
+        // Get the field.
         if ($field = $view->df->field_manager->get_field_by_name($fieldname)) {
             if ($replacements = $field->renderer->get_replacements(array($tag), $entry, $options)) {
                 $replacement = reset($replacements);
@@ -422,7 +422,7 @@ class dataformviewpatterns {
     protected function get_viewurl_replacement($viewname) {
         $thisview = $this->_view;
 
-        // Return this view's url
+        // Return this view's url.
         if ($viewname == $thisview->name) {
             return $thisview->get_baseurl()->out(false);
         }
@@ -452,7 +452,7 @@ class dataformviewpatterns {
         static $views = array();
 
         list($viewname, $linktext, $urlquery, ) = array_merge(explode(';', $args), array(null, null, null));
-        // Return this view's url
+        // Return this view's url.
         if ($viewname == $thisview->name) {
             $view = $thisview;
         } else {
@@ -468,7 +468,7 @@ class dataformviewpatterns {
         if ($view) {
             $linkparams = array();
 
-            // Link text
+            // Link text.
             if ($linktext) {
                 if (strpos($linktext, '_pixicon:') === 0) {
                     list(, $icon, $titletext) = explode(':', $linktext);
@@ -478,7 +478,7 @@ class dataformviewpatterns {
                 $linktext = $view->name;
             }
 
-            // Link query
+            // Link query.
             if ($urlquery) {
                 foreach (explode('|', $urlquery) as $urlparam) {
                     list($key, $value) = explode('=', $urlparam, 2);
@@ -508,7 +508,7 @@ class dataformviewpatterns {
     protected function get_viewcontent_replacement($viewname) {
         $thisview = $this->_view;
 
-        // Cannot display current view or else infinite loop
+        // Cannot display current view or else infinite loop.
         if ($viewname == $thisview->name) {
             return '';
         }
@@ -580,8 +580,9 @@ class dataformviewpatterns {
                 $patterns["##viewurl:$viewname##"] = array(false);
                 $patterns["##viewcontent:$viewname##"] = array(false);
                 $patterns["##viewlink:$viewname##"] = array(false);
-                $patterns["##viewlink:$viewname;[^;]*;[^;]*;##"] = array(false, $cat, true); // Third arg: Regexp pattern identifier
-                $patterns["##viewsesslink:$viewname;[^;]*;[^;]*;##"] = array(false, $cat, true); // Third arg: Regexp pattern identifier
+                // Third arg: Regexp pattern identifier.
+                $patterns["##viewlink:$viewname;[^;]*;[^;]*;##"] = array(false, $cat, true);
+                $patterns["##viewsesslink:$viewname;[^;]*;[^;]*;##"] = array(false, $cat, true);
             }
         }
 

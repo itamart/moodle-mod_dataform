@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ require_once('../../../../config.php');
 $cid = required_param('cid', PARAM_INT);
 $context = required_param('context', PARAM_INT);
 $file = required_param('file', PARAM_FILE);
-// Check user is logged in
+// Check user is logged in.
 require_login();
 
 $count = $DB->get_field('dataform_contents', 'content2', array('id' => $cid));

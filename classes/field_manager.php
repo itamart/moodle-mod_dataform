@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ class mod_dataform_field_manager {
             if ($fields = $DB->get_records('dataform_fields', $params, $sort)) {
                 $this->_items = $fields;
             }
-            // Add internal fields without DB record
+            // Add internal fields without DB record.
             foreach (self::get_internal_field_types() as $fieldid => $fieldtype) {
                 if (empty($this->_items[$fieldid])) {
                     $fieldclass = "dataformfield_{$fieldtype}_$fieldtype";
@@ -178,7 +178,7 @@ class mod_dataform_field_manager {
                 $fieldclass = "dataformfield_{$fieldtype}_$fieldtype";
                 $field = $fieldclass::get_default_data($this->_dataformid);
             } else if ($fieldid > 0) {
-                // Try from DB
+                // Try from DB.
                 $field = $DB->get_record('dataform_fields', array('id' => $fieldid));
             } else {
                 return false;
@@ -212,7 +212,7 @@ class mod_dataform_field_manager {
     public function get_field_by_name($fieldname, $forceget = false) {
         global $DB;
 
-        // Try first internal field
+        // Try first internal field.
         if ($fieldid = array_search($fieldname, self::get_internal_field_types())) {
             return $this->get_field_by_id($fieldid, $forceget);
         }
@@ -224,7 +224,7 @@ class mod_dataform_field_manager {
                 }
             }
         }
-        // Either no field or forceget so get the field from DB
+        // Either no field or forceget so get the field from DB.
         if ($field = $DB->get_record('dataform_fields', array('dataid' => $this->_dataformid, 'name' => $fieldname))) {
             $this->_items[$field->id] = $field;
             return $this->get_field($field);
@@ -339,7 +339,7 @@ class mod_dataform_field_manager {
         $forceget = !empty($options['forceget']) ? $options['forceget'] : null;
 
         $this->get_field_records($forceget, null, $sort);
-        // $this->get_field_records_internal();
+        // $this->get_field_records_internal();.
         if (!$fieldrecs = $this->_items) {
             return array();
         }
@@ -371,14 +371,14 @@ class mod_dataform_field_manager {
         $df = mod_dataform_dataform::instance($this->_dataformid);
         require_capability('mod/dataform:managefields', $df->context);
 
-        // Get array of ids
+        // Get array of ids.
         if (!is_array($fids)) {
             $fids = explode(',', $fids);
         }
 
         $dffields = $this->get_fields();
         $fields = array();
-        // collate the fields for processing
+        // Collate the fields for processing.
         foreach ($fids as $fieldid) {
             if ($fieldid > 0 and isset($dffields[$fieldid])) {
                 $fields[$fieldid] = $dffields[$fieldid];
@@ -396,7 +396,7 @@ class mod_dataform_field_manager {
                 $output = $df->get_renderer();
                 echo $output->header('fields');
 
-                // Print a confirmation page
+                // Print a confirmation page.
                 echo $output->confirm(get_string("fieldsconfirm$action", 'dataform', count($fields)),
                         new moodle_url('/mod/dataform/field/index.php', array('d' => $this->_dataformid,
                                                                         $action => implode(',', array_keys($fields)),
@@ -408,11 +408,11 @@ class mod_dataform_field_manager {
                 exit;
 
             } else {
-                // go ahead and perform the requested action
+                // Go ahead and perform the requested action.
                 switch ($action) {
                     case 'visible':
                         foreach ($fields as $fid => $field) {
-                            // hide = 0; (show to owner) = 1; show to everyone = 2
+                            // Hide = 0; (show to owner) = 1; show to everyone = 2.
                             $field->visible = (($field->visible + 1) % 3);
                             $field->update($field->data);
 
@@ -424,7 +424,7 @@ class mod_dataform_field_manager {
 
                     case 'editable':
                         foreach ($fields as $fid => $field) {
-                            // lock = 0; unlock = -1;
+                            // Lock = 0; unlock = -1;.
                             $field->editable = $field->editable ? 0 : -1;
                             $field->update($field->data);
 
@@ -439,7 +439,7 @@ class mod_dataform_field_manager {
                             if ($this->is_at_max_fields()) {
                                 break;
                             }
-                            // set new name
+                            // Set new name.
                             while ($df->name_exists('fields', $field->name)) {
                                 $field->name .= '_1';
                             }
@@ -455,7 +455,7 @@ class mod_dataform_field_manager {
                             $field->delete();
                             unset($this->_items[$fieldid]);
                             $processedfids[] = $fieldid;
-                            // Update views
+                            // Update views.
                             $df->view_manager->replace_patterns_in_views($deletepatterns, '');
                         }
                         $strnotify = 'fieldsdeleted';

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
      *
      */
     public function field_definition() {
-        // States
+        // States.
         $this->definition_states();
-        // Transitions
+        // Transitions.
         $this->definition_transitions();
     }
 
@@ -42,11 +42,11 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         $field = &$this->_field;
         $mform = &$this->_form;
 
-        // Header
+        // Header.
         $mform->addElement('header', 'hdrstates', get_string('states', 'dataformfield_entrystate'));
         $mform->setExpanded('hdrstates');
 
-        // States name
+        // States name.
         $statenames = '';
         if ($states = $field->states) {
             $statenames = implode("\n", $states);
@@ -62,7 +62,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         // file_prepare_draft_area($draftitemid, $field->df->context->id, 'dataformfield_entrystate', "stateicon$num", $field->id, $options);
         // $mform->addElement('filemanager', "stateicon$num", get_string('stateicon', 'dataformfield_entrystate'), null, $options);
         // $mform->setDefault("stateicon$num", $draftitemid);
-        // $mform->addHelpButton("stateicon$num", 'stateicon', 'dataformfield_entrystate');
+        // $mform->addHelpButton("stateicon$num", 'stateicon', 'dataformfield_entrystate');.
 
     }
 
@@ -78,7 +78,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
             $count++;
         }
 
-        // Add 3 blank transitions
+        // Add 3 blank transitions.
         $this->definition_transition($count++);
         $this->definition_transition($count++);
         $this->definition_transition($count++);
@@ -108,13 +108,13 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         $allowedtostr = get_string('allowedto', 'dataformfield_entrystate');
         $notifystr = get_string('notify', 'dataformfield_entrystate');
 
-        // Header
+        // Header.
         $headerstr = get_string('transition', 'dataformfield_entrystate'). ": $statefrom - $stateto";
         $allowedsummary = $this->get_roles_summary($allowedtostr, $permission, $contextroles);
         $notificationsummary = $this->get_roles_summary($notifystr, $notification, $contextroles);
         $mform->addElement('header', "hdrtrans$num", $headerstr. $allowedsummary. $notificationsummary);
 
-        // From to
+        // From to.
         $grp = array();
         $grp[] = $mform->createElement('select', "from$num", null, $statesmenu);
         $grp[] = $mform->createElement('select', "to$num", null, $statesmenu);
@@ -122,7 +122,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         $mform->setDefault("from$num", $transfrom);
         $mform->setDefault("to$num", $transto);
 
-        // Permissions
+        // Permissions.
         $options = array(
             $field::ROLE_AUTHOR => get_string('author', 'dataform'),
             $field::ROLE_ENTRIES_MANAGER => get_string('entriesmanager', 'dataform'),
@@ -135,7 +135,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
         $mform->disabledIf("permission$num", "from$num", 'eq', '');
         $mform->disabledIf("permission$num", "to$num", 'eq', '');
 
-        // Notifications
+        // Notifications.
         $options = array(
             $field::ROLE_AUTHOR => get_string('author', 'dataform'),
             $field::ROLE_ENTRIES_MANAGER => get_string('entriesmanager', 'dataform'),
@@ -155,14 +155,14 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // Set config (param1)
+            // Set config (param1).
             $config = array();
 
-            // Must have states
+            // Must have states.
             if (!empty($data->states)) {
                 $config['states'] = $data->states;
 
-                // Transitions
+                // Transitions.
                 $transitions = array();
                 $i = 0;
                 while (isset($data->{"to$i"})) {
@@ -189,7 +189,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
                     $config['transitions'] = $transitions;
                 }
             }
-            // Set param1
+            // Set param1.
             $data->param1 = $config ? base64_encode(serialize($config)) : null;
         }
         return $data;

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ class dataformview_tabular_form extends mod_dataform\pluginbase\dataformviewform
      *
      */
     protected function definition_view_specific() {
-        // View template
+        // View template.
         $this->definition_view_template();
 
-        // Entry template
+        // Entry template.
         $this->definition_entry_template();
 
-        // Submission settings
+        // Submission settings.
         $this->definition_view_submission();
     }
 
@@ -50,8 +50,7 @@ class dataformview_tabular_form extends mod_dataform\pluginbase\dataformviewform
 
         $mform = &$this->_form;
 
-        // content
-        // -------------------------------------------------------------------------------
+        // Content.
         $mform->addElement('header', 'entrytemplatehdr', get_string('entrytemplate', 'dataform'));
         $mform->addHelpButton('entrytemplatehdr', 'entrytemplate', 'dataform');
 

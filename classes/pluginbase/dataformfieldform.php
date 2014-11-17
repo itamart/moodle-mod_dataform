@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -181,11 +181,11 @@ class dataformfieldform extends \moodleform {
         $mform = &$this->_form;
 
         $buttonarray = array();
-        // save and display
+        // Save and display.
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        // save and continue
+        // Save and continue.
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savecont', 'dataform'));
-        // cancel
+        // Cancel.
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');

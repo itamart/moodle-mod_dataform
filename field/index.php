@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ require_once("$CFG->libdir/tablelib.php");
 
 $urlparams = new stdClass;
 
-$urlparams->d = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);
+$urlparams->id = optional_param('id', 0, PARAM_INT);
 $urlparams->fid = optional_param('fid', 0 , PARAM_INT);          // update field id
 
-// fields list actions
+// Fields list actions.
 $urlparams->new        = optional_param('new', 0, PARAM_ALPHA);     // type of the new field
 $urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // ids (comma delimited) of fields to delete
 $urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // ids (comma delimited) of fields to duplicate
@@ -43,37 +43,37 @@ $urlparams->editable    = optional_param('editable', 0, PARAM_INT);     // id of
 
 $urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
 
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
 $df->require_manage_permission('fields');
 
 $df->set_page('field/index', array('urlparams' => $urlparams));
 $PAGE->set_context($df->context);
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
-// DATA PROCESSING
+// DATA PROCESSING.
 $fieldman = $df->field_manager;
 if ($urlparams->duplicate and confirm_sesskey()) {
-    // Duplicate requested fields
+    // Duplicate requested fields.
     $fieldman->process_fields('duplicate', $urlparams->duplicate, $urlparams->confirmed);
 } else if ($urlparams->delete and confirm_sesskey()) {
-    // Delete requested fields
+    // Delete requested fields.
     $fieldman->process_fields('delete', $urlparams->delete, $urlparams->confirmed);
 } else if ($urlparams->visible and confirm_sesskey()) {
-    // Set field visibility
+    // Set field visibility.
     $fieldman->process_fields('visible', $urlparams->visible, true);    // confirmed by default
 } else if ($urlparams->editable and confirm_sesskey()) {
-    // Set field editability
+    // Set field editability.
     $fieldman->process_fields('editable', $urlparams->editable, true);    // confirmed by default
 }
 
-// Get the fields
+// Get the fields.
 $fields = $fieldman->get_fields(array('forceget' => true, 'sort' => 'name'));
 $internalfields = array();
 
-// Seperate internal fields
+// Seperate internal fields.
 $internalfieldtypes = $fieldman->get_internal_field_types();
 foreach ($fields as $fieldid => $field) {
     if (array_key_exists($fieldid, $internalfieldtypes)) {
@@ -85,14 +85,14 @@ foreach ($fields as $fieldid => $field) {
 $output = $df->get_renderer();
 echo $output->header(array('tab' => 'fields', 'heading' => $df->name, 'urlparams' => $urlparams));
 
-// Display subplugin selector
+// Display subplugin selector.
 $exclude = array('entryactions', 'entryauthor', 'entrygroup', 'entrytime');
 echo $output->subplugin_select('field', array('exclude' => $exclude));
 
-// Print admin style list of user defined fields
+// Print admin style list of user defined fields.
 echo $output->fields_admin_list('external', '', $fields);
 
-// Print admin style list of internal fields
+// Print admin style list of internal fields.
 echo $output->fields_admin_list('internal', get_string('fieldsinternal', 'dataform'), $internalfields);
 
 echo $output->footer();

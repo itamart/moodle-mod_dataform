@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             // PORTFOLIO_FORMAT_SPREADSHEET,
             // PORTFOLIO_FORMAT_RICHHTML,
             // PORTFOLIO_FORMAT_DOCUMENT,
-            // PORTFOLIO_FORMAT_LEAP2A
+            // PORTFOLIO_FORMAT_LEAP2A.
         );
     }
 
@@ -89,7 +89,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      * @return one of PORTFOLIO_TIME_XX constants
      */
     public function expected_time() {
-        // by number of exported entries
+        // By number of exported entries.
         if (!empty($this->eids)) {
             $dbtime = portfolio_expected_time_db(count(explode(',', $this->eids)));
         } else if (!empty($this->ecount)) {
@@ -99,7 +99,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         }
 
         // (only if export includes embedded files but this is in config and not
-        // yet accessible here ...)
+        // yet accessible here ...).
         $filetime = PORTFOLIO_TIME_HIGH;
 
         return ($filetime > $dbtime) ? $filetime : $dbtime;
@@ -120,13 +120,13 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      * @return stored_file object
      */
     public function prepare_package() {
-        // set the exported view content
+        // Set the exported view content.
         $df = mod_dataform_dataform::instance(null, $this->id);
         $viewman = mod_dataform_view_manager::instance($df->id);
         $view = $viewman->get_view_by_id($this->vid);
         $view->set_viewfilter(array('filterid' => $this->fid, 'eids' => $this->eids));
 
-        // export to spreadsheet
+        // Export to spreadsheet.
         if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_SPREADSHEET) {
             $content = $view->display(array('controls' => false));
             $filename = clean_filename($view->name. '-full.'. $this->get_export_config('spreadsheettype'));
@@ -134,11 +134,11 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             return;
         }
 
-        // export to html
+        // Export to html.
         if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_RICHHTML) {
             $exportfiles = $this->get_export_config('contentformat');
 
-            // collate embedded files (view and field)
+            // Collate embedded files (view and field).
             if ($exportfiles) {
                 if ($files = $view->get_embedded_files()) {
                     foreach ($files as $file) {
@@ -147,7 +147,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
                 }
             }
 
-            // export content
+            // Export content.
             if ($exportfiles != self::CONTENT_FILESONLY) {
                 $content = $view->display(array('controls' => false,
                                                 'pluginfileurl' => $this->exporter->get('format')->get_file_directory()));
@@ -157,9 +157,9 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             return;
         }
 
-        // export to leap2a
+        // Export to leap2a
         // if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_LEAP2A) {
-        // }
+        // }.
 
     }
 
@@ -169,7 +169,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
      * @return bool
      */
     public function check_permissions() {
-        // verification is done in the view so just return true
+        // Verification is done in the view so just return true.
         return true;
     }
 
@@ -188,14 +188,14 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             return;
         }
 
-        // spreadsheet selection
+        // Spreadsheet selection.
         $types = array('csv', 'ods', 'xls');
         $options = array_combine($types, $types);
         $mform->addElement('select', 'caller_spreadsheettype', get_string('spreadsheettype', 'dataform'), $options);
         $mform->setDefault('caller_spreadsheettype', 'csv');
         $mform->disabledIf('caller_spreadsheettype', 'format', 'neq', PORTFOLIO_FORMAT_SPREADSHEET);
 
-        // export content
+        // Export content.
         $options = array(self::CONTENT_NOFILES => 'Exclude embedded files',
                         self::CONTENT_WITHFILES => 'Include embedded files',
                         self::CONTENT_FILESONLY => 'embedded files only');
@@ -204,7 +204,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         $mform->disabledIf('caller_contentformat', 'format', 'neq', PORTFOLIO_FORMAT_RICHHTML);
 
         /*
-        // document selection
+        // Document selection.
         $types = array('htm', 'txt');
         $options = array_combine($types, $types);
         $mform->addElement('select', 'caller_documenttype', get_string('documenttype', 'dataform'), $options);
@@ -213,7 +213,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
         $mform->disabledIf('caller_documenttype', 'caller_content', 'eq', self::CONTENT_FILESONLY);
         */
 
-        // each entry in a separate file
+        // Each entry in a separate file.
         $mform->addElement('selectyesno', 'caller_separateentries', get_string('separateentries', 'dataform'));
 
     }

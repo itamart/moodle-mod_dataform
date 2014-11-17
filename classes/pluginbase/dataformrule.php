@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ require_once("$CFG->libdir/blocklib.php");
  * Base class for Dataform Access Types
  */
 class dataformrule {
-
-    protected $_block = null; // The context block
+    /* @var mix The context block. */
+    protected $_block = null;
     protected $_dataformid;
 
     /**
@@ -213,7 +213,7 @@ class dataformrule {
         $config = $this->_block->config;
         $now = time();
 
-        // Timing
+        // Timing.
         if (!empty($config->timefrom) and $now < $config->timefrom) {
             return false;
         }
@@ -222,7 +222,7 @@ class dataformrule {
             return false;
         }
 
-        // Views
+        // Views.
         if (!empty($data['viewid']) and !empty($config->views)) {
             $vm = \mod_dataform_view_manager::instance($this->_dataformid);
             if (!$view = $vm->get_view_by_id($data['viewid'])) {
@@ -268,7 +268,7 @@ class dataformrule {
         if (!empty($this->_block->config->views)) {
             return $this->_block->config->views;
         }
-        // Return all views
+        // Return all views.
         return \mod_dataform_view_manager::instance($this->_dataformid)->views_menu;
     }
 

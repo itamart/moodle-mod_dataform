@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
             return $replacements;
         }
 
-        // Browse mode
+        // Browse mode.
         foreach ($patterns as $pattern => $cleanpattern) {
             $parts = explode(':', trim($cleanpattern, '[]'));
             if (!empty($parts[1])) {
@@ -91,7 +91,7 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
             $mform->addRule($fieldname, null, 'required', null, 'client');
         }
 
-        // add alt name if not forcing name
+        // Add alt name if not forcing name.
         if (!$field->param2) {
             $mform->addElement('text', "{$fieldname}_alt", get_string('alttext', 'dataformfield_url'));
             $mform->setType("{$fieldname}_alt", PARAM_TEXT);
@@ -114,34 +114,34 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
                 return '';
             }
 
-            // simple url text
+            // Simple url text.
             if (empty($type)) {
                 return $url;
             }
 
-            // param2 forces the text to something
+            // Param2 forces the text to something.
             if ($field->param2) {
                 $alttext = s($field->param2);
             } else {
                 $alttext = empty($entry->{"c{$fieldid}_content1"}) ? $url : $entry->{"c{$fieldid}_content1"};
             }
 
-            // linking
+            // Linking.
             if ($type == 'link') {
                 return html_writer::link($url, $alttext);
             }
 
-            // image
+            // Image.
             if ($type == 'image') {
                 return html_writer::empty_tag('img', array('src' => $url));
             }
 
-            // image flexible
+            // Image flexible.
             if ($type == 'imageflex') {
                 return html_writer::empty_tag('img', array('src' => $url, 'style' => 'width:100%'));
             }
 
-            // media
+            // Media.
             if ($type == 'media') {
                 require_once("$CFG->dirroot/filter/mediaplugin/filter.php");
                 $mpfilter = new filter_mediaplugin($field->get_df()->context, array());
@@ -163,9 +163,9 @@ class dataformfield_url_renderer extends mod_dataform\pluginbase\dataformfieldre
         $formfieldname = "field_{$fieldid}_{$entryid}";
         $patterns = $this->add_clean_pattern_keys($patterns);
 
-        // Only [[$fieldname]] is editable so check it if exists
+        // Only [[$fieldname]] is editable so check it if exists.
         if (array_key_exists("[[*$fieldname]]", $patterns) and isset($data->$formfieldname)) {
-            // Remove http://
+            // Remove http:.
             $content = str_replace('http://', '', $data->$formfieldname);
             if (!$content = clean_param($content, PARAM_URL)) {
                 return array($formfieldname, get_string('fieldrequired', 'dataform'));

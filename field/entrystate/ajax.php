@@ -29,7 +29,7 @@ require_once('../../../../config.php');
 
 $result = new stdClass;
 
-// if session has expired and its an ajax request so we cant do a page redirect
+// If session has expired and its an ajax request so we cant do a page redirect.
 if ( !isloggedin() ) {
     $result->error = get_string('sessionerroruser', 'error');
     echo json_encode($result);
@@ -41,23 +41,23 @@ $fieldid = required_param('fieldid', PARAM_INT);
 $entryid = required_param('entryid', PARAM_INT);
 $newstate = required_param('state', PARAM_INT);
 
-// Instantiate the Dataform
+// Instantiate the Dataform.
 $df = mod_dataform_dataform::instance($d);
 require_login($df->course->id, false, $df->cm);
 
-// Sesskey
+// Sesskey.
 require_sesskey();
 
 $PAGE->set_context($df->context);
 $PAGE->set_url('/mod/dataform/field/entrystate/ajax.php', array('contextid' => $df->context->id));
 
-// Get the field
+// Get the field.
 $field = $df->field_manager->get_field_by_id($fieldid);
 
-// Get the entry
+// Get the entry.
 $entry = $DB->get_record('dataform_entries', array('id' => $entryid));
 
-// Try to update
+// Try to update.
 if ($error = $field->update_state($entry, $newstate)) {
     $result->error = $error;
     echo json_encode($result);
@@ -70,7 +70,7 @@ $df->update_calculated_grades($entry->userid, "##\d*:$field->name##");
 $entry->state = $newstate;
 $entry->baseurl = '';
 
-// Result
+// Result.
 $result->success = true;
 $result->statescontent = $field->renderer->get_browse_content($entry);
 $result->entryid = $entryid;

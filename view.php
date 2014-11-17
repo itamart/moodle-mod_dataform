@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,18 +28,18 @@
 require_once('../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d = optional_param('d', 0, PARAM_INT);  // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);  // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);
+$urlparams->id = optional_param('id', 0, PARAM_INT);
 
-// Current view id
+// Current view id.
 $urlparams->view = optional_param('view', 0, PARAM_INT);
-// Current filter ('filtid' is used in the action url of entries form due to conflicts with 'filter' in moodleforms)
+// Current filter ('filtid' is used in the action url of entries form due to conflicts with 'filter' in moodleforms).
 $urlparams->filter = optional_param('filter', optional_param('filtid', 0, PARAM_INT), PARAM_INT);
 $urlparams->pagelayout = optional_param('pagelayout', '', PARAM_ALPHAEXT);
 $urlparams->refresh = optional_param('refresh', 0, PARAM_INT);
 $urlparams->renew = optional_param('renew', 0, PARAM_INT);
 
-// Set a dataform object with guest autologin
+// Set a dataform object with guest autologin.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id, true);
 
 $pageparams = array(
@@ -51,7 +51,7 @@ $pageparams = array(
         'urlparams' => $urlparams);
 $df->set_page('view', $pageparams);
 
-// Activate navigation node
+// Activate navigation node.
 $currentviewid = $urlparams->view ? $urlparams->view : $df->defaultview;
 if ($currentviewid) {
     navigation_node::override_active_url(new moodle_url('/mod/dataform/view.php', array('d' => $df->id, 'view' => $currentviewid)));

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,13 +22,14 @@
 require_once('../../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
+// Dataform id.
+$urlparams->d          = required_param('d', PARAM_INT);
+// Type of a view to edit.
+$urlparams->type = optional_param('type', '', PARAM_ALPHA);
+// View id to edit.
+$urlparams->vedit = optional_param('vedit', 0, PARAM_INT);
 
-$urlparams->type = optional_param('type', '', PARAM_ALPHA);   // type of a view to edit
-$urlparams->vedit = optional_param('vedit', 0, PARAM_INT);       // view id to edit
-// $urlparams->returnurl = optional_param('returnurl', '', PARAM_URL);
-
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d);
 
 $df->set_page('view/edit', array('urlparams' => $urlparams));
@@ -50,14 +51,14 @@ require_capability($requiredcapability, $df->context);
 
 $mform = $view->get_form();
 
-// Form cancelled
+// Form cancelled.
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
 }
 
-// No submit buttons: reset to default
+// No submit buttons: reset to default.
 if ($mform->no_submit_button_pressed() ) {
-    // reset view to default
+    // Reset view to default.
     $resettodefault = optional_param('resetdefaultbutton', '', PARAM_ALPHA);
     if ($resettodefault) {
         $urlparams->resetdefault = 1;
@@ -65,16 +66,16 @@ if ($mform->no_submit_button_pressed() ) {
     }
 
 } else if ($data = $mform->get_data()) {
-    // Process validated
+    // Process validated.
     $data = $view->from_form($data);
 
     if (!$view->id) {
-        // add new view
+        // Add new view.
         $view->add($data);
         $notification = get_string('viewsadded', 'dataform');
 
     } else {
-        // update view
+        // Update view.
         $view->update($data);
         $notification = get_string('viewsupdated', 'dataform');
     }
@@ -85,11 +86,11 @@ if ($mform->no_submit_button_pressed() ) {
         redirect(new moodle_url('/mod/dataform/view/index.php', array('d' => $urlparams->d)));
     }
 
-    // Save and continue so refresh the form
+    // Save and continue so refresh the form.
     $mform = $view->get_form();
 }
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/view/index.php', array('id' => $df->cm->id)));
 
 $output = $df->get_renderer();
@@ -98,7 +99,7 @@ echo $output->header(array('tab' => 'views', 'heading' => $df->name, 'nonotifica
 $formheading = $view->id ? get_string('viewedit', 'dataform', $view->name) : get_string('viewnew', 'dataform', $view->get_typename());
 echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
 
-// display form
+// Display form.
 $mform->set_data($view->to_form());
 $mform->display();
 

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ $capabilities = array_merge(
  */
 function mod_dataform_capabilities_dataform() {
     return array(
-        // Add instance
+        // Add instance.
         'mod/dataform:addinstance' => array(
             'riskbitmask' => RISK_XSS,
 
@@ -54,7 +54,7 @@ function mod_dataform_capabilities_dataform() {
             'clonepermissionsfrom' => 'moodle/course:manageactivities'
         ),
 
-        // View Dataforms index (administration link and page)
+        // View Dataforms index (administration link and page).
         'mod/dataform:indexview' => array(
 
             'captype' => 'read',
@@ -66,7 +66,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // View profile messaging (administration link)
+        // View profile messaging (administration link).
         'mod/dataform:messagingview' => array(
 
             'captype' => 'read',
@@ -77,7 +77,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage templates: do anything in the dataform
+        // Manage templates: do anything in the dataform.
         'mod/dataform:managetemplates' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -90,7 +90,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage views
+        // Manage views.
         'mod/dataform:manageviews' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -103,7 +103,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage fields
+        // Manage fields.
         'mod/dataform:managefields' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -116,7 +116,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage filters
+        // Manage filters.
         'mod/dataform:managefilters' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -129,7 +129,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage access
+        // Manage access.
         'mod/dataform:manageaccess' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -142,7 +142,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage notifications
+        // Manage notifications.
         'mod/dataform:managenotifications' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -155,7 +155,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage css
+        // Manage css.
         'mod/dataform:managecss' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -168,7 +168,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage js
+        // Manage js.
         'mod/dataform:managejs' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -181,7 +181,7 @@ function mod_dataform_capabilities_dataform() {
             )
         ),
 
-        // Manage tools
+        // Manage tools.
         'mod/dataform:managetools' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -203,7 +203,7 @@ function mod_dataform_capabilities_dataform() {
  */
 function mod_dataform_capabilities_dataform_view() {
     return array(
-        // Access view
+        // Access view.
         'mod/dataform:viewaccess' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -219,7 +219,7 @@ function mod_dataform_capabilities_dataform_view() {
             )
         ),
 
-        // Access hidden views
+        // Access hidden views.
         'mod/dataform:viewaccesshidden' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -232,7 +232,7 @@ function mod_dataform_capabilities_dataform_view() {
             )
         ),
 
-        // Access views before activity available from
+        // Access views before activity available from.
         'mod/dataform:viewaccessearly' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -246,7 +246,7 @@ function mod_dataform_capabilities_dataform_view() {
             )
         ),
 
-        // Access views after activity is due
+        // Access views after activity is due.
         'mod/dataform:viewaccesslate' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -260,7 +260,7 @@ function mod_dataform_capabilities_dataform_view() {
             )
         ),
 
-        // Apply filters to views with view-filter
+        // Apply filters to views with view-filter.
         'mod/dataform:viewfilteroverride' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -282,7 +282,7 @@ function mod_dataform_capabilities_dataform_view() {
  */
 function mod_dataform_capabilities_dataform_entry() {
     return array(
-        // manage entries: view, write, delete, export etc.
+        // Manage entries: view, write, delete, export etc.
         'mod/dataform:manageentries' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -308,7 +308,7 @@ function mod_dataform_capabilities_dataform_entry() {
  */
 function mod_dataform_capabilities_dataform_entry_early() {
     return array(
-        // View
+        // View.
         'mod/dataform:entryearlyview' => array(
 
             'captype' => 'read',
@@ -322,7 +322,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
             )
         ),
 
-        // Add
+        // Add.
         'mod/dataform:entryearlyadd' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -335,7 +335,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
             ),
         ),
 
-        // Update
+        // Update.
         'mod/dataform:entryearlyupdate' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -348,7 +348,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
             )
         ),
 
-        // Delete
+        // Delete.
         'mod/dataform:entryearlydelete' => array(
 
             'captype' => 'write',
@@ -373,7 +373,7 @@ function mod_dataform_capabilities_dataform_entry_early() {
  */
 function mod_dataform_capabilities_dataform_entry_late() {
     return array(
-        // View
+        // View.
         'mod/dataform:entrylateview' => array(
 
             'captype' => 'read',
@@ -387,7 +387,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
             )
         ),
 
-        // Add
+        // Add.
         'mod/dataform:entrylateadd' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -400,7 +400,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
             ),
         ),
 
-        // Update
+        // Update.
         'mod/dataform:entrylateupdate' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -413,7 +413,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
             )
         ),
 
-        // Delete
+        // Delete.
         'mod/dataform:entrylatedelete' => array(
 
             'captype' => 'write',
@@ -439,7 +439,7 @@ function mod_dataform_capabilities_dataform_entry_late() {
  */
 function mod_dataform_capabilities_dataform_entry_own() {
     return array(
-        // View
+        // View.
         'mod/dataform:entryownview' => array(
 
             'captype' => 'read',
@@ -453,7 +453,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
             )
         ),
 
-        // Export
+        // Export.
         'mod/dataform:entryownexport' => array(
 
             'captype' => 'read',
@@ -468,7 +468,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
             'clonepermissionsfrom' => 'mod/dataform:exportownentry'
         ),
 
-        // Add
+        // Add.
         'mod/dataform:entryownadd' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -484,7 +484,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
             'clonepermissionsfrom' => 'mod/dataform:writeentry'
         ),
 
-        // Update
+        // Update.
         'mod/dataform:entryownupdate' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -499,7 +499,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
             )
         ),
 
-        // Delete
+        // Delete.
         'mod/dataform:entryowndelete' => array(
 
             'captype' => 'write',
@@ -527,7 +527,7 @@ function mod_dataform_capabilities_dataform_entry_own() {
  */
 function mod_dataform_capabilities_dataform_entry_group() {
     return array(
-        // View
+        // View.
         'mod/dataform:entrygroupview' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -542,7 +542,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
             )
         ),
 
-        // Export
+        // Export.
         'mod/dataform:entrygroupexport' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -558,7 +558,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
             'clonepermissionsfrom' => 'mod/dataform:exportownentry'
         ),
 
-        // Add
+        // Add.
         'mod/dataform:entrygroupadd' => array(
             'riskbitmask' => RISK_SPAM | RISK_XSS,
 
@@ -573,7 +573,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
             )
         ),
 
-        // Update
+        // Update.
         'mod/dataform:entrygroupupdate' => array(
             'riskbitmask' => RISK_SPAM,
 
@@ -588,7 +588,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
             )
         ),
 
-        // Delete
+        // Delete.
         'mod/dataform:entrygroupdelete' => array(
 
             'captype' => 'write',
@@ -616,7 +616,7 @@ function mod_dataform_capabilities_dataform_entry_group() {
  */
 function mod_dataform_capabilities_dataform_entry_any() {
     return array(
-        // View
+        // View.
         'mod/dataform:entryanyview' => array(
             'riskbitmask' => RISK_PERSONAL,
 
@@ -633,7 +633,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
             'clonepermissionsfrom' => 'mod/dataform:viewentry'
         ),
 
-        // Export
+        // Export.
         'mod/dataform:entryanyexport' => array(
             'riskbitmask' => RISK_PERSONAL,
 
@@ -650,7 +650,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
             'clonepermissionsfrom' => 'mod/dataform:exportallentries'
         ),
 
-        // Add
+        // Add.
         'mod/dataform:entryanyadd' => array(
             'riskbitmask' => RISK_SPAM | RISK_XSS,
 
@@ -664,7 +664,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
             'clonepermissionsfrom' => 'mod/dataform:manageentries'
         ),
 
-        // Update
+        // Update.
         'mod/dataform:entryanyupdate' => array(
             'riskbitmask' => RISK_SPAM,
 
@@ -678,7 +678,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
             'clonepermissionsfrom' => 'mod/dataform:manageentries'
         ),
 
-        // Delete
+        // Delete.
         'mod/dataform:entryanydelete' => array(
 
             'captype' => 'write',
@@ -705,7 +705,7 @@ function mod_dataform_capabilities_dataform_entry_any() {
  */
 function mod_dataform_capabilities_dataform_entry_anonymous() {
     return array(
-        // View
+        // View.
         'mod/dataform:entryanonymousview' => array(
 
             'captype' => 'read',
@@ -721,7 +721,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
             'clonepermissionsfrom' => 'mod/dataform:viewanonymousentry'
         ),
 
-        // Export
+        // Export.
         'mod/dataform:entryanonymousexport' => array(
 
             'captype' => 'read',
@@ -733,7 +733,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
             )
         ),
 
-        // Add
+        // Add.
         'mod/dataform:entryanonymousadd' => array(
             'riskbitmask' => RISK_SPAM | RISK_XSS,
 
@@ -748,7 +748,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
             )
         ),
 
-        // Update
+        // Update.
         'mod/dataform:entryanonymousupdate' => array(
             'riskbitmask' => RISK_SPAM,
 
@@ -761,7 +761,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
             )
         ),
 
-        // Delete
+        // Delete.
         'mod/dataform:entryanonymousdelete' => array(
 
             'captype' => 'write',
@@ -784,7 +784,7 @@ function mod_dataform_capabilities_dataform_entry_anonymous() {
  */
 function mod_dataform_capabilities_dataform_preset() {
     return array(
-        // manage user presets
+        // Manage user presets.
         'mod/dataform:managepresets' => array(
 
             'riskbitmask' => RISK_SPAM | RISK_XSS,
@@ -797,7 +797,7 @@ function mod_dataform_capabilities_dataform_preset() {
             )
         ),
 
-        // view all user presets
+        // View all user presets.
         'mod/dataform:presetsviewall' => array(
 
             'captype' => 'read',
@@ -818,15 +818,15 @@ function mod_dataform_capabilities_dataform_preset() {
 function mod_dataform_capabilities_dataform_depracated() {
     return array(
 
-    // DEPRACATED
+    // DEPRACATED.
 
-        // view entries
+        // View entries.
         'mod/dataform:viewentry' => array(
 
             'captype' => 'read',
             'contextlevel' => CONTEXT_MODULE,
             'archetypes' => array(
-                'frontpage' => CAP_ALLOW, // needed for dataforms on the frontpage
+                'frontpage' => CAP_ALLOW,
                 'guest' => CAP_ALLOW,
                 'student' => CAP_ALLOW,
                 'teacher' => CAP_ALLOW,
@@ -835,7 +835,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // write entries
+        // Write entries.
         'mod/dataform:writeentry' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -850,7 +850,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // view anonymous entries
+        // View anonymous entries.
         'mod/dataform:viewanonymousentry' => array(
 
             'captype' => 'read',
@@ -861,7 +861,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // export entries
+        // Export entries.
         'mod/dataform:exportentry' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -875,7 +875,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // export own entries
+        // Export own entries.
         'mod/dataform:exportownentry' => array(
 
             'captype' => 'read',
@@ -888,7 +888,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // export all entries
+        // Export all entries.
         'mod/dataform:exportallentries' => array(
 
             'riskbitmask' => RISK_PERSONAL,
@@ -902,7 +902,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // Approve an entry
+        // Approve an entry.
         'mod/dataform:approve' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -916,7 +916,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // mangae comments
+        // Mangae comments.
         'mod/dataform:managecomments' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -930,7 +930,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // comment on entries
+        // Comment on entries.
         'mod/dataform:comment' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -945,7 +945,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // mangae ratings
+        // Mangae ratings.
         'mod/dataform:manageratings' => array(
 
             'riskbitmask' => RISK_SPAM,
@@ -959,7 +959,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // rate entries
+        // Rate entries.
         'mod/dataform:rate' => array(
 
             'captype' => 'write',
@@ -971,7 +971,7 @@ function mod_dataform_capabilities_dataform_depracated() {
             )
         ),
 
-        // view entry ratings
+        // View entry ratings.
         'mod/dataform:ratingsview' => array(
 
             'captype' => 'read',

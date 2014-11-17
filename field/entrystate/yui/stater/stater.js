@@ -38,12 +38,12 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
             thedata['entryid'] = this.get('entryid');
             thedata['sesskey'] = this.get('sesskey');
 
-            // Get the link
+            // Get the link.
             var link = e.target;
             if (e.target.get('tagName').toLowerCase() != 'a') {
                 link = e.target.get('parentNode');
             }
-            // Get the requested state
+            // Get the requested state.
             var arr = link.get('id').split('_');
             thedata['state'] = arr[2];
 
@@ -89,7 +89,7 @@ YUI.add('moodle-dataformfield_entrystate-stater', function(Y) {
         }
     });
 
-    // Define a name space to call
+    // Define a name space to call.
     M.dataformfield_entrystate = M.dataformfield_entrystate || {};
     M.dataformfield_entrystate.stater = M.dataformfield_entrystate.stater || {};
     M.dataformfield_entrystate.stater.init = M.dataformfield_entrystate.stater.init || function(options) {

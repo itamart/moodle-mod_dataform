@@ -56,28 +56,28 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         $o .= $this->output->header();
 
-        // print heading
+        // Print heading.
         if (!empty($params->heading)) {
             $o .= $this->output->heading($params->heading);
         }
 
-        // print intro
+        // Print intro.
         if (!empty($params->intro) and $params->intro) {
             $o .= $this->render_intro();
         }
 
-        // print the tabs
+        // Print the tabs.
         if (!empty($params->tab)) {
             $o .= $this->render_tabs($params->tab);
         }
 
-        // print groups menu if needed
+        // Print groups menu if needed.
         if (!empty($params->groups)) {
             $filterid = !empty($params->urlparams->filter) ? $params->urlparams->filter : null;
             $o .= $this->render_groups_menu($params->urlparams->view, $filterid);
         }
 
-        // print any notices
+        // Print any notices.
         if (empty($params->nonotifications)) {
             $o .= $this->render_notifications();
         }
@@ -160,7 +160,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $actionbaseurl = new moodle_url('/mod/dataform/view/index.php', array('d' => $this->_dataformid));
         $sessparam = array('sesskey' => sesskey());
 
-        // table headings
+        // Table headings.
         $strname = get_string('name');
         $strdescription = get_string('description');
         $strtype = get_string('type', 'dataform');
@@ -183,7 +183,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $strpatterncleanup = get_string('patterncleanup', 'dataform');
         $strnorules = get_string('rulesnone', 'dataform');
 
-        // Action icons
+        // Action icons.
         $editicon = $this->output->pix_icon('t/edit', $stredit);
         $browseicon = $this->output->pix_icon('i/search', $strview);
         $duplicateicon = $this->output->pix_icon('t/copy', $strduplicate);
@@ -207,26 +207,26 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         $multiactionurl = new moodle_url($actionbaseurl, $sessparam);
 
-        // Bulk delete
+        // Bulk delete.
         $icon = new pix_icon('t/delete', get_string('multidelete', 'dataform'));
         $multidelete = $this->output->action_icon($actionbaseurl, $icon, null, array('id' => 'id_view_bulkaction_delete'));
         $this->page->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('view', 'delete', $multiactionurl->out(false)));
 
-        // Bulk duplicate
+        // Bulk duplicate.
         $icon = new pix_icon('t/copy', get_string('multiduplicate', 'dataform'));
         $multiduplicate = $this->output->action_icon($actionbaseurl, $icon, null, array('id' => 'id_view_bulkaction_duplicate'));
         $this->page->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('view', 'duplicate', $multiactionurl->out(false)));
 
-        // Filters menu
+        // Filters menu.
         $filtersmenu = mod_dataform_filter_manager::instance($this->_dataformid)->get_filters(null, true);
 
-        // Access manager
+        // Access manager.
         $aman = mod_dataform_access_manager::instance($this->_dataformid);
 
-        // Notification manager
+        // Notification manager.
         $nman = mod_dataform_notification_manager::instance($this->_dataformid);
 
-        // Table headers
+        // Table headers.
         $headers = array(
             'name' => array($strname, 'left', false),
             'type' => array($strtype, 'left', false),
@@ -294,7 +294,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             }
 
             // INFO
-            // Patterns validation
+            // Patterns validation.
             if ($updates = $view->patterns_check()) {
                 $showcleanup = true;
                 if (!empty($updates['view']) or !empty($updates['field'])) {
@@ -309,25 +309,25 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 $viewpatterncheck = $patternvalidicon;
             }
 
-            // Permission rules
+            // Permission rules.
             if ($rulenames = $aman->get_view_rules($view->name)) {
                 $viewpermissions = $accessicon;
-                // html_writer::alist($rulenames);
+                // Html_writer::alist($rulenames);.
             } else {
                 $viewpermissions = $noaccessicon;
             }
 
-            // Notification rules
+            // Notification rules.
             if ($rulenames = $nman->get_view_rules($view->name)) {
                 $viewnotifications = $notificationicon;
-                // html_writer::alist($rulenames);
+                // Html_writer::alist($rulenames);.
             } else {
                 $viewnotifications = $nonotificationicon;
             }
 
             $viewinfo = implode('&nbsp;&nbsp;', array($viewpatterncheck, $viewpermissions, $viewnotifications));
 
-            // ACTIONS
+            // ACTIONS.
             $url = new moodle_url($viewbaseurl, array('view' => $viewid));
             $linkparams = array('id' => "id_browseview$viewid", 'title' => "$strview $view->name");
             $viewbrowse = html_writer::link($url, $browseicon, $linkparams);
@@ -360,14 +360,14 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $rows[] = $data;
         }
 
-        // Add cleanup link to Info header if needed
+        // Add cleanup link to Info header if needed.
         if (!empty($showcleanup)) {
             $url = new moodle_url($actionbaseurl, array('patternscleanup' => -1));
             $cleanuplink = html_writer::link($url, $cleanupicon);
             $headers['info'] = array($cleanuplink, 'left', false);
         }
 
-        // Generate the table
+        // Generate the table.
         $table = new html_table();
         foreach ($headers as $header) {
             list($table->head[], $table->align[], $table->wrap[]) = $header;
@@ -393,7 +393,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         $df = mod_dataform_dataform::instance($this->_dataformid);
 
-        // External or internal
+        // External or internal.
         $external = ($extorint == 'external');
 
         $editbaseurl = new moodle_url('/mod/dataform/field/edit.php', array('d' => $this->_dataformid));
@@ -413,7 +413,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $strpermissions = get_string('permissions', 'role');
         $strnotifications = get_string('notifications');
 
-        // Icons
+        // Icons.
         $editicon = $this->output->pix_icon('t/edit', $stredit);
         $duplicateicon = $this->output->pix_icon('t/copy', $strduplicate);
         $deleteicon = $this->output->pix_icon('t/delete', $strdelete);
@@ -423,23 +423,23 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $noaccessicon = $this->output->pix_icon('noaccess', $strpermissions, 'dataform');
 
         // The default value of the type attr of a button is submit, so set it to button so that
-        // it doesn't submit the form
+        // it doesn't submit the form.
         $selectallnone = html_writer::checkbox('fieldselectallnone', null, false, null, array('id' => 'id_fieldselectallnone'));
         $this->page->requires->js_init_call('M.mod_dataform.util.init_select_allnone', array('field'));
 
         $multiactionurl = new moodle_url($actionbaseurl, $sessparam);
 
-        // Bulk delete
+        // Bulk delete.
         $icon = new pix_icon('t/delete', get_string('multidelete', 'dataform'));
         $multidelete = $this->output->action_icon($actionbaseurl, $icon, null, array('id' => 'id_field_bulkaction_delete'));
         $this->page->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('field', 'delete', $multiactionurl->out(false)));
 
-        // Bulk duplicate
+        // Bulk duplicate.
         $icon = new pix_icon('t/copy', get_string('multiduplicate', 'dataform'));
         $multiduplicate = $this->output->action_icon($actionbaseurl, $icon, null, array('id' => 'id_field_bulkaction_duplicate'));
         $this->page->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('field', 'duplicate', $multiactionurl->out(false)));
 
-        // Table headers
+        // Table headers.
         $headers = array(
             'name' => array($strname, 'left', false),
             'type' => array($strtype, 'left', false),
@@ -456,10 +456,10 @@ class mod_dataform_renderer extends plugin_renderer_base {
             unset($headers['editable']);
         }
 
-        // Access manager
+        // Access manager.
         $aman = mod_dataform_access_manager::instance($this->_dataformid);
 
-        // Notification manager
+        // Notification manager.
         $nman = mod_dataform_notification_manager::instance($this->_dataformid);
 
         if (!$fields) {
@@ -472,17 +472,17 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 continue;
             }
 
-            // Name
+            // Name.
             if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
                 $fieldname = $field->name;
             } else {
                 $fieldname = html_writer::link(new moodle_url($editbaseurl, $sessparam + array('fid' => $fieldid)), $field->name);
             }
-            // Type
+            // Type.
             $fieldtype = $field->image. '&nbsp;'. $field->typename;
-            // Description
+            // Description.
             $fielddescription = shorten_text($field->description, 30);
-            // Visible
+            // Visible.
             if ($visible = $field->visible) {
                 $visibleicon = $this->output->pix_icon('t/hide', $strhide);
                 $visibleicon = ($visible == 1 ? "($visibleicon)" : $visibleicon);
@@ -490,7 +490,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 $visibleicon = $this->output->pix_icon('t/show', $strshow);
             }
             $fieldvisible = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('visible' => $fieldid)), $visibleicon);
-            // Editable
+            // Editable.
             if ($editable = $field->editable) {
                 $editableicon = $this->output->pix_icon('t/lock', $strlock);
             } else {
@@ -499,24 +499,24 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $fieldeditable = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('editable' => $fieldid)), $editableicon);
 
             // INFO
-            // Access rules
+            // Access rules.
             if ($rulenames = $aman->get_field_rules($field->name)) {
                 $fieldaccess = $accessicon;
-                // html_writer::alist($rulenames);
+                // Html_writer::alist($rulenames);.
             } else {
                 $fieldaccess = $noaccessicon;
             }
 
-            // Notification rules
+            // Notification rules.
             if ($rulenames = $nman->get_field_rules($field->name)) {
                 $fieldnotifications = $notificationicon;
-                // html_writer::alist($rulenames);
+                // Html_writer::alist($rulenames);.
             } else {
                 $fieldnotifications = $nonotificationicon;
             }
             $fieldinfo = implode('&nbsp;&nbsp;', array($fieldaccess, $fieldnotifications));
 
-            // ACTIONS
+            // ACTIONS.
             if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
                 $fieldactions = null;
             } else {
@@ -545,7 +545,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $rows[] = $data;
         }
 
-        // Generate the table
+        // Generate the table.
         $table = new html_table();
         foreach ($headers as $header) {
             list($table->head[], $table->align[], $table->wrap[]) = $header;
@@ -578,7 +578,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $actionbaseurl = new moodle_url('/mod/dataform/filter/index.php', array('d' => $this->_dataformid));
         $sessparam = array('sesskey' => sesskey());
 
-        // Strings
+        // Strings.
         $strfilters = get_string('name');
         $strdescription = get_string('description');
         $strperpage = get_string('filterperpage', 'dataform');
@@ -594,7 +594,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $strdefault = get_string('default');
         $strchoose = get_string('choose');
 
-        // Action icons
+        // Action icons.
         $editicon = $this->output->pix_icon('t/edit', $stredit);
         $duplicateicon = $this->output->pix_icon('t/copy', $strduplicate);
         $deleteicon = $this->output->pix_icon('t/delete', $strdelete);
@@ -624,7 +624,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $filtername = html_writer::link(new moodle_url($editbaseurl, array('fid' => $filterid)), $filter->name);
             $filterdescription = format_text($filter->description, FORMAT_PLAIN);
 
-            // Actions
+            // Actions.
             $url = new moodle_url($editbaseurl, array('fid' => $filterid));
             $linkparams = array('id' => "id_editfilter$filterid", 'title' => "$stredit $filter->name");
             $filteredit = html_writer::link($url, $editicon, $linkparams);
@@ -641,11 +641,11 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
             $filteractions = implode('&nbsp;&nbsp;&nbsp;', array($filteredit, $filterduplicate, $filterdelete, $filterselector));
 
-            // visible
+            // Visible.
             $icon = $filter->visible ? $hideicon : $showicon;
             $filtervisible = html_writer::link(new moodle_url($actionbaseurl, $sessparam + array('showhide' => $filterid)), $icon);
 
-            // default filter
+            // Default filter.
             if ($filterid == $df->defaultfilter) {
                 $unseturl = new moodle_url($actionbaseurl, $sessparam + array('default' => -1));
                 $idunsetdefault = str_replace(' ', '_', $filter->name). '_unset_default';
@@ -690,7 +690,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         echo html_writer::empty_tag('br');
         echo html_writer::start_tag('div', array('class' => 'fieldadd mdl-align'));
         echo html_writer::link(new moodle_url('/mod/dataform/filter/edit.php', array('d' => $this->_dataformid)), get_string('filteradd', 'dataform'));
-        // echo $OUTPUT->help_icon('filteradd', 'dataform');
+        // Echo $OUTPUT->help_icon('filteradd', 'dataform');.
         echo html_writer::end_tag('div');
         echo html_writer::empty_tag('br');
     }
@@ -706,7 +706,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $baseurl = "/mod/dataform/$cat/index.php";
         $ruletype = str_replace("dataform$cat", '', $blocktype);
 
-        // Add icon
+        // Add icon.
         $params = array(
             'd' => $this->_dataformid,
             'bui_addblock' => $blocktype,
@@ -720,7 +720,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         echo html_writer::tag('h3', $ruletypename. "  $addlink");
 
-        // table headings
+        // Table headings.
         $strname = get_string('name');
         $strdescription = get_string('description');
         $strpermissions = get_string('permissions', 'role');
@@ -749,15 +749,15 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $data = $rule->get_data();
             $idforaction = $cat. $rule->type. ++$count;
 
-            // Name
+            // Name.
 
-            // Applicable views
+            // Applicable views.
             $applicableviews = '';
             if ($views = $rule->get_applicable_views()) {
                 $applicableviews = \html_writer::alist($views);
             }
 
-            // Show/hide
+            // Show/hide.
             if (!empty($data->enabled)) {
                 $showhide = 'hide';
                 $able = 'disable';
@@ -776,7 +776,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $linkparams = array('id' => "id_showhide$idforaction");
             $showhidelink = html_writer::link($url, $pix, $linkparams);
 
-            // Edit settings
+            // Edit settings.
             $params = array(
                 'd' => $this->_dataformid,
                 'bui_editid' => $block->instance->id,
@@ -788,7 +788,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $linkparams = array('id' => "id_edit$idforaction");
             $editlink = html_writer::link($url, $pix, $linkparams);
 
-            // Edit permissions
+            // Edit permissions.
             $params = array(
                 'd' => $this->_dataformid,
                 'contextid' => $block->context->id,
@@ -798,7 +798,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $linkparams = array('id' => "id_editperm$idforaction");
             $editpermlink = html_writer::link($url, $pix, $linkparams);
 
-            // Delete
+            // Delete.
             $params = array(
                 'd' => $this->_dataformid,
                 'type' => $rule->type,
@@ -910,22 +910,22 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $df = mod_dataform_dataform::instance($this->_dataformid);
         $dfid = $this->_dataformid;
 
-        // Must be in an active dataform instance
+        // Must be in an active dataform instance.
         if (empty($currenttab) or !$df->data or !$df->course) {
             throw new moodle_exception('emptytab', 'dataform');
         }
 
-        // Tabs are displayed only for managers
+        // Tabs are displayed only for managers.
         if (!isloggedin() or !$manager = $df->user_manage_permissions) {
             return null;
         }
 
-        // Main level
+        // Main level.
         $browse = new tabobject('browse', new moodle_url('/mod/dataform/view.php', array('d' => $dfid)), get_string('browse', 'dataform'));
         $manage = new tabobject('manage', new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid)), get_string('manage', 'dataform'));
 
         $maintabs = array($browse, $manage);
-        // Add view edit tab
+        // Add view edit tab.
         if ($currenttab == 'browse' and $manager['views'] and $currentview = $df->currentview and $currentview->id) {
             $params = array('d' => $dfid, 'sesskey' => sesskey(), 'vedit' => $currentview->id);
             $editviewurl = new moodle_url('/mod/dataform/view/edit.php', $params);
@@ -936,49 +936,49 @@ class mod_dataform_renderer extends plugin_renderer_base {
         if ($currenttab != 'browse') {
             $inactive = $manage->inactive = true;
 
-            // Management tabs
+            // Management tabs.
             $tabs = array();
-            // Views
+            // Views.
             if ($manager['views']) {
                 $url = new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('views', $url, get_string('views', 'dataform'));
             }
-            // Fields
+            // Fields.
             if ($manager['fields']) {
                 $url = new moodle_url('/mod/dataform/field/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('fields', $url, get_string('fields', 'dataform'));
             }
-            // Filters
+            // Filters.
             if ($manager['filters']) {
                 $url = new moodle_url('/mod/dataform/filter/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('filters', $url, get_string('filters', 'dataform'));
             }
-            // Access
+            // Access.
             if ($manager['access']) {
                 $url = new moodle_url('/mod/dataform/access/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('access', $url, get_string('access', 'dataform'));
             }
-            // Notifications
+            // Notifications.
             if ($manager['notifications']) {
                 $url = new moodle_url('/mod/dataform/notification/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('notification', $url, get_string('notifications'));
             }
-            // Css
+            // Css.
             if ($manager['css']) {
                 $url = new moodle_url('/mod/dataform/css.php', array('d' => $dfid, 'cssedit' => 1));
                 $tabs[] = new tabobject('css', $url, get_string('cssinclude', 'dataform'));
             }
-            // JS
+            // JS.
             if ($manager['js']) {
                 $url = new moodle_url('/mod/dataform/js.php', array('d' => $dfid, 'jsedit' => 1));
                 $tabs[] = new tabobject('js', $url, get_string('jsinclude', 'dataform'));
             }
-            // Tools
+            // Tools.
             if ($manager['tools']) {
                 $url = new moodle_url('/mod/dataform/tool/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('tools', $url, get_string('tools', 'dataform'));
             }
-            // Preses
+            // Preses.
             if ($manager['presets']) {
                 $url = new moodle_url('/mod/dataform/preset/index.php', array('d' => $dfid));
                 $tabs[] = new tabobject('presets', $url, get_string('presets', 'dataform'));
@@ -1070,7 +1070,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             if (count($menuviews) == 1) {
                 $viewjump = reset($menuviews);
             } else {
-                // Display the view form jump list
+                // Display the view form jump list.
                 $baseurl = $baseurl->out_omit_querystring();
                 $baseurlparams = array('d' => $view->dataid,
                                         'filter' => $filter->id);
@@ -1099,7 +1099,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
                 $menufilters = array();
             }
             if ($userfilters = $fm->get_user_filters_menu($view->id)) {
-                // Quick filter
+                // Quick filter.
                 if (array_key_exists($fm::USER_FILTER_QUICK, $userfilters)) {
                     $quickfilter = array(
                         $fm::USER_FILTER_QUICK => $userfilters[$fm::USER_FILTER_QUICK],
@@ -1116,7 +1116,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             $baseurlparams = array('d' => $df->id,
                                     'view' => $view->id);
 
-            // Display the filter form jump list
+            // Display the filter form jump list.
             $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'filter', $menufilters, $filter->id, array('' => 'choosedots'), 'filterbrowse_jump');
             $select->attributes = array('id' => 'id_filtersmenu');
             $filterjump = $this->output->render($select);
@@ -1148,7 +1148,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             $searchvalue = '';
         }
 
-        // Display the quick search form
+        // Display the quick search form.
         $inputfield = html_writer::empty_tag('input', array('type' => 'text',
                                                             'name' => 'usearch',
                                                             'value' => $searchvalue,
@@ -1162,7 +1162,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
         $attributes = array('method' => 'post', 'action' => new moodle_url($baseurl));
         $qsform = html_writer::tag('form', "$formparams&nbsp;$inputfield", $attributes);
 
-        // and finally one more wrapper with class
+        // And finally one more wrapper with class.
         $quicksearchjump = html_writer::tag('div', $qsform, array('class' => 'singleselect'));
 
         return $quicksearchjump;
@@ -1196,7 +1196,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             20 => 20, 30 => 30, 40 => 40, 50 => 50,
             100 => 100, 200 => 200, 300 => 300, 400 => 400, 500 => 500, 1000 => 1000
         );
-        // Display the view form jump list
+        // Display the view form jump list.
         $select = new single_select(new moodle_url($baseurl, $baseurlparams), 'uperpage', $options, $perpagevalue, array('' => 'choosedots'), 'perpage_jump');
 
         return $this->output->render($select);
@@ -1212,7 +1212,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
         $filter = $view->get_filter();
         $baseurl = $view->get_baseurl();
 
-        // Typical groupby, one group per page case. show paging bar as per number of groups
+        // Typical groupby, one group per page case. show paging bar as per number of groups.
         if ($filter->pagenum) {
             $pagingbar = new paging_bar($filter->pagenum,
                                         $filter->page,
@@ -1224,7 +1224,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             return $output->render($pagingbar);
         }
 
-        // Standard paging bar case
+        // Standard paging bar case.
         if ($filter->perpage) {
 
             $entryman = $view->entry_manager;
@@ -1232,7 +1232,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             $displayedcount = $entryman->entries ? $entryman->get_count(mod_dataform_entry_manager::COUNT_DISPLAYED) : 0;
 
             // Adjust filter page if needed.
-            // This may be needed if redirecting from entry form to paged view
+            // This may be needed if redirecting from entry form to paged view.
             if ($filter->eids and !$filter->page) {
                 if ($entryid = (is_array($filter->eids) ? reset($filter->eids) : $filter->eids) and $entryid > 0) {
                     $filter->page = $entryman->get_entry_position($entryid, $filter);

@@ -43,12 +43,12 @@ class entry_delete extends base {
 
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // Unspecified entry
+        // Unspecified entry.
         if (empty($params['entry'])) {
             return self::has_capability('mod/dataform:entryanydelete', $params);
         }
 
-        // Early entries
+        // Early entries.
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlydelete');
             if (!parent::validate($params)) {
@@ -56,7 +56,7 @@ class entry_delete extends base {
             }
         }
 
-        // Late entries
+        // Late entries.
         if ($df->is_past_due()) {
             $params['capabilities'] = array('mod/dataform:entrylatedelete');
             if (!parent::validate($params)) {
@@ -66,13 +66,13 @@ class entry_delete extends base {
 
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
 
-        // Own entry
+        // Own entry.
         if (\mod_dataform\pluginbase\dataformentry::is_own($entry)) {
             $params['capabilities'] = array('mod/dataform:entryowndelete');
             return parent::validate($params);
         }
 
-        // Group entry
+        // Group entry.
         if (\mod_dataform\pluginbase\dataformentry::is_grouped($entry)) {
             if (groups_is_member($entry->groupid)) {
                 $params['capabilities'] = array('mod/dataform:entrygroupdelete');
@@ -80,7 +80,7 @@ class entry_delete extends base {
             }
         }
 
-        // Anonymous entry
+        // Anonymous entry.
         if (\mod_dataform\pluginbase\dataformentry::is_anonymous($entry)) {
             if (!$df->anonymous) {
                 return false;
@@ -89,7 +89,7 @@ class entry_delete extends base {
             return parent::validate($params);
         }
 
-        // Any entry
+        // Any entry.
         if (\mod_dataform\pluginbase\dataformentry::is_others($entry)) {
             $params['capabilities'] = array('mod/dataform:entryanydelete');
             return parent::validate($params);

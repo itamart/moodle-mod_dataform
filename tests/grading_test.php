@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,17 +49,17 @@ class mod_dataform_grading_testcase extends advanced_testcase {
 
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
 
-        // Teacher
+        // Teacher.
         $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
         $this->teacher = $user;
 
-        // Student 1
+        // Student 1.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student1'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
         $this->student1 = $user;
 
-        // Student 2
+        // Student 2.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student2'));
         $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
         $this->student2 = $user;
@@ -76,10 +76,10 @@ class mod_dataform_grading_testcase extends advanced_testcase {
 
         $this->setAdminUser();
 
-        // Course
+        // Course.
         $courseid = $this->course->id;
 
-        // Dataform
+        // Dataform.
         $params = array(
             'course' => $courseid,
             'grade' => 100,
@@ -88,12 +88,12 @@ class mod_dataform_grading_testcase extends advanced_testcase {
         $dataform = $this->getDataGenerator()->create_module('dataform', $params);
         $df = mod_dataform_dataform::instance($dataform->id);
 
-        // Add a view
+        // Add a view.
         $view = $df->view_manager->add_view('aligned');
-        // Get an entry manager
+        // Get an entry manager.
         $entryman = $view->entry_manager;
 
-        // Fetch the grade item
+        // Fetch the grade item.
         $params = array(
             'itemtype' => 'mod',
             'itemmodule' => 'dataform',
@@ -103,7 +103,7 @@ class mod_dataform_grading_testcase extends advanced_testcase {
         );
         $gitem = grade_item::fetch($params);
 
-        // Student 1 grade
+        // Student 1 grade.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(null, $grade->finalgrade);
 

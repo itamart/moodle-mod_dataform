@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ class dataformfilter {
         // Instance.
         $this->_instance = new \stdClass;
         $this->_instance->id = empty($data->id) ? 0 : $data->id;
-        $this->_instance->dataid = $data->dataid; // required
+        $this->_instance->dataid = $data->dataid;
         $this->_instance->name = empty($data->name) ? '' : $data->name;
         $this->_instance->description = empty($data->description) ? '' : $data->description;
         $this->_instance->visible = !isset($data->visible) ? 1 : $data->visible;
@@ -127,7 +127,7 @@ class dataformfilter {
         if ($this->id) {
             $DB->update_record('dataform_filters', $this->instance);
 
-            // Trigger event
+            // Trigger event.
             $params = array(
                 'objectid' => $this->id,
                 'context' => $df->context,
@@ -143,7 +143,7 @@ class dataformfilter {
         } else {
             $this->id = $DB->insert_record('dataform_filters', $this->instance);
 
-            // Trigger event
+            // Trigger event.
             $params = array(
                 'objectid' => $this->id,
                 'context' => $df->context,
@@ -168,7 +168,7 @@ class dataformfilter {
 
         $DB->delete_records('dataform_filters', array('id' => $this->id));
 
-        // Trigger event
+        // Trigger event.
         $params = array(
             'objectid' => $this->id,
             'context' => $df->context,
@@ -222,13 +222,13 @@ class dataformfilter {
         $fieldkeys = $this->contentfields ? array_fill_keys($this->contentfields, null) : null;
         $contentfields = $fieldkeys ? array_intersect_key($fields, $fieldkeys) : array();
 
-        // SEARCH sql
+        // SEARCH sql.
         list($searchtables, $searchwhere, $searchparams) = $this->get_search_sql($fields);
-        // SORT sql
+        // SORT sql.
         list($sorttables, $sortwhere, $sortorder, $sortparams) = $this->get_sort_sql($fields);
-        // CONTENT sql ($dataformcontent is an array of fieldid whose content needs to be fetched)
+        // CONTENT sql ($dataformcontent is an array of fieldid whose content needs to be fetched).
         list($contentwhat, $contenttables, $contentwhere, $contentparams, $dataformcontent) = $this->get_content_sql($contentfields);
-        // JOIN sql (does't use params)
+        // JOIN sql (does't use params).
         list($joinwhat, $jointables, ) = $this->get_join_sql($fields);
 
         return array(
@@ -246,7 +246,7 @@ class dataformfilter {
             $dataformcontent,
             $joinwhat,
             $jointables,
-            // $joinparams,
+            // $joinparams,.
         );
     }
 
@@ -359,10 +359,10 @@ class dataformfilter {
             $searchparams = array_merge($searchparams, $eidsparams);
         }
 
-        // compile sql for search settings
+        // Compile sql for search settings.
         if ($searchfrom) {
             foreach ($searchfrom as $fieldid) {
-                // add only tables which are not already added
+                // Add only tables which are not already added.
                 if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
                     $this->_filteredtables[] = $fieldid;
                     $searchtables .= $fields[$fieldid]->get_search_from_sql();
@@ -379,7 +379,7 @@ class dataformfilter {
 
         $wheresearch = $searchwhere ? ' AND '. implode(' AND ', $searchwhere) : '';
 
-        // register referred tables
+        // Register referred tables.
         $this->_filteredtables = $searchfrom;
         $searchparams = array_values($searchparams);
 
@@ -411,18 +411,18 @@ class dataformfilter {
                 $field = $fields[$fieldid];
 
                 $sortname = $field->get_sort_sql($element);
-                // Add non-internal fields to sorties
+                // Add non-internal fields to sorties.
                 if (!($field instanceof \mod_dataform\pluginbase\dataformfield_internal)) {
                     $sorties[$fieldid] = $sortname;
                 }
                 $orderby[] = "$sortname ". ($sortdir ? 'DESC' : 'ASC');
 
-                // Register join field if applicable
+                // Register join field if applicable.
                 $this->register_join_field($field);
             }
         }
 
-        // Compile sql for sort settings
+        // Compile sql for sort settings.
         $sorttables = '';
         $wheresort = '';
         $sortorder = '';
@@ -432,7 +432,7 @@ class dataformfilter {
             if ($sorties) {
                 $sortfrom = array_keys($sorties);
                 foreach ($sortfrom as $fieldid) {
-                    // Add only tables which are not already added
+                    // Add only tables which are not already added.
                     if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
                         $this->_filteredtables[] = $fieldid;
                         list($fromsql, ) = $fields[$fieldid]->get_sort_from_sql();
@@ -513,11 +513,14 @@ class dataformfilter {
      */
     public function get_join_sql($fields) {
 
-        $whatjoin = ' '; // List of field ids whose content should be fetched in the main query
-        $jointables = ' '; // List of content tables to include in the main query
+        // List of field ids whose content should be fetched in the main query.
+        $whatjoin = ' ';
+        // List of content tables to include in the main query.
+        $jointables = ' ';
+
         $params = array();
 
-        // Joins should have been registerec in get_content_sql
+        // Joins should have been registerec in get_content_sql.
         if (!$this->_joins) {
             return array($whatjoin, $jointables, $params);
         }
@@ -525,7 +528,7 @@ class dataformfilter {
         $whatjoin = array();
         $joinfrom = array();
 
-        // Process join fields
+        // Process join fields.
         foreach ($this->_joins as $fieldid) {
             if (empty($fields[$fieldid])) {
                 continue;
@@ -580,7 +583,7 @@ class dataformfilter {
                     unset($sorties[$fieldid]);
                 }
             }
-            // Prepend remaining sorties
+            // Prepend remaining sorties.
             if ($sorties) {
                 $sortoptions = $sortoptions + $sorties;
             }
@@ -617,7 +620,7 @@ class dataformfilter {
             }
             $this->customsearch = serialize($searchoptions);
         } else {
-            // Quick search expects a string
+            // Quick search expects a string.
             $this->search = $searchies;
         }
     }

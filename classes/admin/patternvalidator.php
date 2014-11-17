@@ -104,7 +104,7 @@ class patternvalidator {
             }
         }
 
-        // No problems
+        // No problems.
         if (!$brokenpatterns) {
             return $OUTPUT->notification(get_string('patternsnonebroken', 'dataform'), 'notifysuccess');
         }

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
  *
  */
 class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
-    // content - file manager
+    // Content - file manager
     // content1 - alt name
-    // content2 - download counter
+    // content2 - download counter.
 
     /**
      * Returns appearance settings from param4
@@ -71,14 +71,14 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
             }
         }
 
-        // store uploaded files
+        // Store uploaded files.
         $contentid = isset($entry->{"c{$this->id}_id"}) ? $entry->{"c{$this->id}_id"} : null;
         $draftarea = $filemanager;
         $usercontext = context_user::instance($USER->id);
 
         $fs = get_file_storage();
         if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftarea, 'sortorder', false)) {
-            // there are files to upload so add/update content record
+            // There are files to upload so add/update content record.
             $rec = new object;
             $rec->fieldid = $fieldid;
             $rec->entryid = $entryid;
@@ -92,7 +92,7 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
                 $DB->update_record('dataform_contents', $rec);
             }
 
-            // now save files
+            // Now save files.
             $options = array('subdirs' => 0,
                                 'maxbytes' => $this->param1,
                                 'maxfiles' => $this->param2,
@@ -103,7 +103,7 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
             $this->update_content_files($contentid);
 
         } else if (!empty($contentid) and !$savenew) {
-            // user cleared files from the field
+            // User cleared files from the field.
             $this->delete_content($entryid);
         }
         return true;
@@ -134,24 +134,24 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
 
         $fieldid = $this->id;
 
-        // Only one imported pattern ''
+        // Only one imported pattern ''.
         $settings = reset($importsettings);
 
         static $draftid;
         $fs = get_file_storage();
         $usercontext = context_user::instance($USER->id);
 
-        // Upload files done only once
+        // Upload files done only once.
         if (!$draftid) {
             $draftid = file_get_unused_draft_itemid();
             $zipdraftid = $settings['filepicker'];
 
             if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $zipdraftid, 'sortorder', false)) {
                 $zipfile = reset($files);
-                // extract files to the draft area
+                // Extract files to the draft area.
                 $zipper = get_file_packer('application/zip');
                 $zipfile->extract_to_storage($zipper, $usercontext->id, 'user', 'draft', $draftid, '/');
-                // $zipfile->delete();
+                // $zipfile->delete();.
             }
         }
 

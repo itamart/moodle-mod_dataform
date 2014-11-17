@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@ require_once('../../../config.php');
 
 $urlparams = new stdClass;
 
-$urlparams->d          = optional_param('d', 0, PARAM_INT);             // dataform id
-$urlparams->id         = optional_param('id', 0, PARAM_INT);            // course module id
+$urlparams->d          = optional_param('d', 0, PARAM_INT);
+$urlparams->id         = optional_param('id', 0, PARAM_INT);
 
-// filters list actions
+// Filters list actions.
 $urlparams->default    = optional_param('default', 0, PARAM_INT);  // id of filter to default
 $urlparams->showhide    = optional_param('showhide', 0, PARAM_SEQUENCE);     // filter ids (comma delimited) to hide/show
 $urlparams->delete     = optional_param('delete', 0, PARAM_SEQUENCE);   // filter ids (comma delim) to delete
@@ -35,30 +35,35 @@ $urlparams->duplicate  = optional_param('duplicate', 0, PARAM_SEQUENCE);   // fi
 
 $urlparams->confirmed  = optional_param('confirmed', 0, PARAM_INT);
 
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
 $df->require_manage_permission('filters');
 
 $df->set_page('filter/index', array('urlparams' => $urlparams));
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/filter/index.php', array('id' => $df->cm->id)));
 
 $fm = mod_dataform_filter_manager::instance($df->id);
 
-// DATA PROCESSING
-if ($urlparams->duplicate and confirm_sesskey()) {  // Duplicate any requested filters
+// DATA PROCESSING.
+if ($urlparams->duplicate and confirm_sesskey()) {
+    // Duplicate any requested filters.
     $fm->process_filters('duplicate', $urlparams->duplicate, $urlparams->confirmed);
 
-} else if ($urlparams->delete and confirm_sesskey()) { // Delete any requested filters
+} else if ($urlparams->delete and confirm_sesskey()) {
+    // Delete any requested filters.
     $fm->process_filters('delete', $urlparams->delete, $urlparams->confirmed);
 
-} else if ($urlparams->showhide and confirm_sesskey()) {    // set filter's visibility
-    $fm->process_filters('visible', $urlparams->showhide, true);    // confirmed by default
+} else if ($urlparams->showhide and confirm_sesskey()) {
+    // Set filter's visibility (confirmed by default).
+    $fm->process_filters('visible', $urlparams->showhide, true);
 
-} else if ($urlparams->default and confirm_sesskey()) {  // set filter to default
+} else if ($urlparams->default and confirm_sesskey()) {
+    // Set filter to default.
     if ($urlparams->default == -1) {
-        $df->update((object) array('defaultfilter' => 0));    // reset
+        // Reset.
+        $df->update((object) array('defaultfilter' => 0));
     } else {
         $df->update((object) array('defaultfilter' => $urlparams->default));
     }
@@ -72,10 +77,10 @@ if (!$filters = $fm->get_filters(null, false, true)) {
 $output = $df->get_renderer();
 echo $output->header(array('tab' => 'filters', 'heading' => $df->name, 'urlparams' => $urlparams));
 
-// Display add new filter link
+// Display add new filter link.
 echo $output->add_filter_link();
 
-// Display admin style list of filters
+// Display admin style list of filters.
 echo $output->filters_admin_list();
 
 echo $output->footer();

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $fieldname = $this->_field->name;
         $replacements = array_fill_keys(array_keys($patterns), '');
 
-        // View patterns or editing new entry, so no replacements
+        // View patterns or editing new entry, so no replacements.
         if ($entry and $entry->id < 0) {
             return $replacements;
         }
@@ -58,20 +58,20 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         foreach ($patterns as $pattern) {
             $str = '';
             if (strpos($pattern, "[[$fieldname:more:") === 0 and !$editing) {
-                // more for each view
+                // More for each view.
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_more($entry, array('view' => $viewname));
             } else if (strpos($pattern, "[[$fieldname:moreurl:") === 0) {
-                // moreurl for each view
+                // Moreurl for each view.
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_more($entry, array('view' => $viewname, 'url' => 1));
             } else if (strpos($pattern, "[[$fieldname:edit:") === 0 and !$editing) {
-                // edit for each view
+                // Edit for each view.
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_edit($entry, array('view' => $viewname));
             } else {
                 switch ($pattern) {
-                    // reference
+                    // Reference.
                     case "[[$fieldname:more]]":
                         $str = !$editing ? $this->display_more($entry) : '';
                         break;
@@ -82,7 +82,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                         $str = html_writer::tag('a', '', array('name' => "entry$entry->id"));
                         break;
 
-                    // Actions
+                    // Actions.
                     case "[[$fieldname:actionmenu]]":
                         $str = !$editing ? $this->display_action_menu($entry) : '';
                         break;
@@ -102,7 +102,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                         $str = !$editing ? $this->display_duplicate($entry) : '';
                         break;
 
-                    // Bulk action
+                    // Bulk action.
                     case "[[$fieldname:selectallnone]]":
                         $str = $this->display_select_all_none($options);
                         break;
@@ -125,7 +125,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             $replacements[$pattern] = $str;
         }
 
-        // Remove the selector if no actions
+        // Remove the selector if no actions.
         if (!$editing and !empty($replacements["[[$fieldname:select]]"])) {
             if (empty($replacements["[[$fieldname:edit]]"])
                     and empty($replacements["[[$fieldname:delete]]"])
@@ -230,26 +230,26 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $menu = new action_menu();
         $menu->set_menu_trigger($OUTPUT->pix_icon('t/contextmenu', ''));
-        // Edit
+        // Edit.
         if ($action = $this->display_edit($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
-        // More
+        // More.
         if ($action = $this->display_more($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
 
-        // Duplicate
+        // Duplicate.
         if ($action = $this->display_duplicate($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
 
-        // Export
+        // Export.
         if ($action = $this->display_export($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
 
-        // Delete
+        // Delete.
         if ($action = $this->display_delete($entry, array('actionmenu' => 1))) {
             $menu->add_secondary_action($action);
         }
@@ -276,7 +276,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             $viewname = $currentview->name;
         }
         if (!empty($options['view'])) {
-            // Designated view from pattern
+            // Designated view from pattern.
             if ($viewid = array_search($options['view'], $views)) {
                 $viewname = $options['view'];
                 $url->param('view', $viewid);
@@ -285,7 +285,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             $viewid = $entry->baseurl->param('view');
         }
 
-        // Check update permissions for target view
+        // Check update permissions for target view.
         $accessparams = array('dataformid' => $field->dataid, 'viewid' => $viewid, 'entry' => $entry);
         if (!mod_dataform\access\entry_update::validate($accessparams)) {
             return '';
@@ -313,7 +313,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         );
         $url = new moodle_url($entry->baseurl, $params);
         if (!empty($options['view'])) {
-            // Designated view from pattern
+            // Designated view from pattern.
             if ($views = $this->get_views_menu()) {
                 if ($viewid = array_search($options['view'], $views)) {
                     $url->param('ret', $url->param('view'));
@@ -321,7 +321,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                 }
             }
         } else if ($targetview = $field->get_target_view('more')) {
-            // Designated view from default single
+            // Designated view from default single.
             $url->param('ret', $url->param('view'));
             $url->param('view', $targetview);
         }
@@ -370,7 +370,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $field = $this->_field;
 
-        // Check delete permissions for target view
+        // Check delete permissions for target view.
         $viewid = !empty($entry->baseurl) ? $entry->baseurl->param('view') : 0;
         $accessparams = array('dataformid' => $field->dataid, 'viewid' => $viewid, 'entry' => $entry);
         if (!mod_dataform\access\entry_delete::validate($accessparams)) {
@@ -448,7 +448,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $cat = get_string('pluginname', 'dataformfield_entryactions');
 
-        // actions
+        // Actions.
         $patterns["[[$fieldname:actionmenu]]"] = array(true, $cat);
         $patterns["[[$fieldname:edit]]"] = array(true, $cat);
         $patterns["[[$fieldname:delete]]"] = array(true, $cat);
@@ -456,12 +456,12 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $patterns["[[$fieldname:export]]"] = array(true, $cat);
         $patterns["[[$fieldname:duplicate]]"] = array(true, $cat);
 
-        // reference
+        // Reference.
         $patterns["[[$fieldname:anchor]]"] = array(true, $cat);
         $patterns["[[$fieldname:more]]"] = array(true, $cat);
         $patterns["[[$fieldname:moreurl]]"] = array(true, $cat);
 
-        // Hidden patterns for view designated more and edit
+        // Hidden patterns for view designated more and edit.
         if ($views = $this->get_views_menu()) {
             foreach ($views as $viewname) {
                 $patterns["[[$fieldname:more:$viewname]]"] = array(false);

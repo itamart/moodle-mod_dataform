@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,29 +35,28 @@ class dataformruleform_helper {
 
         $paramtext = (!empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN);
 
-        // -------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // name
+        // Name.
         $mform->addElement('text', $prefix. 'name', get_string('name'), array('size' => '32'));
         $mform->addRule($prefix. 'name', null, 'required', null, 'client');
         $mform->setType($prefix. 'name', $paramtext);
 
-        // description
+        // Description.
         $mform->addElement('text', $prefix. 'description', get_string('description'), array('size' => '64'));
         $mform->setType($prefix. 'description', PARAM_CLEAN);
 
-        // enabled
+        // Enabled.
         $mform->addElement('selectyesno', $prefix. 'enabled', get_string('ruleenabled', 'dataform'));
         $mform->setDefault($prefix. 'enabled', 1);
 
-        // Time from
+        // Time from.
         $mform->addElement('date_time_selector', $prefix. 'timefrom', get_string('from'), array('optional' => true));
 
-        // Time to
+        // Time to.
         $mform->addElement('date_time_selector', $prefix. 'timeto', get_string('to'), array('optional' => true));
 
-        // Views
+        // Views.
         $options = array(0 => get_string('all'), 1 => get_string('selected', 'form'));
         $mform->addElement('select', $prefix. 'viewselection', get_string('views', 'dataform'), $options);
 
@@ -97,7 +96,7 @@ class dataformruleform_helper {
         }
         $mform->addElement('select', $prefix. 'filterid', get_string('filter', 'dataform'), $options);
 
-        // Custom filter
+        // Custom filter.
         self::custom_search_definition($mform, $dataformid, $customsearch);
     }
 
@@ -131,7 +130,7 @@ class dataformruleform_helper {
             'IN' => get_string('in', 'dataform'),
         );
 
-        // Add current options
+        // Add current options.
         $searchcriteria = array();
         if ($customsearch) {
             $searchfields = $customsearch;
@@ -157,12 +156,12 @@ class dataformruleform_helper {
             }
         }
 
-        // Add 3 more empty options
+        // Add 3 more empty options.
         $searchcriteria[] = array(null, null, null, null, null);
         $searchcriteria[] = array(null, null, null, null, null);
         $searchcriteria[] = array(null, null, null, null, null);
 
-        // Add form definition for each existing criterion
+        // Add form definition for each existing criterion.
         $fieldlabel = get_string('filtersearchfieldlabel', 'dataform');
         $count = 0;
         foreach ($searchcriteria as $searchcriterion) {
@@ -231,7 +230,7 @@ class dataformruleform_helper {
                 }
 
                 $i = (int) str_replace('searchandor', '', $var);
-                // check if trying to define a search criterion
+                // Check if trying to define a search criterion.
                 if ($searchandor = $formdata->{"searchandor$i"}) {
                     if ($searchelement = $formdata->{"searchfield$i"}) {
                         list($fieldid, $element) = explode(',', $searchelement);
@@ -239,12 +238,12 @@ class dataformruleform_helper {
                         $operator = isset($formdata->{"searchoperator$i"}) ? $formdata->{"searchoperator$i"} : '';
                         $value = isset($formdata->{"searchvalue$i"}) ? $formdata->{"searchvalue$i"} : '';
 
-                        // Don't add empty criteria on cleanup (unless operator is Empty and thus doesn't need search value)
+                        // Don't add empty criteria on cleanup (unless operator is Empty and thus doesn't need search value).
                         if ($operator and !$value) {
                             continue;
                         }
 
-                        // Aggregate by fieldid and searchandor,
+                        // Aggregate by fieldid and searchandor,.
                         if (!isset($searchfields[$fieldid])) {
                             $searchfields[$fieldid] = array();
                         }
@@ -269,7 +268,7 @@ class dataformruleform_helper {
     public static function general_validation($data, $files, $prefix = null) {
         $errors = array();
 
-        // Time from and time to
+        // Time from and time to.
         if (!empty($data[$prefix. 'timefrom']) and !empty($data[$prefix. 'timeto']) and $data[$prefix. 'timeto'] <= $data[$prefix. 'timefrom']) {
             $errors[$prefix. 'timeto'] = get_string('errorinvalidtimeto', 'dataform');
         }

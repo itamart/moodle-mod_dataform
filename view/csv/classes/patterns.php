@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class dataformview_csv_patterns extends mod_dataform\pluginbase\dataformviewpatt
         $found = parent::search($text, $patterns);
 
         if (!$patterns) {
-            // Regexp patterns
+            // Regexp patterns.
             if ($patterns = array_keys($this->patterns_expimp_label())) {
                 foreach ($patterns as $pattern) {
                     if (preg_match_all("/$pattern/", $text, $matches)) {

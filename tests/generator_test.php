@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         $df2->delete();
         $this->assertEquals(2, $DB->count_records('dataform'));
 
-        // Clean up
+        // Clean up.
         $dataformgenerator->delete_all_instances();
     }
 }

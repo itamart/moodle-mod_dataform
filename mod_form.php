@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform = &$this->_form;
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // name
+        // Name.
         $mform->addElement('text', 'name', get_string('name'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
@@ -65,7 +65,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->setDefault('name', get_string('dataformnew', 'dataform'));
 
-        // intro
+        // Intro.
         $this->add_intro_editor(false, get_string('description'));
     }
 
@@ -83,7 +83,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform = &$this->_form;
 
         $mform->addElement('header', 'coursedisplayhdr', get_string('appearance'));
-        // Activity icon
+        // Activity icon.
         $options = array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes, 'maxfiles' => 1, 'accepted_types' => array('image'));
         $draftitemid = file_get_submitted_draft_itemid('activityicon');
         file_prepare_draft_area($draftitemid, $this->context->id, 'mod_dataform', 'activityicon', 0, $options);
@@ -91,7 +91,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->setDefault('activityicon', $draftitemid);
         $mform->addHelpButton('activityicon', 'activityicon', 'mod_dataform');
 
-        // Displayed view
+        // Displayed view.
         $options = array(0 => get_string('choosedots'));
         if ($this->_instance) {
             if ($views = mod_dataform_view_manager::instance($this->_instance)->views_menu) {
@@ -101,7 +101,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addElement('select', 'inlineview', get_string('inlineview', 'mod_dataform'), $options);
         $mform->addHelpButton('inlineview', 'inlineview', 'mod_dataform');
 
-        // Embedded
+        // Embedded.
         $mform->addElement('selectyesno', 'embedded', get_string('embedded', 'mod_dataform'));
         $mform->addHelpButton('embedded', 'embedded', 'mod_dataform');
         $mform->disabledIf('embedded', 'inlineview', 'eq', 0);
@@ -114,22 +114,22 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform = &$this->_form;
         $mform->addElement('header', 'timinghdr', get_string('timing', 'dataform'));
 
-        // time available
+        // Time available.
         $mform->addElement('date_time_selector', 'timeavailable', get_string('timeavailable', 'dataform'), array('optional' => true));
         $mform->addHelpButton('timeavailable', 'timeavailable', 'mod_dataform');
 
-        // time due
+        // Time due.
         $mform->addElement('date_time_selector', 'timedue', get_string('timedue', 'dataform'), array('optional' => true));
         $mform->addHelpButton('timedue', 'timedue', 'mod_dataform');
         $mform->disabledIf('timedue', 'interval', 'gt', 0);
 
-        // Activity interval
+        // Activity interval.
         $mform->addElement('duration', 'timeinterval', get_string('timeinterval', 'dataform'));
         $mform->addHelpButton('timeinterval', 'timeinterval', 'mod_dataform');
         $mform->disabledIf('timeinterval', 'timeavailable[enabled]', 'notchecked');
         $mform->disabledIf('timeinterval', 'timedue[enabled]', 'checked');
 
-        // Number of intervals
+        // Number of intervals.
         $mform->addElement('select', 'intervalcount', get_string('intervalcount', 'dataform'), array_combine(range(1, 100), range(1, 100)));
         $mform->setDefault('intervalcount', 1);
         $mform->addHelpButton('intervalcount', 'intervalcount', 'mod_dataform');
@@ -150,28 +150,28 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addElement('header', 'entrysettingshdr', get_string('entries', 'dataform'));
 
         if ($CFG->dataform_maxentries > 0) {
-            // Admin limit, select from dropdown
+            // Admin limit, select from dropdown.
             $maxoptions = (array_combine(range(0, $CFG->dataform_maxentries), range(0, $CFG->dataform_maxentries)));
-            // Max entries
+            // Max entries.
             $mform->addElement('select', 'maxentries', get_string('entriesmax', 'dataform'), $maxoptions);
             $mform->setDefault('maxentries', $CFG->dataform_maxentries);
-            // Required entries
+            // Required entries.
             $mform->addElement('select', 'entriesrequired', get_string('entriesrequired', 'dataform'), array(0 => get_string('none')) + $maxoptions);
 
         } else {
-            // No limit or no entries
+            // No limit or no entries.
             $admindeniesentries = (int) !$CFG->dataform_maxentries;
             $mform->addElement('hidden', 'admindeniesentries', $admindeniesentries);
             $mform->setType('admindeniesentries', PARAM_INT);
 
-            // Max entries
+            // Max entries.
             $mform->addElement('text', 'maxentries', get_string('entriesmax', 'dataform'));
             $mform->setDefault('maxentries', -1);
             $mform->addRule('maxentries', null, 'numeric', null, 'client');
             $mform->setType('maxentries', PARAM_INT);
             $mform->disabledIf('maxentries', 'admindeniesentries', 'eq', 1);
 
-            // Required entries
+            // Required entries.
             $mform->addElement('text', 'entriesrequired', get_string('entriesrequired', 'dataform'));
             $mform->setDefault('entriesrequired', 0);
             $mform->addRule('entriesrequired', null, 'numeric', null, 'client');
@@ -183,16 +183,16 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addHelpButton('maxentries', 'entriesmax', 'mod_dataform');
         $mform->addHelpButton('entriesrequired', 'entriesrequired', 'mod_dataform');
 
-        // Force separate participants
+        // Force separate participants.
         $mform->addElement('selectyesno', 'individualized', get_string('separateparticipants', 'dataform'));
         $mform->addHelpButton('individualized', 'separateparticipants', 'dataform');
 
-        // Force group entries
+        // Force group entries.
         $mform->addElement('selectyesno', 'grouped', get_string('groupentries', 'dataform'));
         $mform->disabledIf('grouped', 'groupmode', 'eq', 0);
         $mform->addHelpButton('grouped', 'groupentries', 'mod_dataform');
 
-        // Force anonymous entries
+        // Force anonymous entries.
         if ($CFG->dataform_anonymous) {
             $mform->addElement('selectyesno', 'anonymous', get_string('anonymizeentries', 'dataform'));
             $mform->setDefault('anonymous', 0);
@@ -204,7 +204,7 @@ class mod_dataform_mod_form extends moodleform_mod {
             $mform->addHelpButton('anonymousna', 'anonymizeentries', 'mod_dataform');
         }
 
-        // time limit to manage an entry
+        // Time limit to manage an entry.
         $mform->addElement('text', 'timelimit', get_string('entrytimelimit', 'dataform'));
         $mform->setType('timelimit', PARAM_INT);
         $mform->setDefault('timelimit', -1);
@@ -220,7 +220,7 @@ class mod_dataform_mod_form extends moodleform_mod {
 
         $mform->setDefault('grade', 0);
 
-        // Grading formula
+        // Grading formula.
         $mform->addElement('textarea', 'gradecalc', get_string('calculation', 'grades'));
         $mform->setDefault('gradecalc', '');
         $mform->disabledIf('gradecalc', 'grade', 'eq', 0);
@@ -235,7 +235,7 @@ class mod_dataform_mod_form extends moodleform_mod {
     public function add_completion_rules() {
         $mform =& $this->_form;
 
-        // Required entries
+        // Required entries.
         $group = array();
         $group[] =& $mform->createElement('checkbox', 'completionentriesenabled', '', get_string('completionentries', 'dataform'));
         $group[] =& $mform->createElement('text', 'completionentries', '', array('size' => 3));
@@ -243,7 +243,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->addGroup($group, 'completionentriesgroup', get_string('completionentriesgroup', 'dataform'), array(' '), false);
         $mform->disabledIf('completionentries', 'completionentriesenabled', 'notchecked');
 
-        // Required specific grade
+        // Required specific grade.
         $specificgradestr = get_string('completionspecificgrade', 'dataform');
         $specificgradegroupstr = get_string('completionspecificgradegroup', 'dataform');
         $group = array();
@@ -254,7 +254,7 @@ class mod_dataform_mod_form extends moodleform_mod {
                 $range = range($this->current->grade, 1);
                 $options = array_combine($range, $range);
             } else {
-                // Custom scale
+                // Custom scale.
                 $scale = grade_scale::fetch(array('id' => -$this->current->grade));
                 $options = $scale->load_items();
             }
@@ -317,7 +317,7 @@ class mod_dataform_mod_form extends moodleform_mod {
             $data->intervalcount = 1;
         }
 
-        // Turn off completion settings if the checkboxes aren't ticked
+        // Turn off completion settings if the checkboxes aren't ticked.
         if (!empty($data->completionunlocked)) {
             $autocompletion = (!empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC);
             if (empty($data->completionentriesenabled) or !$autocompletion) {
@@ -336,7 +336,7 @@ class mod_dataform_mod_form extends moodleform_mod {
                         $data->completionspecificgrade = $data->grade;
                     }
                 } else {
-                    // Custom scale
+                    // Custom scale.
                     $scale = grade_scale::fetch(array('id' => -$data->grade));
                     $numitems = count($scale->load_items());
                     if ($data->completionspecificgrade > $numitems) {
@@ -355,14 +355,14 @@ class mod_dataform_mod_form extends moodleform_mod {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Completion
+        // Completion.
         if (!empty($errors['completion'])) {
             return $errors;
         }
 
         $autocomletion = (isset($data['completion']) and $data['completion'] == COMPLETION_TRACKING_AUTOMATIC);
         if ($autocomletion) {
-            // Automatic on-view completion can not work together with 'Inline view' option
+            // Automatic on-view completion can not work together with 'Inline view' option.
             if (!empty($data['completionview']) and !empty($data['inlineview'])) {
                 $errors['completion'] = get_string('noautocompletioninline', 'mod_dataform');
             }

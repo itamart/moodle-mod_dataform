@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
         $fieldid = $field->id;
         $fieldname = $field->name;
 
-        // Only [[fieldname]] can be imported
+        // Only [[fieldname]] can be imported.
         if ($patternname != $fieldname) {
             return array(array(), array());
         }

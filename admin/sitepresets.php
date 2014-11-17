@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,24 +26,26 @@ require_once("$CFG->libdir/adminlib.php");
 
 $urlparams = new stdClass;
 
-// presets list actions
-$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);   // ids of presets to delete
-$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);     // ids of presets to download in one zip
+// Presets list actions.
+// Ids of presets to delete.
+$urlparams->delete = optional_param('delete', '', PARAM_SEQUENCE);
+// Ids of presets to download in one zip.
+$urlparams->download = optional_param('download', '', PARAM_SEQUENCE);
 $urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 admin_externalpage_setup('moddataform_sitepresets');
 
 $pm = new mod_dataform_preset_manager(0);
 
-// DATA PROCESSING
+// DATA PROCESSING.
 $pm->process_presets($urlparams);
 
 echo $OUTPUT->header();
 
-// print the preset form
+// Print the preset form.
 $pm->print_preset_form();
 
-// if there are presets print admin style list of them
+// If there are presets print admin style list of them.
 echo html_writer::tag('h4', get_string('presetavailableinsite', 'dataform'));
 $presets = $pm->get_user_presets($pm::PRESET_SITEAREA);
 echo $pm->get_site_presets_list($presets);

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,10 +50,10 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
 
             list(, $patternstate) = explode(':', trim($pattern, '[]'), 2);
             if ($patternstate == 'state') {
-                // Current state
+                // Current state.
                 $replacements[$pattern] = $this->get_state_display($entry);
             } else if ($statekey = array_search($patternstate, $statenames) or $statekey !== false) {
-                // Existing state
+                // Existing state.
                 $replacements[$pattern] = $this->get_state_display($entry, $statekey);
             } else if ($patternstate == 'bulkinstate') {
                 $replacements[$pattern] = '';
@@ -90,7 +90,7 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
 
         if ($html = $this->get_browse_content($entry)) {
             $field = $this->_field;
-            // Initialize AJAX
+            // Initialize AJAX.
             $config = array(
                 'd' => $field->df->id,
                 'fieldid' => $field->id,
@@ -155,7 +155,7 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
      * to allow only the base pattern.
      */
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
-        // Only [[fieldname]] can be imported
+        // Only [[fieldname]] can be imported.
         if ($patternname != $this->_field->name) {
             return array(array(), array());
         }

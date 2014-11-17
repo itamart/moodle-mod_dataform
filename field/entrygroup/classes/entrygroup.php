@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
 
         $groupid = 0;
 
-        // Group id
+        // Group id.
         if (!empty($importsettings['id'])) {
             $setting = $importsettings['id'];
             if (!empty($setting['name'])) {
@@ -68,7 +68,7 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
             return $data;
         }
 
-        // Group idnumber
+        // Group idnumber.
         if (!empty($importsettings['idnumber'])) {
             $setting = $importsettings['idnumber'];
             if (!empty($setting['name'])) {

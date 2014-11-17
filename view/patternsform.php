@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,14 +37,12 @@ class mod_dataform_view_patternsform extends moodleform {
         $patterns = $this->_customdata['patterns'];
         $mform = &$this->_form;
 
-        // Patterns
-        // -------------------------------------------------------------------------------
+        // Patterns.
         foreach ($patterns as $key => $pattern) {
             $this->definition_pattern_replacement($key, $pattern);
         }
 
-        // action buttons
-        // -------------------------------------------------------------------------------
+        // Action buttons.
         $this->add_action_buttons();
     }
 
@@ -75,7 +73,7 @@ class mod_dataform_view_patternsform extends moodleform {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // Collate pattern replacements
+            // Collate pattern replacements.
             $replacements = array();
             $i = 0;
 

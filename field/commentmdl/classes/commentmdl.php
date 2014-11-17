@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ class dataformfield_commentmdl_commentmdl extends mod_dataform\pluginbase\datafo
 
         $oldname = $this->name;
         if (parent::update($data)) {
-            // Adjust comment area in comment records
+            // Adjust comment area in comment records.
             if ($oldname != $this->name) {
                 $context = $this->df->context;
                 if ($comments = $DB->get_records('comments', array('contextid' => $context->id, 'commentarea' => $oldname))) {
@@ -50,7 +50,7 @@ class dataformfield_commentmdl_commentmdl extends mod_dataform\pluginbase\datafo
      * Delete a field completely
      */
     public function delete() {
-        // Delete the comments
+        // Delete the comments.
         $params = array(
             'contextid' => $this->df->context->id,
             'commentarea' => $this->name
@@ -83,38 +83,38 @@ class dataformfield_commentmdl_commentmdl extends mod_dataform\pluginbase\datafo
     public function validation($params) {
         global $DB, $USER;
 
-        // Validate context
+        // Validate context.
         if (empty($params->context) or $params->context->id != $this->df->context->id) {
             throw new comment_exception('invalidcontextid', 'dataform');
         }
 
-        // Validate course
+        // Validate course.
         if ($params->courseid != $this->df->course->id) {
             throw new comment_exception('invalidcourseid', 'dataform');
         }
 
-        // Validate cm
+        // Validate cm.
         if ($params->cm->id != $this->df->cm->id) {
             throw new comment_exception('invalidcmid', 'dataform');
         }
 
-        // validate comment area
+        // Validate comment area
         // if ($params->commentarea != $this->name) {
             // throw new comment_exception('invalidcommentarea');
-        // }
+        // }.
 
-        // validation for non-comment-managers
+        // Validation for non-comment-managers.
         if (!has_capability('mod/dataform:managecomments', $this->df->context)) {
 
-            // non-comment-managers can add/view comments on their own entries
-            // but require df->comments for add/view on other entries (excluding grading entries)
+            // Non-comment-managers can add/view comments on their own entries
+            // but require df->comments for add/view on other entries (excluding grading entries).
 
-            // validate entry
+            // Validate entry.
             if (!$entry = $DB->get_record('dataform_entries', array('id' => $params->itemid))) {
                 throw new comment_exception('invalidcommentitemid');
             }
 
-            // group access
+            // Group access.
             if ($entry->groupid) {
                 $groupmode = groups_get_activity_groupmode($this->df->cm, $this->df->course);
                 if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $this->df->context)) {
@@ -125,7 +125,7 @@ class dataformfield_commentmdl_commentmdl extends mod_dataform\pluginbase\datafo
             }
         }
 
-        // validation for comment deletion
+        // Validation for comment deletion.
         if (!empty($params->commentid)) {
             if ($comment = $DB->get_record('comments', array('id' => $params->commentid))) {
                 if ($comment->commentarea != $this->name) {

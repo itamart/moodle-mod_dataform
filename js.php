@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@
 require_once('../../config.php');
 
 $urlparams = new object;
-$urlparams->d = optional_param('d', 0, PARAM_INT);   // dataform id
-$urlparams->id = optional_param('id', 0, PARAM_INT);   // course module id
+$urlparams->d = optional_param('d', 0, PARAM_INT);
+$urlparams->id = optional_param('id', 0, PARAM_INT);
 $urlparams->jsedit = optional_param('jsedit', 0, PARAM_BOOL);   // edit mode
 
 if ($urlparams->jsedit) {
@@ -42,23 +42,21 @@ if ($urlparams->jsedit) {
 
             $mform = &$this->_form;
 
-            // buttons
-            // -------------------------------------------------------------------------------
+            // Buttons.
             $this->add_action_buttons(true);
 
-            // js
-            // -------------------------------------------------------------------------------
+            // Js.
             $mform->addElement('header', 'generalhdr', get_string('headerjs', 'dataform'));
 
-            // includes
+            // Includes.
             $attributes = array('wrap' => 'virtual', 'rows' => 3, 'style' => 'width:95%');
             $mform->addElement('textarea', 'jsincludes', get_string('jsincludes', 'dataform'), $attributes);
 
-            // code
+            // Code.
             $attributes = array('wrap' => 'virtual', 'rows' => 5, 'style' => 'width:95%');
             $mform->addElement('textarea', 'js', get_string('jscode', 'dataform'), $attributes);
 
-            // uploads
+            // Uploads.
             $options = array(
                 'subdirs' => 0,
                 'maxbytes' => $COURSE->maxbytes,
@@ -67,20 +65,19 @@ if ($urlparams->jsedit) {
             );
             $mform->addElement('filemanager', 'jsupload', get_string('jsupload', 'dataform'), null, $options);
 
-            // buttons
-            // -------------------------------------------------------------------------------
+            // Buttons.
             $this->add_action_buttons(true);
         }
 
     }
 
-    // Set a dataform object
+    // Set a dataform object.
     $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
     $df->require_manage_permission('js');
 
     $df->set_page('js', array('urlparams' => $urlparams));
 
-    // activate navigation node
+    // Activate navigation node.
     navigation_node::override_active_url(new moodle_url('/mod/dataform/js.php', array('id' => $df->cm->id, 'jsedit' => 1)));
 
     $mform = new mod_dataform_js_form(new moodle_url('/mod/dataform/js.php', array('d' => $df->id, 'jsedit' => 1)));
@@ -91,7 +88,7 @@ if ($urlparams->jsedit) {
         $rec->jsincludes = $data->jsincludes;
         $df->update($rec, get_string('jssaved', 'dataform'));
 
-        // add uploaded files
+        // Add uploaded files.
         $options = array(
             'subdirs' => 0,
             'maxbytes' => $COURSE->maxbytes,
@@ -121,8 +118,8 @@ if ($urlparams->jsedit) {
     echo $output->footer();
 
 } else {
-
-    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true); // session not used here
+    // Session not used here.
+    defined('NO_MOODLE_COOKIES') or define('NO_MOODLE_COOKIES', true);
 
     $lifetime  = 600;                                   // Seconds to cache this stylesheet
 

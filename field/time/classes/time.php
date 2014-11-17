@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,12 +51,12 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
         $fieldid = $this->id;
         $oldcontents = array();
         $contents = array();
-        // old contents
+        // Old contents.
         if (isset($entry->{"c{$fieldid}_content"})) {
             $oldcontents[] = $entry->{"c{$fieldid}_content"};
         }
 
-        // new contents
+        // New contents.
         $timestamp = null;
         if (!empty($values)) {
             if (count($values) === 1) {
@@ -64,11 +64,11 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
             }
 
             if (!is_array($values)) {
-                // assuming timestamp is passed (e.g. in import)
+                // Assuming timestamp is passed (e.g. in import).
                 $timestamp = $values;
 
             } else {
-                // assuming any of year, month, day, hour, minute is passed
+                // Assuming any of year, month, day, hour, minute is passed.
                 $enabled = $year = $month = $day = $hour = $minute = 0;
                 foreach ($values as $name => $val) {
                     if (!empty($name)) {          // the time unit
@@ -118,7 +118,7 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
      * @return bool
      */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
-        // Import only from csv
+        // Import only from csv.
         if (!$csvrecord) {
             return $data;
         }
@@ -138,11 +138,11 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
                 if (((string) (int) $timestr === $timestr)
                         && ($timestr <= PHP_INT_MAX)
                         && ($timestr >= ~PHP_INT_MAX)) {
-                    // It's a timestamp
+                    // It's a timestamp.
                     $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
 
                 } else if ($timestr = strtotime($timestr)) {
-                    // It's a valid time string
+                    // It's a valid time string.
                     $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
                 }
             }

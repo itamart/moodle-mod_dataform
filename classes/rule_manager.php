@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,12 +38,12 @@ abstract class mod_dataform_rule_manager {
     /** @var array List of rule (block) ids by field name */
     protected $_fieldrules = null;
 
-    // construct
+    // Construct.
     public function __construct($dataformid) {
         $this->_dataformid = $dataformid;
     }
 
-    // RULE MANAGEMENT
+    // RULE MANAGEMENT.
 
     /**
      *
@@ -108,10 +108,10 @@ abstract class mod_dataform_rule_manager {
                 foreach ($blockplugins as $name) {
                     if (strpos($name, $component) !== 0) {
                         if ($this->_ruletypes) {
-                            // Found all candidates
+                            // Found all candidates.
                             break;
                         } else {
-                            // Keep looking
+                            // Keep looking.
                             continue;
                         }
                     }
@@ -180,7 +180,7 @@ abstract class mod_dataform_rule_manager {
             return $this->_rules;
         }
 
-        // Get the list of rule subplugins
+        // Get the list of rule subplugins.
         if (!$ruletypes = $this->get_types()) {
             return null;
         }
@@ -188,7 +188,7 @@ abstract class mod_dataform_rule_manager {
         $cat = $this->get_category();
         $component = "dataform$cat";
 
-        // Get the block instances
+        // Get the block instances.
         $context = mod_dataform_dataform::instance($this->_dataformid)->context;
 
         $this->_rules = array();
@@ -215,7 +215,7 @@ abstract class mod_dataform_rule_manager {
                 $this->_rules[$instanceid] = $rule;
                 $this->_typerules[$typename][$instanceid] = $instanceid;
 
-                // View rules
+                // View rules.
                 if ($views = $rule->get_applicable_views()) {
                     foreach ($views as $viewname) {
                         if (empty($this->_viewrules[$viewname])) {
@@ -225,7 +225,7 @@ abstract class mod_dataform_rule_manager {
                     }
                 }
 
-                // Field rules
+                // Field rules.
                 if ($fields = $rule->get_applicable_fields()) {
                     foreach ($fields as $fieldname) {
                         if (empty($this->_fieldrules[$fieldname])) {

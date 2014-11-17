@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
                     continue;
                 }
                 $required = $this->is_required($pattern);
-                // Determine whether date only selector
+                // Determine whether date only selector.
                 $date = (($cleanpattern == "[[$fieldname:date]]") or $field->date_only);
                 $options = array('required' => $required, 'date' => $date);
                 $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $options));
@@ -52,11 +52,11 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
             return $replacements;
         }
 
-        // Browse mod
+        // Browse mod.
         foreach ($patterns as $pattern => $cleanpattern) {
-            // Determine display format
+            // Determine display format.
             $format = (strpos($pattern, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($pattern, '[]')) : $field->display_format);
-            // For specialized patterns convert format to the userdate format string
+            // For specialized patterns convert format to the userdate format string.
             switch ($format) {
                 case 'date':
                     $format = get_string('strftimedate', 'langconfig');
@@ -144,21 +144,21 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
 
         $includetime = empty($options['date']) ? true : false;
 
-        // If date only don't add time to selector
+        // If date only don't add time to selector.
         $time = $includetime ? 'time_' : '';
         $tmoptions = array();
-        // Optional
+        // Optional.
         $tmoptions['optional'] = (!empty($options['required']) ? false : true);
-        // Start year
+        // Start year.
         if ($field->start_year) {
             $tmoptions['startyear'] = $field->start_year;
         }
-        // End year
+        // End year.
         if ($field->stop_year) {
             $tmoptions['stopyear'] = $field->stop_year;
         }
         $mform->addElement("date_{$time}selector", $fieldname, null, $tmoptions);
-        // $mform->addRule($fieldname, null, 'required', null, 'client');
+        // $mform->addRule($fieldname, null, 'required', null, 'client');.
         $mform->setDefault($fieldname, $content);
     }
 
@@ -198,7 +198,7 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $grp[] = &$mform->createElement('select', "{$fieldname}[month]", null, array(0 => $maskmonth) + $months);
         $grp[] = &$mform->createElement('select', "{$fieldname}[year]", null, array(0 => $maskyear) + $years);
 
-        // If time add hours and minutes
+        // If time add hours and minutes.
         if ($includetime) {
             $maskhour = get_string('hour', 'dataformfield_time');
             $maskminute = get_string('minute', 'dataformfield_time');
@@ -217,19 +217,19 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         }
 
         $mform->addGroup($grp, "grp$fieldname", null, '', false);
-        // Set field values
+        // Set field values.
         if ($content) {
             list($day, $month, $year, $hour, $minute) = explode(':', date('d:n:Y:G:i', $content));
             $mform->setDefault("{$fieldname}[day]", (int) $day);
             $mform->setDefault("{$fieldname}[month]", (int) $month);
             $mform->setDefault("{$fieldname}[year]", (int) $year);
-            // Defaults for time
+            // Defaults for time.
             if ($includetime) {
                 $mform->setDefault("{$fieldname}[hour]", (int) $hour);
                 $mform->setDefault("{$fieldname}[minute]", (int) $minute);
             }
         }
-        // Add enabled fake field
+        // Add enabled fake field.
         $mform->addElement('hidden', "{$fieldname}[enabled]", 1);
         $mform->setType("{$fieldname}[enabled]", PARAM_INT);
     }
@@ -243,19 +243,19 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
         $patterns = parent::patterns();
         $patterns["[[$fieldname]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:date]]"] = array(true, $fieldname);
-        // Minute (M)
+        // Minute (M).
         $patterns["[[$fieldname:minute]]"] = array(false);
-        // Hour (H)
+        // Hour (H).
         $patterns["[[$fieldname:hour]]"] = array(false);
-        // Day (a)
+        // Day (a).
         $patterns["[[$fieldname:day]]"] = array(false);
         $patterns["[[$fieldname:d]]"] = array(false);
-        // Week (W)
+        // Week (W).
         $patterns["[[$fieldname:week]]"] = array(false);
-        // Month (b)
+        // Month (b).
         $patterns["[[$fieldname:month]]"] = array(false);
         $patterns["[[$fieldname:m]]"] = array(false);
-        // Year (G)
+        // Year (G).
         $patterns["[[$fieldname:year]]"] = array(false);
         $patterns["[[$fieldname:Y]]"] = array(false);
 

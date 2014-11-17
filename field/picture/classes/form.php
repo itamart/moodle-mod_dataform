@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $field = &$this->_field;
         $mform = &$this->_form;
 
-        // Appearance
+        // Appearance.
         $mform->addElement('header', 'appearancehdr', get_string('appearance'));
         $mform->setExpanded('appearancehdr');
 
-        // Files separator (param4)
+        // Files separator (param4).
         $options = array(
             '' => get_string('none'),
             '<br />' => get_string('newline', 'dataformfield_file')
@@ -43,7 +43,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->addHelpButton('separator', 'filesseparator', 'dataformfield_file');
         $mform->setDefault('separator', $field->appearance->separator);
 
-        // Display WxH
+        // Display WxH.
         $grp = array();
         $grp[] = &$mform->createElement('text', 'dispw', null, array('size' => '4', 'style' => 'width:inherit;'));
         $grp[] = &$mform->createElement('text', 'disph', null, array('size' => '4', 'style' => 'width:inherit;'));
@@ -57,7 +57,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->setDefault('disph', $field->appearance->disph);
         $mform->setDefault('dispu', $field->appearance->dispu);
 
-        // Max pic dimensions (crop if needed)
+        // Max pic dimensions (crop if needed).
         $grp = array();
         $grp[] = &$mform->createElement('text', 'maxw', null, array('size' => '4', 'style' => 'width:inherit;'));
         $grp[] = &$mform->createElement('text', 'maxh', null, array('size' => '4', 'style' => 'width:inherit;'));
@@ -69,7 +69,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->setDefault('maxw', $field->appearance->maxw);
         $mform->setDefault('maxh', $field->appearance->maxh);
 
-        // Thumbnail dimensions (crop if needed)
+        // Thumbnail dimensions (crop if needed).
         $grp = array();
         $grp[] = &$mform->createElement('text', 'thumbw', null, array('size' => '4', 'style' => 'width:inherit;'));
         $grp[] = &$mform->createElement('text', 'thumbh', null, array('size' => '4', 'style' => 'width:inherit;'));
@@ -87,15 +87,15 @@ class dataformfield_picture_form extends dataformfield_file_form {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            // Set appearance (param4)
+            // Set appearance (param4).
             $appearance = array();
 
-            // Separator
+            // Separator.
             if (!empty($data->separator)) {
                 $appearance['separator'] = $data->separator;
             }
 
-            // Display dimensions
+            // Display dimensions.
             if (!empty($data->dispw) or !empty($data->disph)) {
                 if (!empty($data->dispw)) {
                     $appearance['dispw'] = $data->dispw;
@@ -108,7 +108,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
                 }
             }
 
-            // Max size
+            // Max size.
             if (!empty($data->maxw)) {
                 $appearance['maxw'] = $data->maxw;
             }
@@ -116,7 +116,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
                 $appearance['maxh'] = $data->maxh;
             }
 
-            // Thumb size
+            // Thumb size.
             if (!empty($data->thumbw)) {
                 $appearance['thumbw'] = $data->thumbw;
             }
@@ -124,7 +124,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
                 $appearance['thumbh'] = $data->thumbh;
             }
 
-            // Set param4
+            // Set param4.
             $data->param4 = $appearance ? base64_encode(serialize((object) $appearance)) : null;
         }
         return $data;
@@ -137,7 +137,7 @@ class dataformfield_picture_form extends dataformfield_file_form {
 
         $mform =& $this->_form;
 
-        // accetped types
+        // Accetped types.
         $options = array();
         $options['*.jpg,*.gif,*.png'] = get_string('filetypeimage', 'dataform');
         $options['*.jpg'] = get_string('filetypejpg', 'dataform');

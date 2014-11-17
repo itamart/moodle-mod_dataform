@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ class defaultcontent {
         $steps[] = new Given('I follow "Browse"');
 
         // 3. Add an entry with clearing its content.
-        // Cannot clear radio button content
+        // Cannot clear radio button content.
 
         // 4. Add an entry without changing its content.
         $steps[] = new Given('I follow "Add a new entry"');

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,16 +31,13 @@ class entriesform extends \moodleform {
 
     public function definition() {
 
-        // buttons
-        // -------------------------------------------------------------------------------
-        // $this->add_action_buttons();
+        // Buttons
+        // $this->add_action_buttons();.
 
-        // entries
-        // -------------------------------------------------------------------------------
+        // Entries.
         $this->definition_entries();
 
-        // buttons again
-        // -------------------------------------------------------------------------------
+        // Buttons again.
         $this->add_action_buttons();
     }
 
@@ -54,22 +51,22 @@ class entriesform extends \moodleform {
         $elements = !empty($this->_customdata['elements']) ? $this->_customdata['elements'] : array();
         $mform =& $this->_form;
 
-        // Header
+        // Header.
         $mform->addElement('header', '', null);
 
         $htmlcontent = '';
         foreach ($elements as $element) {
             if (!empty($element)) {
                 if (!is_array($element)) {
-                    // Collect consecutive html to reduce number of elements
+                    // Collect consecutive html to reduce number of elements.
                     $htmlcontent .= $element;
                 } else {
-                    // Add html element for html content and reset the var
+                    // Add html element for html content and reset the var.
                     if ($htmlcontent) {
                         $mform->addElement('html', $htmlcontent);
                         $htmlcontent = '';
                     }
-                    // If the element is an array, it contains a function
+                    // If the element is an array, it contains a function.
                     list($func, $params) = $element;
                     call_user_func_array($func, array_merge(array($mform), $params));
                 }
@@ -117,16 +114,16 @@ class entriesform extends \moodleform {
         if (!$errors = parent::validation($data, $files)) {
             $errors = array();
 
-            // field validations
+            // Field validations.
             $view = $this->_customdata['view'];
             $patterns = $view->get_pattern_set('field');
             $fields = $view->get_fields();
             $entryids = explode(',', $this->_customdata['update']);
 
             foreach ($entryids as $eid) {
-                // validate all fields for this entry
+                // Validate all fields for this entry.
                 foreach ($fields as $fid => $field) {
-                    // captcha check
+                    // Captcha check.
                     if ($field->type == 'captcha') {
                         if ($err = $field->verify($eid, $mform)) {
                             $errors = array_merge($errors, $err);

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
         $field = $this->_field;
         $edit = !empty($options['edit']);
 
-        // no edit mode
+        // No edit mode.
         $replacements = array();
 
         foreach ($patterns as $pattern) {
@@ -62,7 +62,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_edit(&$mform, $entry, array $options = null) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             $entry->firstname = $USER->firstname;
             $entry->lastname = $USER->lastname;
             $entry->userid = $USER->id;
@@ -79,7 +80,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
         if (is_null($usersmenu)) {
             $users = $field->get_df()->get_gradebook_users();
             $users[$USER->id] = $USER;
-            // add a supervisor's id
+            // Add a supervisor's id.
             if (!in_array($entry->userid, array_keys($users))) {
                 $user = new object;
                 $user->id = $entry->userid;
@@ -103,7 +104,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_name($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             $allnames = get_all_user_name_fields();
             foreach ($allnames as $allname) {
                 $entry->$allname = $USER->$allname;
@@ -121,7 +123,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_firstname($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             return $USER->firstname;
         } else {
             return $entry->firstname;
@@ -134,7 +137,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_lastname($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             return $USER->lastname;
         } else {
             return $entry->lastname;
@@ -147,7 +151,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_username($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             return $USER->username;
         } else {
             return $entry->username;
@@ -160,7 +165,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_id($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             return $USER->id;
         } else {
             return $entry->userid;
@@ -173,7 +179,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_idnumber($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             return $USER->idnumber;
         } else {
             return $entry->idnumber;
@@ -186,7 +193,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_picture($entry, $large = false) {
         global $USER, $OUTPUT;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             $user = $USER;
         } else {
             $user = new stdClass;
@@ -212,7 +220,8 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     public function display_email($entry) {
         global $USER;
 
-        if ($entry->id < 0) { // new entry
+        if ($entry->id < 0) {
+            // New entry.
             return $USER->email;
         } else {
             return $entry->email;
@@ -252,11 +261,11 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
             $patterns["[[$fieldname:{$internalname}]]"] = array(true, $cat);
         }
 
-        // For user name
+        // For user name.
         $patterns["[[$fieldname:username]]"] = array(true, $cat);
         $patterns["[[$fieldname:name]]"] = array(true, $cat);
         $patterns["[[$fieldname:edit]]"] = array(false, $cat);
-        // For user picture add the large picture
+        // For user picture add the large picture.
         $patterns["[[$fieldname:picturelarge]]"] = array(true, $cat);
 
         return $patterns;

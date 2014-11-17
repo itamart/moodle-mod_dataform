@@ -24,7 +24,7 @@
  * certain copyrights on the Database module may obtain.
  */
 
-// Define a name space to call
+// Define a name space to call.
 M.mod_dataform = M.mod_dataform || {};
 M.mod_dataform.util = M.mod_dataform.util || {};
 
@@ -55,7 +55,7 @@ M.mod_dataform.util.init_tags_selector = function(Y, selectorname, editorname) {
                 editor = Y.one('#id_' + editorname).getDOMNode();
                 insertAtCursor(editor, value);
 
-            // tinyMCE displayed
+            // TinyMCE displayed.
             } else {
                 var editorid = 'id_' + editorname;
                 tinyMCE.execInstanceCommand(editorid, 'mceInsertContent', false, value);
@@ -105,11 +105,11 @@ M.mod_dataform.util.init_bulk_action = function(Y, elemname, action, url, defaul
                 }
             });
 
-            // send selected item ids to processing
+            // Send selected item ids to processing.
             if (selected.length) {
                 location.href = url + '&' + action + '=' + selected.join(',');
 
-            // if no items selected but there is default, send it
+            // If no items selected but there is default, send it.
             } else if (defaultval) {
                 location.href = url + '&' + action + '=' + defaultval;
             }

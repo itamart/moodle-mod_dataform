@@ -43,7 +43,7 @@ class entry_update extends base {
 
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // Cannot update in a view that does not allow submission
+        // Cannot update in a view that does not allow submission.
         if (!empty($params['viewid'])) {
             $view = $df->view_manager->get_view_by_id($params['viewid']);
             if (!$view or !$view->allows_submission()) {
@@ -54,9 +54,9 @@ class entry_update extends base {
         // Unspecified entry
         // if (empty($params['entry'])) {
         //    return self::has_capability('mod/dataform:entryanyupdate', $params);
-        // }
+        // }.
 
-        // Early entries
+        // Early entries.
         if ($df->is_early()) {
             $params['capabilities'] = array('mod/dataform:entryearlyupdate');
             if (!parent::validate($params)) {
@@ -64,7 +64,7 @@ class entry_update extends base {
             }
         }
 
-        // Late entries
+        // Late entries.
         if ($df->is_past_due()) {
             $params['capabilities'] = array('mod/dataform:entrylateupdate');
             if (!parent::validate($params)) {
@@ -74,13 +74,13 @@ class entry_update extends base {
 
         $entry = !empty($params['entry']) ? $params['entry'] : \mod_dataform\pluginbase\dataformentry::blank_instance($df);
 
-        // Own entry
+        // Own entry.
         if (\mod_dataform\pluginbase\dataformentry::is_own($entry)) {
             $params['capabilities'] = array('mod/dataform:entryownupdate');
             return parent::validate($params);
         }
 
-        // Group entry
+        // Group entry.
         if (\mod_dataform\pluginbase\dataformentry::is_grouped($entry)) {
             if (groups_is_member($entry->groupid)) {
                 $params['capabilities'] = array('mod/dataform:entrygroupupdate');
@@ -88,7 +88,7 @@ class entry_update extends base {
             }
         }
 
-        // Anonymous entry
+        // Anonymous entry.
         if (\mod_dataform\pluginbase\dataformentry::is_anonymous($entry)) {
             if (!$df->anonymous) {
                 return false;
@@ -97,7 +97,7 @@ class entry_update extends base {
             return parent::validate($params);
         }
 
-        // Any entry
+        // Any entry.
         if (\mod_dataform\pluginbase\dataformentry::is_others($entry)) {
             $params['capabilities'] = array('mod/dataform:entryanyupdate');
             return parent::validate($params);

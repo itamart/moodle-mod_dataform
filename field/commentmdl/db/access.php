@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ $capabilities = array(
         ),
     ),
 
-    // Add Cmment
+    // Add Cmment.
     'dataformfield/commentmdl:addcomment' => array(
 
         'riskbitmask' => RISK_SPAM,
@@ -50,7 +50,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'mod/dataform:comment'
     ),
 
-    // Delete own comment
+    // Delete own comment.
     'dataformfield/commentmdl:deleteowncomment' => array(
 
         'riskbitmask' => RISK_SPAM,
@@ -65,7 +65,7 @@ $capabilities = array(
         ),
     ),
 
-    // Delete any comment
+    // Delete any comment.
     'dataformfield/commentmdl:deleteanycomment' => array(
 
         'riskbitmask' => RISK_SPAM,
@@ -80,7 +80,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'mod/dataform:managecomments'
     ),
 
-    // View Comments
+    // View Comments.
     'dataformfield/commentmdl:viewcomments' => array(
 
         'captype' => 'read',

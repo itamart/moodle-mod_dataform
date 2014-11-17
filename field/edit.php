@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,19 +23,22 @@
 require_once('../../../config.php');
 
 $urlparams = new stdClass;
-$urlparams->d          = required_param('d', PARAM_INT);    // dataform ID
+// Dataform id.
+$urlparams->d          = required_param('d', PARAM_INT);
+// Type of a field to edit.
+$urlparams->type       = optional_param('type', '', PARAM_ALPHA);
+// Field id to edit.
+$urlparams->fid        = optional_param('fid', 0, PARAM_INT);
 
-$urlparams->type       = optional_param('type', '', PARAM_ALPHA);   // type of a field to edit
-$urlparams->fid        = optional_param('fid', 0, PARAM_INT);       // field id to edit
-
-// Set a dataform object
+// Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d);
 
 $df->set_page('field/edit', array('urlparams' => $urlparams));
 $df->require_manage_permission('fields');
 
 if ($urlparams->fid) {
-    $field = $df->field_manager->get_field_by_id($urlparams->fid, true); // force get
+    // Force get.
+    $field = $df->field_manager->get_field_by_id($urlparams->fid, true);
 } else if ($urlparams->type) {
     $field = $df->field_manager->get_field($urlparams->type);
 }
@@ -50,24 +53,24 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id)));
 }
 
-// Process validated
+// Process validated.
 if ($data = $mform->get_data()) {
 
     if (!$field->id) {
-        // add new field
+        // Add new field.
         $field->create($data);
 
     } else {
-        // update field
+        // Update field.
         $data->id = $field->id;
 
-        // Prepare for replacing patterns
+        // Prepare for replacing patterns.
         $oldname = $field->name;
         $oldpatterns = $field->renderer->get_patterns();
 
         $field->update($data);
 
-        // Replace patterns
+        // Replace patterns.
         if ($oldname != $field->name) {
             $newpatterns = $field->renderer->get_patterns();
             $df->view_manager->replace_patterns_in_views($oldpatterns, $newpatterns);
@@ -78,11 +81,11 @@ if ($data = $mform->get_data()) {
         redirect(new moodle_url('/mod/dataform/field/index.php', array('d' => $df->id)));
     }
 
-    // continue to edit so refresh the form
+    // Continue to edit so refresh the form.
     $mform = $field->get_form();
 }
 
-// activate navigation node
+// Activate navigation node.
 navigation_node::override_active_url(new moodle_url('/mod/dataform/field/index.php', array('id' => $df->cm->id)));
 
 $output = $df->get_renderer();
@@ -91,7 +94,7 @@ echo $output->header(array('tab' => 'fields', 'heading' => $df->name, 'nonotific
 $formheading = $field->id ? get_string('fieldedit', 'dataform', $field->name) : get_string('fieldnew', 'dataform', $field->get_typename());
 echo html_writer::tag('h2', format_string($formheading), array('class' => 'mdl-align'));
 
-// display form
+// Display form.
 $mform->set_data($field->data);
 $mform->display();
 

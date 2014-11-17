@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
         $field = $this->_field;
 
         if ($data = parent::get_data()) {
-            // Limit units to (param4)
+            // Limit units to (param4).
             if (!empty($data->param4)) {
                 $data->param4 = implode(',', $data->param4);
             } else {
