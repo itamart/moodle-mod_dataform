@@ -194,14 +194,14 @@ class mod_dataform_mod_form extends moodleform_mod {
 
         // Force anonymous entries.
         if ($CFG->dataform_anonymous) {
-            $mform->addElement('selectyesno', 'anonymous', get_string('anonymizeentries', 'dataform'));
+            $mform->addElement('selectyesno', 'anonymous', get_string('anonymousentries', 'dataform'));
             $mform->setDefault('anonymous', 0);
-            $mform->addHelpButton('anonymous', 'anonymizeentries', 'mod_dataform');
+            $mform->addHelpButton('anonymous', 'anonymousentries', 'mod_dataform');
         } else {
             $mform->addElement('hidden', 'anonymous', 0);
             $mform->setType('anonymous', PARAM_INT);
-            $mform->addElement('static', 'anonymousna', get_string('anonymizeentries', 'dataform'), get_string('notapplicable', 'dataform'));
-            $mform->addHelpButton('anonymousna', 'anonymizeentries', 'mod_dataform');
+            $mform->addElement('static', 'anonymousna', get_string('anonymousentries', 'dataform'), get_string('notapplicable', 'dataform'));
+            $mform->addHelpButton('anonymousna', 'anonymousentries', 'mod_dataform');
         }
 
         // Time limit to manage an entry.

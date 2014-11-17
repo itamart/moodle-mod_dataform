@@ -78,9 +78,9 @@ $string['entriesrequired'] = 'Required entries';
 $string['entriesrequired_help'] = 'The number of entries a user without manageentries capability is required to add for the activity to be considered complete (before consideration of other completion criteria such as grade). If the activity has intervals this number applies to each interval, and the number of required entries for the whole activity is this number times the number of intervals.';
 $string['groupentries'] = 'Group entries';
 $string['groupentries_help'] = 'Entries will be added with group info but without author info. This settings requires group mode.';
-$string['anonymousentries'] = 'Anonymous entries';
-$string['anonymizeentries'] = 'Anonymize entries';
-$string['anonymizeentries_help'] = 'Entries will be added without author information.';
+$string['anonymousentries'] = 'Allow anonymous entries';
+$string['anonymousentries_help'] = 'If enabled guests and not-logged-in users will be able to add entries in this activity.
+ This may be useful for applications such as \'contact us\' where visitors to the site can submit a contact request. The option must be enabled by admin in the module settings.';
 $string['entrytimelimit'] = 'Editing time limit (minutes)';
 $string['entrytimelimit_help'] = 'The time limit (minutes) within which a user without manage entries capability can update or delete a new entry.
 <ul>
