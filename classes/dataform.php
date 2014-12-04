@@ -995,7 +995,8 @@ class mod_dataform_dataform {
     }
 
     /**
-     * Returns entry ids for each user.
+     * Returns entry ids for each user. If the activity entries are grouped,
+     * looks up the user entries by group membership.
      *
      * @param int $userid
      * @return array Associative array userid => array(entryid, entryid, ...)
@@ -1006,16 +1007,53 @@ class mod_dataform_dataform {
         $entryids = array();
 
         $params = array('dataid'  => $this->id);
-        if ($userid) {
-            $params['userid'] = $userid;
-        }
 
-        if ($entries = $DB->get_records_menu('dataform_entries', $params, 'userid', 'id,userid')) {
-            foreach ($entries as $entryid => $userid) {
-                if (empty($entryids[$userid])) {
-                    $entryids[$userid] = array();
+        if ($this->grouped) {
+            // The case of grouped entries.
+            // We need to get the user groups,
+            // and then the entries by the group ids.
+
+            // Prepare a list of user ids to process.
+            if (!$userid) {
+                // Get course users.
+                $courseusers = get_enrolled_users($this->context, '', 0, 'u.id,u.id as uid');
+                $userids = array_keys($courseusers);
+            } else {
+                $userids = array($userid);
+            }
+
+            foreach ($userids as $userid) {
+                $groups = groups_get_user_groups($this->course->id, $userid);
+                // No groups, no entries for this user.
+                if (empty($groups['0'])) {
+                    continue;
                 }
-                $entryids[$userid][] = $entryid;
+
+                foreach ($groups['0'] as $groupid) {
+                    $params['groupid'] = $groupid;
+                    if ($entries = $DB->get_records_menu('dataform_entries', $params, 'groupid', 'id,groupid')) {
+                        if (empty($entryids[$userid])) {
+                            $entryids[$userid] = array();
+                        }
+                        foreach ($entries as $entryid => $unused) {
+                           $entryids[$userid][$entryid] = $entryid;
+                        }
+                    }
+                }
+            }
+        } else {
+            // The case of user entries.
+            if ($userid) {
+                $params['userid'] = $userid;
+            }
+
+            if ($entries = $DB->get_records_menu('dataform_entries', $params, 'userid', 'id,userid')) {
+                foreach ($entries as $entryid => $userid) {
+                    if (empty($entryids[$userid])) {
+                        $entryids[$userid] = array();
+                    }
+                    $entryids[$userid][] = $entryid;
+                }
             }
         }
 
@@ -1026,18 +1064,17 @@ class mod_dataform_dataform {
     // GRADING.
 
     /**
-     *
+     * Returns a list of users by gradebook roles.
      */
     public function get_gradebook_users(array $userids = null) {
         global $DB, $CFG;
 
-        // Get the list of users by gradebook roles.
-        if (!empty($CFG->gradebookroles)) {
-            $gradebookroles = explode(", ", $CFG->gradebookroles);
-
-        } else {
-            $gradebookroles = '';
+        // Must have gradebook roles.
+        if (empty($CFG->gradebookroles)) {
+            return null;
         }
+
+        $gradebookroles = explode(", ", $CFG->gradebookroles);
 
         if (!empty($CFG->enablegroupings) and $this->cm->groupmembersonly) {
             $groupingsusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id');
@@ -1052,36 +1089,40 @@ class mod_dataform_dataform {
             }
         }
 
+        $roleusers = array();
         if (isset($gusers)) {
             if (!empty($gusers)) {
                 list($inuids, $params) = $DB->get_in_or_equal($gusers);
-                return get_rolentryusers(
-                    $gradebookroles,
-                    $this->context,
-                    true,
-                    user_picture::fields('u'),
-                    'u.lastname ASC',
-                    true,
-                    $this->currentgroup,
-                    '',
-                    '',
-                    "u.id $inuids",
-                    $params
-                );
-            } else {
-                return null;
+                foreach ($gradebookroles as $roleid) {
+                    $roleusers = $roleusers + get_role_users(
+                        $roleid,
+                        $this->context,
+                        true,
+                        user_picture::fields('u'),
+                        'u.lastname ASC',
+                        true,
+                        $this->currentgroup,
+                        '',
+                        '',
+                        "u.id $inuids",
+                        $params
+                    );
+                }
             }
         } else {
-            return get_role_users(
-                $gradebookroles,
-                $this->context,
-                true,
-                'u.id, u.lastname, u.firstname',
-                'u.lastname ASC',
-                true,
-                $this->currentgroup
-            );
+            foreach ($gradebookroles as $roleid) {
+                $roleusers = $roleusers + get_role_users(
+                    $roleid,
+                    $this->context,
+                    true,
+                    'u.id, u.lastname, u.firstname',
+                    'u.lastname ASC',
+                    true,
+                    $this->currentgroup
+                );
+            }
         }
+        return $roleusers;
     }
 
     /**
@@ -1248,11 +1289,11 @@ class mod_dataform_dataform {
     /**
      * Updates the user's calculated grades in the dataform instance.
      *
-     * @param int $userid The user id whose grades should be retrieved or 0 for all grades.
+     * @param array|stdClass $data The user id whose grades should be retrieved or 0 for all grades.
      * @param bool $numentries Whether number of entries for the user has changed.
      * @return void
      */
-    public function update_calculated_grades($userid, $pattern = null) {
+    public function update_calculated_grades($data, $pattern = null) {
         global $CFG;
 
         // Must be grading to continue.
@@ -1260,8 +1301,29 @@ class mod_dataform_dataform {
             return;
         }
 
+        $data = (object) $data;
+
         if (!$pattern or preg_match("%$pattern%", $this->gradecalc) !== false) {
-            dataform_update_grades($this->data, $userid);
+            // Get the affected user ids.
+            if ($this->grouped) {
+                if (empty($data->groupid)) {
+                    return;
+                }
+                if (!$userids = groups_get_members($data->groupid, 'u.id,u.id as uid', 'u.id')) {
+                    return;
+                }
+                $userids = array_keys($userids);
+            } else {
+                if (empty($data->userid)) {
+                    return;
+                }
+                $userids = array($data->userid);
+            }
+
+            // Update grades for the affected users.
+            foreach ($userids as $userid) {
+                dataform_update_grades($this->data, $userid);
+            }
 
             // Update specific grade completion if tracked.
             if ($this->completionspecificgrade) {
@@ -1270,7 +1332,9 @@ class mod_dataform_dataform {
                     return;
                 }
 
-                $completion->update_state($this->cm, COMPLETION_UNKNOWN, $userid);
+                foreach ($userids as $userid) {
+                    $completion->update_state($this->cm, COMPLETION_UNKNOWN, $userid);
+                }
             }
         }
     }
