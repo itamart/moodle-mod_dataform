@@ -65,7 +65,7 @@ if ($error = $field->update_state($entry, $newstate)) {
 }
 
 // Update grade if needed.
-$df->update_calculated_grades($entry->userid, "##\d*:$field->name##");
+$df->update_calculated_grades($entry, "##\d*:$field->name##");
 
 $entry->state = $newstate;
 $entry->baseurl = '';

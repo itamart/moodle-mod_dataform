@@ -159,29 +159,38 @@ class mod_dataform_entry_manager {
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
 
         // USER FILTERING.
-        $whereuser = '';
-        // Limit to requested users.
-        if ($filter->users) {
-            list($inusers, $userparams) = $DB->get_in_or_equal($filter->users);
-            $whereuser .= " AND e.userid $inusers ";
-            $params = array_merge($params, $userparams);
-        }
-        // Exclude own entries.
-        if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryownview', $accessparams)) {
-            $whereuser .= " AND e.userid <> ? ";
-            $params[] = $USER->id;
-        }
-        // Exclude guest/anonymous.
-        if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryanonymousview', $accessparams)) {
-            $whereuser .= " AND e.userid <> ? ";
-            $params[] = 0;
-        }
-        // Exclude other entries.
-        $viewany = mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
-        $entriesmanager = mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
-        if (($df->individualized and !$entriesmanager) or !$viewany) {
-            $whereuser .= " AND e.userid = ? ";
-            $params[] = $USER->id;
+        if ($df->grouped) {
+            // Grouped entries without user info; don't filter by user.
+            $whatuser = '';
+            $fromuser = '';
+            $whereuser = '';
+        } else {
+            $whatuser = ', '. user_picture::fields('u', array('idnumber', 'username'), 'uid ');
+            $fromuser = ' JOIN {user} u ON u.id = e.userid ';
+            $whereuser = '';
+            // Limit to requested users.
+            if ($filter->users) {
+                list($inusers, $userparams) = $DB->get_in_or_equal($filter->users);
+                $whereuser .= " AND e.userid $inusers ";
+                $params = array_merge($params, $userparams);
+            }
+            // Exclude own entries.
+            if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryownview', $accessparams)) {
+                $whereuser .= " AND e.userid <> ? ";
+                $params[] = $USER->id;
+            }
+            // Exclude guest/anonymous.
+            if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryanonymousview', $accessparams)) {
+                $whereuser .= " AND e.userid <> ? ";
+                $params[] = 0;
+            }
+            // Exclude other entries.
+            $viewany = mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
+            $entriesmanager = mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
+            if (($df->individualized and !$entriesmanager) or !$viewany) {
+                $whereuser .= " AND e.userid = ? ";
+                $params[] = $USER->id;
+            }
         }
         // GROUP FILTERING.
         $wheregroup = '';
@@ -199,11 +208,8 @@ class mod_dataform_entry_manager {
         }
 
         // Sql for fetching the entries.
-        $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid';
-        $whatuser = user_picture::fields('u', array('idnumber', 'username'), 'uid ');
-
-        $tables = ' {dataform_entries} e
-                    JOIN {user} u ON u.id = e.userid ';
+        $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid ';
+        $tables = " {dataform_entries} e $fromuser ";
         $wheredfid = " e.dataid = ? ";
 
         // FILTER SQL.
@@ -225,7 +231,7 @@ class mod_dataform_entry_manager {
         ) = $filter->get_sql();
 
         $count = ' COUNT(e.id) ';
-        $whatsql = " DISTINCT $whatentry, $whatuser $contentwhat $joinwhat";
+        $whatsql = " DISTINCT $whatentry $whatuser $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
 
@@ -749,9 +755,7 @@ class mod_dataform_entry_manager {
                 }
 
                 // Update calculated grades if applicable.
-                if ($entry->userid) {
-                    $df->update_calculated_grades($entry->userid);
-                }
+                $df->update_calculated_grades($entry);
 
                 $processed[$entry->id] = $entry;
             }
@@ -798,9 +802,7 @@ class mod_dataform_entry_manager {
             $processed[$newentry->id] = $newentry;
 
             // Update calculated grades if applicable.
-            if ($entry->userid) {
-                $df->update_calculated_grades($entry->userid);
-            }
+            $df->update_calculated_grades($entry);
         }
         return processed;
     }
@@ -844,6 +846,7 @@ class mod_dataform_entry_manager {
                 'other' => array(
                     'dataid' => $this->dataformid,
                     'viewid' => $this->viewid,
+                    'entryid' => $entry->id,
                 )
             );
             $event = \mod_dataform\event\entry_deleted::create($eventparams);
@@ -851,9 +854,7 @@ class mod_dataform_entry_manager {
             $event->trigger();
 
             // Update calculated grades if applicable.
-            if ($entry->userid) {
-                $df->update_calculated_grades($entry->userid);
-            }
+            $df->update_calculated_grades($entry);
         }
 
         return $processed;
@@ -908,6 +909,7 @@ class mod_dataform_entry_manager {
                     'other' => array(
                         'dataid' => $this->dataformid,
                         'viewid' => $this->viewid,
+                        'entryid' => $entry->id,
                     )
                 );
                 $event = \mod_dataform\event\entry_updated::create($eventparams);
@@ -922,10 +924,11 @@ class mod_dataform_entry_manager {
 
         // Add new entry (authenticated or anonymous (if enabled))
         // Identify non-logged-in users (in anonymous entries) as guests.
-        $userid = empty($USER->id) ? $CFG->siteguest : $USER->id;
+        $currentuserid = empty($USER->id) ? $CFG->siteguest : $USER->id;
+        $entryuserid = !empty($entry->userid) ? $entry->userid : $currentuserid;
 
         $entry->dataid = $df->id;
-        $entry->userid = !empty($entry->userid) ? $entry->userid : $userid;
+        $entry->userid = $df->grouped ? 0 : $entryuserid;
         $entry->groupid = !isset($entry->groupid) ? $df->currentgroup : $entry->groupid;
         $entry->timecreated = !isset($entry->timecreated) ? time() : $entry->timecreated;
         $entry->timemodified = !isset($entry->timemodified) ? time() : $entry->timemodified;
@@ -940,6 +943,7 @@ class mod_dataform_entry_manager {
             'other' => array(
                 'dataid' => $this->dataformid,
                 'viewid' => $this->viewid,
+                'entryid' => $entry->id,
             )
         );
         $event = \mod_dataform\event\entry_created::create($eventparams);
