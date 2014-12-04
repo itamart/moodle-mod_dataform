@@ -32,45 +32,47 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name;
-        $edit = !empty($options['edit']);
 
-        $replacements = array();
+        $edit = !empty($options['edit']);
+        $haseditreplacement = false;
+        $editablepatterns = array(
+            "[[$fieldname]]",
+            "[[$fieldname:text]]",
+            "[[$fieldname:textlinks]]",
+        );
 
         $replacements = array_fill_keys(array_keys($patterns), '');
-        if ($edit) {
-            foreach ($patterns as $pattern => $cleanpattern) {
-                if ($cleanpattern == "[[{$fieldname}:wordcount]]") {
-                    $replacements[$pattern] = '';
-                    continue;
-                }
-                if (!$noedit = $this->is_noedit($pattern)) {
+
+        foreach ($patterns as $pattern => $cleanpattern) {
+            if ($edit and !$haseditreplacement) {
+                $patterneditable = in_array($cleanpattern, $editablepatterns);
+                if ($patterneditable and !$noedit = $this->is_noedit($pattern)) {
                     $required = $this->is_required($pattern);
-                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
-                    break;
+                    $editparams = array($entry, array('required' => $required));
+                    $replacements[$pattern] = array(array($this, 'display_edit'), $editparams);
+                    $haseditreplacement = true;
+                    continue;
                 }
             }
 
-        } else {
-            foreach ($patterns as $pattern => $cleanpattern) {
-                switch ($cleanpattern) {
-                    case "[[$fieldname]]":
-                        $replacements[$pattern] = $this->display_browse($entry);
-                        break;
+            switch ($cleanpattern) {
+                case "[[$fieldname]]":
+                    $replacements[$pattern] = $this->display_browse($entry);
+                    break;
 
-                    // Plain text, no links.
-                    case "[[$fieldname:text]]":
-                        $replacements[$pattern] = html_to_text($this->display_browse($entry, array('text' => true)));
-                        break;
+                // Plain text, no links.
+                case "[[$fieldname:text]]":
+                    $replacements[$pattern] = html_to_text($this->display_browse($entry, array('text' => true)));
+                    break;
 
-                    // Plain text, with links.
-                    case "[[$fieldname:textlinks]]":
-                        $replacements[$pattern] = $this->display_browse($entry, array('text' => true, 'links' => true));
-                        break;
+                // Plain text, with links.
+                case "[[$fieldname:textlinks]]":
+                    $replacements[$pattern] = $this->display_browse($entry, array('text' => true, 'links' => true));
+                    break;
 
-                    case "[[{$fieldname}:wordcount]]":
-                        $replacements[$pattern] = $this->word_count($entry);
-                        break;
-                }
+                case "[[{$fieldname}:wordcount]]":
+                    $replacements[$pattern] = $this->word_count($entry);
+                    break;
             }
         }
 

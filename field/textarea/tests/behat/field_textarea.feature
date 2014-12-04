@@ -57,5 +57,6 @@ Feature: Add dataform entries
         And I follow "Browse"
         And I follow "id_editentry1"
         Then "id_field_1_1" "field" does not exist
+        And I see "This world is required"
         And I press "Save"
         Then I see "This world is required"
