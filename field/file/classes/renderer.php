@@ -33,27 +33,26 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name;
+
         $edit = !empty($options['edit']);
+        $haseditreplacement = false;
+        $editablepatterns = array("[[$fieldname]]");
 
-        $replacements = array();
+        $replacements = array_fill_keys(array_keys($patterns), '');
 
-        if ($edit) {
-            $firstinput = false;
-            foreach ($patterns as $pattern => $cleanpattern) {
-                $noedit = $this->is_noedit($pattern);
-                if (!$firstinput and !$noedit and $cleanpattern == "[[$fieldname]]") {
+        foreach ($patterns as $pattern => $cleanpattern) {
+            if ($edit and !$haseditreplacement) {
+                $patterneditable = in_array($cleanpattern, $editablepatterns);
+                if ($patterneditable and !$noedit = $this->is_noedit($pattern)) {
                     $required = $this->is_required($pattern);
-                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, array('required' => $required)));
-                    $firstinput = true;
-                } else {
-                    $replacements[$pattern] = '';
+                    $editparams = array($entry, array('required' => $required));
+                    $replacements[$pattern] = array(array($this, 'display_edit'), $editparams);
+                    $haseditreplacement = true;
+                    continue;
                 }
             }
-            return $replacements;
-        }
 
-        // Browse mode.
-        foreach ($patterns as $pattern => $cleanpattern) {
+            // Browse mode.
             $displaybrowse = '';
             if ($cleanpattern == "[[$fieldname]]") {
                 $displaybrowse = $this->display_browse($entry);
