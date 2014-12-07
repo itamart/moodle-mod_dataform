@@ -100,9 +100,9 @@ class behat_mod_dataform extends behat_base {
     public function start_afresh_steps() {
         global $DB;
 
-        /* Dataform module id */
+        // Dataform module id.
         $moduleid = $DB->get_field('modules', 'id', array('name' => 'dataform'));
-        /* CM ids */
+        // CM ids.
         if ($cmids = $DB->get_records('course_modules', array('module' => $moduleid), '', 'id,id AS cmid')) {
             // Delete properly any existing dataform instances.
             foreach ($cmids as $cmid) {
@@ -124,6 +124,9 @@ class behat_mod_dataform extends behat_base {
         foreach ($tables as $table) {
             $DB->execute("TRUNCATE TABLE {$prefix}{$table}");
         }
+
+        // Clean up instance store cache.
+        \mod_dataform_instance_store::unregister();
 
         $steps = array();
 
@@ -753,6 +756,23 @@ class behat_mod_dataform extends behat_base {
     /* ACTIVITY PARTICIPATION STEPS */
 
     /**
+     * Enters the specified dataform in the specified course as the specified user.
+     *
+     * @Given /^I am in dataform "(?P<dataformname_string>(?:[^"]|\\")*)" "(?P<coursename_string>(?:[^"]|\\")*)" as "(?P<username_string>(?:[^"]|\\")*)"$/
+     * @param string $dataformname
+     * @param string $coursename
+     */
+    public function i_am_in_dataform_as($dataformname, $coursename, $username) {
+        $steps = array();
+
+        $steps[] = new Given('I log in as "' . $username. '"');
+        $steps[] = new Given('I follow "' . $coursename. '"');
+        $steps[] = new Given('I follow "' . $dataformname. '"');
+
+        return $steps;
+    }
+
+    /**
      * Opens Dataform url.
      *
      * @Given /^I go to dataform page "(?P<dataform_url_string>(?:[^"]|\\")*)"$/
@@ -760,6 +780,23 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_go_to_dataform_page($url) {
         $this->getSession()->visit($this->locate_path("/mod/dataform/$url"));
+    }
+
+    /**
+     * Adds a dataform entry with the specified values.
+     * The step begins on the front page of a dataform activity ready to browse.
+     *
+     * @Given /^I add a dataform entry with:$/
+     * @param string $data
+     */
+    public function i_add_a_dataform_entry_with($data) {
+        $steps = array();
+
+        $steps[] = new Given('I follow "Add a new entry"');
+        $steps[] = new Given('I set the following fields to these values:', $data);
+        $steps[] = new Given('I press "Save"');
+
+        return $steps;
     }
 
     /**
