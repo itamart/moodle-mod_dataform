@@ -63,8 +63,10 @@ class mod_dataform_instance_store {
      * @param string Instance type name.
      * @return void.
      */
-    public static function unregister($dataformid, $manager = null) {
-        if (!$manager) {
+    public static function unregister($dataformid = 0, $manager = null) {
+        if (!$dataformid) {
+            self::$instances = array();
+        } else if (!$manager) {
             unset(self::$instances[$dataformid]);
         } else {
             unset(self::$instances[$dataformid][$manager]);
