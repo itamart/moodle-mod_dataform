@@ -57,33 +57,52 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
         }
 
         // New contents.
+        $value = (count($values) === 1 ? reset($values) : $values);
+        $timestamp = $this->get_timestamp_from_value($value);
+        $contents[] = $timestamp;
+
+        return array($contents, $oldcontents);
+    }
+
+    /**
+     *
+     */
+    protected function get_timestamp_from_value($value) {
+        if (empty($value)) {
+            return null;
+        }
+
         $timestamp = null;
-        if (!empty($values)) {
-            if (count($values) === 1) {
-                $values = reset($values);
+
+        // Timestamp or time string.
+        if (!is_array($value)) {
+            if (((string) (int) $value === (string) $value)
+                    && ($value <= PHP_INT_MAX)
+                    && ($value >= ~PHP_INT_MAX)) {
+                // It's a timestamp.
+                $timestamp = $value;
+
+            } else if ($value = strtotime($value)) {
+                // It's a valid time string.
+                $timestamp = $value;
             }
 
-            if (!is_array($values)) {
-                // Assuming timestamp is passed (e.g. in import).
-                $timestamp = $values;
-
-            } else {
-                // Assuming any of year, month, day, hour, minute is passed.
-                $enabled = $year = $month = $day = $hour = $minute = 0;
-                foreach ($values as $name => $val) {
-                    if (!empty($name)) {          // the time unit
-                        ${$name} = $val;
-                    }
+        } else {
+            // Assuming any of year, month, day, hour, minute is passed.
+            $enabled = $year = $month = $day = $hour = $minute = 0;
+            foreach ($value as $name => $val) {
+                if (!empty($name)) {
+                    ${$name} = $val;
                 }
-                if ($enabled) {
-                    if ($year or $month or $day or $hour or $minute) {
-                        $timestamp = makentrytimestamp($year, $month, $day, $hour, $minute, 0);
-                    }
+            }
+            if ($enabled) {
+                if ($year or $month or $day or $hour or $minute) {
+                    $timestamp = makentrytimestamp($year, $month, $day, $hour, $minute, 0);
                 }
             }
         }
-        $contents[] = $timestamp;
-        return array($contents, $oldcontents);
+
+        return $timestamp;
     }
 
     /**
@@ -133,18 +152,8 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
 
         if ($csvname and isset($csvrecord[$csvname]) and $csvrecord[$csvname] !== '') {
             $timestr = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
-
             if ($timestr) {
-                if (((string) (int) $timestr === $timestr)
-                        && ($timestr <= PHP_INT_MAX)
-                        && ($timestr >= ~PHP_INT_MAX)) {
-                    // It's a timestamp.
-                    $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
-
-                } else if ($timestr = strtotime($timestr)) {
-                    // It's a valid time string.
-                    $data->{"field_{$fieldid}_{$entryid}"} = $timestr;
-                }
+                $data->{"field_{$fieldid}_{$entryid}"} = $this->get_timestamp_from_value($timestr);
             }
         }
 
