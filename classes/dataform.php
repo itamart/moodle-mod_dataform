@@ -1092,7 +1092,7 @@ class mod_dataform_dataform {
         $roleusers = array();
         if (isset($gusers)) {
             if (!empty($gusers)) {
-                list($inuids, $params) = $DB->get_in_or_equal($gusers);
+                list($inuids, $params) = $DB->get_in_or_equal($gusers, SQL_PARAMS_NAMED, 'u');
                 foreach ($gradebookroles as $roleid) {
                     $roleusers = $roleusers + get_role_users(
                         $roleid,
@@ -1115,7 +1115,7 @@ class mod_dataform_dataform {
                     $roleid,
                     $this->context,
                     true,
-                    'u.id, u.lastname, u.firstname',
+                    user_picture::fields('u'),
                     'u.lastname ASC',
                     true,
                     $this->currentgroup
