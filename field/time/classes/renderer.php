@@ -33,27 +33,27 @@ class dataformfield_time_renderer extends mod_dataform\pluginbase\dataformfieldr
     protected function replacements(array $patterns, $entry, array $options = null) {
         $field = $this->_field;
         $fieldname = $field->name;
+
         $edit = !empty($options['edit']);
+        $haseditreplacement = false;
 
         $replacements = array_fill_keys(array_keys($patterns), '');
 
-        if ($edit) {
-            foreach ($patterns as $pattern => $cleanpattern) {
-                if ($this->is_noedit($pattern)) {
+        foreach ($patterns as $pattern => $cleanpattern) {
+            // Edit mode.
+            if ($edit) {
+                if (!$haseditreplacement and !$this->is_noedit($pattern)) {
+                    $required = $this->is_required($pattern);
+                    // Determine whether date only selector.
+                    $date = (($cleanpattern == "[[$fieldname:date]]") or $field->date_only);
+                    $options = array('required' => $required, 'date' => $date);
+                    $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $options));
+                    $haseditreplacement = true;
                     continue;
                 }
-                $required = $this->is_required($pattern);
-                // Determine whether date only selector.
-                $date = (($cleanpattern == "[[$fieldname:date]]") or $field->date_only);
-                $options = array('required' => $required, 'date' => $date);
-                $replacements[$pattern] = array(array($this, 'display_edit'), array($entry, $options));
-                break;
             }
-            return $replacements;
-        }
 
-        // Browse mod.
-        foreach ($patterns as $pattern => $cleanpattern) {
+            // Browse mod.
             // Determine display format.
             $format = (strpos($pattern, "$fieldname:") !== false ? str_replace("$fieldname:", '', trim($pattern, '[]')) : $field->display_format);
             // For specialized patterns convert format to the userdate format string.
