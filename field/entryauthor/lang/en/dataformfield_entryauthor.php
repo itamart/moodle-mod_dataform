@@ -32,3 +32,5 @@ $string['username'] = 'User name';
 $string['userpicture'] = 'User picture';
 $string['userusername'] = 'User username';
 $string['currentuser'] = 'Current user';
+$string['assignme'] = 'Assign me';
+$string['unassignme'] = 'Unassign me';

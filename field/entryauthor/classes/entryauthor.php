@@ -47,6 +47,102 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
     }
 
     /**
+     * Assigns/unassigned the specified user as the entry author.
+     * Only current user can unassign him/her self.
+     * Unassigning sets the entry userid to 0. Possible conflicts need to examined.
+     * Gradebook users can assign only to entries not currently owned by gradebook users.
+     *
+     * @param int $userid The user to assign as the entry owner (0 for unassign).
+     * @param int $entryid The entry to be assigned.
+     * @param int
+     * @param int
+     * @return bool
+     */
+    public function assign_user($userid, $entryid, $viewid) {
+        global $DB, $USER;
+
+        // Get the entry.
+        if (!$entry = $DB->get_record('dataform_entries', array('id' => $entryid))) {
+            return false;
+        }
+
+        $dataformid = $entry->dataid;
+
+        // The view must have the assignme pattern.
+        $view = \mod_dataform_view_manager::instance($dataformid)->get_view_by_id($viewid);
+        $patterns = $view->get_pattern_set('field');
+        if (!$patterns or empty($patterns[$this->id])) {
+            return  false;
+        }
+
+        $fieldname = $this->name;
+        if (!in_array("[[$fieldname:assignme]]", $patterns[$this->id])) {
+            return false;
+        }
+
+        // If same user (for some reason), no need to do anything.
+        if ($entry->userid == $userid) {
+            return true;
+        }
+
+        // UNASSIGN.
+        // Only the current user can unassign him/her self.
+        if ($userid == 0) {
+            if ($entry->userid != $USER->id) {
+                return false;
+            }
+            // Try to get a teacher id for the user id.
+            if ($roles = $DB->get_records('role', array('archetype' => 'editingteacher'))) {
+                foreach ($roles as $role) {
+                    $teachers = get_role_users(
+                        $role->id,
+                        $this->df->context,
+                        true,
+                        user_picture::fields('u'),
+                        'u.lastname ASC',
+                        false
+                    );
+                    if ($teachers) {
+                        $userid = key($teachers);
+                        break;
+                    }
+                }
+            }
+            // If no teachers, get admin id.
+            if (!$userid = ($userid ? $userid : get_admin()->id)) {
+                return false;
+            }
+
+            $DB->set_field('dataform_entries', 'userid', $userid, array('id' => $entryid));
+            // Notify.
+
+            return true;
+        }
+
+        // ASSIGN.
+        // Self assign of gradebook user can only be allowed when the current
+        // entry user is not gradebook user.
+        // In other words, a student cannot override another student's selection.
+        if ($gbusers = $this->df->get_gradebook_users(array($entry->userid, $userid))) {
+            if (array_key_exists($entry->userid, $gbusers)) {
+                if (array_key_exists($userid, $gbusers)) {
+                    return false;
+                }
+            }
+        }
+
+        // Set the user as entry owner.
+        $DB->set_field('dataform_entries', 'userid', $userid, array('id' => $entryid));
+
+        // Update the entry the standard way, to trigger events.
+        $eids = array($entryid);
+        $data = (object) array('submitbutton_save' => 'Save');
+        $processed = $view->entry_manager->process_entries('update', $eids, $data, true);
+
+        return true;
+    }
+
+    /**
      * Overrides {@link dataformfield::prepare_import_content()} to set import of entry::userid.
      *
      * @return stdClass
