@@ -229,6 +229,48 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
     }
 
     /**
+     *
+     */
+    public function display_assignme($entry) {
+        global $USER, $OUTPUT;
+
+        $field = $this->_field;
+        $df = $field->df;
+
+        // Assign.
+        $viewurl = $entry->baseurl;
+        $urlparams = array(
+            'd' => $df->id,
+            'vid' => $df->currentview->id,
+            'eid' => $entry->id,
+            'ret' => urlencode($viewurl->out(false)),
+        );
+        $url = new \moodle_url('/mod/dataform/field/entryauthor/assign.php', $urlparams);
+        if ($USER->id == $entry->userid) {
+            // Display unassign button.
+            $url->param('action', 'unassign');
+            $label = get_string('unassignme', 'dataformfield_entryauthor');
+            return $OUTPUT->single_button($url, $label);
+        } else {
+            $gbusers = $df->get_gradebook_users(array($entry->userid, $USER->id));
+            // Student cannot self-assign an entry of a peer.
+            if (!empty($gbusers[$entry->userid]) and !empty($gbusers[$USER->id])) {
+                return null;
+            }
+            
+            // Do no display assign button if user at max entries.
+            if ($df->user_at_max_entries(true)) {
+                return null;
+            }
+            // Display assign button.
+            $url->param('action', 'assign');
+            $label = get_string('assignme', 'dataformfield_entryauthor');
+            return $OUTPUT->single_button($url, $label);
+        }
+        return null;
+    }
+
+    /**
      * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()}
      * to return import settings only for username, id, idnumber.
      *
@@ -265,6 +307,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
         $patterns["[[$fieldname:username]]"] = array(true, $cat);
         $patterns["[[$fieldname:name]]"] = array(true, $cat);
         $patterns["[[$fieldname:edit]]"] = array(false, $cat);
+        $patterns["[[$fieldname:assignme]]"] = array(false, $cat);
         // For user picture add the large picture.
         $patterns["[[$fieldname:picturelarge]]"] = array(true, $cat);
 
