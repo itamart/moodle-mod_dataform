@@ -27,7 +27,6 @@
 
 require_once("$CFG->libdir/portfolio/caller.php");
 require_once("$CFG->libdir/filelib.php");
-require_once("$CFG->dirroot/calendar/lib.php");
 
 /**
  * The class to handle entry exports of a dataform module
@@ -39,7 +38,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     const CONTENT_FILESONLY = 2;
 
     /**
-     * the required callback arguments for export
+     * The required callback arguments for export.
      *
      * @return array
      */
@@ -49,7 +48,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             'vid' => true,
             'fid' => true,
             'eids' => false,
-            'ecount' => false,  // number of entries for full exports
+            'ecount' => false,  // Number of entries for full exports.
         );
     }
 
@@ -61,7 +60,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     }
 
     /**
-     * base supported formats before we know anything about the export
+     * Base supported formats before we know anything about the export.
      */
     public static function base_supported_formats() {
         return array(
@@ -73,7 +72,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     }
 
     /**
-     * get files to export if any
+     * Get files to export if any.
      *
      * @global object $DB
      */
@@ -84,9 +83,9 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     }
 
     /**
-     * How long we think the export will take
+     * How long we think the export will take.
      *
-     * @return one of PORTFOLIO_TIME_XX constants
+     * @return one of PORTFOLIO_TIME_XX constants.
      */
     public function expected_time() {
         // By number of exported entries.
@@ -98,8 +97,8 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             $dbtime = PORTFOLIO_TIME_HIGH;
         }
 
-        // (only if export includes embedded files but this is in config and not
-        // yet accessible here ...).
+        // Only if export includes embedded files but this is in config and not
+        // yet accessible here ....
         $filetime = PORTFOLIO_TIME_HIGH;
 
         return ($filetime > $dbtime) ? $filetime : $dbtime;
@@ -115,7 +114,7 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
     }
 
     /**
-     * Prepare the package for export
+     * Prepare the package for export.
      *
      * @return stored_file object
      */
@@ -156,10 +155,6 @@ class dataform_portfolio_caller extends portfolio_module_caller_base {
             }
             return;
         }
-
-        // Export to leap2a
-        // if ($this->exporter->get('formatclass') == PORTFOLIO_FORMAT_LEAP2A) {
-        // }.
 
     }
 
@@ -349,74 +344,4 @@ class dataform_file_info_container extends file_info {
     public function get_parent() {
         return $this->browser->get_file_info($this->context);
     }
-}
-
-/**
- * Dataform helper for Moodle Calendar management
- */
-class dataform_calendar_helper {
-    /**
-     *
-     */
-    public static function update_event_timeavailable($data) {
-        global $DB;
-
-        if (!empty($data->timeavailable)) {
-            $event = new stdClass;
-            $event->name        = $data->name;
-            $event->description = format_module_intro('dataform', $data, $data->coursemodule);
-            $event->timestart   = $data->timeavailable;
-
-            if ($event->id = $DB->get_field('event', 'id', array('modulename' => 'dataform', 'instance' => $data->id))) {
-                $calendarevent = calendar_event::load($event->id);
-                $calendarevent->update($event);
-            } else {
-                $event->courseid    = $data->course;
-                $event->groupid     = 0;
-                $event->userid      = 0;
-                $event->modulename  = 'dataform';
-                $event->instance    = $data->id;
-                $event->eventtype   = 'available';
-                $event->timeduration = 0;
-                $event->visible = $DB->get_field('course_modules', 'visible', array('module' => $data->module, 'instance' => $data->id));
-
-                calendar_event::create($event);
-            }
-        } else {
-            $DB->delete_records('event', array('modulename' => 'dataform', 'instance' => $data->id, 'eventtype' => 'available'));
-        }
-    }
-
-    /**
-     *
-     */
-    public static function update_event_timedue($data) {
-        global $DB;
-
-        if (!empty($data->timedue)) {
-            $event = new stdClass;
-            $event->name        = $data->name;
-            $event->description = format_module_intro('dataform', $data, $data->coursemodule);
-            $event->timestart   = $data->timedue;
-
-            if ($event->id = $DB->get_field('event', 'id', array('modulename' => 'dataform', 'instance' => $data->id))) {
-                $calendarevent = calendar_event::load($event->id);
-                $calendarevent->update($event);
-            } else {
-                $event->courseid    = $data->course;
-                $event->groupid     = 0;
-                $event->userid      = 0;
-                $event->modulename  = 'dataform';
-                $event->instance    = $data->id;
-                $event->eventtype   = 'due';
-                $event->timeduration = 0;
-                $event->visible = $DB->get_field('course_modules', 'visible', array('module' => $data->module, 'instance' => $data->id));
-
-                calendar_event::create($event);
-            }
-        } else {
-            $DB->delete_records('event', array('modulename' => 'dataform', 'instance' => $data->id, 'eventtype' => 'due'));
-        }
-    }
-
 }
