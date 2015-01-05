@@ -53,7 +53,7 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = 0) {
         global $DB;
 
-        $groupid = 0;
+        $courseid = $this->df->course->id;
 
         // Group id.
         if (!empty($importsettings['id'])) {
@@ -62,7 +62,10 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
                 $csvname = $setting['name'];
 
                 if (isset($csvrecord[$csvname]) and $csvrecord[$csvname] !== '') {
-                    $data->{"entry_{$entryid}_groupid"} = $csvrecord[$csvname];
+                    $sqlparams = array('courseid' => $courseid, 'id' => $csvrecord[$csvname]);
+                    if ($groupid = $DB->get_field('groups', 'id', $sqlparams)) {
+                        $data->{"entry_{$entryid}_groupid"} = $groupid;
+                    }
                 }
             }
             return $data;
@@ -75,7 +78,24 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
                 $csvname = $setting['name'];
 
                 if (isset($csvrecord[$csvname]) and $csvrecord[$csvname] !== '') {
-                    if ($groupid = $DB->get_field('groups', 'id', array('idnumber' => $csvrecord[$csvname]))) {
+                    $sqlparams = array('courseid' => $courseid, 'idnumber' => $csvrecord[$csvname]);
+                    if ($groupid = $DB->get_field('groups', 'id', $sqlparams)) {
+                        $data->{"entry_{$entryid}_groupid"} = $groupid;
+                    }
+                }
+            }
+            return $data;
+        }
+
+        // Group name.
+        if (!empty($importsettings['name'])) {
+            $setting = $importsettings['name'];
+            if (!empty($setting['name'])) {
+                $csvname = $setting['name'];
+
+                if (isset($csvrecord[$csvname]) and $csvrecord[$csvname] !== '') {
+                    $sqlparams = array('courseid' => $courseid, 'name' => $csvrecord[$csvname]);
+                    if ($groupid = $DB->get_field('groups', 'id', $sqlparams)) {
                         $data->{"entry_{$entryid}_groupid"} = $groupid;
                     }
                 }
@@ -96,6 +116,7 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
     public function get_sort_options_menu() {
         $fieldid = $this->id;
         return array(
+            "$fieldid,name" => get_string('name'),
             "$fieldid,idnumber" => get_string('idnumber'),
         );
     }

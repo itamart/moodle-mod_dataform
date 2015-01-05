@@ -15,9 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage entrygroup
- * @copyright 2011 Itamar Tzadok
+ * @package dataformfield_entrygroup
+ * @copyright 2014 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
@@ -36,27 +35,20 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
 
         // Set the group object.
         $group = new stdClass;
-        if ($entry->id < 0) { // new record (0)
+        if ($entry->id < 0) {
             $entry->groupid = $field->df->currentgroup;
-            $group->id = $entry->groupid;
-            $group->idnumber = null;
-            $group->name = null;
-            $group->hidepicture = null;
-            $group->picture = null;
-
-        } else {
-            $group->id = $entry->groupid;
-            $group->idnumber = $entry->groupidnumber;
-            $group->name = $entry->groupname;
-            $group->hidepicture = $entry->grouphidepic;
-            $group->picture = $entry->grouppic;
         }
+        $group->id = $entry->groupid;
+        $group->idnumber = isset($entry->groupidnumber) ? $entry->groupidnumber : null;
+        $group->name = isset($entry->groupname) ? $entry->groupname : null;
+        $group->hidepicture = isset($entry->grouphidepic) ? $entry->grouphidepic : null;
+        $group->picture = isset($entry->grouppic) ? $entry->grouppic : null;
 
         $replacements = array();
 
         foreach ($patterns as $pattern) {
             $replacements[$pattern] = '';
-            list(, $pvar) = explode(':', trim($pattern, '[]'));
+            list(, $pvar, $part) = array_pad(explode(':', trim($pattern, '[]')), 3, null);
             switch ($pvar) {
                 case 'id':
                     if (!empty($group->id)) {
@@ -74,9 +66,9 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
                     $replacements[$pattern] = $group->name;
                     break;
 
-                // Case 'description':
-                    // $replacements[$pattern] = $group->description;
-                    // break;.
+                Case 'description':
+                    // Currently we do not fetch group description.
+                    break;
 
                 case 'picture':
                     $replacements[$pattern] = print_group_picture($group, $field->get_df()->course->id, false, true);
@@ -93,6 +85,10 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
                         $replacements[$pattern] = $group->name;
                     }
                     break;
+
+                case 'members':
+                    $replacements[$pattern] = $this->render_browse_members($entry, array('part' => $part));
+                    break;
             }
         }
 
@@ -108,7 +104,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
      * @return array
      */
     public function get_pattern_import_settings(&$mform, $patternname, $header) {
-        $allowedpatternparts = array('id', 'idnumber');
+        $allowedpatternparts = array('id', 'name', 'idnumber');
 
         $fieldname = $this->_field->name;
         $patternpart = trim(str_replace($fieldname, '', $patternname), ':');
@@ -144,6 +140,47 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
     }
 
     /**
+     *
+     */
+    public function render_browse_members($entry, array $options = null) {
+        global $OUTPUT;
+
+        $field = $this->_field;
+        $fieldid = $field->id;
+
+        $part = $options['part'];
+
+        // We must have entry group.
+        if (!$groupid = $entry->groupid) {
+            return null;
+        }
+
+        $members = groups_get_members($groupid, $fields = 'u.id,u.firstname,u.lastname');
+
+        // Group members count.
+        if ($part == 'count') {
+            if ($members) {
+                return count($members);
+            }
+            return 0;
+        }
+
+        // List.
+        if ($part == 'list') {
+            if ($members) {
+                $list = array();
+                foreach ($members as $member) {
+                    $list[] = "$member->firstname $member->lastname";
+                }
+                return implode(', ', $list);
+            }
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
      * Array of patterns this field supports
      */
     protected function patterns() {
@@ -154,10 +191,10 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $patterns["[[$fieldname:id]]"] = array(true, $cat);
         $patterns["[[$fieldname:name]]"] = array(true, $cat);
         $patterns["[[$fieldname:idnumber]]"] = array(true, $cat);
-        // $patterns["[[$fieldname:description]]"] = array(true, $cat);.
         $patterns["[[$fieldname:picture]]"] = array(true, $cat);
         $patterns["[[$fieldname:picturelarge]]"] = array(false, $cat);
-        $patterns["[[$fieldname:edit]]"] = array(true, $cat);
+        $patterns["[[$fieldname:members:count]]"] = array(true, $cat);
+        $patterns["[[$fieldname:members:list]]"] = array(true, $cat);
 
         return $patterns;
     }
