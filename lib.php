@@ -31,8 +31,6 @@
 
 defined('MOODLE_INTERNAL') or die;
 
-require_once('locallib.php');
-
 /**
  * Adds an instance of a dataform
  *
@@ -77,8 +75,8 @@ function dataform_add_instance($data) {
     }
 
     // Calendar.
-    dataform_calendar_helper::update_event_timeavailable($data);
-    dataform_calendar_helper::update_event_timedue($data);
+    \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
+    \mod_dataform\helper\calendar_event::update_event_timedue($data);
 
     // Grading.
     dataform_grade_item_update($data);
@@ -127,8 +125,8 @@ function dataform_update_instance($data) {
     file_save_draft_area_files($data->activityicon, $context->id, 'mod_dataform', 'activityicon', 0, $options);
 
     // Calendar.
-    dataform_calendar_helper::update_event_timeavailable($data);
-    dataform_calendar_helper::update_event_timedue($data);
+    \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
+    \mod_dataform\helper\calendar_event::update_event_timedue($data);
 
     // Grading.
     dataform_update_grades($data);
@@ -186,8 +184,8 @@ function dataform_refresh_events($courseid = 0) {
         $cm = get_coursemodule_from_instance('dataform', $data->id, $courseid, false, MUST_EXIST);
         $data->coursemodule = $cm->id;
 
-        dataform_calendar_helper::update_event_timeavailable($data);
-        dataform_calendar_helper::update_event_timedue($data);
+        \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
+        \mod_dataform\helper\calendar_event::update_event_timedue($data);
     }
     return true;
 }
