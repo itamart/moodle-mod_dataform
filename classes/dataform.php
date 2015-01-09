@@ -847,8 +847,22 @@ class mod_dataform_dataform {
     /**
      *
      */
+    public function set_groupmode($groupmode) {
+        $this->_groupmode = $groupmode;
+    }
+
+    /**
+     *
+     */
     public function get_currentgroup() {
         return $this->_currentgroup;
+    }
+
+    /**
+     *
+     */
+    public function set_currentgroup($groupid) {
+        $this->_currentgroup = $groupid;
     }
 
     /**
