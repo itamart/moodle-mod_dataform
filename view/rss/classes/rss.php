@@ -29,6 +29,7 @@ require_once("$CFG->libdir/rsslib.php");
 class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implements mod_dataform\interfaces\rss {
 
     protected $_editors = array('section', 'param2', 'param6');
+    protected $_entrytemplate = null;
 
     /**
      *
@@ -109,16 +110,18 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
     protected function entry_definition($fielddefinitions, array $options = null) {
         $elements = array();
 
+        $entrytemplate = $this->entry_template;
+
         // If not editing, do simple replacement and return the html.
         if (empty($options['edit'])) {
-            $elements[] = str_replace(array_keys($fielddefinitions), $fielddefinitions, $this->param2);
+            $elements[] = str_replace(array_keys($fielddefinitions), $fielddefinitions, $entrytemplate);
             return $elements;
         }
 
         // Editing so split the entry template to tags and html
         // split the entry template to tags and html.
         $tags = array_keys($fielddefinitions);
-        $parts = $this->split_tags($tags, $this->param2);
+        $parts = $this->split_tags($tags, $entrytemplate);
 
         foreach ($parts as $part) {
             if (in_array($part, $tags)) {
@@ -157,7 +160,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
         }
 
         // Split the entry template to tags and html.
-        $parts = $this->split_tags($tags, $this->param2);
+        $parts = $this->split_tags($tags, $this->entry_template);
 
         foreach ($parts as $part) {
             if (in_array($part, $tags)) {
@@ -333,4 +336,25 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
         return $entry->timecreated;
     }
 
+    /**
+     * Returns the content of the view's entry template with text filters applied.
+     *
+     * @return string HTML fragment.
+     */
+    protected function get_entry_template() {
+        if ($this->_entrytemplate === null) {
+            $this->_entrytemplate = '';
+            if ($this->param2) {
+                // Apply text filters to template.
+                $formatoptions = array(
+                    'para' => false,
+                    'allowid' => true,
+                    'trusted' => true,
+                    'noclean' => true
+                );
+                $this->_entrytemplate = format_text($this->param2, FORMAT_HTML, $formatoptions);
+            }
+        }
+        return $this->_entrytemplate;
+    }
 }

@@ -24,8 +24,8 @@
 class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview {
 
     protected $_editors = array('section');
-
     protected $_columns = null;
+    protected $_entrytemplate = null;
 
     /**
      * Generates the default entry template for a new view instance or when reseting an existing instance.
@@ -64,7 +64,8 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
     public function get_columns() {
         if (empty($this->_columns)) {
             $this->_columns = array();
-            $columns = explode("\n", $this->param2);
+
+            $columns = explode("\n", $this->entry_template);
             foreach ($columns as $column) {
                 $column = trim($column);
                 if (empty($column)) {
@@ -225,6 +226,28 @@ class dataformview_aligned_aligned extends mod_dataform\pluginbase\dataformview 
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the content of the view's entry template with text filters applied.
+     *
+     * @return string HTML fragment.
+     */
+    protected function get_entry_template() {
+        if ($this->_entrytemplate === null) {
+            $this->_entrytemplate = '';
+            if ($this->param2) {
+                // Apply text filters to template.
+                $formatoptions = array(
+                    'para' => false,
+                    'allowid' => true,
+                    'trusted' => true,
+                    'noclean' => true
+                );
+                $this->_entrytemplate = format_text($this->param2, FORMAT_HTML, $formatoptions);
+            }
+        }
+        return $this->_entrytemplate;
     }
 
     /**
