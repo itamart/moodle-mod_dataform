@@ -34,6 +34,7 @@
 class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview {
 
     protected $_editors = array('section', 'param2');
+    protected $_entrytemplate = null;
 
     /**
      *
@@ -100,7 +101,7 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
     protected function group_entries_definition($entriesset, $name = '') {
         global $CFG, $OUTPUT;
 
-        $tablehtml = trim($this->param2);
+        $tablehtml = trim($this->entry_template);
         $opengroupdiv = html_writer::start_tag('div', array('class' => 'entriesview'));
         $closegroupdiv = html_writer::end_tag('div');
         if ($name) {
@@ -226,5 +227,27 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
 
         $elements[] = $fielddefinitions;
         return $elements;
+    }
+
+    /**
+     * Returns the content of the view's entry template with text filters applied.
+     *
+     * @return string HTML fragment.
+     */
+    protected function get_entry_template() {
+        if ($this->_entrytemplate === null) {
+            $this->_entrytemplate = '';
+            if ($this->param2) {
+                // Apply text filters to template.
+                $formatoptions = array(
+                    'para' => false,
+                    'allowid' => true,
+                    'trusted' => true,
+                    'noclean' => true
+                );
+                $this->_entrytemplate = format_text($this->param2, FORMAT_HTML, $formatoptions);
+            }
+        }
+        return $this->_entrytemplate;
     }
 }
