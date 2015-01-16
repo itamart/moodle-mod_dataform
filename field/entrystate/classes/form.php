@@ -26,7 +26,7 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
         // States.
         $this->definition_states();
         // Transitions.

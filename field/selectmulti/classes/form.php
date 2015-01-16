@@ -25,7 +25,7 @@ class dataformfield_selectmulti_form extends mod_dataform\pluginbase\dataformfie
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
 
         $mform = &$this->_form;
         $field = $this->_field;

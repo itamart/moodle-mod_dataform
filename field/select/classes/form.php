@@ -26,7 +26,7 @@ class dataformfield_select_form extends mod_dataform\pluginbase\dataformfieldfor
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
         $mform =& $this->_form;
 
         // Options.
