@@ -26,7 +26,7 @@ class dataformfield_ratingmdl_form extends mod_dataform\pluginbase\dataformfield
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
 
         $mform =& $this->_form;
 

@@ -26,7 +26,7 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
 
         $mform = &$this->_form;
 

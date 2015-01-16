@@ -26,7 +26,7 @@ class dataformfield_commentmdl_form extends mod_dataform\pluginbase\dataformfiel
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
 
         $mform =& $this->_form;
 

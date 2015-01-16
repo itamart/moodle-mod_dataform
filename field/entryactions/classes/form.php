@@ -26,7 +26,7 @@ class dataformfield_entryactions_form extends mod_dataform\pluginbase\dataformfi
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
 
         $mform =& $this->_form;
 

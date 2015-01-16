@@ -26,7 +26,7 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
         // Appearance.
         $this->definition_appearance();
 

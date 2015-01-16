@@ -25,7 +25,7 @@ class dataformfield_textarea_form extends \mod_dataform\pluginbase\dataformfield
     /**
      * Field settings.
      */
-    public function field_definition() {
+    protected function field_definition() {
         global $CFG;
 
         $mform =& $this->_form;

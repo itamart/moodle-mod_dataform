@@ -26,7 +26,7 @@ class dataformfield_radiobutton_form extends dataformfield_select_form {
     /**
      *
      */
-    public function field_definition() {
+    protected function field_definition() {
         parent::field_definition();
 
         $mform = &$this->_form;
