@@ -47,20 +47,23 @@ class mod_dataform_access_testcase extends advanced_testcase {
         $courseid = $this->course->id;
 
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
+        $editingteacherrolename = \mod_dataform\helper\testing::get_role_shortname('editingteacher');
+        $teacherrolename = \mod_dataform\helper\testing::get_role_shortname('teacher');
+        $studentrolename = \mod_dataform\helper\testing::get_role_shortname('student');
 
         // Teacher.
         $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$editingteacherrolename]);
         $this->teacher = $user;
 
         // Assistant.
         $user = $this->getDataGenerator()->create_user(array('username' => 'assistant'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['teacher']);
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$teacherrolename]);
         $this->assistant = $user;
 
         // Student.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$studentrolename]);
         $this->student = $user;
 
         // Guest.

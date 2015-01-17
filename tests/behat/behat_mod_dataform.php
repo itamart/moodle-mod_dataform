@@ -152,13 +152,16 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('the following "users" exist:', $table);
 
         // Enrol users in course.
+        $teacherrole = \mod_dataform\helper\testing::get_role_shortname('editingteacher');
+        $assistantrole = \mod_dataform\helper\testing::get_role_shortname('teacher');
+        $studentrole = \mod_dataform\helper\testing::get_role_shortname('student');
         $data = array(
             '| user         | course | role             |',
-            '| teacher1     | C1     | editingteacher   |',
-            '| assistant1   | C1     | teacher          |',
-            '| assistant2   | C1     | teacher          |',
-            '| student1     | C1     | student          |',
-            '| student2     | C1     | student          |',
+            "| teacher1     | C1     | $teacherrole     |",
+            "| assistant1   | C1     | $assistantrole   |",
+            "| assistant2   | C1     | $assistantrole   |",
+            "| student1     | C1     | $studentrole     |",
+            "| student2     | C1     | $studentrole     |",
         );
         $table = new TableNode(implode("\n", $data));
         $steps[] = new Given('the following "course enrolments" exist:', $table);

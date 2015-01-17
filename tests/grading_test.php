@@ -48,20 +48,22 @@ class mod_dataform_grading_testcase extends advanced_testcase {
         $courseid = $this->course->id;
 
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
+        $editingteacherrolename = \mod_dataform\helper\testing::get_role_shortname('editingteacher');
+        $studentrolename = \mod_dataform\helper\testing::get_role_shortname('student');
 
         // Teacher.
         $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$editingteacherrolename]);
         $this->teacher = $user;
 
         // Student 1.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student1'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$studentrolename]);
         $this->student1 = $user;
 
         // Student 2.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student2'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$studentrolename]);
         $this->student2 = $user;
     }
 
