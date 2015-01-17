@@ -53,17 +53,20 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
 
         // Teacher.
         $user = $this->getDataGenerator()->create_user(array('username' => 'teacher'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['editingteacher']);
+        $roleshortname = \mod_dataform\helper\testing::get_role_shortname('editingteacher');
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$roleshortname]);
         $this->teacher = $user;
 
         // Student 1.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student1'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
+        $roleshortname = \mod_dataform\helper\testing::get_role_shortname('student');
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$roleshortname]);
         $this->student1 = $user;
 
         // Student 2.
         $user = $this->getDataGenerator()->create_user(array('username' => 'student2'));
-        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles['student']);
+        $roleshortname = \mod_dataform\helper\testing::get_role_shortname('student');
+        $this->getDataGenerator()->enrol_user($user->id, $courseid, $roles[$roleshortname]);
         $this->student2 = $user;
     }
 
