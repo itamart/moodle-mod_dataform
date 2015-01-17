@@ -5,22 +5,26 @@ Feature: Dataform access permissions
     Scenario: Default access
         Given I start afresh with dataform "Test access default"
 
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test access default"
-
         ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "text" with "Field Text"
+        And the following dataform "fields" exist:
+            | name          | type          | dataform  |
+            | Field Text    | text          | dataform1 |
 
         ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View Aligned"
-        And I follow "Edit View Aligned"
-        And I expand all fieldsets
-        And I prepend "<div>Num entries total: ##numentriestotal##</div><div>Num entries max: ##numentriesviewable##</div><div>Num entries filtered: ##numentriesfiltered##</div><div>Num entries displayed: ##numentriesdisplayed##</div>" to field "View template"
-        And I press "Save changes"
-        And I set "View Aligned" as default view
+        And the following dataform "views" exist:
+            | name          | type      | dataform  | default   |
+            | View Aligned  | aligned   | dataform1 | 1         |
+
+
+        And view "View Aligned" in dataform "1" has the following view template:
+            """
+            <div>##addnewentry##</div>
+            <div>Num entries total: ##numentriestotal##</div>
+            <div>Num entries max: ##numentriesviewable##</div>
+            <div>Num entries filtered: ##numentriesfiltered##</div>
+            <div>Num entries displayed: ##numentriesdisplayed##</div>
+            <div>##entries##</div>
+            """
 
         ## Entries
         And the following dataform "entries" exist:
@@ -31,7 +35,9 @@ Feature: Dataform access permissions
             | dataform1 | student2      |       |               |               | 4 Entry by Student 02     |
             | dataform1 | student3      |       |               |               | 5 Entry by Student 03     |
 
-        And I follow "Browse"
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Test access default"
 
         # Teacher access
 
