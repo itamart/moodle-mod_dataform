@@ -112,28 +112,33 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
         if ($operator == 'LIKE') {
             $searchsqls = array();
 
-            $optionsstr = implode('#', $options);
-
             foreach ($searchedvalues as $searched) {
-                if ($pos = strpos($optionsstr, $searched) or $pos !== false) {
-                    $key = substr_count($optionsstr, '#', 0, $pos + 1) + 1;
-                    $value = '#'. $key. '#';
-                    $search = array($element, $not, $operator, $value);
-                    $searchsqls[] = parent::get_search_sql($search);
+                foreach ($options as $key => $option) {
+                    if (strpos($option, $searched) !== false) {
+                        $value = '#'. $key. '#';
+                        $search = array($element, $not, $operator, $value);
+                        $searchsqls[$key] = parent::get_search_sql($search);
+                    }
                 }
             }
-            $sqlon = array();
-            foreach ($searchsqls as $searchsql) {
-                list($sqlon[], $paramon, ) = $searchsql;
-                $params = array_merge($params, $paramon);
-            }
 
-            if ($sqlon) {
+            if ($searchsqls) {
+                $sqlon = array();
+                foreach ($searchsqls as $searchsql) {
+                    list($sqlon[], $paramon, ) = $searchsql;
+                    $params = array_merge($params, $paramon);
+                }
+
                 $sql = '('. implode(' OR ', $sqlon). ')';
+                return array($sql, $params, $this->is_dataform_content());
+            } else {
+                // Searched strings not found so search for the impossible to return no entries.
+                $search = array($element, '', '=', '##');
+                return parent::get_search_sql($search);
             }
         }
 
-        return array($sql, $params, $this->is_dataform_content());
+        return null;
     }
 
     /**
