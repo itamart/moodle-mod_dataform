@@ -22,24 +22,37 @@ Feature: Rating
         And I set the field "Type" to "Point"
         And I set the field "Maximum points" to "100"
         And I press "Save changes"
-        
+
         And I set the field "Add a field" to "ratingmdl"
         And I expand all fieldsets
         And I set the field "Name" to "rating2"
         And I set the field "Type" to "Point"
         And I set the field "Maximum points" to "24"
         And I press "Save changes"
-        
+
         ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "grid" with "View 01"
-        And I follow "Edit View 01"
-        And I expand all fieldsets
-        And I replace in field "Entry template" "[[rating1]]" with "[[rating1]]<div>Rating1 avg: [[rating1:view:avg]]</div><div>Rating1 sum: [[rating1:view:sum]]</div><div>Rating1 count: [[rating1:view:count]]</div><div>Rating1 max: [[rating1:view:max]]</div><div>Rating1 min: [[rating1:view:min]]</div>"
-        And I replace in field "Entry template" "[[rating2]]" with "[[rating2]]<div>Rating2 avg: [[rating2:view:avg]]</div><div>Rating2 sum: [[rating2:view:sum]]</div><div>Rating2 count: [[rating2:view:count]]</div><div>Rating2 max: [[rating2:view:max]]</div><div>Rating2 min: [[rating2:view:min]]</div>"
-        And I press "Save changes"
-        
-        And I set "View 01" as default view
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | grid   | dataform1 | 1         |
+
+
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            <div class="entry">
+            [[rating1]]
+            <div>Rating1 avg: [[rating1:view:avg]]</div>
+            <div>Rating1 sum: [[rating1:view:sum]]</div>
+            <div>Rating1 count: [[rating1:view:count]]</div>
+            <div>Rating1 max: [[rating1:view:max]]</div>
+            <div>Rating1 min: [[rating1:view:min]]</div>
+            [[rating2]]
+            <div>Rating2 avg: [[rating2:view:avg]]</div>
+            <div>Rating2 sum: [[rating2:view:sum]]</div>
+            <div>Rating2 count: [[rating2:view:count]]</div>
+            <div>Rating2 max: [[rating2:view:max]]</div>
+            <div>Rating2 min: [[rating2:view:min]]</div>
+            </div>
+            """
 
         And the following dataform "entries" exist:
             | dataform  | user          | group | timecreated   | timemodified  | Field Text                |
