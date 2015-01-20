@@ -19,7 +19,7 @@ Feature: Completion
         And I click on "Edit settings" "link" in the "Administration" "block"
         And I expand all fieldsets
         And I set the field "Enable completion tracking" to "Yes"
-        And I press "Save and display"
+        And I press "Save changes"
 
         Then I follow "Dataform completion requires specific grade"
 

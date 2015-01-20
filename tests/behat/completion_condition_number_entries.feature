@@ -26,7 +26,7 @@ Feature: Set a certain number of entries as a completion condition for a datafor
         And I expand all fieldsets
         And I set the following fields to these values:
           | Enable completion tracking | Yes |
-        And I press "Save and display"
+        And I press "Save changes"
 
         # Dataform completion enabling
 

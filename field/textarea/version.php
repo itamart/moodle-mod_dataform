@@ -21,5 +21,5 @@
  */
 
 $plugin->component = 'dataformfield_textarea';
-$plugin->version = 2014111001;
+$plugin->version = 2014111002;
 $plugin->requires = 2014111000;
