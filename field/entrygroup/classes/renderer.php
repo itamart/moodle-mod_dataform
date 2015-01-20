@@ -71,15 +71,15 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
                     break;
 
                 case 'picture':
-                    $replacements[$pattern] = print_group_picture($group, $field->get_df()->course->id, false, true);
+                    $replacements[$pattern] = print_group_picture($group, $field->df->course->id, false, true);
                     break;
 
                 case 'picturelarge':
-                    $replacements[$pattern] = print_group_picture($group, $field->get_df()->course->id, true, true);
+                    $replacements[$pattern] = print_group_picture($group, $field->df->course->id, true, true);
                     break;
 
                 case 'edit':
-                    if ($edit and has_capability('mod/dataform:manageentries', $field->get_df()->context)) {
+                    if ($edit and has_capability('mod/dataform:manageentries', $field->df->context)) {
                         $replacements[$pattern] = array(array($this, 'display_edit'), array($entry));
                     } else {
                         $replacements[$pattern] = $group->name;
@@ -190,6 +190,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $patterns = array();
         $patterns["[[$fieldname:id]]"] = array(true, $cat);
         $patterns["[[$fieldname:name]]"] = array(true, $cat);
+        $patterns["[[$fieldname:edit]]"] = array(true, $cat);
         $patterns["[[$fieldname:idnumber]]"] = array(true, $cat);
         $patterns["[[$fieldname:picture]]"] = array(true, $cat);
         $patterns["[[$fieldname:picturelarge]]"] = array(false, $cat);
