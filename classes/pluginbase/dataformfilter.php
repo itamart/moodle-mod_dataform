@@ -299,11 +299,7 @@ class dataformfilter {
                             list($fieldsql, $fieldparams, $fromcontent) = $fieldsqloptions;
                             $whereand[] = $fieldsql;
                             $searchparams = array_merge($searchparams, $fieldparams);
-
-                            // Add searchfrom (JOIN) only for search in dataform content or external tables.
-                            if (!$internalfield and $fromcontent) {
-                                $searchfrom[$fieldid] = $fieldid;
-                            }
+                            $searchfrom[$fieldid] = $fieldid;
                         }
                     }
                 }
@@ -315,11 +311,7 @@ class dataformfilter {
                             list($fieldsql, $fieldparams, $fromcontent) = $fieldsqloptions;
                             $whereor[] = $fieldsql;
                             $searchparams = array_merge($searchparams, $fieldparams);
-
-                            // Add searchfrom (JOIN) only for search in dataform content or external tables.
-                            if (!$internalfield and $fromcontent) {
-                                $searchfrom[$fieldid] = $fieldid;
-                            }
+                            $searchfrom[$fieldid] = $fieldid;
                         }
                     }
                 }
