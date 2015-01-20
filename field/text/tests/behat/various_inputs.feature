@@ -5,20 +5,19 @@ Feature: Various inputs
     Scenario: Add dataform entry with text field
         Given I start afresh with dataform "Test field text"
 
+        ## Field
+        And the following dataform "fields" exist:
+            | name     | type       | dataform  |
+            | Text     | text       | dataform1 |
+
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test field text"
-
-        ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "text" with "Text"
-
-        ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View 01"
-        And I set "View 01" as default view
-
-        And I follow "Browse"
 
         ## Some text.
         And I follow "Add a new entry"

@@ -5,22 +5,21 @@ Feature: Pattern required noedit
     Scenario: Use required or noedit patterns
         Given I start afresh with dataform "Test field checkbox"
 
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  | param1 |
+            | Checkbox    | checkbox       | dataform1 | CB 01\\nCB 02\\nCB 03\\nCB 04 |
+
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test field checkbox"
 
-        ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "checkbox" with "Checkbox"
-        And I set dataform field "Checkbox" options to "CB 01\nCB 02\nCB 03\nCB 04"
-
-        ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View 01"
-        And I set "View 01" as default view
-
         # No rules no content
-        Then I follow "Browse"
         And I follow "Add a new entry"
         And I press "Save"
         Then I do not see "CB 01"
@@ -85,23 +84,22 @@ Feature: Pattern required noedit
     Scenario: Add dataform entry with checkbox field
         Given I start afresh with dataform "Test field checkbox"
 
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  | param1 |
+            | Checkbox    | checkbox       | dataform1 | Option 1\\nOption 2\\nOption 3\\nOption 4 |
+
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test field checkbox"
 
-        ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "checkbox" with "Checkbox"
-        And I set dataform field "Checkbox" options to "Option 1\nOption 2\nOption 3\nOption 4"
-
-        ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View 01"
-        And I set "View 01" as default view
-
         # BROWSE
         ################################
-        Then I follow "Browse"
         And I follow "Add a new entry"
         And I press "Save"
         Then "id_editentry1" "link" should exist

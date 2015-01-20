@@ -5,21 +5,21 @@ Feature: Add dataform entries
     Scenario: Use required or noedit patterns
         Given I start afresh with dataform "Test duration field"
 
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  |
+            | Duration    | duration       | dataform1 |
+
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test duration field"
 
-        ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "duration" with "Duration"
-
-        ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View 01"
-        And I set "View 01" as default view
-
         # No rules no content
-        And I follow "Browse"
         And I follow "Add a new entry"
         And I press "Save"
         Then "id_editentry1" "link" should exist
