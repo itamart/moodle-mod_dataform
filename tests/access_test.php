@@ -161,4 +161,14 @@ class mod_dataform_access_testcase extends advanced_testcase {
         $df->delete();
     }
 
+    /**
+     * Makes sure that we can still call the Moodle API method
+     * load_capability_def() when plugin is installed (see CONTRIB-5561).
+     */
+    public function test_load_capability_def() {
+        // Calling this twice will invoke a fatal error before CONTRIB-5561 is
+        // patched.
+        load_capability_def('mod_dataform');
+        load_capability_def('mod_dataform');
+    }
 }
