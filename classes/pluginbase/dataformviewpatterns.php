@@ -175,7 +175,7 @@ class dataformviewpatterns {
             $patterns = array_merge($unshiftpatterns, $patterns);
         }
 
-        $replacements = array();
+        $replacements = array_fill_keys($patterns, '');
         foreach ($patterns as $pattern) {
             if (in_array($pattern, $info)) {
                 $replacements[$pattern] = $this->get_info_replacement($pattern, $entry, $options);
