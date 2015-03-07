@@ -87,6 +87,42 @@ class mod_dataform_dataform {
     }
 
     /**
+     * Returns a default Dataform data record.
+     *
+     * @return stdClass
+     */
+    public static function get_default_data() {
+        $data = new \stdClass;
+        $data->name = get_string('dataformnew', 'dataform');
+        $data->intro = null;
+        $data->inlineview = 0;
+        $data->embedded = 0;
+        $data->timemodified = time();
+        $data->timeavailable = 0;
+        $data->timedue = 0;
+        $data->timeinterval = 0;
+        $data->intervalcount = 1;
+        $data->grade = 0;
+        $data->gradecalc = null;
+        $data->maxentries = -1;
+        $data->entriesrequired = 0;
+        $data->grouped = 0;
+        $data->anonymous = 0;
+        $data->individualized = 0;
+        $data->timelimit = -1;
+        $data->css = null;
+        $data->cssincludes = null;
+        $data->js = null;
+        $data->jsincludes = null;
+        $data->defaultview = 0;
+        $data->defaultfilter = 0;
+        $data->completionentries = 0;
+        $data->completionspecificgrade = 0;
+
+        return $data;
+    }
+
+    /**
      * Returns dataform content for inline display.
      * Used in {@link dataform_cm_info_view()} and in {@link block_dataform_view::get_content()}.
      *
@@ -740,32 +776,7 @@ class mod_dataform_dataform {
      * @return bool
      */
     protected function reset_settings() {
-        global $DB;
-
-        $data = new \stdClass;
-        $data->name = get_string('dataformnew', 'dataform');
-        $data->intro = null;
-        $data->inlineview = 0;
-        $data->embedded = 0;
-        $data->timemodified = time();
-        $data->timeavailable = 0;
-        $data->timedue = 0;
-        $data->timeinterval = 0;
-        $data->intervalcount = 1;
-        $data->grade = 0;
-        $data->gradecalc = null;
-        $data->maxentries = -1;
-        $data->entriesrequired = 0;
-        $data->grouped = 0;
-        $data->anonymous = 0;
-        $data->individualized = 0;
-        $data->timelimit = -1;
-        $data->css = null;
-        $data->cssincludes = null;
-        $data->js = null;
-        $data->jsincludes = null;
-        $data->defaultview = 0;
-        $data->defaultfilter = 0;
+        $data = self::get_default_data();
 
         // Reset grading manager.
         $gradingman = get_grading_manager($this->context, 'mod_dataform', 'activity');

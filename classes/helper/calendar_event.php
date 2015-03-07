@@ -45,7 +45,7 @@ class calendar_event {
             $event->timestart = $data->timeavailable;
 
             if ($event->id = $DB->get_field('event', 'id', array('modulename' => 'dataform', 'instance' => $data->id))) {
-                $calendarevent = calendar_event::load($event->id);
+                $calendarevent = \calendar_event::load($event->id);
                 $calendarevent->update($event);
             } else {
                 $event->courseid = $data->course;
