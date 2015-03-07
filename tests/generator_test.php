@@ -35,49 +35,111 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $generator = $this->getDataGenerator();
+
+        // There should be no instances at this point.
+        $instances = array();
+        $this->assertEquals(count($instances), $DB->count_records('dataform'));
+
+        // Verify the datafrom generator.
         $dataformgenerator = $generator->get_plugin_generator('mod_dataform');
-
-        $this->assertEquals(0, $DB->count_records('dataform'));
-
-        $course = $generator->create_course();
-
         $this->assertInstanceOf('mod_dataform_generator', $dataformgenerator);
         $this->assertEquals('dataform', $dataformgenerator->get_modulename());
 
-        $data1 = $dataformgenerator->create_instance(array('course' => $course->id));
-        $data2 = $dataformgenerator->create_instance(array('course' => $course->id));
-        $this->assertEquals(2, $DB->count_records('dataform'));
+        // Add course.
+        $course = $generator->create_course();
 
-        $df1 = mod_dataform_dataform::instance($data1->id);
-        $df2 = mod_dataform_dataform::instance($data2->id);
+        // Add instances.
+        $dataset = $this->createCsvDataSet(array('cases' => __DIR__.'/fixtures/tc_generator.csv'));
+        $cases = $dataset->getTable('cases');
+        $columns = $dataset->getTableMetaData('cases')->getColumns();
 
-        foreach (array($df1, $df2) as $df) {
+        for ($r = 0; $r < $cases->getRowCount(); $r++) {
+            $case = array_combine($columns, $cases->getRow($r));
+
+            $defaultdata = \mod_dataform_dataform::get_default_data();
+
+            // Adjust values.
+            foreach ($case as $key => $value) {
+                if (!isset($defaultdata->$key)) {
+                    continue;
+                }
+                $method = "get_value_$key";
+                if (method_exists($this, $method)) {
+                    $value = $this->$method($value);
+                }
+                $defaultdata->$key = $value;
+            }
+            $defaultdata->course = $course->id;
+
+            // Create the instance.
+            $data = $dataformgenerator->create_instance((array) $defaultdata);
+            $instances[] = $data->id;
+            $this->assertEquals(count($instances), $DB->count_records('dataform'));
+
+            // Update the instance.
+            $df = \mod_dataform_dataform::instance($data->id);
+            $df->update($df->data);
+
+            // Verify instances count.
+            $this->assertEquals(count($instances), $DB->count_records('dataform'));
+
+            // Verify course id.
             $this->assertEquals($df->course->id, $course->id);
 
+            // Verify course module.
             $cm = get_coursemodule_from_instance('dataform', $df->id);
             $this->assertEquals($df->cm->id, $cm->id);
             $this->assertEquals($df->id, $cm->instance);
             $this->assertEquals('dataform', $cm->modname);
             $this->assertEquals($course->id, $cm->course);
 
+            // Verify context.
             $context = context_module::instance($cm->id);
             $this->assertEquals($df->context->id, $context->id);
             $this->assertEquals($df->cm->id, $context->instanceid);
+
+            // Test gradebook integration using low level DB access - DO NOT USE IN PLUGIN CODE!
+            if ($data->grade) {
+                $gitemparams = array(
+                    'courseid' => $course->id,
+                    'itemtype' => 'mod',
+                    'itemmodule' => 'dataform',
+                    'iteminstance' => $data->id
+                );
+                $gitem = $DB->get_record('grade_items', $gitemparams);
+                $this->assertNotEmpty($gitem);
+                $this->assertEquals(100, $gitem->grademax);
+                $this->assertEquals(0, $gitem->grademin);
+                $this->assertEquals(GRADE_TYPE_VALUE, $gitem->gradetype);
+            }
         }
 
-        // Test gradebook integration using low level DB access - DO NOT USE IN PLUGIN CODE!
-        $data3 = $dataformgenerator->create_instance(array('course' => $course->id, 'grade' => 100));
-        $gitem = $DB->get_record('grade_items', array('courseid' => $course->id, 'itemtype' => 'mod', 'itemmodule' => 'dataform', 'iteminstance' => $data3->id));
-        $this->assertNotEmpty($gitem);
-        $this->assertEquals(100, $gitem->grademax);
-        $this->assertEquals(0, $gitem->grademin);
-        $this->assertEquals(GRADE_TYPE_VALUE, $gitem->gradetype);
-
-        $this->assertEquals(3, $DB->count_records('dataform'));
-        $df2->delete();
-        $this->assertEquals(2, $DB->count_records('dataform'));
+        $dataid = array_pop($instances);
+        \mod_dataform_dataform::instance($dataid)->delete();
+        $this->assertEquals(count($instances), $DB->count_records('dataform'));
 
         // Clean up.
         $dataformgenerator->delete_all_instances();
     }
+
+    /**
+     * Returns timestamp for timeavailable string.
+     *
+     * @param string $value
+     * @return int timestamp
+     */
+    protected function get_value_timeavailable($value) {
+        return (!empty($value) ? strtotime($value) : 0);
+    }
+
+    /**
+     * Returns timestamp for timedue string.
+     *
+     * @param string $value
+     * @return int timestamp
+     */
+    protected function get_value_timedue($value) {
+        return (!empty($value) ? strtotime($value) : 0);
+    }
+
 }
