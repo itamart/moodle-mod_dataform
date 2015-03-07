@@ -22,11 +22,11 @@
 
 /**
  * @package mod-dataform
- * @copyright 2011 Itamar Tzadok
+ * @copyright 2015 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/** PAGE MOD EMBED */
+/** PAGE MOD EMBED **/
  #page-mod-dataform-embed {
     margin: 0;
     width: 100%;
@@ -36,34 +36,29 @@
     padding: 0;
 }
 
-/** TAB TREE */
-#page-mod-dataform-view .tabtree {
-  margin-bottom: 1em;
+/** QUICK MENUS **/
+.path-mod-dataform .quickmenu {
 }
 
-/** QUICK MENUS */
-.quickmenu {
-}
-
-.quickmenus-wrapper .quickmenu,
-.quickfilters-wrapper .quickfilter{
+.path-mod-dataform .quickmenus-wrapper .quickmenu,
+.path-mod-dataform .quickfilters-wrapper .quickfilter{
     float: left;
     margin-right: 30px;
 }
 
-.quickmenus-wrapper,
-.quickfilters-wrapper {
+.path-mod-dataform .quickmenus-wrapper,
+.path-mod-dataform .quickfilters-wrapper {
     border: 1px solid #DDD;
     padding: 10px;
     margin: 10px 0;
 }
 
-.addnewentry-wrapper {
+/** ADD NEW ENTRY **/
+.path-mod-dataform .addnewentry-wrapper {
     margin: 20px 0;
 }
 
-/** ADD NEW ENTRY */
-.addnewentry{
+.path-mod-dataform .addnewentry{
     padding: 10px 15px;
     background: #4479BA;
     color: #FFF;
@@ -77,14 +72,14 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.addnewentry:hover, .addnewentry:focus {
+.path-mod-dataform .addnewentry:hover, .addnewentry:focus {
     color: #FFF;
     background: #356094;
     border: solid 1px #2A4E77;
     text-decoration: none;
 }
 
-/** PAGING BAR */
+/** PAGING BAR **/
 #page-mod-dataform-view .paging {
   margin-top: 1em;
   margin-bottom: 1em;
@@ -105,12 +100,12 @@
   background-color: #EFEFEF;
 }
 
-/** SINGLE SELECT */
+/** SINGLE SELECT **/
 #page-mod-dataform-view .singleselect {
   margin: 0.5em 0;
 }
 
-/** ENTRIES VIEW */
+/** ENTRIES VIEW **/
 #page-mod-dataform-embed .entriesview,
 #page-mod-dataform-view .entriesview {
   overflow: auto;
@@ -125,7 +120,7 @@
   border: 1px solid #DDD;;
 }
 
-/** MOODLE FORM */
+/** ENTRIES FORM **/
 #page-mod-dataform-embed.gecko .mform fieldset.hidden,
 #page-mod-dataform-view.gecko .mform fieldset.hidden {
   display: table-column;
@@ -141,71 +136,44 @@
 
 #page-mod-dataform-embed .mform .fitem .fitemtitle,
 #page-mod-dataform-embed .mform.entriesform .fitem .fitemtitle,
-/*#page-mod-dataform-view .mform .fitem .fitemtitle,*/
 #page-mod-dataform-view .mform.entriesform .fitem .fitemtitle {
   float: left;
   text-align: left;
   width: auto;
 }
 
-
 #page-mod-dataform-embed .mform .fitem .felement,
 #page-mod-dataform-embed .mform.entriesform .fitem .felement,
 #page-mod-dataform-embed .mform .entriesform .fitem .feditor,
-/*#page-mod-dataform-view .mform .fitem .felement,*/
 #page-mod-dataform-view .mform.entriesform .fitem .felement,
 #page-mod-dataform-view .mform.entriesform .fitem .feditor {
   margin-left: 0;
   width: 100%;
 }
 
-.mod-dataform-field .c0 {
-  text-align: right;
-}
-
-.mod-dataform-field .fieldadd,
-.mod-dataform-field .sortdefault {
-  margin-bottom: 1em;
-  margin-top: 1em;
-}
-
-.mod-dataform-field .fieldadd select,
-.mod-dataform-field .sortdefault select {
-  margin-left: 1em;
-}
-
-.generaltable td.z_borderless,
-.generaltable th.z_borderless {
-    border: 0 none !important;
-}
-
-.mform div.fdescription.required {
+#page-mod-dataform-embed .mform.entriesform div.fdescription.required,
+#page-mod-dataform-view .mform.entriesform div.fdescription.required {
     display: none;
 }
 
-.mform fieldset.collapsible legend div.summary {
-    font-size: 14px;
-    line-height: 16px;
-}
-
-.mform fieldset.collapsible legend div.summary span.summarylabel {
-    color: #0088CC;
-}
-
-.viewvisibilityselector.viewdisabled select,
-.viewvisibilityselector select option[value="0"] {
+/** VIEWS INDEX **/
+#page-mod-dataform-view-index .viewvisibilityselector.viewdisabled select,
+#page-mod-dataform-view-index .viewvisibilityselector select option[value="0"] {
     background-color: #666;
     color: #FFF;
 }
 
-.viewvisibilityselector.viewvisible select,
-.viewvisibilityselector select option[value="1"] {
+#page-mod-dataform-view-index .viewvisibilityselector.viewvisible select,
+#page-mod-dataform-view-index .viewvisibilityselector select option[value="1"] {
     background-color: #FFF;
     color: #555;
 }
 
-.viewvisibilityselector.viewhidden select,
-.viewvisibilityselector select option[value="2"] {
+#page-mod-dataform-view-index .viewvisibilityselector.viewhidden select,
+#page-mod-dataform-view-index .viewvisibilityselector select option[value="2"] {
     background-color: #DDD;
     color: #555;
 }
+
+/** FIELD INDEX **/
+#page-mod-dataform-field-index .fieldadd select,
