@@ -20,13 +20,15 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_dataform\observer;
+
 /**
  * Observers helper class
  */
-class mod_dataform_observers_helper {
+class observers {
 
     /**
-     * Returns notification observers for all Dataform events.
+     * Returns list of dataform observers.
      *
      * @return array
      */
@@ -35,7 +37,11 @@ class mod_dataform_observers_helper {
 
         $observers = array();
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/observer") as $filename) {
-            $observer = '\mod_dataform\observer\\'. basename($filename, '.php');
+            $basename = basename($filename, '.php');
+            if ($basename == 'observers') {
+                continue;
+            }
+            $observer = '\mod_dataform\observer\\'. $basename;
             $observers = array_merge($observers, $observer::observers());
         }
         return $observers;
