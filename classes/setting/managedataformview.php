@@ -15,24 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Field management setting.
+ * View management setting.
  *
  * @package    mod_dataform
  * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_dataform\setting;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/adminlib.php");
 
-class mod_dataform_setting_managedataformfield extends admin_setting {
+class managedataformview extends \admin_setting {
     /**
      * Calls parent::__construct with specific arguments
      */
     public function __construct() {
         $this->nosave = true;
-        parent::__construct('mod_dataform_manageui', get_string('managefields', 'mod_dataform'), '', '');
+        parent::__construct('mod_dataform_manageui', get_string('manageviews', 'mod_dataform'), '', '');
     }
 
     /**
@@ -65,7 +67,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
     }
 
     /**
-     * Checks if $query is one of the available dataformfield plugins.
+     * Checks if $query is one of the available dataformview plugins.
      *
      * @param string $query The string to search for
      * @return bool Returns true if found, false if not
@@ -75,14 +77,14 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
             return true;
         }
 
-        $query = core_text::strtolower($query);
-        $plugins = core_component::get_plugin_list('dataformfield');
+        $query = \core_text::strtolower($query);
+        $plugins = \core_component::get_plugin_list('dataformview');
         foreach ($plugins as $plugin => $fulldir) {
-            if (strpos(core_text::strtolower($plugin), $query) !== false) {
+            if (strpos(\core_text::strtolower($plugin), $query) !== false) {
                 return true;
             }
-            $localised = get_string('pluginname', "dataformfield_$plugin");
-            if (strpos(core_text::strtolower($localised), $query) !== false) {
+            $localised = get_string('pluginname', "dataformview_$plugin");
+            if (strpos(\core_text::strtolower($localised), $query) !== false) {
                 return true;
             }
         }
@@ -99,7 +101,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
     public function output_html($data, $query = '') {
         global $OUTPUT, $PAGE;
 
-        $plugincat = 'dataformfield';
+        $plugincat = 'dataformview';
 
         // Display strings.
         $strup = get_string('up');
@@ -133,7 +135,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
         $return = $OUTPUT->heading(get_string('availableplugins', 'mod_dataform'), 3, 'main', true);
         $return .= $OUTPUT->box_start('generalbox');
 
-        $table = new html_table();
+        $table = new \html_table();
         $table->head = array(
             get_string('name'),
             $strversion,
@@ -159,7 +161,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
         // Iterate through the plugins and add to the display table.
         $updowncount = 1;
         $plugincount = count($enabled);
-        $url = new moodle_url('/mod/dataform/admin/plugins.php', array('sesskey' => sesskey()));
+        $url = new \moodle_url('/mod/dataform/admin/plugins.php', array('sesskey' => sesskey()));
         $printed = array();
         foreach ($allplugins as $plugin => $unused) {
             $plugintype = $plugincat. '_'. $plugin;
@@ -182,14 +184,14 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
 
             // Hide/show links.
             if (isset($enabled[$plugin])) {
-                $aurl = new moodle_url($url, array('action' => 'disable', 'plugin' => $plugintype));
+                $aurl = new \moodle_url($url, array('action' => 'disable', 'plugin' => $plugintype));
                 $hideshow = "<a href=\"$aurl\">";
                 $hideshow .= "<img src=\"" . $OUTPUT->pix_url('t/hide') . "\" class=\"iconsmall\" alt=\"$strdisable\" /></a>";
                 $isenabled = true;
                 $displayname = "<span>$name</span>";
             } else {
                 if (isset($available[$plugin])) {
-                    $aurl = new moodle_url($url, array('action' => 'enable', 'plugin' => $plugintype));
+                    $aurl = new \moodle_url($url, array('action' => 'enable', 'plugin' => $plugintype));
                     $hideshow = "<a href=\"$aurl\">";
                     $hideshow .= "<img src=\"" . $OUTPUT->pix_url('t/show') . "\" class=\"iconsmall\" alt=\"$strenable\" /></a>";
                     $isenabled = false;
@@ -210,14 +212,14 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
             $updown = '';
             if ($isenabled) {
                 if ($updowncount > 1) {
-                    $aurl = new moodle_url($url, array('action' => 'up', 'plugin' => $plugintype));
+                    $aurl = new \moodle_url($url, array('action' => 'up', 'plugin' => $plugintype));
                     $updown .= "<a href=\"$aurl\">";
                     $updown .= "<img src=\"" . $OUTPUT->pix_url('t/up') . "\" alt=\"$strup\" class=\"iconsmall\" /></a>&nbsp;";
                 } else {
                     $updown .= "<img src=\"" . $OUTPUT->pix_url('spacer') . "\" class=\"iconsmall\" alt=\"\" />&nbsp;";
                 }
                 if ($updowncount < $plugincount) {
-                    $aurl = new moodle_url($url, array('action' => 'down', 'plugin' => $plugintype));
+                    $aurl = new \moodle_url($url, array('action' => 'down', 'plugin' => $plugintype));
                     $updown .= "<a href=\"$aurl\">";
                     $updown .= "<img src=\"" . $OUTPUT->pix_url('t/down') . "\" alt=\"$strdown\" class=\"iconsmall\" /></a>";
                 } else {
@@ -231,7 +233,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
                 $settings = '';
             } else {
                 if ($surl = $plugininfo->get_settings_url()) {
-                    $settings = html_writer::link($surl, $strsettings);
+                    $settings = \html_writer::link($surl, $strsettings);
                 } else {
                     $settings = '';
                 }
@@ -239,8 +241,8 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
 
             // Add uninstall info.
             $uninstall = '';
-            if ($uninstallurl = core_plugin_manager::instance()->get_uninstall_url($plugintype, 'manage')) {
-                $uninstall = html_writer::link($uninstallurl, $struninstall);
+            if ($uninstallurl = \core_plugin_manager::instance()->get_uninstall_url($plugintype, 'manage')) {
+                $uninstall = \html_writer::link($uninstallurl, $struninstall);
             }
 
             // Add a row to the table.
@@ -257,7 +259,7 @@ class mod_dataform_setting_managedataformfield extends admin_setting {
             $printed[$plugin] = true;
         }
 
-        $return .= html_writer::table($table);
+        $return .= \html_writer::table($table);
         $return .= get_string('configplugins', 'mod_dataform') . '<br />' . get_string('tablenosave', 'admin');
         $return .= $OUTPUT->box_end();
         return highlight($query, $return);

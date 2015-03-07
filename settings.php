@@ -82,7 +82,7 @@ $admincatstr = new lang_string('fieldplugins', 'mod_dataform');
 $admincat = new admin_category('dataformfieldplugins', $admincatstr, !$module->is_enabled());
 $ADMIN->add('moddataformfolder', $admincat);
 $settingpage = new admin_settingpage('managedataformfield', new lang_string('managefields', 'mod_dataform'));
-$settingpage->add(new mod_dataform_setting_managedataformfield());
+$settingpage->add(new \mod_dataform\setting\managedataformfield());
 $ADMIN->add('dataformfieldplugins', $settingpage);
 
 // Manage dataformview plugins.
@@ -90,7 +90,7 @@ $admincatstr = new lang_string('viewplugins', 'mod_dataform');
 $admincat = new admin_category('dataformviewplugins', $admincatstr, !$module->is_enabled());
 $ADMIN->add('moddataformfolder', $admincat);
 $settingpage = new admin_settingpage('managedataformview', new lang_string('manageviews', 'mod_dataform'));
-$settingpage->add(new mod_dataform_setting_managedataformview());
+$settingpage->add(new \mod_dataform\setting\managedataformview());
 $ADMIN->add('dataformviewplugins', $settingpage);
 
 // Site presets manager.
