@@ -1026,12 +1026,17 @@ class mod_dataform_dataform {
      * @param int $userid
      * @return array Associative array userid => array(entryid, entryid, ...)
      */
-    public function get_entry_ids_per_user($userid = 0) {
+    public function get_entry_ids_per_user($userids = null) {
         global $DB;
 
         $entryids = array();
 
-        $params = array('dataid'  => $this->id);
+        // Set the userids.
+        if ($userids) {
+            $userids = is_array($userids) ? $userids : explode(',', $userids);
+        }
+
+        $params = array('dataid' => $this->id);
 
         if ($this->grouped) {
             // The case of grouped entries.
@@ -1039,12 +1044,10 @@ class mod_dataform_dataform {
             // and then the entries by the group ids.
 
             // Prepare a list of user ids to process.
-            if (!$userid) {
+            if (!$userids) {
                 // Get course users.
                 $courseusers = get_enrolled_users($this->context, '', 0, 'u.id,u.id as uid');
                 $userids = array_keys($courseusers);
-            } else {
-                $userids = array($userid);
             }
 
             foreach ($userids as $userid) {
@@ -1068,11 +1071,21 @@ class mod_dataform_dataform {
             }
         } else {
             // The case of user entries.
-            if ($userid) {
-                $params['userid'] = $userid;
+            if ($userids) {
+                list($inuid, $uparams) = $DB->get_in_or_equal($userids);
+                $params = array_merge($params, $uparams);
+                $entries = $DB->get_records_select_menu(
+                    'dataform_entries',
+                    " userid $inuid ",
+                    $params,
+                    'userid',
+                    'id,userid'
+                );
+            } else {
+                $entries = $DB->get_records_menu('dataform_entries', $params, 'userid', 'id,userid');
             }
 
-            if ($entries = $DB->get_records_menu('dataform_entries', $params, 'userid', 'id,userid')) {
+            if ($entries) {
                 foreach ($entries as $entryid => $userid) {
                     if (empty($entryids[$userid])) {
                         $entryids[$userid] = array();
@@ -1221,69 +1234,69 @@ class mod_dataform_dataform {
                 'userid' => $userid,
                 'rawgrade' => null
             );
-        }
 
-        // Num entries pattern.
-        if (strpos($formula, '##numentries##') !== false) {
-            $patterns['##numentries##'] = 0;
-            if ($numentries = $this->get_entries_count_per_user(self::COUNT_ALL, $userid)) {
-                foreach ($numentries as $userid => $count) {
-                    if (empty($users[$userid])) {
-                        $users[$userid] = array();
+            // Num entries pattern.
+            if (strpos($formula, '##numentries##') !== false) {
+                $patterns['##numentries##'] = 0;
+                if ($numentries = $this->get_entries_count_per_user(self::COUNT_ALL, $userid)) {
+                    foreach ($numentries as $userid => $count) {
+                        if (empty($users[$userid])) {
+                            $users[$userid] = array();
+                        }
+                        $users[$userid]['##numentries##'] = $count->numentries;
                     }
-                    $users[$userid]['##numentries##'] = $count->numentries;
                 }
             }
-        }
 
-        // Extract grading field patterns from the formula.
-        if (preg_match_all("/##\d*:[^#]+##/", $formula, $matches)) {
-            // Get the entry ids per user.
-            $entryids = $this->get_entry_ids_per_user($userid);
+            // Extract grading field patterns from the formula.
+            if (preg_match_all("/##\d*:[^#]+##/", $formula, $matches)) {
+                // Get the entry ids per user.
+                $entryids = $this->get_entry_ids_per_user($userid);
 
-            foreach ($matches[0] as $pattern) {
-                $patterns[$pattern] = 0;
+                foreach ($matches[0] as $pattern) {
+                    $patterns[$pattern] = 0;
 
-                list($targetval, $fieldpattern) = explode(':', trim($pattern, '#'), 2);
+                    list($targetval, $fieldpattern) = explode(':', trim($pattern, '#'), 2);
 
-                // Get the field from the pattern.
-                if (!$field = $this->field_manager->get_field_by_pattern("[[$fieldpattern]]")) {
-                    continue;
-                }
-
-                $uservalues = null;
-
-                // Get user values for the pattern.
-                // The field must either has helper\contentperuser component,
-                // or be an instance of interface grading.
-                $helper = "dataformfield_$field->type\\helper\\contentperuser";
-                if (class_exists($helper)) {
-                    $uservalues = $helper::get_content($field, $fieldpattern, $entryids);
-                } else if ($field instanceof mod_dataform\interfaces\grading) {
-                    // BC - this method for grading user values is depracated.
-                    $uservalues = $field->get_user_values($fieldpattern, $entryids, $userid);
-                }
-
-                // Leave pattern value at 0 if no user values.
-                if (!$uservalues) {
-                    continue;
-                }
-                // Register pattern values for users.
-                foreach ($uservalues as $userid => $values) {
-                    if (empty($users[$userid])) {
-                        $users[$userid] = array();
+                    // Get the field from the pattern.
+                    if (!$field = $this->field_manager->get_field_by_pattern("[[$fieldpattern]]")) {
+                        continue;
                     }
 
-                    // Keep only target val if specified.
-                    if ($targetval) {
-                        foreach ($values as $key => $value) {
-                            if ($value != $targetval) {
-                                unset($values[$key]);
+                    $uservalues = null;
+
+                    // Get user values for the pattern.
+                    // The field must either has helper\contentperuser component,
+                    // or be an instance of interface grading.
+                    $helper = "dataformfield_$field->type\\helper\\contentperuser";
+                    if (class_exists($helper)) {
+                        $uservalues = $helper::get_content($field, $fieldpattern, $entryids);
+                    } else if ($field instanceof mod_dataform\interfaces\grading) {
+                        // BC - this method for grading user values is depracated.
+                        $uservalues = $field->get_user_values($fieldpattern, $entryids, $userid);
+                    }
+
+                    // Leave pattern value at 0 if no user values.
+                    if (!$uservalues) {
+                        continue;
+                    }
+                    // Register pattern values for users.
+                    foreach ($uservalues as $userid => $values) {
+                        if (empty($users[$userid])) {
+                            $users[$userid] = array();
+                        }
+
+                        // Keep only target val if specified.
+                        if ($targetval) {
+                            foreach ($values as $key => $value) {
+                                if ($value != $targetval) {
+                                    unset($values[$key]);
+                                }
                             }
                         }
-                    }
-                    if ($values) {
-                        $users[$userid][$pattern] = implode(',', $values);
+                        if ($values) {
+                            $users[$userid][$pattern] = implode(',', $values);
+                        }
                     }
                 }
             }
