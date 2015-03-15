@@ -146,10 +146,8 @@ class mod_dataform_entry_manager {
     /**
      *
      */
-    public function get_sql_query($filter) {
+    public function get_sql_query(\mod_dataform\pluginbase\dataformfilter $filter) {
         global $DB, $USER;
-
-        $df = mod_dataform_dataform::instance($this->dataformid);
 
         // Params array for the sql.
         $params = array();
@@ -159,7 +157,7 @@ class mod_dataform_entry_manager {
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
 
         // USER FILTERING.
-        if ($df->grouped) {
+        if ($filter->grouped) {
             // Grouped entries without user info; don't filter by user.
             $whatuser = '';
             $fromuser = '';
@@ -187,12 +185,14 @@ class mod_dataform_entry_manager {
             // Exclude other entries.
             $viewany = mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
             $entriesmanager = mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
-            if (($df->individualized and !$entriesmanager) or !$viewany) {
+            if (($filter->individualized and !$entriesmanager) or !$viewany) {
                 $whereuser .= " AND e.userid = ? ";
                 $params[] = $USER->id;
             }
         }
         // GROUP FILTERING.
+        $currentgroup = $filter->currentgroup;
+        $groupmode = $filter->groupmode;
         $wheregroup = '';
         // Specific groups requested.
         if (!empty($filter->groups)) {
@@ -201,10 +201,19 @@ class mod_dataform_entry_manager {
             $params = array_merge($params, $groupparams);
         }
         // Current group.
-        if ($df->currentgroup) {
-            list($ingroups, $groupparams) = $DB->get_in_or_equal(array($df->currentgroup, 0));
+        if ($currentgroup) {
+            list($ingroups, $groupparams) = $DB->get_in_or_equal(array($currentgroup, 0));
             $wheregroup .= " AND e.groupid $ingroups ";
             $params = array_merge($params, $groupparams);
+        }
+
+        // All participants in separate groups mode, must have accessallgroups.
+        if (!$currentgroup and $groupmode == SEPARATEGROUPS) {
+            $df = mod_dataform_dataform::instance($this->dataformid);
+            if (!has_capability('moodle/site:accessallgroups', $df->context)) {
+                $wheregroup .= " AND e.groupid = ? ";
+                $params[] = 0;
+            }
         }
 
         // Sql for fetching the entries.
@@ -435,7 +444,7 @@ class mod_dataform_entry_manager {
      * Returns the position of the specified entryid in the list of filtered entries.
      *
      * @param int $entryid
-     * @param dataformfilter $filter
+     * @param \mod_dataform\pluginbase\dataformfilter $filter
      * @return int
      */
     public function get_entry_position($entryid, $filter) {

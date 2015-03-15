@@ -5,26 +5,37 @@ Feature: Filtering
     Scenario: Filtering
         Given a fresh site with dataform "Test dataform filtering"
 
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test dataform filtering"
+        #Section: Add a text field.
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  |
+            | Text field   | text          | dataform1 |
+        #:Section
 
-        ## Add a text field.
-        Then I go to manage dataform "fields"
-        And I add a dataform field "text" with "Text field"
+        #Section: Add an aligned view.
+        And the following dataform "views" exist:
+            | name          | type      | dataform  | default   |
+            | Aligned view  | aligned   | dataform1 | 1         |
 
-        ## Add an aligned view.
-        Then I go to manage dataform "views"
-        And I add a dataform view "aligned" with "Aligned view"
-        And I set "Aligned view" as default view
+        And view "Aligned view" in dataform "1" has the following view template:
+            """
+            <div>
+                <div class="exporthide">
+                    <div class="addnewentry-wrapper">##addnewentry##</div>
+                    <div class="quickfilters-wrapper">
+                        <div class="quickfilter">Current filter ##filtersmenu##</div>
+                        <div class="quickfilter">Search ##quicksearch##</div>
+                        <div class="quickfilter">Per page ##quickperpage##</div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div>##advancedfilter##</div>
+                    <div>##paging:bar##</div>
+                </div>
+                <div>##entries##</div>
+            </div>
+            """
+        #:Section
 
-        ## Adjust the aligned view.
-        And I follow "Edit Aligned view"
-        And I expand all fieldsets
-        And I prepend "<p>##advancedfilter##</p>" to field "View template"
-        And I press "Save changes"
-
-        ## Add entries.
+        #Section: Add entries.
         And the following dataform "entries" exist:
             | dataform  | user          | group | timecreated   | timemodified  | Text field   |
             | dataform1 | teacher1      |       |               |               | Entry 01     |
@@ -33,13 +44,23 @@ Feature: Filtering
             | dataform1 | teacher1      |       |               |               | Entry 04     |
             | dataform1 | teacher1      |       |               |               | Entry 05     |
             | dataform1 | teacher1      |       |               |               | Entry 06     |
+        #:Section
 
-
-        Then I follow "Browse"
+        #Section: Log in.
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Test dataform filtering"
+        And I see "Entry 01"
+        And I see "Entry 02"
+        And I see "Entry 03"
+        And I see "Entry 04"
+        And I see "Entry 05"
+        And I see "Entry 06"
+        #:Section
 
         ### Quick filtering ###
 
-        ## Per page
+        #Section: Quick per page.
         And I do not see "Quick filter"
         And I do not see "Next"
         And I do not see "Previous"
@@ -88,17 +109,19 @@ Feature: Filtering
         And I see "Entry 04"
         And I see "Entry 05"
         And I see "Entry 06"
+        #:Section
 
-        ## Quick search
+        #Section: Quick search.
         #Then I set the field "usearch" to "Entry 01"
         #And I press Enter on "usearch" "field"
         #And I see "Quick filter"
         #And I see "Entry 01"
         #And I do not see "Entry 02"
+        #:Section
 
-        ## Define and apply a standard filter
+        ### Define and apply a standard filter ###
 
-        # Add filter: Last 2 entries
+        #Section: Add filter: Last 2 entries
         Then I go to manage dataform "filters"
         Then I follow "Add a filter"
         And I set the field "Name" to "Last 2 Entries"
@@ -107,44 +130,23 @@ Feature: Filtering
         And I press "Save changes"
         And I see "Last 2 Entries"
 
-        # Add filter: With "Entry 01" content
+        Then I follow "Browse"
+        Then I set the field "id_filtersmenu" to "Last 2 Entries"
+        And I see "Entry 05"
+        And I see "Entry 06"
+        And I do not see "Entry 01"
+        And I do not see "Entry 02"
+        #:Section
+
+        #Section: Add filter: With "Entry 01" content
+        Then I go to manage dataform "filters"
         Then I follow "Add a filter"
         And I set the field "Name" to "With Entry_01"
         And I set search criterion "1" to "AND" "1,content" "" "=" "Entry 01"
         And I press "Save changes"
         And I see "With Entry_01"
 
-        # Add filter: With Entry 01 and Entry_05 content
-        Then I follow "Add a filter"
-        And I set the field "Name" to "With Entry_01 and Entry_05"
-        And I set search criterion "1" to "AND" "1,content" "" "=" "Entry 01"
-        And I set search criterion "2" to "AND" "1,content" "" "=" "Entry 05"
-        And I press "Save changes"
-        And I see "With Entry_01 and Entry_05"
-
-        # Add filter: With Entry 01 or Entry_05 content
-        Then I follow "Add a filter"
-        And I set the field "Name" to "With Entry_01 or Entry_05"
-        And I set search criterion "1" to "OR" "1,content" "" "=" "Entry 01"
-        And I set search criterion "2" to "OR" "1,content" "" "=" "Entry 05"
-        And I press "Save changes"
-        And I see "With Entry_01 or Entry_05"
-
-        # Browse and filter
         Then I follow "Browse"
-        And I see "Entry 01"
-        And I see "Entry 02"
-        And I see "Entry 03"
-        And I see "Entry 04"
-        And I see "Entry 05"
-        And I see "Entry 06"
-
-        Then I set the field "id_filtersmenu" to "Last 2 Entries"
-        And I see "Entry 05"
-        And I see "Entry 06"
-        And I do not see "Entry 01"
-        And I do not see "Entry 02"
-
         Then I set the field "id_filtersmenu" to "With Entry_01"
         And I see "Entry 01"
         And I do not see "Entry 02"
@@ -152,7 +154,18 @@ Feature: Filtering
         And I do not see "Entry 04"
         And I do not see "Entry 05"
         And I do not see "Entry 06"
+        #:Section
 
+        #Section: Add filter: With Entry 01 and Entry_05 content
+        Then I go to manage dataform "filters"
+        Then I follow "Add a filter"
+        And I set the field "Name" to "With Entry_01 and Entry_05"
+        And I set search criterion "1" to "AND" "1,content" "" "=" "Entry 01"
+        And I set search criterion "2" to "AND" "1,content" "" "=" "Entry 05"
+        And I press "Save changes"
+        And I see "With Entry_01 and Entry_05"
+
+        Then I follow "Browse"
         Then I set the field "id_filtersmenu" to "With Entry_01 and Entry_05"
         And I do not see "Entry 01"
         And I do not see "Entry 02"
@@ -160,7 +173,18 @@ Feature: Filtering
         And I do not see "Entry 04"
         And I do not see "Entry 05"
         And I do not see "Entry 06"
+        #:Section
 
+        #Section: Add filter: With Entry 01 or Entry_05 content
+        Then I go to manage dataform "filters"
+        Then I follow "Add a filter"
+        And I set the field "Name" to "With Entry_01 or Entry_05"
+        And I set search criterion "1" to "OR" "1,content" "" "=" "Entry 01"
+        And I set search criterion "2" to "OR" "1,content" "" "=" "Entry 05"
+        And I press "Save changes"
+        And I see "With Entry_01 or Entry_05"
+
+        Then I follow "Browse"
         Then I set the field "id_filtersmenu" to "With Entry_01 or Entry_05"
         And I see "Entry 01"
         And I do not see "Entry 02"
@@ -168,28 +192,39 @@ Feature: Filtering
         And I do not see "Entry 04"
         And I see "Entry 05"
         And I do not see "Entry 06"
+        #:Section
 
-        # Define and apply an advanced filter
-        #-------------------------
-        Then I follow "Aligned view"
+        #Section: Add filter: With Entry 01 or Entry_03 or Entry_06
+        Then I go to manage dataform "filters"
+        Then I follow "Add a filter"
+        And I set the field "Name" to "With Entry 01 or Entry_03 or Entry_06"
+        And I set search criterion "1" to "OR" "1,content" "" "=" "Entry 03"
+        And I set search criterion "2" to "OR" "1,content" "" "=" "Entry 01"
+        And I press "Continue"
+        And I set search criterion "3" to "OR" "1,content" "" "=" "Entry 06"
+        And I press "Save changes"
 
-        # Add filter: My Entry 01 or Entry_03 or Entry_06 content
+        Then I follow "Browse"
+        Then I set the field "id_filtersmenu" to "With Entry 01 or Entry_03 or Entry_06"
+        And I see "Entry 01"
+        And I do not see "Entry 02"
+        And I see "Entry 03"
+        And I do not see "Entry 04"
+        And I do not see "Entry 05"
+        And I see "Entry 06"
+        #:Section
+
+        ### Define and apply advanced filters ###
+
+        #Section: Advanced filter: My Entry 01 or Entry_03 or Entry_06 content
         Then I follow "Advanced filter"
         And I set the field "Name" to "My Entry 01 or Entry_03 or Entry_06"
         And I set search criterion "1" to "OR" "1,content" "" "=" "Entry 03"
         And I set search criterion "2" to "OR" "1,content" "" "=" "Entry 01"
+        And I press "Continue"
         And I set search criterion "3" to "OR" "1,content" "" "=" "Entry 06"
         And I press "Save changes"
 
-        Then I follow "Aligned view"
-        And I see "Entry 01"
-        And I see "Entry 02"
-        And I see "Entry 03"
-        And I see "Entry 04"
-        And I see "Entry 05"
-        And I see "Entry 06"
-
-        Then I set the field "id_filtersmenu" to "My Entry 01 or Entry_03 or Entry_06"
         And I see "Entry 01"
         And I do not see "Entry 02"
         And I see "Entry 03"
@@ -204,4 +239,4 @@ Feature: Filtering
         And I see "Entry 04"
         And I see "Entry 05"
         And I see "Entry 06"
-
+        #:Section

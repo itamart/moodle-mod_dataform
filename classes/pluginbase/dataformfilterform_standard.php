@@ -35,70 +35,23 @@ class dataformfilterform_standard extends dataformfilterform {
      */
     public function definition() {
 
+        $mform = &$this->_form;
         $filter = $this->_filter;
-        $name = empty($filter->name) ? get_string('filternew', 'dataform') : $filter->name;
-        $description = empty($filter->description) ? '' : $filter->description;
-        $visible = !isset($filter->visible) ? 1 : $filter->visible;
-
         $df = \mod_dataform_dataform::instance($filter->dataid);
         $fields = $df->field_manager->get_fields(array('exclude' => array(-1)));
-        $mform = &$this->_form;
 
         $mform->addElement('html', get_string('filterurlquery', 'dataform'). ': '. $this->get_url_query($fields));
 
         // Buttons.
         $this->add_action_buttons(true);
 
-        $mform->addElement('header', 'general', get_string('general', 'form'));
-
-        // Name and description.
-        $mform->addElement('text', 'name', get_string('name'));
-        $mform->addElement('textarea', 'description', get_string('description'));
-        $mform->setType('name', PARAM_TEXT);
-        $mform->setType('description', PARAM_TEXT);
-        $mform->setDefault('name', $name);
-        $mform->setDefault('description', $description);
-
-        // Visibility.
-        $mform->addElement('selectyesno', 'visible', get_string('visible'));
-        $mform->setDefault('visible', 1);
-
-        // Entries per page.
-        $options = array(
-            0 => get_string('choose'),
-            1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 15 => 15,
-            20 => 20, 30 => 30, 40 => 40, 50 => 50,
-            100 => 100, 200 => 200, 300 => 300, 400 => 400, 500 => 500, 1000 => 1000
-        );
-        $mform->addElement('select', 'perpage', get_string('viewperpage', 'dataform'), $options);
-        $mform->setDefault('perpage', $filter->perpage);
-
-        // Selection method
-        // $options = array(0 => get_string('filterbypage', 'dataform'), 1 => get_string('random', 'dataform'));
-        // $mform->addElement('select', 'selection', get_string('filterselection', 'dataform'), $options);
-        // $mform->setDefault('selection', $filter->selection);
-        // $mform->disabledIf('selection', 'perpage', 'eq', '0');.
-
-        // Group by
-        // $mform->addElement('select', 'groupby', get_string('filtergroupby', 'dataform'), $fieldoptions);
-        // $mform->setDefault('groupby', $filter->groupby);.
+        // General definition.
+        $this->definition_general();
 
         // Sort options.
-        $mform->addElement('header', 'customsorthdr', get_string('filtercustomsort', 'dataform'));
-        $mform->setExpanded('customsorthdr');
-
         $this->custom_sort_definition($filter->customsort, $fields, true);
 
         // Search options.
-        $mform->addElement('header', 'customsearchhdr', get_string('filtercustomsearch', 'dataform'));
-        $mform->setExpanded('customsearchhdr');
-
-        // General search.
-        $mform->addElement('text', 'search', get_string('search'));
-        $mform->setType('search', PARAM_TEXT);
-        $mform->setDefault('search', $filter->search);
-
-        // Custom search.
         $this->custom_search_definition($filter->customsearch, $fields, true);
 
         // Buttons.
@@ -116,7 +69,6 @@ class dataformfilterform_standard extends dataformfilterform {
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
         // Continue.
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton_continue', get_string('continue'));
-        $mform->registerNoSubmitButton('submitbutton_continue');
         // Cancel.
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', ' ', false);
@@ -127,14 +79,15 @@ class dataformfilterform_standard extends dataformfilterform {
      *
      */
     public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
+        if (!$errors = parent::validation($data, $files)) {
 
-        $filter = $this->_filter;
-        $df = \mod_dataform_dataform::instance($filter->dataid);
+            $filter = $this->_filter;
+            $df = \mod_dataform_dataform::instance($filter->dataid);
 
-        // Validate unique name.
-        if (empty($data['name']) or $df->name_exists('filters', $data['name'], $filter->id)) {
-            $errors['name'] = get_string('invalidname', 'dataform', get_string('filter', 'dataform'));
+            // Validate unique name.
+            if (empty($data['name']) or $df->name_exists('filters', $data['name'], $filter->id)) {
+                $errors['name'] = get_string('invalidname', 'dataform', get_string('filter', 'dataform'));
+            }
         }
 
         return $errors;

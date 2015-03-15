@@ -674,3 +674,6 @@ $string['availableplugins'] = 'Available plugins';
 $string['instances'] = 'Instances';
 $string['pluginhasinstances'] = 'ATTENTION: This plugin has {$a} instances.';
 $string['configplugins'] = 'Please enable all required plugins and arrange them in appropriate order.';
+
+// ERRORS.
+$string['error:cannotbenegative'] = 'Value cannot be negative';
