@@ -22,6 +22,7 @@ defined('MOODLE_INTERNAL') || die();
  * @package    mod_dataform
  * @category   phpunit
  * @group      mod_dataform
+ * @group      mod_dataform_access
  * @copyright  2014 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

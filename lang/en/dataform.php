@@ -267,6 +267,7 @@ $string['event_entry_deleted'] = 'Entry deleted';
 
 // CAPABILITY.
 // Deprecated.
+$string['dataform:viewaccesshidden'] = '** Deprecated **';
 $string['dataform:viewanonymousentry'] = '** Deprecated **';
 $string['dataform:viewentry'] = '** Deprecated **';
 $string['dataform:writeentry'] = '** Deprecated **';
@@ -301,7 +302,7 @@ $string['dataform:managepresets'] = 'Manage presets';
 $string['dataform:presetsviewall'] = 'View presets from all users';
 // View.
 $string['dataform:viewaccess'] = 'View - Access';
-$string['dataform:viewaccesshidden'] = 'View - Access hidden';
+$string['dataform:viewaccessdisabled'] = 'View - Access disabled';
 $string['dataform:viewaccessearly'] = 'View - Access early';
 $string['dataform:viewaccesslate'] = 'View - Access late';
 $string['dataform:viewfilteroverride'] = 'View - Filter override';
@@ -397,8 +398,8 @@ $string['viewsupdated'] = '{$a} view(s) updated';
 $string['views'] = 'Views';
 $string['view'] = 'view';
 $string['viewvisibility'] = 'Visibility';
-$string['viewvisibility_help'] = 'A Disabled view is accessible only with viewaccesshidden capability (typically teachers and managers).
-A Visible view can be accessed by participants and appears in navigation.
+$string['viewvisibility_help'] = 'A Disabled view is accessible only with viewaccessdisabled capability (typically teachers and managers).
+A Visible view can be accessed by participants and it appears in navigation.
 A Hidden view can be accessed by participants but does not appear in navigation.';
 $string['viewdisabled'] = 'Disabled';
 $string['viewvisible'] = 'Visible';

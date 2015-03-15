@@ -306,9 +306,9 @@ class mod_dataform_view_manager {
 
         // Check access to the view.
         $df = mod_dataform_dataform::instance($this->_dataformid);
-        $manager = has_capability('mod/dataform:manageviews', $df->context);
+        $canaccessdisabled = has_capability('mod/dataform:viewaccessdisabled', $df->context);
         foreach ($views as $viewid => $view) {
-            if (!$manager) {
+            if (!$canaccessdisabled) {
                 if (!$view->visible) {
                     continue;
                 }
