@@ -315,7 +315,7 @@ class dataformview {
         $event->trigger();
 
         // Set content.
-        $filter = clone($this->filter);
+        $filter = !empty($options['filter']) ? $options['filter'] : clone($this->filter);
         if ($this->user_is_editing() and !$this->in_edit_display_mode()) {
             // Display only the edited entries.
             $filter->eids = $this->editentries;

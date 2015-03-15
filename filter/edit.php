@@ -50,20 +50,13 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id)));
 }
 
-// No submit buttons: return to form.
-if ($mform->no_submit_button_pressed() ) {
-    // Get clean filter from submitted data.
-    if ($data = $mform->get_submitted_data()) {
-        $filter = $fm->get_filter_from_form($filter, $data, true);
-        $mform = $fm->get_filter_form($filter);
-    }
-
-} else if ($data = $mform->get_data()) {
-    // Get clean filter from data.
+if ($data = $mform->get_submitted_data()) {
     $filter = $fm->get_filter_from_form($filter, $data, true);
-    $filter->update();
+    $mform = $fm->get_filter_form($filter);
 
-    if ($data->submitbutton != get_string('savecont', 'dataform')) {
+    if (!empty($data->submitbutton) and $data = $mform->get_data()) {
+        $filter = $fm->get_filter_from_form($filter, $data, true);
+        $filter->update();
         redirect(new moodle_url('/mod/dataform/filter/index.php', array('d' => $df->id)));
     }
 }

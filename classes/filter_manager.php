@@ -388,15 +388,8 @@ class mod_dataform_filter_manager {
      *
      */
     protected function get_sort_options_from_form($formdata) {
-        $sortfields = array();
-        $i = 0;
-        while (isset($formdata->{"sortfield$i"})) {
-            if ($sortelement = $formdata->{"sortfield$i"}) {
-                $sortfields[$sortelement] = $formdata->{"sortdir$i"};
-            }
-            $i++;
-        }
-
+        $filterformhelper = '\mod_dataform\helper\filterform';
+        $sortfields = $filterformhelper::get_custom_sort_from_form($formdata);
         if ($sortfields) {
             return serialize($sortfields);
         } else {
@@ -407,47 +400,9 @@ class mod_dataform_filter_manager {
     /**
      *
      */
-    protected function get_search_options_from_form($formdata, $finalize = false) {
-        $df = mod_dataform_dataform::instance($this->_dataformid);
-        if ($fields = $df->field_manager->get_fields()) {
-            $searchfields = array();
-            foreach ($formdata as $var => $unused) {
-                if (strpos($var, 'searchandor') !== 0) {
-                    continue;
-                }
-
-                $i = (int) str_replace('searchandor', '', $var);
-                // Check if trying to define a search criterion.
-                if ($searchandor = $formdata->{"searchandor$i"}) {
-                    if ($searchelement = $formdata->{"searchfield$i"}) {
-                        list($fieldid, $element) = explode(',', $searchelement);
-                        $not = !empty($formdata->{"searchnot$i"}) ? $formdata->{"searchnot$i"} : '';
-                        $operator = isset($formdata->{"searchoperator$i"}) ? $formdata->{"searchoperator$i"} : '';
-                        $value = isset($formdata->{"searchvalue$i"}) ? $formdata->{"searchvalue$i"} : '';
-
-                        // Don't add empty criteria on cleanup (unless operator is Empty and thus doesn't need search value).
-                        if ($finalize and $operator and !$value) {
-                            continue;
-                        }
-
-                        // If finalizing, aggregate by fieldid and searchandor,
-                        // otherwise just make a flat array (of arrays).
-                        if ($finalize) {
-                            if (!isset($searchfields[$fieldid])) {
-                                $searchfields[$fieldid] = array();
-                            }
-                            if (!isset($searchfields[$fieldid][$searchandor])) {
-                                $searchfields[$fieldid][$searchandor] = array();
-                            }
-                            $searchfields[$fieldid][$searchandor][] = array($element, $not, $operator, $value);
-                        } else {
-                            $searchfields[] = array($fieldid, $element, $searchandor, $not, $operator, $value);
-                        }
-                    }
-                }
-            }
-        }
-
+    protected function get_search_options_from_form($formdata) {
+        $filterformhelper = '\mod_dataform\helper\filterform';
+        $searchfields = $filterformhelper::get_custom_search_from_form($formdata, $this->_dataformid);
         if ($searchfields) {
             return serialize($searchfields);
         } else {

@@ -42,17 +42,6 @@ abstract class base {
         $dataformid = $params['dataformid'];
         $df = \mod_dataform_dataform::instance($dataformid);
 
-        // In separate groups mode, not member must have accessallgroups.
-        // At this point, does not apply to particular rules.
-        if ($df->groupmode) {
-            $currentandseparate = ($df->currentgroup and $df->groupmode == SEPARATEGROUPS);
-            if ($currentandseparate and !groups_is_member($df->currentgroup)) {
-                if (!has_capability('moodle/site:accessallgroups', $df->context)) {
-                    return false;
-                }
-            }
-        }
-
         $accessman = \mod_dataform_access_manager::instance($dataformid);
         $accesstype = get_called_class();
 

@@ -64,9 +64,17 @@ class dataformfilter {
         $this->_attributes->eids = empty($data->eids) ? '' : $data->eids;
         $this->_attributes->users = empty($data->users) ? '' : $data->users;
         $this->_attributes->groups = empty($data->groups) ? '' : $data->groups;
+        $this->_attributes->states = empty($data->states) ? '' : $data->states;
         $this->_attributes->page = empty($data->page) ? 0 : $data->page;
         $this->_attributes->pagenum = empty($data->pagenum) ? 0 : $data->pagenum;
         $this->_attributes->contentfields = empty($data->contentfields) ? '' : $data->contentfields;
+
+        // Dataform overrides.
+        $df = \mod_dataform_dataform::instance($data->dataid);
+        $this->_attributes->grouped = isset($data->grouped) ? $data->grouped : $df->grouped;
+        $this->_attributes->individualized = isset($data->individualized) ? $data->individualized : $df->individualized;
+        $this->_attributes->groupmode = isset($data->groupmode) ? $data->groupmode : $df->groupmode;
+        $this->_attributes->currentgroup = isset($data->currentgroup) ? $data->currentgroup : $df->currentgroup;
     }
 
     /**

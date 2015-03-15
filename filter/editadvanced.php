@@ -49,15 +49,20 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url("/mod/dataform/$pagefile.php", array('d' => $df->id, 'view' => $view->id)));
 }
 
-// Process validated.
-if ($data = $mform->get_data()) {
+if ($data = $mform->get_submitted_data()) {
+    $filter = $fm->get_filter_from_form($filter, $data, true);
+    $mform = $fm->get_advanced_filter_form($filter, $view, $pagefile);
 
-    $filter = (object) $fm->get_filter_from_form($filter, $data, true);
+    $save = !empty($data->submitbutton);
+    $newfilter = !empty($data->submitbutton_new);
 
-    $newfilter = !empty($data->newbutton);
-
-    if ($filter = $fm->set_advanced_filter($filter, $view, $newfilter)) {
-        $mform = $fm->get_advanced_filter_form($filter, $view, $pagefile);
+    if (($save or $newfilter) and $data = $mform->get_data()) {
+        $filter = $fm->get_filter_from_form($filter, $data, true);
+        if ($filter = $fm->set_advanced_filter($filter, $view, $newfilter)) {
+            $redirecturl = $view->baseurl;
+            $redirecturl->param('filter', $filter->id);
+            redirect($redirecturl);
+        }
     }
 }
 
