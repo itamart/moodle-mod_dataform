@@ -89,16 +89,33 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
 
         } else {
             // Assuming any of year, month, day, hour, minute is passed.
-            $enabled = $year = $month = $day = $hour = $minute = 0;
+            $enabled = 0;
+            $year = 0;
+            $month = 1;
+            $day = 1;
+            $hour = 0;
+            $minute = 0;
             foreach ($value as $name => $val) {
-                if (!empty($name)) {
+                if (!empty($val)) {
                     ${$name} = $val;
                 }
             }
-            if ($enabled) {
-                if ($year or $month or $day or $hour or $minute) {
-                    $timestamp = makentrytimestamp($year, $month, $day, $hour, $minute, 0);
-                }
+            if ($enabled and $year) {
+                $calendartype = \core_calendar\type_factory::get_calendar_instance();
+                $gregoriandate = $calendartype->convert_to_gregorian(
+                    $year,
+                    $month,
+                    $day,
+                    $hour,
+                    $minute
+                );
+                $timestamp = make_timestamp(
+                    $gregoriandate['year'],
+                    $gregoriandate['month'],
+                    $gregoriandate['day'],
+                    $gregoriandate['hour'],
+                    $gregoriandate['minute']
+                );
             }
         }
 

@@ -58,4 +58,12 @@ class dataformfield_time_form extends mod_dataform\pluginbase\dataformfieldform 
         $mform->addHelpButton('param4', 'displayformat', 'dataformfield_time');
     }
 
+    /**
+     * The field default content fieldset. Override parent to display no defaults.
+     *
+     * @return void
+     */
+    protected function definition_defaults() {
+    }
+
 }

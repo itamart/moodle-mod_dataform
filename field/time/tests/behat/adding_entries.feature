@@ -17,13 +17,15 @@ Feature: Adding entries with field
 
     @javascript
     Scenario: The data/time selector is disabled by default.
+        #Section:
         Given I am in dataform "Test time field" "Course 1" as "teacher1"
         When I follow "Add a new entry"
         Then the "field_1_-1[day]" "select" should be disabled
-    #:Scenario
+        #:Section
 
     @javascript
     Scenario: Required field is enabled by default and cannot be disabled.
+        #Section:
         Given I am in dataform "Test time field" "Course 1" as "teacher1"
         And view "View 01" in dataform "1" has the following entry template:
             """
@@ -38,10 +40,11 @@ Feature: Adding entries with field
 
         Then the "field_1_-1[day]" "select" should be enabled
         And "id_field_1_-1_enabled" "checkbox" should not exist
-    #:Scenario
+        #:Section
 
     @javascript
     Scenario: Noedit field does not display input elements in editing mode.
+        #Section:
         Given I am in dataform "Test time field" "Course 1" as "teacher1"
         And view "View 01" in dataform "1" has the following entry template:
             """
@@ -55,10 +58,11 @@ Feature: Adding entries with field
         When I follow "Add a new entry"
 
         Then "field_1_1[day]" "select" should not exist
-    #:Scenario
+        #:Section
 
     @javascript
     Scenario: Noedit field displays content in editing mode.
+        #Section:
         Given view "View 01" in dataform "1" has the following entry template:
             """
             [[EAU:picture]]
@@ -75,21 +79,80 @@ Feature: Adding entries with field
         When I follow "Edit Entry 1"
 
         Then I see "December 2014"
-    #:Scenario
+        #:Section
 
     @javascript
     Scenario: Teacher adds entry without content.
+        #Section:
         Given I am in dataform "Test time field" "Course 1" as "teacher1"
         When I follow "Add a new entry"
         And I press "Save"
         Then "id_editentry1" "link" should exist
-    #:Scenario
+        #:Section
 
     @javascript
     Scenario: Teacher adds entry with content.
+        #Section:
         Given I am in dataform "Test time field" "Course 1" as "teacher1"
         When I add a dataform entry with:
             | field_1_-1[enabled] | checked |
             | field_1_-1[year]    | 2013    |
         Then I see "2013"
-    #:Scenario
+        #:Section
+
+    @javascript
+    Scenario: Add time content of a masked field.
+        #Section:
+        Given I am in dataform "Test time field" "Course 1" as "teacher1"
+        And the following dataformfield time exists:
+            | dataform          | dataform1 |
+            | name              | Time 01   |
+            | date only         |           |
+            | masked            | 1         |
+            | start year        |           |
+            | stop year         |           |
+            | display format    |           |
+            | default content   |           |
+        When I add a dataform entry with:
+            | field_1_-1[year]    | 2014    |
+        Then I see "1 January 2014, 12:00 AM"
+        #:Section
+
+    @javascript
+    Scenario: Add time content of a masked field with custom start year.
+        #Section:
+        Given I am in dataform "Test time field" "Course 1" as "teacher1"
+        And the following dataformfield time exists:
+            | dataform          | dataform1 |
+            | name              | Time 01   |
+            | date only         |           |
+            | masked            | 1         |
+            | start year        |           |
+            | stop year         | 2025      |
+            | display format    |           |
+            | default content   |           |
+        When I add a dataform entry with:
+            | field_1_-1[year]    | 2024    |
+        Then I see "1 January 2024, 12:00 AM"
+        #:Section
+
+    @javascript
+    Scenario: Add time content with display format.
+        #Section:
+        Given I am in dataform "Test time field" "Course 1" as "teacher1"
+        And the following dataformfield time exists:
+            | dataform          | dataform1 |
+            | name              | Time 01   |
+            | date only         |           |
+            | masked            |           |
+            | start year        |           |
+            | stop year         |           |
+            | display format    | %Y-%m-%d  |
+            | default content   |           |
+        When I add a dataform entry with:
+            | field_1_-1[enabled] | checked |
+            | field_1_-1[year]    | 2012    |
+            | field_1_-1[month]   | 11      |
+            | field_1_-1[day]     | 26      |
+        Then I see "2012-11-26"
+        #:Section
