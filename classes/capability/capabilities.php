@@ -49,7 +49,7 @@ class capabilities {
             self::dataform_entry_any(),
             self::dataform_entry_anonymous(),
             self::dataform_preset(),
-            self::dataform_depracated()
+            self::dataform_deprecated()
         );
 
         // Now add pluggable capabilities if any.
@@ -249,17 +249,17 @@ class capabilities {
                 )
             ),
 
-            // Access hidden views.
-            'mod/dataform:viewaccesshidden' => array(
+            // Access disabled views.
+            'mod/dataform:viewaccessdisabled' => array(
 
                 'riskbitmask' => RISK_PERSONAL,
                 'captype' => 'read',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
                     'manager' => CAP_ALLOW
-                )
+                ),
+                'clonepermissionsfrom' => 'mod/dataform:viewaccesshidden'
             ),
 
             // Access views before activity available from.
@@ -302,6 +302,7 @@ class capabilities {
                     'manager' => CAP_ALLOW
                 )
             ),
+
         );
     }
 
@@ -843,14 +844,27 @@ class capabilities {
     }
 
     /**
-     * Returns the list of dataform capabilities which have been depracated
+     * Returns the list of dataform capabilities which have been deprecated.
      *
      * @return array
      */
-    protected static function dataform_depracated() {
+    protected static function dataform_deprecated() {
         return array(
 
-        // DEPRACATED.
+        // DEPRECATED.
+
+            // Replaced by mod/dataform:viewaccessdisabled.
+            'mod/dataform:viewaccesshidden' => array(
+
+                'riskbitmask' => RISK_PERSONAL,
+                'captype' => 'read',
+                'contextlevel' => CONTEXT_MODULE,
+                'archetypes' => array(
+                    'teacher' => CAP_ALLOW,
+                    'editingteacher' => CAP_ALLOW,
+                    'manager' => CAP_ALLOW
+                )
+            ),
 
             // View entries.
             'mod/dataform:viewentry' => array(

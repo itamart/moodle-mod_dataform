@@ -57,7 +57,7 @@ class view_access extends base {
         }
 
         // Disabled view.
-        $params['capabilities'] = array('mod/dataform:viewaccesshidden');
+        $params['capabilities'] = array('mod/dataform:viewaccessdisabled');
         if (!$view->visible and !parent::validate($params)) {
             return false;
         }
@@ -92,7 +92,7 @@ class view_access extends base {
     public static function get_capabilities() {
         return array(
             'mod/dataform:viewaccess',
-            'mod/dataform:viewaccesshidden',
+            'mod/dataform:viewaccessdisabled',
             'mod/dataform:viewaccessearly',
             'mod/dataform:viewaccesslate',
         );
