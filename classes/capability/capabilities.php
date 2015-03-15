@@ -20,14 +20,14 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_dataform\helper;
+namespace mod_dataform\capability;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * This class provides helper methods for dataform capabilities.
  */
-class capability {
+class capabilities {
 
     /**
      * Returns a list of dataform capabilities.
@@ -54,7 +54,11 @@ class capability {
 
         // Now add pluggable capabilities if any.
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/capability") as $filename) {
-            $capability = '\mod_dataform\capability\\'. basename($filename, '.php');
+            $basename = basename($filename, '.php');
+            if ($basename == 'capabilities') {
+                continue;
+            }
+            $capability = '\mod_dataform\capability\\'. $basename;
             $capabilities = array_merge($capabilities, $capability::capabilities());
         }
         return $capabilities;
