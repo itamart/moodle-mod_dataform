@@ -14,18 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_dataform\pluginbase;
-
 /**
  * @package mod_dataform
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_dataform\helper;
+
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Dataform notification form helper
  */
-class dataformnotificationform_helper extends  dataformruleform_helper {
+class notificationform extends  ruleform {
 
     /**
      *
