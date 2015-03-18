@@ -40,6 +40,7 @@ class dataformentry {
         $entry->groupid = !empty($data->groupid) ? $data->groupid : $df->currentgroup;
         $entry->timecreated = !empty($data->timecreated) ? $data->timecreated : $now;
         $entry->timemodified = !empty($data->timemodified) ? $data->timemodified : $now;
+        $entry->state = !empty($data->state) ? $data->state : 0;
 
         return $entry;
     }

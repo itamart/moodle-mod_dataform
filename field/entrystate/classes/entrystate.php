@@ -318,6 +318,15 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
     }
 
     /**
+     * Searches on the entries table that is included by default so just return nothing.
+     *
+     * @return string Empty string.
+     */
+    public function get_search_from_sql() {
+        return '';
+    }
+
+    /**
      * Return array of sort options menu as
      * $fieldid,element => name, for the filter form.
      *
