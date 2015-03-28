@@ -609,13 +609,10 @@ class dataformfilter {
                 if (empty($searchoptions[$fieldid])) {
                     $searchoptions[$fieldid] = $searchies[$fieldid];
                 } else {
-                    foreach ($searchies[$fieldid] as $andor => $options) {
-                        if (empty($searchoptions[$fieldid][$andor])) {
-                            $searchoptions[$fieldid][$andor] = array($options);
-                        } else {
-                            $searchoptions[$fieldid][$andor][] = $options;
-                        }
-                    }
+                    $searchoptions[$fieldid] = array_merge_recursive(
+                        $searchoptions[$fieldid],
+                        $searchies[$fieldid]
+                    );
                 }
             }
             $this->customsearch = serialize($searchoptions);
