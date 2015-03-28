@@ -508,7 +508,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
@@ -524,7 +523,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
@@ -538,7 +536,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
@@ -598,7 +595,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
@@ -613,7 +609,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
@@ -627,7 +622,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
@@ -773,7 +767,6 @@ class capabilities {
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
-                    'frontpage' => CAP_ALLOW,
                     'student' => CAP_ALLOW,
                     'teacher' => CAP_ALLOW,
                     'editingteacher' => CAP_ALLOW,
