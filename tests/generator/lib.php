@@ -46,9 +46,25 @@ class mod_dataform_generator extends testing_module_generator {
      * @return stdClass activity record with extra cmid field
      */
     public function create_instance($record = null, array $options = null) {
-        $record = (object)(array)$record;
+        $record = (object) (array) $record;
+        $data = \mod_dataform_dataform::get_default_data();
 
-        return parent::create_instance($record, (array)$options);
+        // Adjust values.
+        foreach ($record as $key => $value) {
+            if (!property_exists($data, $key)) {
+                continue;
+            }
+            $method = "get_value_$key";
+            if (method_exists($this, $method)) {
+                $value = $this->$method($value);
+            }
+            $data->$key = $value;
+        }
+
+        // Must have course.
+        $data->course = $record->course;
+
+        return parent::create_instance($data, (array) $options);
     }
 
     /**
@@ -99,12 +115,14 @@ class mod_dataform_generator extends testing_module_generator {
         // Do backup.
         $bc = new backup_controller(
             backup::TYPE_1ACTIVITY,
-            $cmid, backup::FORMAT_MOODLE,
+            $cmid,
+            backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO,
             backup::MODE_IMPORT,
             $USER->id
         );
         $backupid = $bc->get_backupid();
+        $backupbasepath = $bc->get_plan()->get_basepath();
         $bc->execute_plan();
         $bc->destroy();
 
@@ -114,9 +132,19 @@ class mod_dataform_generator extends testing_module_generator {
             $course->id,
             backup::INTERACTIVE_NO,
             backup::MODE_IMPORT,
-            $USER->id, backup::TARGET_CURRENT_ADDING
+            $USER->id,
+            backup::TARGET_CURRENT_ADDING
         );
-        $rc->execute_precheck();
+
+        if (!$rc->execute_precheck()) {
+            $precheckresults = $rc->get_precheck_results();
+            if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                if (empty($CFG->keeptempdirectoriesonbackup)) {
+                    fulldelete($backupbasepath);
+                }
+            }
+        }
+
         $rc->execute_plan();
 
         // Find cmid.
@@ -134,6 +162,11 @@ class mod_dataform_generator extends testing_module_generator {
             }
         }
         $rc->destroy();
+
+        if (empty($CFG->keeptempdirectoriesonbackup)) {
+            fulldelete($backupbasepath);
+        }
+
         if (!$newcmid) {
             throw new coding_exception('Unexpected: failure to find restored cmid');
         }
@@ -301,6 +334,26 @@ class mod_dataform_generator extends testing_module_generator {
         }
 
         return $entry;
+    }
+
+    /**
+     * Returns timestamp for timeavailable string.
+     *
+     * @param string $value
+     * @return int timestamp
+     */
+    protected function get_value_timeavailable($value) {
+        return (!empty($value) ? strtotime($value) : 0);
+    }
+
+    /**
+     * Returns timestamp for timedue string.
+     *
+     * @param string $value
+     * @return int timestamp
+     */
+    protected function get_value_timedue($value) {
+        return (!empty($value) ? strtotime($value) : 0);
     }
 
 }
