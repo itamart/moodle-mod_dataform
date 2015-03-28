@@ -41,10 +41,10 @@ class dataformfield_text_filter_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         // Course.
-        $courseid = $this->getDataGenerator()->create_course();
+        $course = $this->getDataGenerator()->create_course();
 
         // Dataform.
-        $dataform = $this->getDataGenerator()->create_module('dataform', array('course' => $courseid));
+        $dataform = $this->getDataGenerator()->create_module('dataform', array('course' => $course->id));
         $df = mod_dataform_dataform::instance($dataform->id);
 
         // Add a field.

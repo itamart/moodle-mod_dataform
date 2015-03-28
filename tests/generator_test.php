@@ -32,6 +32,10 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         global $DB;
 
         $this->resetAfterTest();
+
+        // Reset dataform local cache.
+        \mod_dataform_instance_store::unregister();
+
         $this->setAdminUser();
 
         $generator = $this->getDataGenerator();
@@ -55,24 +59,10 @@ class mod_dataform_generator_testcase extends advanced_testcase {
 
         for ($r = 0; $r < $cases->getRowCount(); $r++) {
             $case = array_combine($columns, $cases->getRow($r));
-
-            $defaultdata = \mod_dataform_dataform::get_default_data();
-
-            // Adjust values.
-            foreach ($case as $key => $value) {
-                if (!isset($defaultdata->$key)) {
-                    continue;
-                }
-                $method = "get_value_$key";
-                if (method_exists($this, $method)) {
-                    $value = $this->$method($value);
-                }
-                $defaultdata->$key = $value;
-            }
-            $defaultdata->course = $course->id;
+            $case['course'] = $course->id;
 
             // Create the instance.
-            $data = $dataformgenerator->create_instance((array) $defaultdata);
+            $data = $dataformgenerator->create_instance($case);
             $instances[] = $data->id;
             $this->assertEquals(count($instances), $DB->count_records('dataform'));
 
@@ -117,29 +107,5 @@ class mod_dataform_generator_testcase extends advanced_testcase {
         $dataid = array_pop($instances);
         \mod_dataform_dataform::instance($dataid)->delete();
         $this->assertEquals(count($instances), $DB->count_records('dataform'));
-
-        // Clean up.
-        $dataformgenerator->delete_all_instances();
     }
-
-    /**
-     * Returns timestamp for timeavailable string.
-     *
-     * @param string $value
-     * @return int timestamp
-     */
-    protected function get_value_timeavailable($value) {
-        return (!empty($value) ? strtotime($value) : 0);
-    }
-
-    /**
-     * Returns timestamp for timedue string.
-     *
-     * @param string $value
-     * @return int timestamp
-     */
-    protected function get_value_timedue($value) {
-        return (!empty($value) ? strtotime($value) : 0);
-    }
-
 }

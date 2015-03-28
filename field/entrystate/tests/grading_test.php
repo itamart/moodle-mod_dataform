@@ -45,6 +45,9 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
 
         $this->resetAfterTest();
 
+        // Reset dataform local cache.
+        \mod_dataform_instance_store::unregister();
+
         // Create a course we are going to add a data module to.
         $this->course = $this->getDataGenerator()->create_course();
         $courseid = $this->course->id;
