@@ -57,7 +57,7 @@ class field_update extends base {
         $entry = $params['entry'];
 
         // Get blank instance for new entries.
-        if ($entry->id == -1) {
+        if ($entry->id < 0) {
             $entry = \mod_dataform\pluginbase\dataformentry::blank_instance($df);
         }
 
