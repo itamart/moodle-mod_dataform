@@ -52,7 +52,7 @@ class dataformfield_selectmulti_form extends mod_dataform\pluginbase\dataformfie
         $field = &$this->_field;
 
         // Content elements.
-        $label = get_string('optionsdefault', 'dataformfield_select');
+        $label = get_string('fielddefaultvalue', 'dataform');
         $options = $field->options_menu();
         $select = $mform->addElement('select', 'contentdefault', $label, $options);
         $select->setMultiple(true);

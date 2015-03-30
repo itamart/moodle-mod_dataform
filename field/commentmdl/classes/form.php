@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage commentmdl
+ * @package dataformfield_commentmdl
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,12 +25,29 @@ class dataformfield_commentmdl_form extends mod_dataform\pluginbase\dataformfiel
     /**
      *
      */
-    protected function field_definition() {
+    protected function definition_general() {
+        parent::definition_general();
 
         $mform =& $this->_form;
 
         // Restrict name to alphanumeric.
         $mform->addRule('name', null, 'alphanumeric', null, 'client');
+    }
+
+    /**
+     * The field settings fieldset. Overrides parent to omit.
+     *
+     * @return void
+     */
+    protected function definition_settings() {
+    }
+
+    /**
+     * The field default content fieldset. Override parent to display no defaults.
+     *
+     * @return void
+     */
+    protected function definition_defaults() {
     }
 
     /**

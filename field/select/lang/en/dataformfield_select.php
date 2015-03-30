@@ -23,6 +23,5 @@
 $string['pluginname'] = 'Select';
 $string['select:addinstance'] = 'Add a new Select dataformfield';
 $string['allowaddoption'] = 'Allow adding options';
-$string['optionsdefault'] = 'Default value';
 $string['options'] = 'Options';
 $string['invaliddefaultvalue'] = 'The value must match one of the field options';

@@ -80,13 +80,14 @@ class dataformfield_textarea_form extends \mod_dataform\pluginbase\dataformfield
         $mform = &$this->_form;
         $field = &$this->_field;
 
+        $label = get_string('fielddefaultvalue', 'dataform');
         if (!$field->is_editor()) {
             // TEXTAREA.
-            $mform->addElement('textarea', 'contentdefault', get_string('content'));
+            $mform->addElement('textarea', 'contentdefault', $label);
         } else {
             // EDITOR.
             $editoroptions = $field->editoroptions + array('collapsed' => true);
-            $mform->addElement('editor', 'contentdefault_editor', get_string('content'), null, $editoroptions);
+            $mform->addElement('editor', 'contentdefault_editor', $label, null, $editoroptions);
         }
     }
 
