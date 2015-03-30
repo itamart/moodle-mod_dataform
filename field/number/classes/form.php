@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage number
+ * @package dataformfield_number
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,4 +44,13 @@ class dataformfield_number_form extends mod_dataform\pluginbase\dataformfieldfor
         $mform->setDefault('param2', '');
         $mform->setDefault('param3', 'px');
     }
+
+    /**
+     * The field default content fieldset. Override parent to display no defaults.
+     *
+     * @return void
+     */
+    protected function definition_defaults() {
+    }
+
 }

@@ -153,6 +153,30 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
     /**
      *
      */
+    public function definition_default_content() {
+        $mform = &$this->_form;
+        $field = &$this->_field;
+
+        // Content elements.
+        $label = get_string('fielddefaultvalue', 'dataform');
+        $options = array('' => get_string('choosedots')) + $field->states;
+        $mform->addElement('select', 'contentdefault', $label, $options);
+        $mform->disabledIf('contentdefault', 'states', 'eq', '');
+    }
+
+    /**
+     *
+     */
+    public function data_preprocessing(&$data) {
+        $field = &$this->_field;
+
+        // Default content.
+        $data->contentdefault = $field->defaultcontent;
+    }
+
+    /**
+     *
+     */
     public function get_data() {
         if ($data = parent::get_data()) {
             // Set config (param1).
@@ -193,6 +217,46 @@ class dataformfield_entrystate_form extends mod_dataform\pluginbase\dataformfiel
             $data->param1 = $config ? base64_encode(serialize($config)) : null;
         }
         return $data;
+    }
+
+    /**
+     * Returns the default content data.
+     *
+     * @param stdClass $data
+     * @return mix|null
+     */
+    protected function get_data_default_content(\stdClass $data) {
+        if (!empty($data->contentdefault)) {
+            return $data->contentdefault;
+        }
+        return null;
+    }
+
+    /**
+     * A hook method for validating field default content. Returns list of errors.
+     *
+     * @param array The form data
+     * @return void
+     */
+    protected function validation_default_content(array $data) {
+        $errors = array();
+
+        if (!empty($data['contentdefault'])) {
+            $selected = $data['contentdefault'];
+            // Get the options.
+            if (!empty($data['states'])) {
+                $options = explode("\n", $data['states']);
+            } else {
+                $options = null;
+            }
+
+            // The default must be a valid option.
+            if (!$options or $selected > count($options)) {
+                $errors['contentdefault'] = get_string('invaliddefaultvalue', 'dataformfield_select');
+            }
+        }
+
+        return $errors;
     }
 
     /**

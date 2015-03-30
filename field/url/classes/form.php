@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage url
+ * @package dataformfield_url
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,6 +35,14 @@ class dataformfield_url_form extends mod_dataform\pluginbase\dataformfieldform {
         // Force link name.
         $mform->addElement('text', 'param2', get_string('forcename', 'dataformfield_url'), array('size' => '32'));
         $mform->setType('param2', PARAM_TEXT);
+    }
+
+    /**
+     * The field default content fieldset. Override parent to display no defaults.
+     *
+     * @return void
+     */
+    protected function definition_defaults() {
     }
 
 }

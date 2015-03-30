@@ -47,7 +47,7 @@ class dataformfield_select_form extends mod_dataform\pluginbase\dataformfieldfor
         $field = &$this->_field;
 
         // Content elements.
-        $label = get_string('optionsdefault', 'dataformfield_select');
+        $label = get_string('fielddefaultvalue', 'dataform');
         $options = array('' => get_string('choosedots')) + $field->options_menu();
         $mform->addElement('select', 'contentdefault', $label, $options);
         $mform->disabledIf('contentdefault', 'param1', 'eq', '');

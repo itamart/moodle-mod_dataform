@@ -479,6 +479,7 @@ $string['fieldvisibleowner'] = 'Owner and managers';
 $string['fieldwidth'] = 'Width';
 $string['err_lowername'] = 'The name cannot contain uppercase letters.';
 $string['fielddefaultcontent'] = 'Default content';
+$string['fielddefaultvalue'] = 'Default value';
 $string['fieldapplydefault'] = 'Apply default when editing';
 $string['fielddefaultnew'] = 'New entries only';
 $string['fielddefaultany'] = 'Any entry';

@@ -73,7 +73,7 @@ class dataformfield_text_form extends \mod_dataform\pluginbase\dataformfieldform
         $field = &$this->_field;
 
         // Content elements.
-        $mform->addElement('text', 'contentdefault', get_string('text', 'dataformfield_text'));
+        $mform->addElement('text', 'contentdefault', get_string('fielddefaultvalue', 'dataform'));
         $mform->setType('contentdefault', PARAM_TEXT);
     }
 

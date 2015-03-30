@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage file
+ * @package dataformfield_file
  * @copyright 2011 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -24,26 +23,19 @@
 class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform {
 
     /**
+     * The field default content fieldset. Override parent to display no defaults.
      *
+     * @return void
      */
-    protected function field_definition() {
-        // Appearance.
-        $this->definition_appearance();
-
-        // File settings.
-        $this->definition_file_settings();
+    protected function definition_defaults() {
     }
 
     /**
      *
      */
-    protected function definition_appearance() {
+    protected function field_definition() {
         $field = &$this->_field;
         $mform = &$this->_form;
-
-        // Appearance.
-        $mform->addElement('header', 'appearancehdr', get_string('appearance'));
-        $mform->setExpanded('appearancehdr');
 
         // Files separator (param4).
         $options = array(
@@ -52,6 +44,9 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
         );
         $mform->addElement('select', 'param4', get_string('filesseparator', 'dataformfield_file'), $options);
         $mform->addHelpButton('param4', 'filesseparator', 'dataformfield_file');
+
+        // File settings.
+        $this->definition_file_settings();
     }
 
     /**

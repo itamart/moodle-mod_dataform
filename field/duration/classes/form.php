@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage duration
+ * @package dataformfield_duration
  * @copyright 2013 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -51,6 +50,14 @@ class dataformfield_duration_form extends mod_dataform\pluginbase\dataformfieldf
         $mform->disabledIf('param3', 'param2', 'eq', '');
         $mform->setDefault('param2', '');
         $mform->setDefault('param3', 'px');
+    }
+
+    /**
+     * The field default content fieldset. Override parent to display no defaults.
+     *
+     * @return void
+     */
+    protected function definition_defaults() {
     }
 
     /**
