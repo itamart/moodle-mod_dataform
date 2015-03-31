@@ -143,8 +143,8 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
                 }
             }
 
-            if ($selected and !empty($options[$selected])) {
-                return $options[$selected];
+            if ($selected and isset($options[$selected])) {
+                return (string) $options[$selected];
             }
         }
 
