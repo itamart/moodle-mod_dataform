@@ -3,21 +3,17 @@ Feature: Manage Dataform presets
 
     @javascript
     Scenario: Add presets
+        #Section: Setup.
         Given a fresh site with dataform "Preset Dataform"
 
-        Then I log in as "admin"
-        And I follow "Course 1"
-        And I follow "Preset Dataform"
+        And the following dataform "fields" exist:
+            | name          | type          | dataform  |
+            | Field Text    | text          | dataform1 |
+            | Field File    | file          | dataform1 |
 
-        ## Field
-        And I go to manage dataform "fields"
-        And I add a dataform field "text" with "Field Text"
-        And I add a dataform field "file" with "Field File"
-
-        ## View
-        And I go to manage dataform "views"
-        And I add a dataform view "aligned" with "View 01"
-        And I set "View 01" as default view
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
 
         ## Entries
         And the following dataform "entries" exist:
@@ -29,60 +25,70 @@ Feature: Manage Dataform presets
         And the following "courses" exist:
             | fullname | shortname | category  |
             | Course 2 | C2        | 0         |
+        #:Section
 
-        # Go to the presets tab.
+        Given I log in as "admin"
+        And I follow "Course 1"
+        And I follow "Preset Dataform"
+
         And I go to manage dataform "presets"
 
-        ## ADD PRESET ##
-        # Add a preset without user data (default settings).
+        #Section: Add a preset without user data (default settings).
         Then I expand all fieldsets
         And I press "id_add"
         And I should see "Preset_Dataform-dataform-preset" in the "table.coursepresets" "css_element"
         And I should see "-without-user-data" in the "table.coursepresets" "css_element"
+        #:Section
 
-        # Add a preset with user data.
+        #Section: Add a preset with user data.
         Then I expand all fieldsets
         And I set the field "id_preset_data" to "with user data"
         And I press "id_add"
         And I should see "-with-user-data" in the "table.coursepresets" "css_element"
+        #:Section
 
-        # Add a preset with user data ANONYMIZED.
+        #Section: Add a preset with user data ANONYMIZED.
         #Then I expand all fieldsets
         #And I set the field "id_preset_data" to "with user data anonymized"
         #And I press "id_add"
         #And I should see "-with-user-data-anonymized" in the "table.coursepresets" "css_element"
+        #:Section
 
-        # Add preset from file.
+        #Section: Add preset from file.
         Then I expand all fieldsets
         And I click on "Upload preset from file" "radio"
         And I upload "mod/dataform/tests/fixtures/Preset-dataform-preset.mbz" file to "Upload" filemanager
         And I press "id_add"
         And I should see "Preset-dataform-preset" in the "table.coursepresets" "css_element"
+        #:Section
 
-        ## SHARE PRESET ##
+        ### SHARE PRESETS
         # There are no site presets yet
         And I should not see "Preset_Dataform-dataform-preset" in the "table.sitepresets" "css_element"
 
-        # Share the preset WITHOUT user data.
+        #Section: Share the preset WITHOUT user data.
         Then I click on "img[title=Share]" "css_element" in the "-without-user-data" "table_row"
         And I should see "Preset_Dataform-dataform-preset" in the "table.sitepresets" "css_element"
         And I should see "-without-user-data" in the "table.sitepresets" "css_element"
+        #:Section
 
-        # Share the preset WITH user data.
+        #Section: Share the preset WITH user data.
         Then I click on "img[title=Share]" "css_element" in the "-with-user-data" "table_row"
         And I should see "-with-user-data" in the "table.sitepresets" "css_element"
+        #:Section
 
-        # Share the preset with user data ANONYMIZED.
+        #Section: Share the preset with user data ANONYMIZED.
         #Then I click on "img[title=Share]" "css_element" in the "-with-user-data-anonymized" "table_row"
         #And I should see "-with-user-data-anonymized" in the "table.sitepresets" "css_element"
+        #:Section
 
-        # Share the uploaded preset.
+        #Section: Share the uploaded preset.
         Then I click on "img[title=Share]" "css_element" in the "Preset-dataform-preset" "table_row"
         And I should see "Preset-dataform-preset" in the "table.sitepresets" "css_element"
+        #:Section
 
-
-        ## APPLY PRESET WITHOUT USER DATA ##
-        # Apply in same course.
+        ### APPLY PRESET WITHOUT USER DATA
+        #Section: Apply in same course.
         Then I follow "Home"
         And I follow "Course 1"
         And I turn editing mode on
@@ -96,8 +102,9 @@ Feature: Manage Dataform presets
         And I see "View 01"
 
         And I delete this dataform
+        #:Section
 
-        # Apply in a different course.
+        #Section: Apply in a different course.
         Then I follow "Home"
         And I follow "Course 2"
         And I turn editing mode on
@@ -111,9 +118,10 @@ Feature: Manage Dataform presets
         And I see "View 01"
 
         And I delete this dataform
+        #:Section
 
-        ## APPLY PRESET WITH USER DATA ##
-        # Apply in same course.
+        ### APPLY PRESET WITH USER DATA
+        #Section: Apply in same course.
         Then I follow "Home"
         And I follow "Course 1"
         And I turn editing mode on
@@ -127,8 +135,9 @@ Feature: Manage Dataform presets
         And I see "View 01"
 
         And I delete this dataform
+        #:Section
 
-        # Apply in a different course.
+        #Section: Apply in a different course.
         Then I follow "Home"
         And I follow "Course 2"
         And I turn editing mode on
@@ -142,9 +151,10 @@ Feature: Manage Dataform presets
         And I see "View 01"
 
         And I delete this dataform
+        #:Section
 
-        ## APPLY UPLOADED PRESET ##
-        # Apply in same course.
+        ### APPLY UPLOADED PRESET
+        #Section: Apply in same course.
         Then I follow "Home"
         And I follow "Course 1"
         And I turn editing mode on
@@ -158,8 +168,9 @@ Feature: Manage Dataform presets
         And I see "View 01"
 
         And I delete this dataform
+        #:Section
 
-        # Apply in a different course.
+        #Section: Apply in a different course.
         Then I follow "Home"
         And I follow "Course 2"
         And I turn editing mode on
@@ -171,4 +182,5 @@ Feature: Manage Dataform presets
         Then I go to manage dataform "presets"
         And I click on "img[title=Apply]" "css_element" in the "Preset-dataform-preset" "table_row"
         And I see "View 01"
+        #:Section
 

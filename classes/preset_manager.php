@@ -267,7 +267,14 @@ class mod_dataform_preset_manager {
         // Store preset settings in $SESSION.
         $SESSION->{"dataform_{$df->cm->id}_preset"} = "$users $anon";
 
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $df->cm->id, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $df->cm->id,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_GENERAL,
+            $USER->id
+        );
 
         // Clear preset settings from $SESSION.
         unset($SESSION->{"dataform_{$df->cm->id}_preset"});
@@ -380,9 +387,9 @@ class mod_dataform_preset_manager {
         // Extract the backup file to the temp folder.
         $folder = 'tmp-'. $df->context->id. '-'. time();
         $backuptempdir = make_temp_directory("backup/$folder");
-        $zipper = get_file_packer('application/zip');
         $fs = get_file_storage();
         $file = $fs->get_file_by_id($userpreset);
+        $zipper = get_file_packer($file->get_mimetype());
         $file->extract_to_pathname($zipper, $backuptempdir);
 
         require_once("$CFG->dirroot/backup/util/includes/restore_includes.php");
@@ -394,14 +401,23 @@ class mod_dataform_preset_manager {
         $DB->delete_records('grading_areas', array('contextid' => $df->context->id));
 
         $transaction = $DB->start_delegated_transaction();
-        $rc = new restore_controller($folder,
-                                    $df->course->id,
-                                    backup::INTERACTIVE_NO,
-                                    backup::MODE_GENERAL,
-                                    $USER->id,
-                                    backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $folder,
+            $df->course->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_GENERAL,
+            $USER->id,
+            backup::TARGET_CURRENT_ADDING
+        );
 
-        $rc->execute_precheck();
+        if (!$rc->execute_precheck()) {
+            $precheckresults = $rc->get_precheck_results();
+            if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                if (empty($CFG->keeptempdirectoriesonbackup)) {
+                    fulldelete($backuptempdir);
+                }
+            }
+        }
 
         // Get the dataform restore activity task.
         $tasks = $rc->get_plan()->get_tasks();
