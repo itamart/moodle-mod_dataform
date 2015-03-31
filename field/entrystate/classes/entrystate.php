@@ -15,14 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package dataformfield
- * @subpackage entrystate
- * @copyright 2012 Itamar Tzadok
+ * @package dataformfield_entrystate
+ * @copyright 2015 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent
-        implements mod_dataform\interfaces\grading {
+class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\dataformfield_nocontent {
 
     const ROLE_AUTHOR = -1;
     const ROLE_ENTRIES_MANAGER = -2;
