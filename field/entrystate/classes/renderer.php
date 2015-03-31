@@ -49,9 +49,10 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
             }
 
             list(, $patternstate) = explode(':', trim($pattern, '[]'), 2);
-            if ($patternstate == 'state') {
+            if ($patternstate == 'current' or $patternstate == 'state') {
                 // Current state.
-                $replacements[$pattern] = $this->get_state_display($entry);
+                $currentstate = empty($entry->state) ? 0 : $entry->state;
+                $replacements[$pattern] = $this->get_state_display($entry, $currentstate);
             } else if ($statekey = array_search($patternstate, $statenames) or $statekey !== false) {
                 // Existing state.
                 $replacements[$pattern] = $this->get_state_display($entry, $statekey);
@@ -189,10 +190,11 @@ class dataformfield_entrystate_renderer extends mod_dataform\pluginbase\dataform
 
         $patterns = array();
         $patterns["[[$fieldname]]"] = array(true, $cat);
-        $patterns["[[$fieldname::state]]"] = array(true, $cat);
+        $patterns["[[$fieldname:current]]"] = array(true, $cat);
+        $patterns["[[$fieldname:state]]"] = array(false);
         if ($states = $field->states) {
             foreach ($states as $state) {
-                $patterns["[[$fieldname::$state]]"] = array(false);
+                $patterns["[[$fieldname:$state]]"] = array(false);
             }
         }
 
