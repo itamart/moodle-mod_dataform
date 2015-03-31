@@ -113,6 +113,9 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
             $searchsqls = array();
 
             foreach ($searchedvalues as $searched) {
+                if ((string) $searched == '') {
+                    continue;
+                }
                 foreach ($options as $key => $option) {
                     if (strpos($option, $searched) !== false) {
                         $value = '#'. $key. '#';
