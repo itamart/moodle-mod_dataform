@@ -68,67 +68,20 @@ class restore_dataform_activity_task extends restore_activity_task {
     public function build() {
         parent::build();
 
-        // If restoring into a given activity remove the module_info step b/c there
-        // is no need to create a module instance.
+        // If restoring into a given activity replace the restore module structure step
+        // with the our specialized one, as we only need to update the current module instance.
         if ($this->get_activityid()) {
             $steps = array();
             foreach ($this->steps as $key => $step) {
                 if ($step instanceof restore_module_structure_step) {
-                    continue;
+                    $step = new restore_dataform_to_module_structure_step('module_info', 'module.xml');
+                    $step->set_task($this);
+                    $steps[] = $step;
+                } else {
+                    $steps[] = $step;
                 }
-                $steps[] = $step;
             }
             $this->steps = $steps;
-        }
-    }
-
-    /**
-     * Override to remove the course module step if restoring a preset.
-     */
-    public function build1() {
-
-        // If restoring into a given activity remove the module_info step b/c there
-        // is no need to create a module instance.
-        if ($this->get_activityid()) {
-
-            // Here we add all the common steps for any activity and, in the point of interest
-            // we call to define_my_steps() is order to get the particular ones inserted in place.
-            $this->define_my_steps();
-
-            // Roles (optionally role assignments and always role overrides).
-            $this->add_step(new restore_ras_and_caps_structure_step('course_ras_and_caps', 'roles.xml'));
-
-            // Filters (conditionally).
-            if ($this->get_setting_value('filters')) {
-                $this->add_step(new restore_filters_structure_step('activity_filters', 'filters.xml'));
-            }
-
-            // Comments (conditionally).
-            if ($this->get_setting_value('comments')) {
-                $this->add_step(new restore_comments_structure_step('activity_comments', 'comments.xml'));
-            }
-
-            // Grades (module-related, rest of gradebook is restored later if possible: cats, calculations...).
-            $this->add_step(new restore_activity_grades_structure_step('activity_grades', 'grades.xml'));
-
-            // Advanced grading methods attached to the module.
-            $this->add_step(new restore_activity_grading_structure_step('activity_grading', 'grading.xml'));
-
-            // Userscompletion (conditionally).
-            if ($this->get_setting_value('userscompletion')) {
-                $this->add_step(new restore_userscompletion_structure_step('activity_userscompletion', 'completion.xml'));
-            }
-
-            // Logs (conditionally).
-            if ($this->get_setting_value('logs')) {
-                $this->add_step(new restore_activity_logs_structure_step('activity_logs', 'logs.xml'));
-            }
-
-            // At the end, mark it as built.
-            $this->built = true;
-
-        } else {
-            parent::build();
         }
     }
 
@@ -279,4 +232,95 @@ class restore_dataform_activity_task extends restore_activity_task {
 
         return $rules;
     }
+}
+
+
+/**
+ * Structure step to restore common course_module information into an existing module.
+ *
+ * This step will process the module.xml file for one activity, in order to restore
+ * the corresponding information into the course module within which the restore is
+ * executed, skipping various bits
+ * of information based on CFG settings (groupings, completion...) in order to fullfill
+ * all the reqs to be able to use the context by all the rest of steps
+ * in the activity restore task
+ */
+class restore_dataform_to_module_structure_step extends restore_module_structure_step {
+
+    protected function process_module($data) {
+        global $CFG, $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+        $this->task->set_old_moduleversion($data->version);
+
+        // Get the current course module data.
+        $newitemid = $this->task->get_moduleid();
+        $params = array('id' => $newitemid);
+        $cmdata = $DB->get_record('course_modules', $params, '*', MUST_EXIST);
+
+        // Group mode and Grouping.
+        $cmdata->groupmode = $data->groupmode;
+        $cmdata->groupingid = $this->get_mappingid('grouping', $data->groupingid);
+
+        // Idnumber uniqueness.
+        if (!grade_verify_idnumber($data->idnumber, $this->get_courseid())) {
+            $data->idnumber = '';
+        }
+        $cmdata->idnumber = $data->idnumber;
+
+        // Completion.
+        if (!empty($CFG->enablecompletion)) {
+            $cmdata->completion = $data->completion;
+            $cmdata->completiongradeitemnumber = $data->completiongradeitemnumber;
+            $cmdata->completionview = $data->completionview;
+            $cmdata->completionexpected = $this->apply_date_offset($data->completionexpected);
+        }
+
+        // Availability.
+        if (empty($CFG->enableavailability)) {
+            $data->availability = null;
+        }
+        if (empty($data->availability)) {
+            // If there are legacy availablility data fields (and no new format data),
+            // convert the old fields.
+            $data->availability = \core_availability\info::convert_legacy_fields(
+                    $data, false);
+        } else if (!empty($data->groupmembersonly)) {
+            // There is current availability data, but it still has groupmembersonly
+            // as well (2.7 backups), convert just that part.
+            require_once($CFG->dirroot . '/lib/db/upgradelib.php');
+            $data->availability = upgrade_group_members_only($data->groupingid, $data->availability);
+        }
+        $cmdata->availability = $data->availability;
+
+        // Backups that did not include showdescription, set it to default 0
+        // (this is not totally necessary as it has a db default, but just to
+        // be explicit).
+        if (!isset($data->showdescription)) {
+            $data->showdescription = 0;
+        }
+        $cmdata->showdescription = $data->showdescription;
+
+        // Course_module record ready, update it.
+        $DB->update_record('course_modules', $cmdata);
+        // Save mapping.
+        $this->set_mapping('course_module', $oldid, $newitemid);
+        // Set the new course_module id in the task.
+        $this->task->set_moduleid($newitemid);
+        // We can now create the context safely.
+        $ctxid = context_module::instance($newitemid)->id;
+        // Set the new context id in the task.
+        $this->task->set_contextid($ctxid);
+
+        // If there is the legacy showavailability data, store this for later use.
+        // (This data is not present when restoring 'new' backups.)
+        if (isset($cmdata->showavailability)) {
+            // Cache the showavailability flag using the backup_ids data field.
+            restore_dbops::set_backup_ids_record($this->get_restoreid(),
+                    'module_showavailability', $newitemid, 0, null,
+                    (object)array('showavailability' => $cmdata->showavailability));
+        }
+    }
+
 }
