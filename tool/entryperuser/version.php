@@ -21,5 +21,5 @@
  */
 
 $plugin->component = 'dataformtool_entryperuser';
-$plugin->version = 2014111001;
+$plugin->version = 2014111005;
 $plugin->requires = 2014111000;
