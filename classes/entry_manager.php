@@ -195,7 +195,7 @@ class mod_dataform_entry_manager {
         $groupmode = $filter->groupmode;
         $wheregroup = '';
         // Specific groups requested.
-        if (!empty($filter->groups)) {
+        if ($filter->groups) {
             list($ingroups, $groupparams) = $DB->get_in_or_equal($filter->groups);
             $wheregroup .= " AND e.groupid $ingroups ";
             $params = array_merge($params, $groupparams);
@@ -764,7 +764,7 @@ class mod_dataform_entry_manager {
                 }
 
                 // Update calculated grades if applicable.
-                $df->update_calculated_grades($entry);
+                $df->grade_manager->update_calculated_grades($entry);
 
                 $processed[$entry->id] = $entry;
             }
@@ -811,7 +811,7 @@ class mod_dataform_entry_manager {
             $processed[$newentry->id] = $newentry;
 
             // Update calculated grades if applicable.
-            $df->update_calculated_grades($entry);
+            $df->grade_manager->update_calculated_grades($entry);
         }
         return processed;
     }
@@ -863,7 +863,7 @@ class mod_dataform_entry_manager {
             $event->trigger();
 
             // Update calculated grades if applicable.
-            $df->update_calculated_grades($entry);
+            $df->grade_manager->update_calculated_grades($entry);
         }
 
         return $processed;

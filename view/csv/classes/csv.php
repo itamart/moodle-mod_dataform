@@ -343,7 +343,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         $updateexisting = !empty($options['updateexisting']) and !empty($csvfieldnames['entryid']);
 
         // Are we adding the imported entries to every participant?
-        $addperparticipant = (!empty($options['addperparticipant']) and $users = $this->df->get_gradebook_users());
+        $addperparticipant = (!empty($options['addperparticipant']) and $users = $this->df->grade_manager->get_gradebook_users());
 
         $i = 0;
         $cir->init();

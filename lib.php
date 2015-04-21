@@ -45,6 +45,7 @@ function dataform_add_instance($data) {
 
     if (empty($data->grade)) {
         $data->grade = 0;
+        $data->gradeguide = null;
         $data->gradecalc = null;
     }
 
@@ -79,7 +80,12 @@ function dataform_add_instance($data) {
     \mod_dataform\helper\calendar_event::update_event_timedue($data);
 
     // Grading.
-    dataform_grade_item_update($data);
+    if ($data->grade) {
+        $grademan = \mod_dataform_grade_manager::instance($data->id);
+        $itemparams = $grademan->get_grade_item_params_from_data($data);
+        $grademan->update_grade_item(0, $itemparams);
+    }
+
     return $data->id;
 }
 
@@ -91,46 +97,11 @@ function dataform_add_instance($data) {
  * @return bool
  */
 function dataform_update_instance($data) {
-    global  $CFG, $DB, $COURSE;
-
-    $data->id = $data->instance;
-
-    $data->timemodified = time();
-
-    if (empty($data->grade)) {
-        $data->grade = 0;
-        $data->gradecalc = null;
-    }
-
-    // Max entries.
-    if ($CFG->dataform_maxentries == 0) {
-        $data->maxentries = 0;
-    } else if ($CFG->dataform_maxentries > 0 and ($data->maxentries > $CFG->dataform_maxentries or $data->maxentries < 0)) {
-        $data->maxentries = $CFG->dataform_maxentries;
-    } else if ($data->maxentries < -1) {
-        $data->maxentries = -1;
-    }
-
-    $df = mod_dataform_dataform::instance($data->id);
+    $id = $data->instance;
+    $df = mod_dataform_dataform::instance($id);
     if (!$df->update($data)) {
         return false;
     }
-
-    // Activity icon.
-    $context = context_module::instance($data->coursemodule);
-    $options = array('subdirs' => 0,
-                    'maxbytes' => $COURSE->maxbytes,
-                    'maxfiles' => 1,
-                    'accepted_types' => array('image'));
-    file_save_draft_area_files($data->activityicon, $context->id, 'mod_dataform', 'activityicon', 0, $options);
-
-    // Calendar.
-    \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
-    \mod_dataform\helper\calendar_event::update_event_timedue($data);
-
-    // Grading.
-    dataform_update_grades($data);
-
     return true;
 }
 
@@ -572,14 +543,10 @@ function dataform_reset_userdata($data) {
  * @param int $courseid
  * @param string $type optional type
  */
-function dataform_reset_gradebook($courseid, $type='') {
+function dataform_reset_gradebook($courseid, $type = '') {
     global $DB;
 
-    $sql = "SELECT d.*, cm.idnumber as cmidnumber, d.course as courseid
-              FROM {dataform} d, {course_modules} cm, {modules} m
-             WHERE m.name='dataform' AND m.id=cm.module AND cm.instance=d.id AND d.course=?";
-
-    if ($dataforms = $DB->get_records_sql($sql, array($courseid))) {
+    if ($dataforms = $DB->get_records('dataform', array('course' => $courseid))) {
         foreach ($dataforms as $dataform) {
             dataform_grade_item_update($dataform, 'reset');
         }
@@ -775,31 +742,82 @@ function dataform_extend_navigation($navigation, $course, $module, $cm) {
  * @param navigation_node $datanode The node to add module settings to
  */
 function dataform_extend_settings_navigation(settings_navigation $settings, navigation_node $dfnode) {
-    global $PAGE;
-
-    // Index.
-    $coursecontext = context_course::instance($PAGE->course->id);
-    if (has_capability('mod/dataform:indexview', $coursecontext)) {
-        $dfnode->add(get_string('index', 'dataform'), new moodle_url('/mod/dataform/index.php', array('id' => $PAGE->course->id)));
-    }
+    global $PAGE, $CFG;
 
     // MANAGEMENT.
     // Must be activity manager.
     $df = \mod_dataform_dataform::instance(null, $PAGE->cm->id);
-    if (!$manager = $df->user_manage_permissions) {
-        return;
+    if ($manager = $df->user_manage_permissions) {
+        if ($manager['templates']) {
+            // Grade items.
+            if ($CFG->dataform_multigradeitems) {
+                $params = array('id' => $PAGE->cm->id);
+                $url = new moodle_url('/mod/dataform/grade/items.php', $params);
+                $dfnode->add(get_string('gradeitems', 'dataform'), $url);
+            }
+
+            // Renew activity.
+            $params = array('id' => $PAGE->cm->id, 'renew' => 1, 'sesskey' => sesskey());
+            $dfnode->add(get_string('renewactivity', 'dataform'), new moodle_url('/mod/dataform/view.php', $params));
+
+            // Delete activity.
+            $params = array('delete' => $PAGE->cm->id, 'sesskey' => sesskey());
+            $dfnode->add(get_string('deleteactivity', 'dataform'), new moodle_url('/course/mod.php', $params));
+        }
+
+        // Manage.
+        $manage = $dfnode->add(get_string('manage', 'dataform'));
+
+        if ($manager['views']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/view/index.php', $params));
+        }
+
+        if ($manager['fields']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', $params));
+        }
+
+        if ($manager['filters']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filter/index.php', $params));
+        }
+
+        if ($manager['access']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('access', 'dataform'), new moodle_url('/mod/dataform/access/index.php', $params));
+        }
+
+        if ($manager['notifications']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('notifications'), new moodle_url('/mod/dataform/notification/index.php', $params));
+        }
+
+        if ($manager['css']) {
+            $params = array('id' => $PAGE->cm->id, 'cssedit' => 1);
+            $manage->add(get_string('cssinclude', 'dataform'), new moodle_url('/mod/dataform/css.php', $params));
+        }
+
+        if ($manager['js']) {
+            $params = array('id' => $PAGE->cm->id, 'jsedit' => 1);
+            $manage->add(get_string('jsinclude', 'dataform'), new moodle_url('/mod/dataform/js.php', $params));
+        }
+
+        if ($manager['tools']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('tools', 'dataform'), new moodle_url('/mod/dataform/tool/index.php', $params));
+        }
+
+        if ($manager['presets']) {
+            $params = array('id' => $PAGE->cm->id);
+            $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/preset/index.php', $params));
+        }
     }
 
     // View gradebook.
     if ($df->grade) {
-        $dfnode->add(get_string('gradebook', 'grades'), new moodle_url('/grade/report/index.php', array('id' => $PAGE->course->id)));
-    }
-
-    if ($manager['templates']) {
-        // Renew activity.
-        $dfnode->add(get_string('renewactivity', 'dataform'), new moodle_url('/mod/dataform/view.php', array('id' => $PAGE->cm->id, 'renew' => 1, 'sesskey' => sesskey())));
-        // Delete activity.
-        $dfnode->add(get_string('deleteactivity', 'dataform'), new moodle_url('/course/mod.php', array('delete' => $PAGE->cm->id, 'sesskey' => sesskey())));
+        $params = array('id' => $PAGE->course->id);
+        $dfnode->add(get_string('gradebook', 'grades'), new moodle_url('/grade/report/index.php', $params));
     }
 
     // Module administration (requires site:config).
@@ -808,44 +826,14 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
         $dfnode->add(get_string('modulesettings', 'dataform'), $url);
     }
 
-    // Manage.
-    $manage = $dfnode->add(get_string('manage', 'dataform'));
-
-    if ($manager['views']) {
-        $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/view/index.php', array('id' => $PAGE->cm->id)));
+    // Index.
+    $coursecontext = context_course::instance($PAGE->course->id);
+    if (has_capability('mod/dataform:indexview', $coursecontext)) {
+        $params = array('id' => $PAGE->course->id);
+        $dfnode->add(get_string('index', 'dataform'), new moodle_url('/mod/dataform/index.php', $params));
     }
 
-    if ($manager['fields']) {
-        $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', array('id' => $PAGE->cm->id)));
-    }
 
-    if ($manager['filters']) {
-        $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filter/index.php', array('id' => $PAGE->cm->id)));
-    }
-
-    if ($manager['access']) {
-        $manage->add(get_string('access', 'dataform'), new moodle_url('/mod/dataform/access/index.php', array('id' => $PAGE->cm->id)));
-    }
-
-    if ($manager['notifications']) {
-        $manage->add(get_string('notifications'), new moodle_url('/mod/dataform/notification/index.php', array('id' => $PAGE->cm->id)));
-    }
-
-    if ($manager['css']) {
-        $manage->add(get_string('cssinclude', 'dataform'), new moodle_url('/mod/dataform/css.php', array('id' => $PAGE->cm->id, 'cssedit' => 1)));
-    }
-
-    if ($manager['js']) {
-        $manage->add(get_string('jsinclude', 'dataform'), new moodle_url('/mod/dataform/js.php', array('id' => $PAGE->cm->id, 'jsedit' => 1)));
-    }
-
-    if ($manager['tools']) {
-        $manage->add(get_string('tools', 'dataform'), new moodle_url('/mod/dataform/tool/index.php', array('id' => $PAGE->cm->id)));
-    }
-
-    if ($manager['presets']) {
-        $manage->add(get_string('presets', 'dataform'), new moodle_url('/mod/dataform/preset/index.php', array('id' => $PAGE->cm->id)));
-    }
 }
 
 // INFO.
@@ -1096,136 +1084,53 @@ function dataform_rating_validate($params) {
 // GRADING.
 
 /**
- * Lists all gradable areas for the advanced grading methods gramework
+ * Lists all gradable areas for the advanced grading methods.
  *
  * @return array
  */
 function dataform_grading_areas_list() {
-    return array('activity' => get_string('activity'));
-}
+    global $PAGE;
 
-/**
- * Return grade for given user or all users.
- * @return array array of grades, false if none
- */
-function dataform_get_user_grades($data, $userid = 0) {
-    global $CFG;
-
-    if (empty($data->grade)) {
-        return null;
+    if (empty($PAGE->cm->modname) or $PAGE->cm->modname != 'dataform') {
+        return array();
     }
 
-    $df = mod_dataform_dataform::instance($data->id);
-    return $df->get_user_grades($userid);
+    // Find gradingadv fields and return their names as grading areas.
+    $grademan = \mod_dataform_grade_manager::instance($PAGE->cm->instance);
+    if ($areas = $grademan->get_available_grading_areas()) {
+        return $areas;
+    }
+
+    return array();
 }
 
 /**
- * Update grades by firing grade_updated event
- * @param object $data null means all databases
+ * Update grades.
+ *
+ * @param object $data The mod instance.
  * @param int $userid specific user only, 0 mean all
  * @param bool $nullifnone
- * @param array $grades
+ * @return void
  */
-function dataform_update_grades($data = null, $userid = 0, $nullifnone = true, $grades = null) {
-    if ($data == null) {
-        return;
-    }
-
-    if (!$data->grade) {
-        dataform_grade_item_delete($data);
-        return;
-    }
-
-    if ($grades or $grades = dataform_get_user_grades($data, $userid)) {
-        dataform_grade_item_update($data, $grades);
-
-    } else if ($userid and $nullifnone) {
-        $grade = new stdClass;
-        $grade->userid   = $userid;
-        $grade->rawgrade = null;
-        dataform_grade_item_update($data, $grade);
-
-    } else {
-        dataform_grade_item_update($data);
-    }
+function dataform_update_grades($data, $userid = 0, $nullifnone = true) {
+    $grademan = \mod_dataform_grade_manager::instance($data->id);
+    $grademan->update_grades($userid, $nullifnone);
 }
 
 /**
- * Update all grades in gradebook.
- *
- * @global object
- */
-function dataform_upgrade_grades() {
-    global $DB;
-
-    $sql = "SELECT COUNT('x')
-              FROM {dataform} d, {course_modules} cm, {modules} m
-             WHERE m.name='dataform' AND m.id=cm.module AND cm.instance=d.id";
-    $count = $DB->count_records_sql($sql);
-
-    $sql = "SELECT d.*, cm.idnumber AS cmidnumber, d.course AS courseid
-              FROM {dataform} d, {course_modules} cm, {modules} m
-             WHERE m.name='dataform' AND m.id=cm.module AND cm.instance=d.id";
-    $rs = $DB->get_recordset_sql($sql);
-    if ($rs->valid()) {
-        // Too much debug output.
-        $pbar = new progress_bar('dataupgradegrades', 500, true);
-        $i = 0;
-        foreach ($rs as $data) {
-            $i++;
-            // Set up timeout, may also abort execution.
-            upgrade_set_timeout(60 * 5);
-            dataform_update_grades($data, 0, false);
-            $pbar->update($i, $count, "Updating Dataform grades ($i/$count).");
-        }
-    }
-    $rs->close();
-}
-
-/**
- * Update/create grade item for given dataform
+ * Update/create grade item for given dataform.
  * @param object $data object with extra cmidnumber
  * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
- * @return object grade_item
+ * @return int
  */
 function dataform_grade_item_update($data, $grades = null) {
-    global $CFG;
-    require_once("$CFG->libdir/gradelib.php");
-
-    $params = array(
-        'itemname' => $data->name,
-        'idnumber' => isset($data->cmidnumber) ? $data->cmidnumber : null
-    );
-
-    if (!$data->grade) {
-        $params['gradetype'] = GRADE_TYPE_NONE;
-
-    } else if ($data->grade > 0) {
-        $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax']  = $data->grade;
-        $params['grademin']  = 0;
-
-    } else if ($data->grade < 0) {
-        $params['gradetype'] = GRADE_TYPE_SCALE;
-        $params['scaleid']   = -$data->grade;
+    $grademan = \mod_dataform_grade_manager::instance($data->id);
+    $options = ($grades == 'reset' ? array('reset' => 1) : array());
+    foreach ($grademan->grade_items as $itemnumber => $unused) {
+        $res = $grademan->update_grade_item($itemnumber, $options);
+        if ($res != GRADE_UPDATE_OK) {
+            // Break on failure.
+            return $res;
+        }
     }
-
-    if ($grades === 'reset') {
-        $params['reset'] = true;
-        $grades = null;
-    }
-
-    return grade_update('mod/dataform', $data->course, 'mod', 'dataform', $data->id, 0, $grades, $params);
-}
-
-/**
- * Delete grade item for given data
- * @param object $data object
- * @return object grade_item
- */
-function dataform_grade_item_delete($data) {
-    global $CFG;
-    require_once("$CFG->libdir/gradelib.php");
-
-    return grade_update('mod/dataform', $data->course, 'mod', 'dataform', $data->id, 0, null, array('deleted' => 1));
 }

@@ -71,6 +71,16 @@ if ($ADMIN->fulltree) {
     $options = array(0 => get_string('no'), 1 => get_string('yes'));
     $settings->add(new admin_setting_configselect('dataform_anonymous', new lang_string('anonymousentries', 'dataform'),
                        new lang_string('configanonymousentries', 'dataform'), 0, $options));
+
+    // Allow multiple grade items.
+    $options = array(0 => get_string('no'), 1 => get_string('yes'));
+    $settings->add(new admin_setting_configselect(
+        'dataform_multigradeitems',
+        new lang_string('multigradeitems', 'dataform'),
+        new lang_string('configmultigradeitems', 'dataform'),
+        0,
+        $options
+    ));
 }
 
 $ADMIN->add('moddataformfolder', $settings);
