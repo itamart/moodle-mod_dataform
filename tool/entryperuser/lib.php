@@ -31,7 +31,7 @@ class dataformtool_entryperuser {
         global $DB;
 
         // Get gradebook users.
-        if (!$users = $df->get_gradebook_users()) {
+        if (!$users = $df->grade_manager->get_gradebook_users()) {
             return;
         }
 

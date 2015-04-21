@@ -103,6 +103,7 @@ class mod_dataform_dataform {
         $data->timeinterval = 0;
         $data->intervalcount = 1;
         $data->grade = 0;
+        $data->gradeguide = null;
         $data->gradecalc = null;
         $data->maxentries = -1;
         $data->entriesrequired = 0;
@@ -657,52 +658,119 @@ class mod_dataform_dataform {
      * @return bool
      */
     public function update($params, $notify = '') {
-        global $DB;
+        global  $CFG, $DB, $COURSE;
 
-        if ($params) {
-            $updatedf = false;
-            foreach ($params as $key => $value) {
-                $oldvalue = $this->{$key} ? $this->{$key} : null;
-                $newvalue = !empty($value) ? $value : null;
-                if ($newvalue != $oldvalue) {
-                    $this->{$key} = $value;
-                    $updatedf = true;
-                }
+        $updatedf = false;
+
+        $params = (object) $params;
+        $data = $this->data;
+
+        $data->coursemodule = $this->cm->id;
+        $data->module = $this->cm->module;
+        $data->activityicon = 0;
+
+        foreach ($params as $key => $value) {
+            if (!property_exists($data, $key)) {
+                continue;
             }
 
-            if ($updatedf) {
-                if ($DB->update_record('dataform', $this->data)) {
-                    // Process notification message.
-                    if ($notify and $notify !== true) {
-                        $this->notifications = array('success' => array('' => $notify));;
-                    }
-
-                    // Trigger event.
-                    $eventparams = array(
-                        'objectid' => $this->cm->id,
-                        'context' => $this->context,
-                        'other' => array(
-                            'modulename' => 'dataform',
-                            'name' => $this->name,
-                            'instanceid' => $this->id,
-                        )
-                    );
-                    $event = \core\event\course_module_updated::create($eventparams);
-                    $event->add_record_snapshot('course_modules', $this->cm);
-                    $event->add_record_snapshot('course', $this->course);
-                    $event->add_record_snapshot('dataform', $this->data);
-                    $event->trigger();
-
-                } else {
-                    if ($notify === true) {
-                        $this->notifications = array('problem' => array('dfupdatefailed' => get_string('dfupdatefailed', 'dataform')));
-                    } else if ($notify) {
-                        $this->notifications = array('problem' => array('' => $notify));;
-                    }
-                    return false;
-                }
+            if ($value != $data->$key) {
+                $this->$key = $value;
+                $updatedf = true;
             }
         }
+
+        if (!$updatedf) {
+            return true;
+        }
+
+        $data->timemodified = time();
+
+        if (!$data->grade) {
+            $data->gradeguide = null;
+            $data->gradecalc = null;
+        }
+
+        // Max entries.
+        $cfgmaxentries = $CFG->dataform_maxentries;
+        if ($cfgmaxentries == 0) {
+            $data->maxentries = 0;
+        } else if ($cfgmaxentries > 0) {
+            if ($data->maxentries > $cfgmaxentries or $data->maxentries < 0) {
+                $data->maxentries = $cfgmaxentries;
+            }
+        }
+        if ($data->maxentries < -1) {
+            $data->maxentries = -1;
+        }
+
+        if (!$DB->update_record('dataform', $data)) {
+            // Something went wrong at updating.
+            if ($notify === true) {
+                $this->notifications = array('problem' => array('dfupdatefailed' => get_string('dfupdatefailed', 'dataform')));
+            } else if ($notify) {
+                $this->notifications = array('problem' => array('' => $notify));;
+            }
+            return false;
+        }
+
+        // Activity icon.
+        if (!empty($data->activityicon)) {
+            $options = array(
+                'subdirs' => 0,
+                'maxbytes' => $this->course->maxbytes,
+                'maxfiles' => 1,
+                'accepted_types' => array('image')
+            );
+            file_save_draft_area_files(
+                $data->activityicon,
+                $this->context->id,
+                'mod_dataform',
+                'activityicon',
+                0,
+                $options
+            );
+        }
+
+        // Calendar.
+        \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
+        \mod_dataform\helper\calendar_event::update_event_timedue($data);
+
+        // Grading.
+        $grademan = $this->grade_manager;
+        if (!$data->grade) {
+            $grademan->delete_grade_items();
+        } else {
+            $gradedata = array('grade' => $data->grade);
+            // Update name if there is only one grade item.
+            if (!$gradeitems = $grademan->grade_items or count($gradeitems) < 2) {
+                $gradedata['name'] = $this->name;
+            }
+            $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
+            $this->grade_manager->update_grade_item(0, $itemparams);
+        }
+
+        // Trigger event.
+        $eventparams = array(
+            'objectid' => $this->cm->id,
+            'context' => $this->context,
+            'other' => array(
+                'modulename' => 'dataform',
+                'name' => $this->name,
+                'instanceid' => $this->id,
+            )
+        );
+        $event = \core\event\course_module_updated::create($eventparams);
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('course', $this->course);
+        $event->add_record_snapshot('dataform', $data);
+        $event->trigger();
+
+        // Process notification message.
+        if ($notify and $notify !== true) {
+            $this->notifications = array('success' => array('' => $notify));;
+        }
+
         return true;
     }
 
@@ -754,7 +822,7 @@ class mod_dataform_dataform {
         $fs->delete_area_files($this->context->id, 'mod_dataform');
 
         // Clean up gradebook.
-        dataform_grade_item_delete($this->data);
+        mod_dataform_grade_manager::instance($this->id)->delete_grade_items();
 
         // Refresh events.
         dataform_refresh_events($this->course->id);
@@ -778,10 +846,6 @@ class mod_dataform_dataform {
     protected function reset_settings() {
         $data = self::get_default_data();
 
-        // Reset grading manager.
-        $gradingman = get_grading_manager($this->context, 'mod_dataform', 'activity');
-        $gradingman->set_active_method(null);
-
         return $this->update($data);
     }
 
@@ -796,9 +860,6 @@ class mod_dataform_dataform {
 
         $entryman = new mod_dataform_entry_manager($this->id);
         $entryman->delete_entries($userid);
-
-        // Reset grades.
-        dataform_update_grades($this->data, $userid);
 
         return true;
     }
@@ -911,6 +972,15 @@ class mod_dataform_dataform {
     }
 
     /**
+     * Returns the grade manager for the Dataform instance.
+     *
+     * @return mod_dataform_grade_manager
+     */
+    public function get_grade_manager() {
+        return mod_dataform_grade_manager::instance($this->id);
+    }
+
+    /**
      * Returns the grading manager for the Dataform instance.
      *
      * @return grading_manager
@@ -918,7 +988,6 @@ class mod_dataform_dataform {
     public function get_grading_manager() {
         return get_grading_manger($this->context, 'mod_dataform', 'activity');
     }
-
 
     // SETTERS.
 
@@ -1098,284 +1167,6 @@ class mod_dataform_dataform {
         return $entryids;
     }
 
-
-    // GRADING.
-
-    /**
-     * Returns a list of users by gradebook roles.
-     */
-    public function get_gradebook_users(array $userids = null) {
-        global $DB, $CFG;
-
-        // Must have gradebook roles.
-        if (empty($CFG->gradebookroles)) {
-            return null;
-        }
-
-        $gradebookroles = explode(", ", $CFG->gradebookroles);
-
-        if (!empty($CFG->enablegroupings) and $this->cm->groupmembersonly) {
-            $groupingsusers = groups_get_grouping_members($this->cm->groupingid, 'u.id', 'u.id');
-            $gusers = $groupingsusers ? array_keys($groupingsusers) : null;
-        }
-
-        if (!empty($userids)) {
-            if (!empty($gusers)) {
-                $gusers = array_intersect($userids, $gusers);
-            } else {
-                $gusers = $userids;
-            }
-        }
-
-        $roleusers = array();
-        if (isset($gusers)) {
-            if (!empty($gusers)) {
-                list($inuids, $params) = $DB->get_in_or_equal($gusers, SQL_PARAMS_NAMED, 'u');
-                foreach ($gradebookroles as $roleid) {
-                    $roleusers = $roleusers + get_role_users(
-                        $roleid,
-                        $this->context,
-                        true,
-                        user_picture::fields('u'),
-                        'u.lastname ASC',
-                        true,
-                        $this->currentgroup,
-                        '',
-                        '',
-                        "u.id $inuids",
-                        $params
-                    );
-                }
-            }
-        } else {
-            foreach ($gradebookroles as $roleid) {
-                $roleusers = $roleusers + get_role_users(
-                    $roleid,
-                    $this->context,
-                    true,
-                    user_picture::fields('u'),
-                    'u.lastname ASC',
-                    true,
-                    $this->currentgroup
-                );
-            }
-        }
-        return $roleusers;
-    }
-
-    /**
-     * Returns user's grades in the dataform instance per the instance grade settings.
-     * For simple direct grading can use grade calculation to automate the grading.
-     * Simple direct with no calculation returns nothing because the grades are overriden
-     * in the gradebook and cannot be changed from the activity.
-     *
-     * @global object CFG
-     * @param int $userid optional user id, 0 means all users
-     * @return array array of grades, false if none
-     */
-    public function get_user_grades($userid = 0) {
-        global $CFG;
-
-        if (!$this->grade) {
-            return null;
-        }
-
-        // Advanced grading.
-        $gradingman = get_grading_manager($this->context, 'mod_dataform', 'activity');
-        $controller = $gradingman->get_active_controller();
-        if (!empty($controller)) {
-            return null;
-        }
-        // Calculated grade.
-        if ($this->gradecalc) {
-            return $this->get_user_grades_calculated($userid);
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns user's calculated grades in the dataform instance.
-     *
-     * @param int $userid The user id whose grades should be retrieved or 0 for all grades.
-     * @return array|null
-     */
-    public function get_user_grades_calculated($userid = 0) {
-        global $CFG;
-
-        if (!$this->gradecalc) {
-            return null;
-        }
-
-        require_once("$CFG->libdir/mathslib.php");
-        $formula = $this->gradecalc;
-
-        // Patterns container.
-        $patterns = array();
-
-        // Users container.
-        if ($userid) {
-            $users = array($userid => array());
-        } else {
-            $gusers = $this->get_gradebook_users();
-            $users = array_fill_keys(array_keys($gusers), array());
-        }
-
-        // Must have users.
-        if (!$users) {
-            return null;
-        }
-
-        // Grades container.
-        $grades = array();
-        foreach ($users as $userid => $unused) {
-            $grades[$userid] = (object) array(
-                'id' => $userid,
-                'userid' => $userid,
-                'rawgrade' => null
-            );
-
-            // Num entries pattern.
-            if (strpos($formula, '##numentries##') !== false) {
-                $patterns['##numentries##'] = 0;
-                if ($numentries = $this->get_entries_count_per_user(self::COUNT_ALL, $userid)) {
-                    foreach ($numentries as $userid => $count) {
-                        if (empty($users[$userid])) {
-                            $users[$userid] = array();
-                        }
-                        $users[$userid]['##numentries##'] = $count->numentries;
-                    }
-                }
-            }
-
-            // Extract grading field patterns from the formula.
-            if (preg_match_all("/##\d*:[^#]+##/", $formula, $matches)) {
-                // Get the entry ids per user.
-                $entryids = $this->get_entry_ids_per_user($userid);
-
-                foreach ($matches[0] as $pattern) {
-                    $patterns[$pattern] = 0;
-
-                    list($targetval, $fieldpattern) = explode(':', trim($pattern, '#'), 2);
-
-                    // Get the field from the pattern.
-                    if (!$field = $this->field_manager->get_field_by_pattern("[[$fieldpattern]]")) {
-                        continue;
-                    }
-
-                    $uservalues = null;
-
-                    // Get user values for the pattern.
-                    // The field must either has helper\contentperuser component,
-                    // or be an instance of interface grading.
-                    $helper = "dataformfield_$field->type\\helper\\contentperuser";
-                    if (class_exists($helper)) {
-                        $uservalues = $helper::get_content($field, $fieldpattern, $entryids);
-                    } else if ($field instanceof mod_dataform\interfaces\grading) {
-                        // BC - this method for grading user values is depracated.
-                        $uservalues = $field->get_user_values($fieldpattern, $entryids, $userid);
-                    }
-
-                    // Leave pattern value at 0 if no user values.
-                    if (!$uservalues) {
-                        continue;
-                    }
-                    // Register pattern values for users.
-                    foreach ($uservalues as $userid => $values) {
-                        if (empty($users[$userid])) {
-                            $users[$userid] = array();
-                        }
-
-                        // Keep only target val if specified.
-                        if ($targetval) {
-                            foreach ($values as $key => $value) {
-                                if ($value != $targetval) {
-                                    unset($values[$key]);
-                                }
-                            }
-                        }
-                        if ($values) {
-                            $users[$userid][$pattern] = implode(',', $values);
-                        }
-                    }
-                }
-            }
-        }
-
-        // For each user calculate the formula and create a grade object.
-        foreach ($grades as $userid => $grade) {
-            // If no values, no grade for this user.
-            if (empty($users[$userid])) {
-                continue;
-            }
-
-            $values = $users[$userid];
-            $replacements = array_merge($patterns, $values);
-            $calculation = str_replace(array_keys($replacements), $replacements, $formula);
-
-            $calc = new calc_formula("=$calculation");
-            $result = $calc->evaluate();
-            // False as result indicates some problem.
-            if ($result !== false) {
-                $grade->rawgrade = $result;
-            }
-        }
-
-        return $grades;
-    }
-
-    /**
-     * Updates the user's calculated grades in the dataform instance.
-     *
-     * @param array|stdClass $data The user id whose grades should be retrieved or 0 for all grades.
-     * @param bool $numentries Whether number of entries for the user has changed.
-     * @return void
-     */
-    public function update_calculated_grades($data, $pattern = null) {
-        global $CFG;
-
-        // Must be grading to continue.
-        if (!$this->grade or !$this->gradecalc) {
-            return;
-        }
-
-        $data = (object) $data;
-
-        if (!$pattern or preg_match("%$pattern%", $this->gradecalc) !== false) {
-            // Get the affected user ids.
-            if ($this->grouped) {
-                if (empty($data->groupid)) {
-                    return;
-                }
-                if (!$userids = groups_get_members($data->groupid, 'u.id,u.id as uid', 'u.id')) {
-                    return;
-                }
-                $userids = array_keys($userids);
-            } else {
-                if (empty($data->userid)) {
-                    return;
-                }
-                $userids = array($data->userid);
-            }
-
-            // Update grades for the affected users.
-            foreach ($userids as $userid) {
-                dataform_update_grades($this->data, $userid);
-            }
-
-            // Update specific grade completion if tracked.
-            if ($this->completionspecificgrade) {
-                $completion = new \completion_info($this->course);
-                if ($completion->is_enabled($this->cm) != COMPLETION_TRACKING_AUTOMATIC) {
-                    return;
-                }
-
-                foreach ($userids as $userid) {
-                    $completion->update_state($this->cm, COMPLETION_UNKNOWN, $userid);
-                }
-            }
-        }
-    }
 
     // USER.
 

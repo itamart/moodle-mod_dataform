@@ -123,7 +123,7 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
         // Self assign of gradebook user can only be allowed when the current
         // entry user is not gradebook user.
         // In other words, a student cannot override another student's selection.
-        if ($gbusers = $this->df->get_gradebook_users(array($entry->userid, $userid))) {
+        if ($gbusers = $this->df->grade_manager->get_gradebook_users(array($entry->userid, $userid))) {
             if (array_key_exists($entry->userid, $gbusers)) {
                 if (array_key_exists($userid, $gbusers)) {
                     return false;

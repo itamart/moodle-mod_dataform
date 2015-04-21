@@ -67,6 +67,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
     xmldb_dataform_upgrade_2014111000($dbman, $oldversion);
+    xmldb_dataform_upgrade_2014111003($dbman, $oldversion);
 
     return true;
 }
@@ -1163,6 +1164,35 @@ function xmldb_dataform_upgrade_2014111000($dbman, $oldversion) {
         // Add defaultcontent column to dataform_fields.
         $table = new xmldb_table('dataform_fields');
         $field = new xmldb_field('defaultcontent', XMLDB_TYPE_TEXT, null, null, null, null, null, 'defaultcontentmode');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Dataform savepoint reached.
+        upgrade_mod_savepoint(true, $newversion, 'dataform');
+    }
+
+    return true;
+}
+
+function xmldb_dataform_upgrade_2014111003($dbman, $oldversion) {
+    global $CFG, $DB;
+
+    list(, , , $newversion) = explode('_', __FUNCTION__);
+    if ($oldversion < $newversion) {
+        // Enable existing field plugins.
+        $type = 'dataformfield';
+        $enabled = array_keys(core_component::get_plugin_list($type));
+        set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
+
+        // Enable existing view plugins.
+        $type = 'dataformview';
+        $enabled = array_keys(core_component::get_plugin_list($type));
+        set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
+
+        // Add grade guide column to dataform.
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('gradeguide', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'grade');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }

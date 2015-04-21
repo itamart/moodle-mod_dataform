@@ -131,7 +131,7 @@ if ($userrating != RATING_UNSET_RATING) {
 }
 
 // Try to update grades in case grading by entries.
-$df->update_calculated_grades(array('userid' => $rateduserid));
+$df->grade_manager->update_calculated_grades(array('userid' => $rateduserid));
 
 // Need to retrieve the updated item to get its new aggregate value.
 $item = new stdClass;

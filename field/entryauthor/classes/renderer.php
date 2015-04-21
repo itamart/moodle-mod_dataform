@@ -78,7 +78,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
 
         static $usersmenu = null;
         if (is_null($usersmenu)) {
-            $users = $field->get_df()->get_gradebook_users();
+            $users = $field->df->grade_manager->get_gradebook_users();
             $users[$USER->id] = $USER;
             // Add a supervisor's id.
             if (!in_array($entry->userid, array_keys($users))) {
@@ -252,7 +252,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
             $label = get_string('unassignme', 'dataformfield_entryauthor');
             return $OUTPUT->single_button($url, $label);
         } else {
-            $gbusers = $df->get_gradebook_users(array($entry->userid, $USER->id));
+            $gbusers = $df->grade_manager->get_gradebook_users(array($entry->userid, $USER->id));
             // Student cannot self-assign an entry of a peer.
             if (!empty($gbusers[$entry->userid]) and !empty($gbusers[$USER->id])) {
                 return null;

@@ -39,7 +39,6 @@ class mod_dataform_mod_form extends moodleform_mod {
         $this->definition_appearance();
         $this->definition_timing();
         $this->definition_entry_settings();
-        $this->standard_grading_coursemodule_elements();
         $this->definition_grading();
         $this->standard_coursemodule_elements();
 
@@ -66,7 +65,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->setDefault('name', get_string('dataformnew', 'dataform'));
 
         // Intro.
-        $this->add_intro_editor(false, get_string('description'));
+        $this->standard_intro_elements(false, get_string('description'));
     }
 
     /**
@@ -216,17 +215,51 @@ class mod_dataform_mod_form extends moodleform_mod {
      *
      */
     protected function definition_grading() {
+        global $CFG;
+
+        $dataformid = !empty($this->current->id) ? $this->current->id : 0;
+
         $mform = &$this->_form;
+        $displaymultilink = false;
 
-        $mform->setDefault('grade', 0);
+        if ($CFG->dataform_multigradeitems) {
+            if ($dataformid) {
+                $gitems = grade_item::fetch_all(array(
+                    'itemtype'      => 'mod',
+                    'itemmodule'    => 'dataform',
+                    'iteminstance'  => $dataformid,
+                    'courseid'      => $this->current->course
+                ));
 
-        // Grading formula.
-        $mform->addElement('textarea', 'gradecalc', get_string('calculation', 'grades'));
-        $mform->setDefault('gradecalc', '');
-        $mform->disabledIf('gradecalc', 'grade', 'eq', 0);
-        $mform->disabledIf('gradecalc', 'advancedgradingmethod_activity', 'neq', '');
-        $mform->addHelpButton('gradecalc', 'calculation', 'grades');
+                if ($gitems and count($gitems) > 1) {
+                    $displaymultilink = true;
+                }
+            }
+        }
 
+        if ($displaymultilink) {
+            $mform->addElement('header', 'modstandardgrade', get_string('grade'));
+            $urlparams = array('id' => $this->current->update);
+            $url = new \moodle_url('/mod/dataform/grade/items.php', $urlparams);
+            $label = get_string('usegradeitemsform', 'mod_dataform', $url->out(false));
+            $mform->addElement('html', $label);
+        } else {
+            $this->standard_grading_coursemodule_elements();
+            $mform->setDefault('grade', 0);
+
+            $grademan = new \mod_dataform_grade_manager($dataformid);
+
+            // Grading rubric/guide.
+            $gradeguide = null;
+            if ($grademan->get_form_definition_grading_areas($mform, 'gradeguide', 'gradecalc')) {
+                $gradeguide = 'gradeguide';
+                $mform->disabledIf('gradeguide', 'grade[modgrade_type]', 'eq', 'none');
+            }
+
+            // Grading formula.
+            $grademan->get_form_definition_grading_calc($mform, 'gradecalc', $gradeguide);
+            $mform->disabledIf('gradecalc', 'grade[modgrade_type]', 'eq', 'none');
+        }
     }
 
     /**
@@ -371,4 +404,10 @@ class mod_dataform_mod_form extends moodleform_mod {
         return $errors;
     }
 
+    protected function init_features() {
+        parent::init_features();
+
+        // Deny the advancedgrading so that it doesn't appear in the activity settings form.
+        $this->_features->advancedgrading = false;
+    }
 }

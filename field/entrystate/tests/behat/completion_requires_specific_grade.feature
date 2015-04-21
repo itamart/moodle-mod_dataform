@@ -46,7 +46,7 @@ Feature: Completion
         And I expand all fieldsets
         And I set the field "id_modgrade_type" to "Point"
         And I set the field "id_modgrade_point" to "10"
-        And I set the field "Calculation" to "SUM(##2:State##)/2"
+        And I set the field "Grade calculation" to "SUM(##2:State##)/2"
         And I press "Save and display"
 
         ## Completion

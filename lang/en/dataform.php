@@ -89,8 +89,16 @@ $string['entrytimelimit_help'] = 'The time limit (minutes) within which a user w
 <li><b>&nbsp;N:</b> The entry can be updated or deleted within N minutes (where N is any positive number, e.g. 30).
 </ul>';
 $string['notapplicable'] = 'N/A';
+
 // Grading.
-$string['grading'] = 'Grading';
+$string['gradeguide'] = 'Grade guide/rubric';
+$string['gradeguide_help'] = 'Choose a grading guide or rubric that should be used for assigning grades in this activity/grade item.';
+$string['gradecalc'] = 'Grade calculation';
+$string['gradecalc_help'] = 'A grade calculation is a formula that determines the activity grade. The formula may use common mathematical operators, such as max, min and sum. It can also use certain field patterns to determine the activity grade based on user content.';
+$string['gradeitems'] = 'Grade items';
+$string['gradeitemsin'] = 'Grade items in {$a}';
+$string['gradeitems_help'] = 'This page lets you add/edit grade items for this activity.';
+$string['usegradeitemsform'] = 'This instance contains multiple grade items. To edit these items, please use the <a href="{$a}">grade items form</a>.';
 
 // ROLES.
 $string['entriesmanager'] = 'Entries Manager';
@@ -130,6 +138,9 @@ $string['cssinclude'] = 'CSS';
 $string['cssincludes'] = 'Include external CSS';
 $string['csssaved'] = 'CSS saved';
 $string['cssupload'] = 'Upload CSS files';
+
+$string['multigradeitems'] = 'Allow multiple grade items';
+$string['configmultigradeitems'] = 'Set to Yes to allow multiple grade items in a Dataform activity.';
 
 // CSV.
 $string['csvdelimiter'] = 'delimiter';
@@ -192,12 +203,7 @@ $string['getstarted'] = 'This dataform appears to be new or with incomplete setu
 $string['getstartedpresets'] = 'Apply a preset in the {$a} section';
 $string['getstartedfields'] = 'Add fields in the {$a} section';
 $string['getstartedviews'] = 'Add views in the {$a} section';
-$string['grade'] = 'Grade';
-$string['gradeinputtype'] = 'Grade input type';
-$string['grading'] = 'Grading';
-$string['gradingmethod'] = 'Grading method';
-$string['gradingsettings'] = 'Activity grading settings';
-$string['groupinfo'] = 'Group info';
+
 $string['headercss'] = 'Custom CSS styles for all views';
 $string['headerjs'] = 'Custom javascript for all views';
 $string['horizontal'] = 'Horizontal';
