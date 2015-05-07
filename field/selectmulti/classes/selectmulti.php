@@ -173,12 +173,13 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
             $options = $this->options_menu();
             $update = false;
             foreach ($newvalues as $newvalue) {
-                if (!$optionkey = (int) array_search($newvalue, $options)) {
+                $optionkey = array_search($newvalue, $options);
+                if ($optionkey === false) {
                     $update = true;
                     $optionkey = count($options) + 1;
-                    $selected[] = $optionkey;
                     $options[$optionkey] = $newvalue;
                 }
+                $selected[] = $optionkey;
             }
             if ($update) {
                 $this->param1 = implode("\n", $options);
