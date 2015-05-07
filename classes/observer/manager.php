@@ -23,9 +23,9 @@
 namespace mod_dataform\observer;
 
 /**
- * Observers helper class
+ * Observers manager class
  */
-class observers {
+class manager {
 
     /**
      * Returns list of dataform observers.
@@ -38,7 +38,7 @@ class observers {
         $observers = array();
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/observer") as $filename) {
             $basename = basename($filename, '.php');
-            if ($basename == 'observers') {
+            if ($basename == 'manager') {
                 continue;
             }
             $observer = '\mod_dataform\observer\\'. $basename;
