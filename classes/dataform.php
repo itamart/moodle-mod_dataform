@@ -351,8 +351,30 @@ class mod_dataform_dataform {
         }
 
         // RENEW if requested.
-        if ($manager and !empty($urlparams['renew']) and confirm_sesskey()) {
-            $this->reset();
+        if ($manager and !empty($urlparams['renew'])and confirm_sesskey()) {
+            $returnurl = new \moodle_url('/mod/dataform/view.php', array('id' => $this->cm->id));
+            if (empty($urlparams['confirmed'])) {
+                $PAGE->set_url('/mod/dataform/view.php', $urlparams);
+
+                $message = get_string('renewconfirm', 'dataform');
+                $yesparams = array('id' => $this->cm->id, 'renew' => 1, 'sesskey' => sesskey(), 'confirmed' => 1);
+                $confirmedurl = new moodle_url('/mod/dataform/view.php', $yesparams);
+
+                $output = $this->renderer;
+                $headerparams = array(
+                        'heading' => get_string('renewactivity', 'dataform'). ': '. $this->name,
+                        'urlparams' => $urlparams);
+                echo $output->header($headerparams);
+                // Print a confirmation page.
+                echo $output->confirm($message, $confirmedurl, $returnurl);
+                echo $output->footer();
+                exit;
+
+            } else {
+                $this->reset();
+                rebuild_course_cache($this->course->id);
+                redirect($returnurl);
+            }
         }
 
         // RSS.

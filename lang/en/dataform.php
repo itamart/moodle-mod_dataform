@@ -638,6 +638,7 @@ $string['random'] = 'Random';
 $string['range'] = 'Range';
 $string['reference'] = 'Reference';
 $string['renewactivity'] = 'Renew activity';
+$string['renewconfirm'] = 'You are about to completely reset this activity. All the activity structure and user data will be deleted. Would you like to proceed?';
 $string['deleteactivity'] = 'Delete activity';
 $string['requiredall'] = 'all required';
 $string['requirednotall'] = 'not all required';
