@@ -34,7 +34,7 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
         $edit = !empty($options['edit']);
 
         // Set the group object.
-        $group = new stdClass;
+        $group = new \stdClass;
         if ($entry->id < 0) {
             $entry->groupid = $field->df->currentgroup;
         }
@@ -51,15 +51,11 @@ class dataformfield_entrygroup_renderer extends mod_dataform\pluginbase\dataform
             list(, $pvar, $part) = array_pad(explode(':', trim($pattern, '[]')), 3, null);
             switch ($pvar) {
                 case 'id':
-                    if (!empty($group->id)) {
-                        $replacements[$pattern] = $group->id;
-                    }
+                    $replacements[$pattern] = $group->id ? $group->id : '0';
                     break;
 
                 case 'idnumber':
-                    if (!empty($group->id)) {
-                        $replacements[$pattern] = $group->idnumber;
-                    }
+                     $replacements[$pattern] = $group->idnumber;
                     break;
 
                 case 'name':
