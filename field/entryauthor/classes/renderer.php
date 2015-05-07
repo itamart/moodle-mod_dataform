@@ -257,7 +257,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
             if (!empty($gbusers[$entry->userid]) and !empty($gbusers[$USER->id])) {
                 return null;
             }
-            
+
             // Do no display assign button if user at max entries.
             if ($df->user_at_max_entries(true)) {
                 return null;

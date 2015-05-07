@@ -468,7 +468,7 @@ class dataformview {
             $baseurlparams = array();
             $baseurlparams['d'] = $this->dataid;
             $baseurlparams['view'] = $this->id;
-            if (!empty($filter->id)) {
+            if ($filter->id) {
                 $baseurlparams['filter'] = $filter->id;
             }
             if ($filter->eids) {

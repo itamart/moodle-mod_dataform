@@ -40,7 +40,6 @@ abstract class base {
      */
     public static function validate($params) {
         $dataformid = $params['dataformid'];
-        $df = \mod_dataform_dataform::instance($dataformid);
 
         $accessman = \mod_dataform_access_manager::instance($dataformid);
         $accesstype = get_called_class();

@@ -69,7 +69,7 @@ class behat_dataformfield_entrystate extends behat_base {
         }
 
         $field->name = $datahash['name'];
-        
+
         // Set config (param1).
         $config = array();
 
