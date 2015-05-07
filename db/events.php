@@ -26,4 +26,4 @@
 defined('MOODLE_INTERNAL') or die;
 
 /* List of observers */
-$observers = mod_dataform\observer\observers::observers();
+$observers = mod_dataform\observer\manager::observers();

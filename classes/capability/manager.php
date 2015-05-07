@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * This class provides helper methods for dataform capabilities.
  */
-class capabilities {
+class manager {
 
     /**
      * Returns a list of dataform capabilities.
@@ -55,7 +55,7 @@ class capabilities {
         // Now add pluggable capabilities if any.
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/capability") as $filename) {
             $basename = basename($filename, '.php');
-            if ($basename == 'capabilities') {
+            if ($basename == 'manager') {
                 continue;
             }
             $capability = '\mod_dataform\capability\\'. $basename;
