@@ -27,17 +27,10 @@ $ADMIN->add('modsettings', new admin_category('moddataformfolder', $admincatstr,
 $settings = new admin_settingpage($section, get_string('settings', 'mod_dataform'), 'moodle/site:config', $module->is_enabled() === false);
 
 if ($ADMIN->fulltree) {
-    // Enable rss feeds.
-    if (empty($CFG->enablerssfeeds)) {
-        $options = array(0 => get_string('rssglobaldisabled', 'admin'));
-        $str = new lang_string('configenablerssfeeds', 'dataform').'<br />'.new lang_string('configenablerssfeedsdisabled2', 'admin');
-
-    } else {
-        $options = array(0 => get_string('no'), 1 => get_string('yes'));
-        $str = new lang_string('configenablerssfeeds', 'dataform');
-    }
-    $settings->add(new admin_setting_configselect('dataform_enablerssfeeds', new lang_string('enablerssfeeds', 'admin'),
-                       $str, 0, $options));
+    // Activity administration settings header.
+    $name = new lang_string('activityadministration', 'mod_dataform');
+    $description = '';
+    $settings->add(new admin_setting_heading('activityadminsettings', $name, $description));
 
     $unlimited = get_string('unlimited');
     $keys = range(0, 500);
@@ -59,6 +52,11 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('dataform_maxfilters', new lang_string('filtersmax', 'dataform'),
                        new lang_string('configmaxfilters', 'dataform'), 0, $options));
 
+    // Entry settings header.
+    $name = new lang_string('entries', 'mod_dataform');
+    $description = '';
+    $settings->add(new admin_setting_heading('entrysettings', $name, $description));
+
     // Max entries.
     $keys = range(-1, 500);
     $values = range(0, 500);
@@ -72,6 +70,11 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('dataform_anonymous', new lang_string('anonymousentries', 'dataform'),
                        new lang_string('configanonymousentries', 'dataform'), 0, $options));
 
+    // Grade settings header.
+    $name = new lang_string('grade', 'grades');
+    $description = '';
+    $settings->add(new admin_setting_heading('gradesettings', $name, $description));
+
     // Allow multiple grade items.
     $options = array(0 => get_string('no'), 1 => get_string('yes'));
     $settings->add(new admin_setting_configselect(
@@ -81,6 +84,24 @@ if ($ADMIN->fulltree) {
         0,
         $options
     ));
+
+    // Other settings header.
+    $name = new lang_string('other');
+    $description = '';
+    $settings->add(new admin_setting_heading('othersettings', $name, $description));
+
+    // Enable rss feeds.
+    if (empty($CFG->enablerssfeeds)) {
+        $options = array(0 => get_string('rssglobaldisabled', 'admin'));
+        $str = new lang_string('configenablerssfeeds', 'dataform').'<br />'.new lang_string('configenablerssfeedsdisabled2', 'admin');
+
+    } else {
+        $options = array(0 => get_string('no'), 1 => get_string('yes'));
+        $str = new lang_string('configenablerssfeeds', 'dataform');
+    }
+    $settings->add(new admin_setting_configselect('dataform_enablerssfeeds', new lang_string('enablerssfeeds', 'admin'),
+                       $str, 0, $options));
+
 }
 
 $ADMIN->add('moddataformfolder', $settings);
