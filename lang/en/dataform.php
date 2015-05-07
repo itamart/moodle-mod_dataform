@@ -35,7 +35,9 @@ $string['dataformnone'] = 'No Dataforms found';
 $string['dataformnotready'] = 'This activity is not ready for viewing';
 $string['dataformearly'] = 'This activity is scheduled to start {$a}';
 $string['dataformpastdue'] = 'This activity was due {$a}';
-// DATAFORM SETTINGS.
+
+// ACTIVITY SETTINGS.
+$string['activityadministration'] = 'Activity administration';
 $string['dataformnew'] = 'New Dataform';
 // Appreance.
 $string['activityicon'] = 'Activity icon';
@@ -139,6 +141,7 @@ $string['cssincludes'] = 'Include external CSS';
 $string['csssaved'] = 'CSS saved';
 $string['cssupload'] = 'Upload CSS files';
 
+// GRADE.
 $string['multigradeitems'] = 'Allow multiple grade items';
 $string['configmultigradeitems'] = 'Set to Yes to allow multiple grade items in a Dataform activity.';
 
