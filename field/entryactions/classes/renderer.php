@@ -280,6 +280,9 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             if ($viewid = array_search($options['view'], $views)) {
                 $viewname = $options['view'];
                 $url->param('view', $viewid);
+            } else {
+                // View does not exist or cannot be accessed.
+                return '';
             }
         } else if (!empty($entry->baseurl)) {
             $viewid = $entry->baseurl->param('view');
@@ -318,6 +321,9 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                 if ($viewid = array_search($options['view'], $views)) {
                     $url->param('ret', $url->param('view'));
                     $url->param('view', $viewid);
+                } else {
+                    // View does not exist or cannot be accessed.
+                    return '';
                 }
             }
         } else if ($targetview = $field->get_target_view('more')) {
