@@ -231,11 +231,14 @@ class dataformfilter {
         $contentfields = $fieldkeys ? array_intersect_key($fields, $fieldkeys) : array();
 
         // SEARCH sql.
-        list($searchtables, $searchwhere, $searchparams) = $this->get_search_sql($fields);
+        $searchsql = $this->get_search_sql($fields);
+        list($searchtables, $searchwhere, $searchparams) = $searchsql;
         // SORT sql.
-        list($sorttables, $sortwhere, $sortorder, $sortparams) = $this->get_sort_sql($fields);
+        $sortsql = $this->get_sort_sql($fields);
+        list($sorttables, $sortwhere, $sortorder, $sortparams) = $sortsql;
         // CONTENT sql ($dataformcontent is an array of fieldid whose content needs to be fetched).
-        list($contentwhat, $contenttables, $contentwhere, $contentparams, $dataformcontent) = $this->get_content_sql($contentfields);
+        $contentsql = $this->get_content_sql($contentfields);
+        list($contentwhat, $contenttables, $contentwhere, $contentparams, $dataformcontent) = $contentsql;
         // JOIN sql (does't use params).
         list($joinwhat, $jointables, ) = $this->get_join_sql($fields);
 
@@ -254,7 +257,6 @@ class dataformfilter {
             $dataformcontent,
             $joinwhat,
             $jointables,
-            // $joinparams,.
         );
     }
 
@@ -482,14 +484,16 @@ class dataformfilter {
                 $dataformcontent[] = $fieldid;
             } else {
                 $whatcontent[] = $selectsql;
-                $this->_filteredtables[] = $fieldid;
                 if ($sortformsql = $field->get_sort_from_sql()) {
-                    list($contentfromfieldid, $fieldparam) = $sortformsql;
-                    if ($contentfromfieldid) {
-                        $contentfrom[$fieldid] = $contentfromfieldid;
-                    }
-                    if ($fieldparam !== null) {
-                        $params[] = $fieldparam;
+                    // Add only tables which are not already added.
+                    if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
+                        list($contentfromfieldid, $fieldparam) = $sortformsql;
+                        if ($contentfromfieldid) {
+                            $contentfrom[$fieldid] = $contentfromfieldid;
+                        }
+                        if ($fieldparam !== null) {
+                            $params[] = $fieldparam;
+                        }
                     }
                 }
             }
