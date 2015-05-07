@@ -501,6 +501,52 @@ abstract class dataformfield {
     }
 
     /**
+     * Loads the field content in the entry and returns the entry.
+     * This will fetch from DB and add to the entry object any of the field
+     * content that is not already there.
+     *
+     * @param stdClass $entry
+     * @return stdClass
+     */
+    public function load_entry_content($entry) {
+        global $DB;
+
+        $fieldid = $this->id;
+
+        // Must have content parts.
+        if (!$contentvars = $this->content_parts) {
+            return $entry;
+        }
+
+        $fetch = false;
+
+        // Make sure we have the field content in the entry.
+        if (!isset($entry->{"c{$fieldid}_id"})) {
+            $fetch = true;
+        } else {
+            foreach ($contentvars as $var) {
+                if (!isset($entry->{"c{$fieldid}_$var"})) {
+                    $fetch = true;
+                    break;
+                }
+            }
+        }
+
+        if ($fetch) {
+            $params = array('fieldid' => $fieldid, 'entryid' => $entry->id);
+            if (!$content = $DB->get_record('dataform_contents', $params)) {
+                return $entry;
+            }
+            // Add the content to the entry.
+            $entry->{"c{$fieldid}_id"} = $content->id;
+            foreach ($contentvars as $var) {
+                $entry->{"c{$fieldid}_$var"} = $content->$var;
+            }
+        }
+        return $entry;
+    }
+
+    /**
      * Validate form data in entries form
      */
     public function validate($eid, $patterns, $formdata) {

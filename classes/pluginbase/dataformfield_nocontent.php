@@ -26,6 +26,13 @@ namespace mod_dataform\pluginbase;
  * Base class for Dataform field types that require no content
  */
 abstract class dataformfield_nocontent extends dataformfield {
+    /**
+     *
+     */
+    public function get_content_parts() {
+        return array();
+    }
+
     public function update_content($entry, array $values = null, $savenew = false) {
         return true;
     }

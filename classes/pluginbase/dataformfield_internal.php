@@ -37,6 +37,13 @@ abstract class dataformfield_internal extends dataformfield {
         return null;
     }
 
+    /**
+     *
+     */
+    public function get_content_parts() {
+        return array();
+    }
+
     public function update_content($entry, array $values = null, $savenew = false) {
         return true;
     }

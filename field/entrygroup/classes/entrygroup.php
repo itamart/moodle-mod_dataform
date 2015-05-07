@@ -46,6 +46,56 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
     }
 
     /**
+     * Loads the field content in the entry and returns the entry.
+     * This will fetch from DB and add to the entry object any of the field
+     * content that is not already there.
+     *
+     * @param stdClass $entry
+     * @return stdClass
+     */
+    public function load_entry_content($entry) {
+        global $DB;
+
+        $fieldid = $this->id;
+
+        // Must have entry group id.
+        if (empty($entry->groupid)) {
+            return $entry;
+        }
+
+        // Content parts.
+        $contentvars = array(
+            'name' => 'groupname',
+            'idnumber' => 'groupidnumber',
+            'hidepicture' => 'grouphidepic',
+            'picture' => 'grouppic',
+        );
+
+        $fetch = false;
+
+        // Make sure we have the group content in the entry.
+        foreach ($contentvars as $alias) {
+            if (!isset($entry->$alias)) {
+                $fetch = true;
+                break;
+            }
+        }
+
+        if ($fetch) {
+            $params = array('id' => (int) $entry->groupid);
+            $fields = implode(',', array_keys($contentvars));
+            if (!$group = $DB->get_record('groups', $params, $fields)) {
+                return $entry;
+            }
+            // Add the content to the entry.
+            foreach ($contentvars as $var => $alias) {
+                $entry->$alias = $group->$var;
+            }
+        }
+        return $entry;
+    }
+
+    /**
      * Overrides {@link dataformfield::prepare_import_content()} to set import into entry::groupid.
      *
      * @return stdClass
