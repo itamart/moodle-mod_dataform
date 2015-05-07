@@ -28,6 +28,7 @@ Feature: Manage Dataform presets
         #:Section
 
         Given I log in as "admin"
+        And I follow "Courses"
         And I follow "Course 1"
         And I follow "Preset Dataform"
 
@@ -89,7 +90,8 @@ Feature: Manage Dataform presets
 
         ### APPLY PRESET WITHOUT USER DATA
         #Section: Apply in same course.
-        Then I follow "Home"
+        Then I am on homepage
+        And I follow "Courses"
         And I follow "Course 1"
         And I turn editing mode on
         And I add a "Dataform" to section "1"
@@ -105,7 +107,8 @@ Feature: Manage Dataform presets
         #:Section
 
         #Section: Apply in a different course.
-        Then I follow "Home"
+        Then I am on homepage
+        And I follow "Courses"
         And I follow "Course 2"
         And I turn editing mode on
         And I add a "Dataform" to section "1"
@@ -122,7 +125,8 @@ Feature: Manage Dataform presets
 
         ### APPLY PRESET WITH USER DATA
         #Section: Apply in same course.
-        Then I follow "Home"
+        Then I am on homepage
+        And I follow "Courses"
         And I follow "Course 1"
         And I turn editing mode on
         And I add a "Dataform" to section "1"
@@ -138,7 +142,8 @@ Feature: Manage Dataform presets
         #:Section
 
         #Section: Apply in a different course.
-        Then I follow "Home"
+        Then I am on homepage
+        And I follow "Courses"
         And I follow "Course 2"
         And I turn editing mode on
         And I add a "Dataform" to section "1"
@@ -155,7 +160,8 @@ Feature: Manage Dataform presets
 
         ### APPLY UPLOADED PRESET
         #Section: Apply in same course.
-        Then I follow "Home"
+        Then I am on homepage
+        And I follow "Courses"
         And I follow "Course 1"
         And I turn editing mode on
         And I add a "Dataform" to section "1"
@@ -171,7 +177,8 @@ Feature: Manage Dataform presets
         #:Section
 
         #Section: Apply in a different course.
-        Then I follow "Home"
+        Then I am on homepage
+        And I follow "Courses"
         And I follow "Course 2"
         And I turn editing mode on
         And I add a "Dataform" to section "1"

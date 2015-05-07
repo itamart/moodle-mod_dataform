@@ -308,6 +308,55 @@ class mod_dataform_generator extends testing_module_generator {
     }
 
     /**
+     * Generates a dataform grade item.
+     * @param array|stdClass $record
+     * @param array $options
+     * @return \grade_item generated object
+     */
+    public function create_grade_item($record, array $options = null) {
+        $record = (object)(array)$record;
+
+        $dataformid = $record->dataid;
+        $df = \mod_dataform_dataform::instance($dataformid);
+        $grademan = $df->grade_manager;
+
+        // Get existing grade items.
+        if (!$gradeitems = $grademan->grade_items) {
+            $itemnumber = 0;
+        } else {
+            $itemnumber = count($gradeitems);
+        }
+
+        $gradedata = array(
+            'grade' => $record->grade
+        );
+        if (!empty($record->gradeguide)) {
+            $gradedata['gradeguide'] = $record->gradeguide;
+        }
+        if (!empty($record->gradecalc)) {
+            $gradedata['gradecalc'] = $record->gradecalc;
+        }
+
+        if ($itemnumber == 0) {
+            // First item, let's update the dataform to create the grade item.
+            $df->update($gradedata);
+            // Now update the grade item with the desired name.
+            $gradedata['name'] = $record->name;
+            $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
+            $grademan->update_grade_item($itemnumber, $itemparams);
+        } else {
+            // Now update the grade item.
+            $gradedata['name'] = $record->name;
+            $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
+            $grademan->update_grade_item($itemnumber, $itemparams);
+            $grademan->adjust_dataform_settings($itemnumber, $gradedata);
+        }
+
+        $grademan->grade_items = null;
+        return $grademan->grade_items[$itemnumber];
+    }
+
+    /**
      * Generates a dataform entry.
      * @param array|stdClass $record
      * @param array $options
@@ -326,9 +375,16 @@ class mod_dataform_generator extends testing_module_generator {
 
         // Add content.
         if ($fields = $df->field_manager->get_fields()) {
+            $fieldsbyname = array();
             foreach ($fields as $field) {
-                if (!empty($record[$field->name])) {
-                    $field->update_content($entry, array($record[$field->name]));
+                $fieldsbyname[$field->name] = $field;
+            }
+
+            foreach ($record as $name => $value) {
+                list($fieldname, $contentname) = array_pad(explode('_', $name), 2, '');
+                if (array_key_exists($fieldname, $fieldsbyname)) {
+                    $values = array($contentname => $value);
+                    $fieldsbyname[$fieldname]->update_content($entry, $values);
                 }
             }
         }
