@@ -38,6 +38,7 @@ $urlparams->filter = optional_param('filter', optional_param('filtid', 0, PARAM_
 $urlparams->pagelayout = optional_param('pagelayout', '', PARAM_ALPHAEXT);
 $urlparams->refresh = optional_param('refresh', 0, PARAM_INT);
 $urlparams->renew = optional_param('renew', 0, PARAM_INT);
+$urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object with guest autologin.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id, true);
