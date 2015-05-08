@@ -790,7 +790,7 @@ class mod_dataform_entry_manager {
         $processed = array();
         $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
         foreach ($entries as $entryid => $entry) {
-            // Can user add anymore entries?
+            // Can user add more entries?
             if (!mod_dataform\access\entry_add::validate($accessparams + array('entry' => $entry))) {
                 return $processed;
             }
@@ -813,7 +813,7 @@ class mod_dataform_entry_manager {
             // Update calculated grades if applicable.
             $df->grade_manager->update_calculated_grades($entry);
         }
-        return processed;
+        return $processed;
     }
 
     /**
