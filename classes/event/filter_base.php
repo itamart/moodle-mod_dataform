@@ -61,8 +61,11 @@ abstract class filter_base extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        $action = str_replace('filter_', '', $this->data['eventname']);
-        return 'The filter ' . $this->objectid . ' belonging to the dataform activity ' . $this->other['dataid'] . ' has been '. $action. '.';
+        list(, $action) = explode('_', self::get_event_name());
+        $description = 'The filter '. $this->objectid.
+            ' belonging to the dataform activity '. $this->other['dataid'].
+            ' has been '. $action. '.';
+        return $description;
     }
 
     /**

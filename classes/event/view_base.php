@@ -61,8 +61,11 @@ abstract class view_base extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        $action = str_replace('view_', '', $this->data['eventname']);
-        return 'The view ' . $this->objectid . ' belonging to the dataform activity ' . $this->other['dataid'] . ' has been '. $action. '.';
+        list(, $action) = explode('_', self::get_event_name());
+        $description = 'The view '. $this->objectid.
+            ' belonging to the dataform activity '. $this->other['dataid'].
+            ' has been '. $action. '.';
+        return $description;
     }
 
     /**
