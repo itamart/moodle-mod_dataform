@@ -61,8 +61,11 @@ abstract class field_base extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        $action = str_replace('field_', '', $this->data['eventname']);
-        return 'The field ' . $this->objectid . ' belonging to the dataform activity ' . $this->other['dataid'] . ' has been '. $action. '.';
+        list(, $action) = explode('_', self::get_event_name());
+        $description = 'The field '. $this->objectid.
+            ' belonging to the dataform activity '. $this->other['dataid'].
+            ' has been '. $action. '.';
+        return $description;
     }
 
     /**
