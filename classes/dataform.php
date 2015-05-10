@@ -103,8 +103,7 @@ class mod_dataform_dataform {
         $data->timeinterval = 0;
         $data->intervalcount = 1;
         $data->grade = 0;
-        $data->gradeguide = null;
-        $data->gradecalc = null;
+        $data->gradeitems = null;
         $data->maxentries = -1;
         $data->entriesrequired = 0;
         $data->grouped = 0;
@@ -709,8 +708,7 @@ class mod_dataform_dataform {
         $data->timemodified = time();
 
         if (!$data->grade) {
-            $data->gradeguide = null;
-            $data->gradecalc = null;
+            $data->gradeitems = null;
         }
 
         // Max entries.
@@ -964,6 +962,16 @@ class mod_dataform_dataform {
      */
     public function get_notifications() {
         return $this->_notifications;
+    }
+
+    /**
+     *
+     */
+    public function get_grade_items() {
+        if ($this->gradeitems) {
+            return unserialize($this->gradeitems);
+        }
+        return array();
     }
 
     /**

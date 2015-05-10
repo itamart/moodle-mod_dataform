@@ -45,8 +45,7 @@ function dataform_add_instance($data) {
 
     if (empty($data->grade)) {
         $data->grade = 0;
-        $data->gradeguide = null;
-        $data->gradecalc = null;
+        $data->gradeitems = null;
     }
 
     // Max entries.

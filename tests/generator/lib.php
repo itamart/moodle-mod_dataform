@@ -330,11 +330,8 @@ class mod_dataform_generator extends testing_module_generator {
         $gradedata = array(
             'grade' => $record->grade
         );
-        if (!empty($record->gradeguide)) {
-            $gradedata['gradeguide'] = $record->gradeguide;
-        }
-        if (!empty($record->gradecalc)) {
-            $gradedata['gradecalc'] = $record->gradecalc;
+        if (!empty($record->gradeitems)) {
+            $gradedata['gradeitems'] = $record->gradeitems;
         }
 
         if ($itemnumber == 0) {

@@ -293,7 +293,7 @@ class mod_dataform_grading_testcase extends advanced_testcase {
             'name' => 'Calculated Grade Dataform',
             'course' => $courseid,
             'grade' => 100,
-            'gradecalc' => '##numentries##',
+            'gradeitems' => serialize(array(0 => array('ca' => '##numentries##'))),
         );
         $dataform = $this->getDataGenerator()->create_module('dataform', $params);
         $df = mod_dataform_dataform::instance($dataform->id);
