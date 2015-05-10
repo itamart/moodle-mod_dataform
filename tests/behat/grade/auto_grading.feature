@@ -12,7 +12,7 @@ Feature: Auto grading
             | name                  | Auto grade by number of entries |
             | intro                 | Auto grade by number of entries |
             | grade                 | 80        |
-            | gradecalc             | ##numentries## |
+            | gradeitem 0 ca        | ##numentries## |
         #:Section
 
         #Section: Add view

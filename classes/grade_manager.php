@@ -141,15 +141,14 @@ class mod_dataform_grade_manager {
             $items = array();
             if ($gitems = \grade_item::fetch_all($params)) {
                 // Get grade guides and calcs from the Dataform.
-                $guides = $this->grade_guides;
-                $calcs = $this->grade_calcs;
+                $gdef = ($df = $this->df) ? $df->grade_items : null;
 
                 foreach ($gitems as $gitem) {
                     $itemnumber = $gitem->itemnumber;
                     // Attach guide.
-                    $gitem->gradeguide = !empty($guides[$itemnumber]) ? $guides[$itemnumber] : null;
+                    $gitem->gradeguide = !empty($gdef[$itemnumber]['ru']) ? $gdef[$itemnumber]['ru'] : null;
                     // Attach calc.
-                    $gitem->gradecalc = !empty($calcs[$itemnumber]) ? $calcs[$itemnumber] : null;
+                    $gitem->gradecalc = !empty($gdef[$itemnumber]['ca']) ? $gdef[$itemnumber]['ca'] : null;
                     // Sort by itemnumber.
                     $items[$itemnumber] = $gitem;
                 }
@@ -281,8 +280,7 @@ class mod_dataform_grade_manager {
         $updates = array();
         if (!empty($options['deleted'])) {
             $updates['grade'] = 0;
-            $updates['gradeguide'] = null;
-            $updates['gradecalc'] = null;
+            $updates['gradeitems'] = null;
 
             $df->update($updates);
 
@@ -306,40 +304,26 @@ class mod_dataform_grade_manager {
                 }
             }
 
+            $gradeitems = $df->grade_items;
+
             // Guides part (all items).
             if (isset($options['gradeguide'])) {
                 $guide = $options['gradeguide'];
-                if ($guides = $this->grade_guides) {
-                    if (!array_key_exists($itemnumber, $guides)) {
-                        $guides[] = $guide;
-                    }
-                    $guides[$itemnumber] = $guide;
-                } else {
-                    $guides = array_pad(array(), $itemnumber + 1, '');
-                    $guides[$itemnumber] = $guide;
+                if (empty($gradeitems[$itemnumber])) {
+                    $gradeitems[$itemnumber] = array();
                 }
-                $gradeguide = $guides ? implode("\n", $guides) : null;
-                if ($gradeguide != $instance->gradeguide) {
-                    $updates['gradeguide'] = $gradeguide;
-                }
+                $gradeitems[$itemnumber]['ru'] = $guide;
+                $updates['gradeitems'] = serialize($gradeitems);
             }
 
             // Calcs part (all items).
             if (isset($options['gradecalc'])) {
                 $calc = $options['gradecalc'];
-                if ($calcs = $this->grade_calcs) {
-                    if (!array_key_exists($itemnumber, $calcs)) {
-                        $calcs[] = $calc;
-                    }
-                    $calcs[$itemnumber] = $calc;
-                } else {
-                    $calcs = array_pad(array(), $itemnumber + 1, '');
-                    $calcs[$itemnumber] = $calc;
+                if (empty($gradeitems[$itemnumber])) {
+                    $gradeitems[$itemnumber] = array();
                 }
-                $gradecalc = $calcs ? implode("\n", $calcs) : null;
-                if ($gradecalc != $instance->gradecalc) {
-                    $updates['gradecalc'] = $gradecalc;
-                }
+                $gradeitems[$itemnumber]['ca'] = $calc;
+                $updates['gradeitems'] = serialize($gradeitems);
             }
 
             if ($updates) {
@@ -982,12 +966,13 @@ class mod_dataform_grade_manager {
             'itemnumber' => $itemnumber
         );
         if ($gitem = grade_item::fetch($params)) {
+            // Get grade guides and calcs from the Dataform.
+            $gdef = ($df = $this->df) ? $df->grade_items : null;
+
             // Attach guide.
-            $guides = $this->grade_guides;
-            $gitem->gradeguide = !empty($guides[$itemnumber]) ? $guides[$itemnumber] : null;
+            $gitem->gradeguide = !empty($gdef[$itemnumber]['ru']) ? $gdef[$itemnumber]['ru'] : null;
             // Attach calc.
-            $calcs = $this->grade_calcs;
-            $gitem->gradecalc = !empty($calcs[$itemnumber]) ? $calcs[$itemnumber] : null;
+            $gitem->gradecalc = !empty($gdef[$itemnumber]['ca']) ? $gdef[$itemnumber]['ca'] : null;
         }
         return $gitem;
     }
@@ -1013,38 +998,6 @@ class mod_dataform_grade_manager {
         }
 
         return $gradeitem;
-    }
-
-    /**
-     * Returns a list of grade guides (grading areas) for the Dataform instance.
-     * These are stored in the Dataform instance and correspond to the instance
-     * grade items by item number.
-     *
-     * @return array Array of strings.
-     */
-    protected function get_grade_guides() {
-        if (!$df = $this->df) {
-            $guides = null;
-        } else {
-            $guides = array_map('trim', explode("\n", $df->gradeguide));
-        }
-        return $guides;
-    }
-
-    /**
-     * Returns a list of grade calcs for the Dataform instance. These are stored
-     * in the Dataform instance and correspond to the instance grade items by item
-     * number.
-     *
-     * @return array Array of strings.
-     */
-    protected function get_grade_calcs() {
-        if (!$df = $this->df) {
-            $calcs = null;
-        } else {
-            $calcs = array_map('trim', explode("\n", $df->gradecalc));
-        }
-        return $calcs;
     }
 
     /**

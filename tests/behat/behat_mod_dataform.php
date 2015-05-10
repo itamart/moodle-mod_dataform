@@ -272,6 +272,48 @@ class behat_mod_dataform extends behat_base {
         }
     }
 
+    /**
+     * Creates a Dataform instance.
+     *
+     * @Given /^the following dataform exists:$/
+     * @param TableNode $data
+     */
+    public function the_following_dataform_exists(TableNode $data) {
+        $steps = array();
+
+        $datahash = $data->getRowsHash();
+
+        // Compile grade items if exist.
+        $gradeitems = array();
+        foreach ($datahash as $key => $value) {
+            if (strpos($key, 'gradeitem') !== 0) {
+                continue;
+            }
+            if (empty($value)) {
+                continue;
+            }
+            list(, $itemnumber, $var) = explode(' ', $key);
+            if (empty($gradeitems[$itemnumber])) {
+                $gradeitems[$itemnumber] = array();
+            }
+            $gradeitems[$itemnumber][$var] = $value;
+            unset($datahash[$key]);
+        }
+        if ($gradeitems) {
+            $datahash['gradeitems'] = serialize($gradeitems);
+        }
+
+        $data = array(
+            '| activity | '. implode(' | ', array_keys($datahash)). ' | ',
+            '| dataform | '. implode(' | ', $datahash). ' | ',
+        );
+
+        $table = new TableNode(implode("\n", $data));
+        $steps[] = new Given('the following "activities" exist:', $table);
+
+        return $steps;
+    }
+
     /* ACTIVITY SETUP STEPS */
 
     /**

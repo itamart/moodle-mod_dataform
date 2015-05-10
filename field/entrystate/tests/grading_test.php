@@ -89,7 +89,7 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $params = array(
             'course' => $courseid,
             'grade' => 100,
-            'gradecalc' => 'SUM(##:entrystate##)',
+            'gradeitems' => serialize(array(0 => array('ca' => 'SUM(##:entrystate##)'))),
         );
         $dataform = $this->getDataGenerator()->create_module('dataform', $params);
         $df = mod_dataform_dataform::instance($dataform->id);
@@ -172,7 +172,8 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $this->assertEquals(2, $grade->finalgrade);
 
         // Teacher changes calculation.
-        $df->update((object) array('gradecalc' => 'SUM(##:entrystate##)*2'));
+        $gradeitems = serialize(array(0 => array('ca' => 'SUM(##:entrystate##)*2')));
+        $df->update((object) array('gradeitems' => $gradeitems));
 
         // Grade for Student 1 is 4.
         $grade = $gitem->get_grade($this->student1->id, false);

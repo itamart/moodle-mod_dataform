@@ -19,8 +19,7 @@
         <FIELD NAME="timeinterval" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time duration in seconds as activity interval. Requires timeavailable."/>
         <FIELD NAME="intervalcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Number of intervals for the activity. If there are multiple intervals, activity start time and end time are calculated for each interval."/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The maximum grade for the activity. A negative grade indicates the use of a scale."/>
-        <FIELD NAME="gradeguide" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="A list of grade guide areas for guide or rubric grading."/>
-        <FIELD NAME="gradecalc" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="A list of grade calculation formulae for direct grading. Allows grade calculation for each user based on entries' content."/>
+        <FIELD NAME="gradeitems" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="A list of grade calculation formulae for direct grading. Allows grade calculation for each user based on entries' content."/>
         <FIELD NAME="maxentries" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="entriesrequired" TYPE="int" LENGTH="8" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="individualized" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

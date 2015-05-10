@@ -39,7 +39,7 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $dataform = new backup_nested_element('dataform', array('id'), array(
             'name', 'intro', 'introformat', 'inlineview', 'embedded',
             'timemodified', 'timeavailable', 'timedue', 'timeinterval', 'intervalcount',
-            'grade', 'gradecalc',
+            'grade', 'gradeitems',
             'maxentries', 'entriesrequired', 'individualized', 'grouped', 'anonymous', 'timelimit',
             'css', 'cssincludes', 'js', 'jsincludes',
             'defaultview', 'defaultfilter', 'completionentries', 'completionspecificgrade'));

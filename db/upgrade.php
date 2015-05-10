@@ -67,7 +67,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
     xmldb_dataform_upgrade_2014111000($dbman, $oldversion);
-    xmldb_dataform_upgrade_2014111003($dbman, $oldversion);
+    xmldb_dataform_upgrade_2014111006($dbman, $oldversion);
 
     return true;
 }
@@ -1175,26 +1175,36 @@ function xmldb_dataform_upgrade_2014111000($dbman, $oldversion) {
     return true;
 }
 
-function xmldb_dataform_upgrade_2014111003($dbman, $oldversion) {
+function xmldb_dataform_upgrade_2014111006($dbman, $oldversion, $t = '') {
     global $CFG, $DB;
 
     list(, , , $newversion) = explode('_', __FUNCTION__);
+    $newversion = $t ? (double) ("$newversion.$t") : $newversion;
     if ($oldversion < $newversion) {
-        // Enable existing field plugins.
-        $type = 'dataformfield';
-        $enabled = array_keys(core_component::get_plugin_list($type));
-        set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
-
-        // Enable existing view plugins.
-        $type = 'dataformview';
-        $enabled = array_keys(core_component::get_plugin_list($type));
-        set_config("enabled_$type", implode(',', $enabled), 'mod_dataform');
-
-        // Add grade guide column to dataform.
+        // Change gradecalc column to gradeitems dataform.
         $table = new xmldb_table('dataform');
-        $field = new xmldb_field('gradeguide', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'grade');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
+        $field = new xmldb_field('gradecalc', XMLDB_TYPE_TEXT, null, null, null, null, null, 'grade');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'gradeitems');
+        }
+
+        // Convert gradecalc content to new content.
+        if ($dataforms = $DB->get_records('dataform')) {
+            foreach ($dataforms as $dataform) {
+                if (empty($dataform->gradeitems)) {
+                    continue;
+                }
+                if (@unserialize($dataform->gradeitems) !== false) {
+                    continue;
+                }
+
+                // We have an old style calc.
+                $calc = $dataform->gradeitems;
+                // Convert to new style.
+                $dataform->gradeitems = serialize(array(0 => array('ca' => $calc)));
+
+                $DB->update_record('dataform', $dataform);
+            }
         }
 
         // Dataform savepoint reached.
