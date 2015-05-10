@@ -354,9 +354,12 @@ $string['dataform:entryanonymousdelete'] = 'Anonymous Entry - Delete';
 $string['messageprovider:dataform_notification'] = 'Dataform notifications';
 $string['subject'] = 'Subject';
 $string['message'] = 'Message';
+$string['contentview'] = 'Content from view';
 $string['notification'] = 'Notification';
 $string['conversation'] = 'Conversation';
 $string['noreply'] = 'No-reply';
+$string['sender'] = 'Sender';
+$string['recipient'] = 'Recipient';
 
 // VIEW.
 $string['viewadd'] = 'Add a view';

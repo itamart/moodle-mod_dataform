@@ -763,6 +763,27 @@ class mod_dataform_entry_manager {
                     $fields[$fieldid]->update_content($entry, $content, $savenew);
                 }
 
+                // Trigger the entry event.
+                if ($eid != $entry->id) {
+                    $entryevent = '\mod_dataform\event\entry_created';
+                } else {
+                    $entryevent = '\mod_dataform\event\entry_updated';
+                }
+
+                $eventparams = array(
+                    'objectid' => $entry->id,
+                    'context' => $df->context,
+                    'relateduserid' => $entry->userid,
+                    'other' => array(
+                        'dataid' => $this->dataformid,
+                        'viewid' => $this->viewid,
+                        'entryid' => $entry->id,
+                    )
+                );
+                $event = $entryevent::create($eventparams);
+                $event->add_record_snapshot('dataform_entries', $entry);
+                $event->trigger();
+
                 // Update calculated grades if applicable.
                 $df->grade_manager->update_calculated_grades($entry);
 
@@ -809,6 +830,21 @@ class mod_dataform_entry_manager {
                 $field->duplicate_content($entry, $newentry);
             }
             $processed[$newentry->id] = $newentry;
+
+            // Trigger the entry event.
+            $eventparams = array(
+                'objectid' => $entry->id,
+                'context' => $df->context,
+                'relateduserid' => $entry->userid,
+                'other' => array(
+                    'dataid' => $this->dataformid,
+                    'viewid' => $this->viewid,
+                    'entryid' => $entry->id,
+                )
+            );
+            $event = \mod_dataform\event\entry_created::create($eventparams);
+            $event->add_record_snapshot('dataform_entries', $entry);
+            $event->trigger();
 
             // Update calculated grades if applicable.
             $df->grade_manager->update_calculated_grades($entry);
@@ -897,10 +933,7 @@ class mod_dataform_entry_manager {
                 $updatetime = false;
             }
 
-            // Entry group sanity checks
-            // If (isset($data['groupid'])) {
-                // Currently no check that user belong to that group
-            // }.
+            // TODO Entry group sanity checks on $data['groupid'].
         }
 
         // Update existing entry (only authenticated users).
@@ -910,21 +943,6 @@ class mod_dataform_entry_manager {
             }
 
             if ($DB->update_record('dataform_entries', $entry)) {
-                // Trigger event.
-                $eventparams = array(
-                    'objectid' => $entry->id,
-                    'context' => $df->context,
-                    'relateduserid' => $entry->userid,
-                    'other' => array(
-                        'dataid' => $this->dataformid,
-                        'viewid' => $this->viewid,
-                        'entryid' => $entry->id,
-                    )
-                );
-                $event = \mod_dataform\event\entry_updated::create($eventparams);
-                $event->add_record_snapshot('dataform_entries', $entry);
-                $event->trigger();
-
                 return $entry->id;
             } else {
                 return false;
@@ -943,21 +961,6 @@ class mod_dataform_entry_manager {
         $entry->timemodified = !isset($entry->timemodified) ? time() : $entry->timemodified;
         $entry->state = !empty($entry->state) ? $entry->state : 0;
         $entry->id = $DB->insert_record('dataform_entries', $entry);
-
-        // Trigger event.
-        $eventparams = array(
-            'objectid' => $entry->id,
-            'context' => $df->context,
-            'relateduserid' => $entry->userid,
-            'other' => array(
-                'dataid' => $this->dataformid,
-                'viewid' => $this->viewid,
-                'entryid' => $entry->id,
-            )
-        );
-        $event = \mod_dataform\event\entry_created::create($eventparams);
-        $event->add_record_snapshot('dataform_entries', $entry);
-        $event->trigger();
 
         return $entry->id;
     }

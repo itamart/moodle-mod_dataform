@@ -51,9 +51,18 @@ class notificationform extends  ruleform {
         $mform->addElement('text', $prefix. 'subject', get_string('subject', 'dataform'));
         $mform->setType($prefix. 'subject', $paramtext);
 
-        // Message.
-        $mform->addElement('textarea', $prefix. 'message', get_string('message', 'dataform'));
-        $mform->setType($prefix. 'message', $paramtext);
+        // Content.
+        $mform->addElement('textarea', $prefix. 'contenttext', get_string('content'));
+        $mform->setType($prefix. 'contenttext', $paramtext);
+
+        // Content from view.
+        $options = array('' => get_string('choosedots'));
+        if ($items = \mod_dataform_view_manager::instance($dataformid)->views_menu) {
+            $items = array_combine($items, $items);
+            $options = array_merge($options, $items);
+        }
+        $label = get_string('contentview', 'mod_dataform');
+        $mform->addElement('select', $prefix. 'contentview', $label, $options);
 
         // Format.
         $options = array(
@@ -63,7 +72,7 @@ class notificationform extends  ruleform {
         $mform->addElement('select', $prefix. 'messageformat', get_string('format'), $options);
 
         // Sender: Entry author, manager.
-        $mform->addElement('header', 'senderhdr', get_string('from'));
+        $mform->addElement('header', 'senderhdr', get_string('sender', 'mod_dataform'));
         $mform->setExpanded('senderhdr');
 
         $admin = get_admin();
@@ -77,23 +86,23 @@ class notificationform extends  ruleform {
         $mform->addElement('select', $prefix. 'sender', get_string('from'), $options);
 
         // Recipient.
-        $mform->addElement('header', 'recipientshdr', get_string('to'));
+        $mform->addElement('header', 'recipientshdr', get_string('recipient', 'mod_dataform'));
         $mform->setExpanded('recipientshdr');
 
         // Admin.
-        $mform->addElement('advcheckbox', $prefix. 'recipientadmin', get_string('admin'));
+        $mform->addElement('advcheckbox', $prefix. 'recipient[admin]', get_string('admin'));
         // Support.
-        $mform->addElement('advcheckbox', $prefix. 'recipientsupport', get_string('supportcontact', 'admin'));
+        $mform->addElement('advcheckbox', $prefix. 'recipient[support]', get_string('supportcontact', 'admin'));
         // Entry author.
-        $mform->addElement('advcheckbox', $prefix. 'recipientauthor', get_string('author', 'dataform'));
+        $mform->addElement('advcheckbox', $prefix. 'recipient[author]', get_string('author', 'dataform'));
         // Role (mod/dataform:notification permission in context).
-        $mform->addElement('advcheckbox', $prefix. 'recipientrole', get_string('role'));
+        $mform->addElement('advcheckbox', $prefix. 'recipient[role]', get_string('role'));
         // Username (comma delimited).
-        $mform->addElement('text', $prefix. 'recipientusername', get_string('username'));
-        $mform->setType($prefix. 'recipientusername', $paramtext);
+        $mform->addElement('text', $prefix. 'recipient[username]', get_string('username'));
+        $mform->setType($prefix. 'recipient[username]', $paramtext);
         // Email (comma delimited).
-        $mform->addElement('text', $prefix. 'recipientemail', get_string('email'));
-        $mform->setType($prefix. 'recipientemail', $paramtext);
+        $mform->addElement('text', $prefix. 'recipient[email]', get_string('email'));
+        $mform->setType($prefix. 'recipient[email]', $paramtext);
 
     }
 
@@ -104,13 +113,8 @@ class notificationform extends  ruleform {
         $errors = array();
 
         // Must have a recipient.
-        if (empty($data[$prefix.'recipientadmin'])
-                and empty($data[$prefix.'recipientsupport'])
-                and empty($data[$prefix.'recipientauthor'])
-                and empty($data[$prefix.'recipientrole'])
-                and empty($data[$prefix.'recipientusername'])
-                and empty($data[$prefix.'recipientemail'])) {
-            $errors[$prefix.'recipientadmin'] = get_string('err_required', 'form');
+        if (empty($data[$prefix.'recipient']) or !trim(implode('', $data[$prefix.'recipient']))) {
+            $errors[$prefix.'recipient[admin]'] = get_string('err_required', 'form');
         }
 
         return $errors;
