@@ -36,19 +36,19 @@ class notification {
     public static function observers() {
         global $CFG;
 
-        $noteobservers = array();
+        $observers = array();
         foreach (get_directory_list("$CFG->dirroot/mod/dataform/classes/event") as $filename) {
             if (strpos($filename, '_base.php') !== false) {
                 continue;
             }
             $name = basename($filename, '.php');
-            $noteobservers[] = array(
-                'eventname'   => "\\mod_dataform\\event\\$name",
-                'callback'    => '\mod_dataform\observer\notification::notify',
+            $observers[] = array(
+                'eventname' => "\\mod_dataform\\event\\$name",
+                'callback' => '\mod_dataform\observer\notification::notify',
             );
         }
 
-        return $noteobservers;
+        return $observers;
     }
 
     /**
@@ -75,11 +75,12 @@ class notification {
             $params['event'] = $event->eventname;
             $params['dataformid'] = $dataformid;
             $params['viewid'] = !empty($event->other['viewid']) ? $event->other['viewid'] : null;
+            $params['entryid'] = !empty($event->other['entryid']) ? $event->other['entryid'] : null;
 
             foreach ($rules as $rule) {
                 if ($rule->is_applicable($params)) {
                     $notification = new notification;
-                    $message = $notification->prepare_data($event, $rule->data, $rule->context);
+                    $message = $notification->prepare_data($event, $rule);
                     $result = ($result or $notification->send_message($message));
                 }
             }
@@ -114,7 +115,7 @@ class notification {
         $message->fullmessage     = $data['content'];
         $message->fullmessageformat = $data['contentformat'];
         $message->fullmessagehtml = !empty($data['contenthtml']) ? $data['contenthtml'] : $message->fullmessage;
-        $message->smallmessage    = $data['subject'];
+        $message->smallmessage    = $message->fullmessagehtml;
         $message->notification    = (int) !empty($data['notification']);
 
         // Send message.
@@ -163,7 +164,10 @@ class notification {
     /**
      *
      */
-    public function prepare_data($event, $data, $context) {
+    public function prepare_data($event, $rule) {
+        $data = $rule->block->get_data($event);
+        $context = $rule->context;
+
         // Adjust sender.
         if (!empty($data->sender)) {
             // Get entry author id for sender author where applicable.
@@ -178,15 +182,19 @@ class notification {
         }
 
         // Get entry author id for recipient author where applicable.
-        if (!empty($data->recipientauthor) and $event->relateduserid) {
-            $data->recipientauthor = $event->relateduserid;
+        if (!empty($data->recipient['author']) and $event->relateduserid) {
+            $data->recipient['author'] = $event->relateduserid;
         }
 
+        $content = $this->get_content($event, $data);
+        $contenthtml = $content;
+
+        // Prepare the message data.
         $message = array();
         $message['subject'] = $this->get_subject($event, $data);
-        $message['content'] = $this->get_content($event, $data);
+        $message['content'] = $content;
         $message['contentformat'] = $this->get_content_format($data);
-        $message['contenthtml'] = $this->get_content_html($data);
+        $message['contenthtml'] = $contenthtml;
         $message['sender'] = $this->get_sender_user($data);
         $message['recipients'] = $this->get_recipient_users($data, $context);
         $message['recipientemails'] = $this->get_recipient_email_users($data);
@@ -264,26 +272,26 @@ class notification {
         $recipients = array();
 
         // Admin.
-        if (!empty($data->recipientadmin)) {
+        if (!empty($data->recipient['admin'])) {
             $user = get_admin();
             $recipients[$user->id] = $user;
         }
 
         // Support.
-        if (!empty($data->recipientsupport)) {
+        if (!empty($data->recipient['support'])) {
             if ($user = \core_user::get_support_user()) {
                 $recipients[$user->id] = $user;
             }
         }
 
         // Author.
-        if (!empty($data->recipientauthor)) {
-            $recipients[$data->recipientauthor] = \core_user::get_user($data->recipientauthor);
+        if (!empty($data->recipient['author'])) {
+            $recipients[$data->recipient['author']] = \core_user::get_user($data->recipient['author']);
         }
 
         // Username.
-        if (!empty($data->recipientusername)) {
-            $usernames = explode(',', $data->recipientusername);
+        if (!empty($data->recipient['username'])) {
+            $usernames = explode(',', $data->recipient['username']);
             foreach ($usernames as $username) {
                 if ($user = \core_user::get_user_by_username($username)) {
                     $recipients[$user->id] = $user;
@@ -292,7 +300,7 @@ class notification {
         }
 
         // Notification roles.
-        if (!empty($config->recipientrole)) {
+        if (!empty($config->recipient['role'])) {
             if ($users = get_users_by_capability($context, 'mod/dataform:notification')) {
                 foreach ($users as $userid => $user) {
                     $recipients[$userid] = $user;
@@ -312,8 +320,8 @@ class notification {
     protected function get_recipient_email_users($data) {
         $recipients = array();
 
-        if (!empty($data->recipientemail)) {
-            $emails = explode(',', $data->recipientemail);
+        if (!empty($data->recipient['email'])) {
+            $emails = explode(',', $data->recipient['email']);
             $userfields = array_fill_keys(get_all_user_name_fields(), '');
             foreach ($emails as $email) {
                 if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {

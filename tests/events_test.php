@@ -179,15 +179,15 @@ class mod_dataform_events_testcase extends advanced_testcase {
         $entryman->process_entries('update', array($entryid), $data, true);
         $events = $sink->get_events();
         // We expect two events here.
-        // Event 0 is entry updated.
+        // Event 0 is field content updated.
         $event0 = $events[0];
-        // Event 1 is field content updated.
+        // Event 1 is entry updated.
         $event1 = $events[1];
 
         // Check that the event data is valid.
-        $this->assertInstanceOf('\mod_dataform\event\entry_updated', $event0);
+        $this->assertInstanceOf('\mod_dataform\event\field_content_updated', $event0);
         $this->assertEquals(context_module::instance($df->cm->id), $event0->get_context());
-        $this->assertInstanceOf('\mod_dataform\event\field_content_updated', $event1);
+        $this->assertInstanceOf('\mod_dataform\event\entry_updated', $event1);
         $this->assertEquals(context_module::instance($df->cm->id), $event1->get_context());
 
         // DELETE
