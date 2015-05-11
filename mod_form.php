@@ -322,6 +322,19 @@ class mod_dataform_mod_form extends moodleform_mod {
         // Set up the completion checkboxes which aren't part of standard data.
         $data['completionentriesenabled'] = (int) !empty($data['completionentries']);
         $data['completionspecificgradeenabled'] = (int) !empty($data['completionspecificgrade']);
+
+        // Set up the grade calc and grade guide.
+        if ($this->_instance) {
+            $df = \mod_dataform_dataform::instance($this->_instance);
+            if ($gradeitems = $df->grade_items) {
+                if (!empty($gradeitems[0]['ca'])) {
+                    $data['gradecalc'] = $gradeitems[0]['ca'];
+                }
+                if (!empty($gradeitems[0]['ru'])) {
+                    $data['gradeguide'] = $gradeitems[0]['ru'];
+                }
+            }
+        }
     }
 
     /**
@@ -378,6 +391,41 @@ class mod_dataform_mod_form extends moodleform_mod {
                 }
             }
         }
+
+        // Grade items.
+        $gradeitems = array();
+        if ($this->_instance) {
+            $gradeitems = \mod_dataform_dataform::instance($this->_instance)->grade_items;
+        }
+        $gradeitems[0] = empty($gradeitems[0]) ? array() : $gradeitems[0];
+
+        $updategradeitems = false;
+        // Check grade calc change.
+        $thiscalc = !empty($gradeitems[0]['ca']) ? $gradeitems[0]['ca'] : null;
+        $gradecalc = !empty($data->gradecalc) ? $data->gradecalc : null;
+        if ($thiscalc != $gradecalc) {
+            if (!$gradecalc) {
+                unset($gradeitems[0]['ca']);
+            } else {
+                $gradeitems[0]['ca'] = $gradecalc;
+            }
+            $updategradeitems = true;
+        }
+        // Check grade guide change.
+        $thisguide = !empty($gradeitems[0]['ru']) ? $gradeitems[0]['ru'] : null;
+        $gradeguide = !empty($data->gradeguide) ? $data->gradeguide : null;
+        if ($thisguide != $gradeguide) {
+            if (!$gradeguide) {
+                unset($gradeitems[0]['ru']);
+            } else {
+                $gradeitems[0]['ru'] = $gradeguide;
+            }
+            $updategradeitems = true;
+        }
+        if ($updategradeitems) {
+            $data->gradeitems = $gradeitems[0] ? serialize($gradeitems) : null;
+        }
+
 
         return $data;
     }

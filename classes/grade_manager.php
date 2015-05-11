@@ -288,15 +288,13 @@ class mod_dataform_grade_manager {
             $instance = $df->data;
 
             // Grade part (only first item).
-            if ($itemnumber == 0) {
+            if ($itemnumber === 0) {
                 $grade = $instance->grade;
-                if (isset($options['grade'])) {
-                    $grade = $options['grade'];
-                } else if (isset($options['gradetype'])) {
+                if (isset($options['gradetype'])) {
                     if ($options['gradetype'] == GRADE_TYPE_VALUE) {
                         $grade = $options['grademax'];
                     } else if ($options['gradetype'] == GRADE_TYPE_SCALE) {
-                        $grade = $options['scaleid'];
+                        $grade = -$options['scaleid'];
                     }
                 }
                 if ($grade != $instance->grade) {
