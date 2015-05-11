@@ -31,13 +31,10 @@ class entriesform extends \moodleform {
 
     public function definition() {
 
-        // Buttons
-        // $this->add_action_buttons();.
-
         // Entries.
         $this->definition_entries();
 
-        // Buttons again.
+        // Buttons.
         $this->add_action_buttons();
     }
 
