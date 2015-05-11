@@ -15,19 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    dataformtool
- * @subpackage entryperuser
- * @copyright 2012 Itamar Tzadok
+ * @package dataformtool_entryperuser
+ * @copyright 2015 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') or die;
 
-class dataformtool_entryperuser {
+class dataformtool_entryperuser_tool {
     /**
      *
      */
-    public static function run($df) {
+    public static function execute($df) {
         global $DB;
 
         // Get gradebook users.

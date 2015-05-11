@@ -27,9 +27,9 @@ $urlparams->d = optional_param('d', 0, PARAM_INT);
 $urlparams->id = optional_param('id', 0, PARAM_INT);
 
 // Views list actions.
-$urlparams->run    = optional_param('run', '', PARAM_PLUGIN);  // tool plugin to run
+$urlparams->run = optional_param('run', '', PARAM_PLUGIN);  // tool plugin to run
 
-$urlparams->confirmed    = optional_param('confirmed', 0, PARAM_INT);
+$urlparams->confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 // Set a dataform object.
 $df = mod_dataform_dataform::instance($urlparams->d, $urlparams->id);
@@ -42,19 +42,11 @@ $PAGE->set_context($df->context);
 navigation_node::override_active_url(new moodle_url('/mod/dataform/tool/index.php', array('id' => $df->cm->id)));
 
 // DATA PROCESSING.
-if ($urlparams->run and confirm_sesskey()) {  // Run selected tool
-    $tooldir = "$CFG->dirroot/mod/dataform/tool/$urlparams->run";
-    $toolclass = "dataformtool_$urlparams->run";
-    if (file_exists($tooldir)) {
-        require_once("$tooldir/lib.php");
-        if ($result = $toolclass::run($df)) {
-            list($goodbad, $message) = $result;
-        } else {
-            $goodbad = 'problem';
-            $message = '';
-        }
-        $df->notifications = array($goodbad => array('' => $message));
-    }
+if ($urlparams->run and confirm_sesskey()) {
+    // Run selected tool.
+    $toolclass = "dataformtool_{$urlparams->run}_tool";
+
+    $toolclass::execute($df);
 }
 
 // Get the list of tools.
