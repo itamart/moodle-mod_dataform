@@ -3,7 +3,16 @@ Feature: Completion
 
     @javascript
     Scenario: Completion requires specific grade
-        Given a fresh site with dataform "Dataform completion requires specific grade"
+        Given a fresh site for dataform scenario
+
+        # Dataform activity
+        And the following dataform exists:
+            | course                | C1        |
+            | idnumber              | dataform1 |
+            | name                  | Dataform completion requires specific grade |
+            | intro                 | Dataform completion requires specific grade |
+            | grade                 | 10        |
+            | gradeitem 0 ca        | SUM(##2:State##)/2 |
 
         # Site completion enabling
         Then I log in as "admin"
@@ -21,10 +30,10 @@ Feature: Completion
         And I set the field "Enable completion tracking" to "Yes"
         And I press "Save changes"
 
-        Then I follow "Dataform completion requires specific grade"
 
         # Add a field with  Submitted and Approved  states
-        Then I go to manage dataform "fields"
+        Then I follow "Dataform completion requires specific grade"
+        And I go to manage dataform "fields"
         And I set the field "Add a field" to "entrystate"
         And I expand all fieldsets
         And I set the field "Name" to "State"
@@ -40,14 +49,6 @@ Feature: Completion
         Then I go to manage dataform "views"
         And I add a dataform view "aligned" with "View 01"
         And I set "View 01" as default view
-
-        ## Activity grade
-        Then I follow "Edit settings"
-        And I expand all fieldsets
-        And I set the field "id_modgrade_type" to "Point"
-        And I set the field "id_modgrade_point" to "10"
-        And I set the field "Grade calculation" to "SUM(##2:State##)/2"
-        And I press "Save and display"
 
         ## Completion
         Then I follow "Edit settings"
