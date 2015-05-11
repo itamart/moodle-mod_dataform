@@ -124,23 +124,15 @@ class mod_dataform_grade_items_form extends moodleform {
      */
     public function get_data() {
         if ($data = parent::get_data()) {
-            $dataformid = $this->_customdata['dataformid'];
-            $grademan = \mod_dataform_grade_manager::instance($dataformid);
 
             foreach ($data->gradeitem as $key => &$details) {
                 $gradevar = "gradeitem[$key]";
 
+                // Must have name and grade.
                 if (empty($details['itemname']) or empty($data->$gradevar)) {
                     unset($data->gradeitem[$key]);
                     unset($data->$gradevar);
-                    continue;
                 }
-
-                $gradedata = (object) array('grade' => $data->$gradevar);
-                $gradeparams = $grademan->get_grade_item_params_from_data($gradedata);
-                $details = array_merge($details, $gradeparams);
-
-                unset($data->$gradevar);
             }
         }
 

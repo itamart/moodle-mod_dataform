@@ -110,7 +110,7 @@ Feature: Multiple grade items
     #:Section
 
     #Section: Add two grade items.
-    @javascript
+    @javascript @addtwogradeitems
     Scenario: Add two grade items.
         Given a fresh site for dataform scenario
         Given the following config values are set as admin:
@@ -171,7 +171,7 @@ Feature: Multiple grade items
 
         #Section: Student 1 can see grades for items.
         Then I log in as "student1"
-        And I follow "My grades" in the user menu
+        And I follow "Grades" in the user menu
         And I follow "Course 1"
         Then the following should exist in the "user-grade" table:
             | Grade item                | Grade | Range | Percentage |

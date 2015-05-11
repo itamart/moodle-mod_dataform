@@ -64,7 +64,7 @@ if ($data = $mform->get_data()) {
     }
 
     // There are some items to add/update.
-    $dataitems = array_values($data->gradeitem);
+    $dataitems = $data->gradeitem;
 
     // First delete excessive items.
     if ($gradeitems) {
@@ -78,13 +78,21 @@ if ($data = $mform->get_data()) {
     }
 
     // Add/update grade item from data.
+    $itemnumber = 0;
     foreach ($dataitems as $key => $details) {
+        $gradevar = "gradeitem[$key]";
+
+        $gradedata = (object) array('grade' => $data->$gradevar);
+        $gradeparams = $grademan->get_grade_item_params_from_data($gradedata);
+        $details = array_merge($details, $gradeparams);
+
         // Update the grade item.
-        $details['itemnumber'] = $key;
-        $grademan->update_grade_item($key, $details);
+        $details['itemnumber'] = $itemnumber;
+        $grademan->update_grade_item($itemnumber, $details);
 
         // Update instance settings (e.g. grade calc).
-        $grademan->adjust_dataform_settings($key, $details);
+        $grademan->adjust_dataform_settings($itemnumber, $details);
+        $itemnumber++;
     }
 
     redirect($PAGE->url);
