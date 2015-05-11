@@ -686,29 +686,26 @@ class mod_dataform_dataform {
         $params = (object) $params;
         $data = $this->data;
 
-        $data->coursemodule = $this->cm->id;
-        $data->module = $this->cm->module;
         $data->activityicon = 0;
 
+        // Check for record properties update.
         foreach ($params as $key => $value) {
             if (!property_exists($data, $key)) {
                 continue;
             }
 
             if ($value != $data->$key) {
-                $this->$key = $value;
+                $data->$key = $value;
                 $updatedf = true;
             }
         }
 
-        if (!$updatedf) {
-            return true;
-        }
-
-        $data->timemodified = time();
-
+        // Grade update.
         if (!$data->grade) {
-            $data->gradeitems = null;
+            if ($data->gradeitems) {
+                $data->gradeitems = null;
+                $updatedf = true;
+            }
         }
 
         // Max entries.
@@ -724,15 +721,31 @@ class mod_dataform_dataform {
             $data->maxentries = -1;
         }
 
+        if (!$updatedf) {
+            return true;
+        }
+
+        $data->timemodified = time();
+
         if (!$DB->update_record('dataform', $data)) {
             // Something went wrong at updating.
             if ($notify === true) {
-                $this->notifications = array('problem' => array('dfupdatefailed' => get_string('dfupdatefailed', 'dataform')));
+                $note = array('dfupdatefailed' => get_string('dfupdatefailed', 'dataform'));
+                $this->notifications = array('problem' => $note);
             } else if ($notify) {
                 $this->notifications = array('problem' => array('' => $notify));;
             }
             return false;
         }
+
+        $this->_data = $data;
+
+        // Calendar.
+        $data->coursemodule = $this->cm->id;
+        $data->module = $this->cm->module;
+
+        \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
+        \mod_dataform\helper\calendar_event::update_event_timedue($data);
 
         // Activity icon.
         if (!empty($data->activityicon)) {
@@ -750,11 +763,8 @@ class mod_dataform_dataform {
                 0,
                 $options
             );
+            $updatedf = true;
         }
-
-        // Calendar.
-        \mod_dataform\helper\calendar_event::update_event_timeavailable($data);
-        \mod_dataform\helper\calendar_event::update_event_timedue($data);
 
         // Grading.
         $grademan = $this->grade_manager;
@@ -766,7 +776,9 @@ class mod_dataform_dataform {
             if (!$gradeitems = $grademan->grade_items or count($gradeitems) < 2) {
                 $gradedata['name'] = $this->name;
             }
+
             $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
+
             $this->grade_manager->update_grade_item(0, $itemparams);
         }
 
