@@ -49,7 +49,7 @@ class entriesform extends \moodleform {
         $mform =& $this->_form;
 
         // Header.
-        $mform->addElement('header', '', null);
+        $mform->addElement('header', 'entrieshdr', null);
 
         $htmlcontent = '';
         foreach ($elements as $element) {
@@ -133,13 +133,4 @@ class entriesform extends \moodleform {
         return $errors;
     }
 
-    /**
-     * Overriding parent to replace the class namespace with some normal string,
-     * because the validate javascript gets confused by namespaces class name.
-     *
-     * @return string form identifier.
-     */
-    protected function get_form_identifier() {
-        return 'mod_dataform_entriesform';
-    }
 }
