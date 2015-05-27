@@ -1059,7 +1059,7 @@ class mod_dataform_dataform {
     public function get_entries_count($type, $userid = 0) {
         global $DB;
 
-        $params = array('id'  => $this->id);
+        $params = array('dataid'  => $this->id);
         if ($userid) {
             $params['userid'] = $userid;
         }
