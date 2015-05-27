@@ -1022,7 +1022,7 @@ class manager {
                 )
             ),
 
-            // ???
+            // TODO: do we need that?
             'mod/dataform:ratingsviewany' => array(
 
                 'riskbitmask' => RISK_PERSONAL,
@@ -1036,7 +1036,7 @@ class manager {
                 'clonepermissionsfrom' => 'mod/dataform:ratingsview'
             ),
 
-            // ???
+            // TODO: do we need that?
             'mod/dataform:ratingsviewall' => array(
 
                 'riskbitmask' => RISK_PERSONAL,
