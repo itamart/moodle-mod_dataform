@@ -288,7 +288,7 @@ class mod_dataform_grade_manager {
             $instance = $df->data;
 
             // Grade part (only first item).
-            if ($itemnumber === 0) {
+            if ($itemnumber == 0) {
                 $grade = $instance->grade;
                 if (isset($options['gradetype'])) {
                     if ($options['gradetype'] == GRADE_TYPE_VALUE) {

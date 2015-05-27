@@ -1,8 +1,8 @@
-@mod @mod_dataform @dataformgrading-multigradeitems
+@mod @mod_dataform @dataformgrading
 Feature: Multiple grade items
 
     #Section: Enable site config.
-    @javascript
+    @javascript @dataformgrading-enablesiteconfig
     Scenario: Enable site config.
         Given a fresh site for dataform scenario
 
@@ -44,7 +44,7 @@ Feature: Multiple grade items
     #:Section
 
     #Section: Add a grade item without grade settings.
-    @javascript
+    @javascript @dataformgrading-multigradeitems
     Scenario: Add a grade item without grade settings.
         Given a fresh site for dataform scenario
         Given the following config values are set as admin:
@@ -110,7 +110,7 @@ Feature: Multiple grade items
     #:Section
 
     #Section: Add two grade items.
-    @javascript @addtwogradeitems
+    @javascript @dataformgrading-addtwogradeitems
     Scenario: Add two grade items.
         Given a fresh site for dataform scenario
         Given the following config values are set as admin:
