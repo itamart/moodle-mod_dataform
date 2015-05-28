@@ -28,43 +28,64 @@
 require_once("../../config.php");
 require_once("$CFG->dirroot/mod/dataform/lib.php");
 
-$id             = required_param('id', PARAM_INT);   // course
-// $add            = optional_param('add', '', PARAM_ALPHA);
-// $update         = optional_param('update', 0, PARAM_INT);
-// $duplicate      = optional_param('duplicate', 0, PARAM_INT);
-// $hide           = optional_param('hide', 0, PARAM_INT);
-// $show           = optional_param('show', 0, PARAM_INT);
-// $movetosection  = optional_param('movetosection', 0, PARAM_INT);
-// $delete         = optional_param('delete', 0, PARAM_INT);.
-
-if (!$course = $DB->get_record('course', array('id' => $id))) {
-    throw new moodle_exception('invalidcourseid');
-}
-
-$context = context_course::instance($course->id);
-require_course_login($course);
-
-// Must have viewindex capability.
-require_capability('mod/dataform:indexview', $context);
+$courseid = optional_param('id', 0, PARAM_INT);
 
 $modulename = get_string('modulename', 'dataform');
 $modulenameplural  = get_string('modulenameplural', 'dataform');
+$pageurl = new moodle_url('/mod/dataform/index.php');
 
-$PAGE->set_url('/mod/dataform/index.php', array('id' => $id));
-$PAGE->set_pagelayout('incourse');
-$PAGE->navbar->add($modulename, new moodle_url('/mod/dataform/index.php', array('id' => $course->id)));
+// Get the course if we have course id.
+if (!$courseid or !$course = $DB->get_record('course', array('id' => $courseid))) {
+    $courseid = 0;
+}
+
+if (!$courseid) {
+    $PAGE->set_context(context_system::instance());
+} else {
+    $pageurl->param('id', $courseid);
+    $context = context_course::instance($course->id);
+    $PAGE->set_context($context);
+    require_course_login($course);
+}
+
+$PAGE->set_url($pageurl);
+$PAGE->set_pagelayout('admin');
+$PAGE->navbar->add($modulename, $pageurl);
 $PAGE->set_title($modulename);
-$PAGE->set_heading($course->fullname);
+$PAGE->set_heading('');
+
+// Course menu selector.
+$courseselector = null;
+// Display a list of course where the user has indexview capability.
+if ($courses = get_user_capability_course('mod/dataform:indexview', null, true, 'fullname')) {
+    $coursemenu = array();
+    foreach ($courses as $crs) {
+        $coursemenu[$crs->id] = $crs->fullname;
+    }
+    $select = new \single_select($pageurl, 'id', $coursemenu, $courseid, array(0 => get_string('choosedots')), 'index_jump');
+    $select->set_label(get_string('course'). '&nbsp;');
+    $courseselector = $OUTPUT->render($select);
+}
 
 echo $OUTPUT->header();
+echo $courseselector;
 
-if (!$dataforms = get_all_instances_in_course("dataform", $course)) {
+// Without course id, display just the selector.
+if (!$courseid) {
+    echo $OUTPUT->footer();
+    exit;
+}
+
+// Must have indexview capability.
+require_capability('mod/dataform:indexview', $context);
+
+if (!$dataforms = get_all_instances_in_course('dataform', $course)) {
     notice(get_string('thereareno', 'moodle', $modulenameplural) , new moodle_url('/course/view.php', array('id' => $course->id)));
 }
 
-$usesections = course_format_uses_sections($course->format);
-if ($usesections) {
-    $sections = get_all_sections($course->id);
+if ($usesections = course_format_uses_sections($course->format)) {
+    $modinfo = get_fast_modinfo($course);
+    $sections = $modinfo->get_section_info_all();
 }
 
 $table = new html_table();
