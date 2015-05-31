@@ -85,7 +85,7 @@ class mod_dataform_field_manager {
     }
 
     /**
-     * Initialize if needed and return the internal fields
+     * Initialize if needed and return the internal field types.
      */
     public static function get_internal_field_types() {
         static $types;
@@ -99,6 +99,24 @@ class mod_dataform_field_manager {
             }
         }
         return $types;
+    }
+
+    /**
+     * Initialize if needed and return the internal field names.
+     */
+    public static function get_internal_fields($dataformid) {
+        static $fieldw;
+        if (!isset($fields)) {
+            $fields = array();
+            foreach (array_keys(core_component::get_plugin_list('dataformfield')) as $subpluginname) {
+                $fieldclass = "dataformfield_{$subpluginname}_$subpluginname";
+                if (is_subclass_of($fieldclass, '\mod_dataform\pluginbase\dataformfield_internal')) {
+                    $fielddata = $fieldclass::get_default_data($dataformid);
+                    $fields[$fieldclass::INTERNALID] = $fielddata;
+                }
+            }
+        }
+        return $fields;
     }
 
     /**
@@ -117,12 +135,8 @@ class mod_dataform_field_manager {
                 $this->_items = $fields;
             }
             // Add internal fields without DB record.
-            foreach (self::get_internal_field_types() as $fieldid => $fieldtype) {
-                if (empty($this->_items[$fieldid])) {
-                    $fieldclass = "dataformfield_{$fieldtype}_$fieldtype";
-                    $field = $fieldclass::get_default_data($this->_dataformid);
-                    $this->_items[$fieldid] = $field;
-                }
+            foreach (self::get_internal_fields($this->_dataformid) as $fieldid => $field) {
+                $this->_items[$fieldid] = $field;
             }
         }
         return $this->_items;
@@ -213,8 +227,10 @@ class mod_dataform_field_manager {
         global $DB;
 
         // Try first internal field.
-        if ($fieldid = array_search($fieldname, self::get_internal_field_types())) {
-            return $this->get_field_by_id($fieldid, $forceget);
+        foreach (self::get_internal_fields($this->_dataformid) as $field) {
+            if ($fieldname == $field->name) {
+                return $this->get_field($field);
+            }
         }
 
         if (!$forceget) {
@@ -314,21 +330,6 @@ class mod_dataform_field_manager {
             $fields[$fieldid] = $this->get_field($field);
         }
         return $fields;
-    }
-
-    /**
-     *
-     */
-    public function get_fields_user_defined($forceget = false, $sort = '') {
-        $fields = $this->get_fields(null, false, $forceget, $sort);
-        $retfields = array();
-        foreach ($fields as $fieldid => $field) {
-            if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
-                continue;
-            }
-            $retfields[$fieldid] = $field;
-        }
-        return $retfields;
     }
 
     /**
