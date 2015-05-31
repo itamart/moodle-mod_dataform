@@ -1094,7 +1094,7 @@ function dataform_grading_areas_list() {
         return array();
     }
 
-    // Find gradingadv fields and return their names as grading areas.
+    // Find gradingform fields and return their names as grading areas.
     $grademan = \mod_dataform_grade_manager::instance($PAGE->cm->instance);
     if ($areas = $grademan->get_available_grading_areas()) {
         return $areas;
