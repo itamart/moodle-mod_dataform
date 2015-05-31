@@ -120,7 +120,14 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         // Insert the dataform_fields record.
         $newitemid = $DB->insert_record('dataform_fields', $data);
-        $this->set_mapping('dataform_field', $oldid, $newitemid, true); // Files by this item id.
+        $this->set_mapping('dataform_field', $oldid, $newitemid, true);
+
+        // Process any field specific data.
+        $data->id = $newitemid;
+        $restoreclass = 'dataformfield_'. $data->type. "_restore";
+        if (method_exists($restoreclass, 'process')) {
+            $restoreclass::process($this, $data);
+        }
     }
 
     /**
@@ -207,7 +214,14 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         // Insert the dataform_views record.
         $newitemid = $DB->insert_record('dataform_views', $data);
-        $this->set_mapping('dataform_view', $oldid, $newitemid, true); // Files by this item id.
+        $this->set_mapping('dataform_view', $oldid, $newitemid, true);
+
+        // Process any view specific data.
+        $data->id = $newitemid;
+        $restoreclass = 'dataformview_'. $data->type. "_restore";
+        if (method_exists($restoreclass, 'process')) {
+            $restoreclass::process($this, $data);
+        }
     }
 
     /**
@@ -296,12 +310,6 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         // Add content related files, matching by item id (dataform_content).
         $this->add_related_files('mod_dataform', 'content', 'dataform_content');
 
-        // Add dataformview related files, matching by item id (dataform_view).
-        $this->add_related_dataformplugin_files('dataformview', 'dataform_view');
-
-        // Add dataformfield related files, matching by item id (dataform_field).
-        $this->add_related_dataformplugin_files('dataformfield', 'dataform_field');
-
         $dataformnewid = $this->get_new_parentid('dataform');
 
         // Default view.
@@ -318,29 +326,31 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
         }
 
-        // Update id of userinfo fields if needed.
-        // TODO can we condition this on restore to new site?
-        $params = array('dataid' => $dataformnewid, 'type' => 'userinfo');
-        if ($userinfofields = $DB->get_records('dataform_fields', $params, '', 'id,param1,param2')) {
-            foreach ($userinfofields as $fieldid => $uifield) {
-                $infoid = $DB->get_field('user_info_field', 'id', array('shortname' => $uifield->param2));
-                if ($infoid != (int) $uifield->param1) {
-                    $DB->set_field('dataform_fields', 'param1', $infoid, array('id' => $fieldid));
-                }
-            }
-        }
+        // Process dataformview after execute.
+        $this->after_execute_dataform_plugin('dataformview', 'dataform_view');
 
+        // Process dataformfield after execute.
+        $this->after_execute_dataform_plugin('dataformfield', 'dataform_field');
     }
 
-    protected function add_related_dataformplugin_files($plugintype, $source) {
-        global $CFG;
-
+    /**
+     *
+     */
+    protected function after_execute_dataform_plugin($plugintype, $source) {
         $plugins = core_component::get_plugin_list($plugintype);
         foreach ($plugins as $type => $unused) {
+            // Process any plugin specific data.
+            $restoreclass = $plugintype. "_$type". "_restore";
+            if (method_exists($restoreclass, 'after_execute')) {
+                $restoreclass::after_execute($this);
+            }
+
+            // Add related files, matching by item id.
             $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
                 $this->add_related_files($pluginclass, $filearea, $source);
             }
         }
     }
+
 }
