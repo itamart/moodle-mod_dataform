@@ -326,6 +326,9 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             }
         }
 
+        // Submission redirect view.
+        $this->adjust_view_submission_redirect();
+
         // Process dataformview after execute.
         $this->after_execute_dataform_plugin('dataformview', 'dataform_view');
 
@@ -349,6 +352,30 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
             $pluginclass = $plugintype. "_$type". "_$type";
             foreach ($pluginclass::get_file_areas() as $filearea) {
                 $this->add_related_files($pluginclass, $filearea, $source);
+            }
+        }
+    }
+
+    /**
+     * Adjusts view submission redirect view id.
+     */
+    protected function adjust_view_submission_redirect() {
+        global $DB;
+
+        $dataformnewid = $this->get_new_parentid('dataform');
+        if ($views = $DB->get_records('dataform_views', array('id' => $dataformnewid))) {
+            foreach ($views as $viewid => $view) {
+                if (empty($view->submission)) {
+                    continue;
+                }
+                $submission = unserialize(base64_decode($view->submission));
+                if (empty($submission['redirect'])) {
+                    continue;
+                }
+                $submission['redirect'] = $this->get_mappingid('dataform_view', $submission['redirect']);
+                $submission = base64_encode(serialize($submission));
+
+                $DB->set_field('dataform_views', 'submission', $submission, array('id' => $viewid));
             }
         }
     }
