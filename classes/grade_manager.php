@@ -1044,7 +1044,7 @@ class mod_dataform_grade_manager {
     public function get_available_grading_areas() {
         global $DB;
 
-        $params = array('type' => 'gradingadv', 'dataid' => $this->_dataformid);
+        $params = array('type' => 'gradingform', 'dataid' => $this->_dataformid);
         if ($areas = $DB->get_records_menu('dataform_fields', $params, 'name', 'id,name')) {
             return array_combine($areas, $areas);
         }
