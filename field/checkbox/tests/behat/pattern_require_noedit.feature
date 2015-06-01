@@ -8,7 +8,7 @@ Feature: Pattern required noedit
         ## Field
         And the following dataform "fields" exist:
             | name         | type          | dataform  | param1 |
-            | Checkbox    | checkbox       | dataform1 | CB 01\\nCB 02\\nCB 03\\nCB 04 |
+            | Checkbox    | checkbox       | dataform1 | {CB 01,CB 02,CB 03,CB 04} |
 
         ## View
         And the following dataform "views" exist:
@@ -87,7 +87,7 @@ Feature: Pattern required noedit
         ## Field
         And the following dataform "fields" exist:
             | name         | type          | dataform  | param1 |
-            | Checkbox    | checkbox       | dataform1 | Option 1\\nOption 2\\nOption 3\\nOption 4 |
+            | Checkbox    | checkbox       | dataform1 | {Option 1,Option 2,Option 3,Option 4} |
 
         ## View
         And the following dataform "views" exist:
