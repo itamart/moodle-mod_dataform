@@ -159,8 +159,8 @@ abstract class dataformfilterform extends \moodleform {
             if ($filter->customsort) {
                 if ($sortfields = unserialize($filter->customsort)) {
                     $sorturlarr = array();
-                    foreach ($sortfields as $idandelement => $sortdir) {
-                        list($fieldid, $element) = explode(',', $idandelement);
+                    foreach ($sortfields as $fieldid => $elementanddir) {
+                        list($element, $sortdir) = $elementanddir;
                         if (empty($fields[$fieldid])) {
                             continue;
                         }

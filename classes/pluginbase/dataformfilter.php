@@ -400,17 +400,17 @@ class dataformfilter {
 
         if ($sortfields) {
             $orderby = array();
-            foreach ($sortfields as $sortelement => $sortdir) {
-                if (!$sortelement) {
+            foreach ($sortfields as $fieldid => $elementdir) {
+                if (!$fieldid) {
                     continue;
                 }
 
-                list($fieldid, $element) = explode(',', $sortelement) + array(null);
                 if (empty($fields[$fieldid])) {
                     continue;
                 }
 
                 $field = $fields[$fieldid];
+                list($element, $sortdir) = $elementdir;
 
                 $sortname = $field->get_sort_sql($element);
                 // Add non-internal fields to sorties.
