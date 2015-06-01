@@ -171,8 +171,8 @@ Feature: Multiple grade items
 
         #Section: Student 1 can see grades for items.
         Then I log in as "student1"
-        And I follow "Grades" in the user menu
         And I follow "Course 1"
+        And I navigate to "Grades" node in "Course administration"
         Then the following should exist in the "user-grade" table:
             | Grade item                | Grade | Range | Percentage |
             | Test multiple grade items | 4.00  | 0–4   | 100.00 %   |
