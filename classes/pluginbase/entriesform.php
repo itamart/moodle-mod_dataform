@@ -108,26 +108,24 @@ class entriesform extends \moodleform {
      *
      */
     public function validation($data, $files) {
-        if (!$errors = parent::validation($data, $files)) {
-            $errors = array();
+        $errors = parent::validation($data, $files);
 
-            // Field validations.
-            $view = $this->_customdata['view'];
-            $patterns = $view->get_pattern_set('field');
-            $fields = $view->get_fields();
-            $entryids = explode(',', $this->_customdata['update']);
+        // Field validations.
+        $view = $this->_customdata['view'];
+        $patterns = $view->get_pattern_set('field');
+        $fields = $view->get_fields();
+        $entryids = explode(',', $this->_customdata['update']);
 
-            foreach ($entryids as $eid) {
-                // Validate all fields for this entry.
-                foreach ($fields as $fid => $field) {
-                    // Captcha check.
-                    if ($field->type == 'captcha') {
-                        if ($err = $field->verify($eid, $mform)) {
-                            $errors = array_merge($errors, $err);
-                        }
-                    } else if ($err = $field->validate($eid, $patterns[$fid], (object) $data)) {
+        foreach ($entryids as $eid) {
+            // Validate all fields for this entry.
+            foreach ($fields as $fid => $field) {
+                // Captcha check.
+                if ($field->type == 'captcha') {
+                    if ($err = $field->verify($eid, $mform)) {
                         $errors = array_merge($errors, $err);
                     }
+                } else if ($err = $field->validate($eid, $patterns[$fid], (object) $data)) {
+                    $errors = array_merge($errors, $err);
                 }
             }
         }
