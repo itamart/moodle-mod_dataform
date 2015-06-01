@@ -65,7 +65,7 @@ class mod_dataform_mod_form extends moodleform_mod {
         $mform->setDefault('name', get_string('dataformnew', 'dataform'));
 
         // Intro.
-        $this->standard_intro_elements(false, get_string('description'));
+        $this->add_intro_editor(false, get_string('description'));
     }
 
     /**
