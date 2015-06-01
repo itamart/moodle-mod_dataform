@@ -11,7 +11,7 @@ Feature: Default content
 
         And the following dataform "fields" exist:
             | name         | type          | dataform  | param1                    |
-            | Test Field   | radiobutton   | dataform1 | The\\nBig\\nBang\\nTheory |
+            | Test Field   | radiobutton   | dataform1 | {The,Big,Bang,Theory}     |
 
         And the following dataform "views" exist:
             | name     | type      | dataform  | default   |

@@ -569,6 +569,20 @@ class behat_mod_dataform extends behat_base {
         $df->update($rec);
     }
 
+    /**
+     * Sets the js template of the specified dataform to the text passed as PyStringNode.
+     *
+     * @Given /^dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" has the following js:$/
+     * @param string $dataformid
+     * @param PyStringNode $content
+     */
+    public function dataform_has_the_following_js($dataformid, PyStringNode $content) {
+        $rec = new stdClass;
+        $rec->js = (string) $content;
+        $df = mod_dataform_dataform::instance($dataformid);
+        $df->update($rec);
+    }
+
     /* FILTER */
 
     /**

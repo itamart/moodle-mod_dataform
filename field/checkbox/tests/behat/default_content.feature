@@ -10,8 +10,8 @@ Feature: Default content
         Given I start afresh with dataform "Test checkbox field default content"
 
         And the following dataform "fields" exist:
-            | name         | type          | dataform  | param1                    |
-            | Test Field   | checkbox      | dataform1 | The\\nBig\\nBang\\nTheory |
+            | name         | type          | dataform  | param1                 |
+            | Test Field   | checkbox      | dataform1 | {The,Big,Bang,Theory}  |
 
         And the following dataform "views" exist:
             | name     | type      | dataform  | default   |
