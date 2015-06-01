@@ -724,6 +724,8 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $strname = get_string('name');
         $strdescription = get_string('description');
         $strpermissions = get_string('permissions', 'role');
+        $strtimefrom = get_string('from');
+        $strtimeto = get_string('to');
         $strapplyto = get_string('views', 'dataform');
         $stredit = get_string('edit');
         $strdelete = get_string('delete');
@@ -733,6 +735,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
         $headers = array(
             array($strname, 'left', false),
             array($strdescription, 'left', false),
+            array("$strtimefrom .. $strtimeto", 'left', false),
             array($strapplyto, 'left', false),
             array('', 'center', false),
         );
@@ -750,6 +753,11 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $idforaction = $cat. $rule->type. ++$count;
 
             // Name.
+
+            // From to.
+            $timeformat = '%a, %Y-%m-%d %H:%M';
+            $timefrom = $data->timefrom ? userdate($data->timefrom, $timeformat) : '';
+            $timeto = $data->timeto ? userdate($data->timeto, $timeformat) : '';
 
             // Applicable views.
             $applicableviews = '';
@@ -813,6 +821,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
             $table->data[] = array(
                 $data->name,
                 $data->description,
+                "$timefrom .. $timeto",
                 $applicableviews,
                 "$showhidelink $editlink $editpermlink $deletelink",
             );
