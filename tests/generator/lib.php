@@ -217,51 +217,50 @@ class mod_dataform_generator extends testing_module_generator {
     public function create_filter($record, array $options = null) {
         $record = (object)(array)$record;
         $filter = new \mod_dataform\pluginbase\dataformfilter($record);
+        $fieldman = new \mod_dataform_field_manager($record->dataid);
 
         // Append sort options if specified.
         if (!empty($record->sortoptions)) {
-            // Convert fieldid sortdir to
-            // fieldid => sortdir.
+            // Convert fieldname[,element] sortdir to
+            // fieldid => (element,sortdir).
             $sorties = array();
-            foreach (explode(',', $record->sortoptions) as $sortoption) {
-                list($fieldid, $sortdir) = explode(' ', $sortoption);
+            foreach (explode(';', $record->sortoptions) as $sortoption) {
+                list($fieldname, $element, $sortdir) = explode(',', $sortoption);
+                if ($field = $fieldman->get_field_by_name($fieldname)) {
+                    $sorties[$field->id] = array($element, $sortdir);
+                }
             }
-            $filter->append_sort_options($record->sortoptions);
+            $filter->append_sort_options($sorties);
         }
 
         // Append search options if specified.
         if (!empty($record->searchoptions)) {
-            // Convert AND|OR,fieldid,element,[NOT],operator,value to
+            // Convert AND|OR,fieldname,element,[NOT],operator,value to
             // fieldid => (endor => (element, not, operator, value)).
-            $searchoptions = array_map(
-                function ($a) {
-                    list($andor, $fieldid, $element, $isnot, $op, $value) = explode(',', $a);
-                    return array($fieldid => array($andor => array(array($element, $isnot, $op, $value))));
-                },
-                explode(';', $record->searchoptions)
-            );
+            $searchoptions = array();
+            foreach (explode(';', $record->searchoptions) as $searchoption) {
+                list($andor, $fieldname, $element, $isnot, $op, $value) = explode(',', $searchoption);
+                if ($field = $fieldman->get_field_by_name($fieldname)) {
+                    $searchy = array(
+                        $andor => array(
+                            array($element, $isnot, $op, $value)
+                        )
+                    );
 
-            $searchies = array();
-            foreach ($searchoptions as $searchoption) {
-                foreach ($searchoption as $fieldid => $andors) {
-                    if (empty($searchies[$fieldid])) {
-                        $searchies[$fieldid] = $andors;
+                    if (empty($searchoptions[$field->id])) {
+                        $searchoptions[$field->id] = $searchy;
                     } else {
-                        foreach ($andors as $andor => $soptions) {
-                            if (empty($searchies[$fieldid][$andor])) {
-                                $searchies[$fieldid][$andor] = $soptions;
-                            } else {
-                                foreach ($soptions as $soption) {
-                                    $searchies[$fieldid][$andor][] = $soption;
-                                }
-                            }
-                        }
+                        $searchoptions[$field->id] = array_merge_recursive(
+                            $searchoptions[$field->id],
+                            $searchy
+                        );
                     }
                 }
             }
 
-            $filter->append_search_options($searchies);
+            $filter->append_search_options($searchoptions);
         }
+
         $filter->update();
         return $filter->instance;
     }
@@ -279,28 +278,11 @@ class mod_dataform_generator extends testing_module_generator {
 
         // Add data from record.
         foreach ($record as $var => $value) {
-            $field->$var = $value;
-        }
-
-        // HACK: make new lines in string.
-        $nlconversionfields = array(
-            'label',
-            'param1',
-            'param2',
-            'param3',
-            'param4',
-            'param5',
-            'param6',
-            'param7',
-            'param8',
-            'param9',
-            'param10',
-        );
-        foreach ($nlconversionfields as $var) {
-            if ($field->$var) {
-                $value = str_replace('\\\n', "\n", $field->$var);
-                $field->$var = $value;
+            // Lists of one-per-line options are comma delimited enclosed with {}.
+            if (strpos($value, '{') === 0 and strpos($value, '}') === strlen($value) - 1) {
+                $value = implode("\n", explode(',', trim($value, '{}')));
             }
+            $field->$var = $value;
         }
 
         $field->create($field->data);
@@ -320,37 +302,29 @@ class mod_dataform_generator extends testing_module_generator {
         $df = \mod_dataform_dataform::instance($dataformid);
         $grademan = $df->grade_manager;
 
-        // Get existing grade items.
-        if (!$gradeitems = $grademan->grade_items) {
-            $itemnumber = 0;
-        } else {
-            $itemnumber = count($gradeitems);
-        }
+        $itemnumber = $record->itemnumber;
+        $itemname = $record->name;
+        $grade = $record->grade;
+        $gradecalc = !empty($record->gradecalc) ? $record->gradecalc : null;
+        $gradeguide = !empty($record->gradeguide) ? $record->gradeguide : null;
 
-        $gradedata = array(
-            'grade' => $record->grade
-        );
-        if (!empty($record->gradeitems)) {
-            $gradedata['gradeitems'] = $record->gradeitems;
-        }
+        $gradedata = (object) array('grade' => $grade);
+        $gradeparams = $grademan->get_grade_item_params_from_data($gradedata);
 
-        if ($itemnumber == 0) {
-            // First item, let's update the dataform to create the grade item.
-            $df->update($gradedata);
-            // Now update the grade item with the desired name.
-            $gradedata['name'] = $record->name;
-            $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
-            $grademan->update_grade_item($itemnumber, $itemparams);
-        } else {
-            // Now update the grade item.
-            $gradedata['name'] = $record->name;
-            $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
-            $grademan->update_grade_item($itemnumber, $itemparams);
-            $grademan->adjust_dataform_settings($itemnumber, $gradedata);
-        }
+        $details = array();
+        $details['itemnumber'] = (int) $itemnumber;
+        $details['itemname'] = $itemname;
+        $details['gradecalc'] = $gradecalc;
+        $details['gradeguide'] = $gradeguide;
+        $details = array_merge($details, $gradeparams);
 
-        $grademan->grade_items = null;
-        return $grademan->grade_items[$itemnumber];
+        $grademan->update_grade_item($itemnumber, $details);
+
+        // Update instance settings (e.g. grade calc).
+        $grademan->adjust_dataform_settings($itemnumber, $details);
+
+        //$grademan->grade_items = null;
+        //return $grademan->grade_items[$itemnumber];
     }
 
     /**

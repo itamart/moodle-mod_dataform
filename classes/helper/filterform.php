@@ -78,11 +78,17 @@ class filterform {
         // Add current options.
         if ($customsort) {
             $sortfields = unserialize($customsort);
-            foreach ($sortfields as $sortelement => $sortdir) {
-                $sortelement = array_pad(explode(',', $sortelement), 2, null);
-                list($fieldid, $element) = $sortelement;
-                if (!empty($fields[$fieldid])) {
-                    $sortcriteria[] = array($fieldid, $element, $sortdir);
+            foreach ($sortfields as $fieldid => $elementdir) {
+                // Fix fieldid if needed.
+                if (strpos($fieldid, ',') !== false) {
+                    list($fieldid, $element) = explode(',', $fieldid);
+                }
+                // Fix element dir if needed.
+                if (is_array($elementdir)) {
+                    list($element, $dir) = $elementdir;
+                }
+                 if (!empty($fields[$fieldid])) {
+                    $sortcriteria[] = array($fieldid, $element, $dir);
                 }
             }
         }
@@ -136,7 +142,8 @@ class filterform {
         $i = 0;
         while (isset($formdata->{"sortfield$i"})) {
             if ($sortelement = $formdata->{"sortfield$i"}) {
-                $sortfields[$sortelement] = $formdata->{"sortdir$i"};
+                list($fieldid, $element) = explode(',', $sortelement);
+                $sortfields[$fieldid] = array($element, $formdata->{"sortdir$i"});
             }
             $i++;
         }
