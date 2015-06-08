@@ -393,6 +393,13 @@ class mod_dataform_entry_manager {
                 foreach ($contents as $contentid => $content) {
                     $entry = $entries->entries[$content->entryid];
                     $fieldid = $content->fieldid;
+
+                    // TODO: this shouldn't happen so we need to check why
+                    // it does and handle properly.
+                    if (empty($fields[$fieldid])) {
+                        continue;
+                    }
+
                     $varcontentid = "c{$fieldid}_id";
                     $entry->$varcontentid = $contentid;
                     foreach ($fields[$fieldid]->get_content_parts() as $part) {
