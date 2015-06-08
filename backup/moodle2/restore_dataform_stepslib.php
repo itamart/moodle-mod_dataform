@@ -363,7 +363,7 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
         global $DB;
 
         $dataformnewid = $this->get_new_parentid('dataform');
-        if ($views = $DB->get_records('dataform_views', array('id' => $dataformnewid))) {
+        if ($views = $DB->get_records('dataform_views', array('dataid' => $dataformnewid))) {
             foreach ($views as $viewid => $view) {
                 if (empty($view->submission)) {
                     continue;
