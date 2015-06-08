@@ -294,7 +294,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             return '';
         }
 
-        $str = get_string('edit'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
+        $str = get_string('edit');
         $attributes = array('id' => "id_editentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('t/edit', $str), $str, true, $attributes);
         if (!empty($options['actionmenu'])) {
@@ -336,7 +336,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             return $url->out(false);
         }
 
-        $str = get_string('more', 'dataform'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
+        $str = get_string('more', 'dataform');
         $attributes = array('id' => "id_moreentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('i/search', $str), $str, true, $attributes);
         if (!empty($options['actionmenu'])) {
@@ -358,7 +358,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             'sesskey' => sesskey()
         );
         $url = new moodle_url($entry->baseurl, $params);
-        $str = get_string('copy'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
+        $str = get_string('copy');
         $attributes = array('id' => "id_duplicateentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('t/copy', $str), $str, true, $attributes);
         if (!empty($options['actionmenu'])) {
@@ -388,7 +388,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             'sesskey' => sesskey()
         );
         $url = new moodle_url($entry->baseurl, $params);
-        $str = get_string('delete'). ' '. get_string('entry', 'dataform'). ' '. $entry->id;
+        $str = get_string('delete');
         $attributes = array('id' => "id_deleteentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('t/delete', $str), $str, true, $attributes);
         if (!empty($options['actionmenu'])) {
