@@ -876,18 +876,20 @@ class mod_dataform_renderer extends plugin_renderer_base {
         }
 
         $df = mod_dataform_dataform::instance($this->_dataformid);
-        if ($df->groupmode) {
-            $params = array(
-                'd' => $this->_dataformid,
-                'view' => $view
-            );
-            if ($filter) {
-                $params['filter'] = $filter;
-            }
-            $pagefile = $df->pagefile;
-            $returnurl = new moodle_url("/mod/dataform/$pagefile.php", $params);
-            return groups_print_activity_menu($df->cm, $returnurl.'&amp;', true);
+        if (!$df->groupmode) {
+            return null;
         }
+
+        $params = array(
+            'd' => $this->_dataformid,
+            'view' => $view
+        );
+        if ($filter) {
+            $params['filter'] = $filter;
+        }
+        $pagefile = $df->pagefile;
+        $returnurl = new moodle_url("/mod/dataform/$pagefile.php", $params);
+        return groups_print_activity_menu($df->cm, $returnurl.'&amp;', true);
     }
 
     /**
