@@ -121,9 +121,10 @@ class dataformfield_entrytime_entrytime extends \mod_dataform\pluginbase\datafor
      */
     public function get_sort_options_menu() {
         $fieldid = $this->id;
+        $fieldname = $this->name;
         return array(
-            "$fieldid,timecreated" => get_string('timecreated', 'dataformfield_entrytime'),
-            "$fieldid,timemodified" => get_string('timemodified', 'dataformfield_entrytime'),
+            "$fieldid,timecreated" => "$fieldname ". get_string('timecreated', 'dataformfield_entrytime'),
+            "$fieldid,timemodified" => "$fieldname ". get_string('timemodified', 'dataformfield_entrytime'),
         );
     }
 

@@ -165,9 +165,10 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
      */
     public function get_sort_options_menu() {
         $fieldid = $this->id;
+        $fieldname = $this->name;
         return array(
-            "$fieldid,name" => get_string('name'),
-            "$fieldid,idnumber" => get_string('idnumber'),
+            "$fieldid,name" => "$fieldname ". get_string('name'),
+            "$fieldid,idnumber" => "$fieldname ". get_string('idnumber'),
         );
     }
 

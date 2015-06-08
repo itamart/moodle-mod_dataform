@@ -333,8 +333,9 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
      */
     public function get_sort_options_menu() {
         $fieldid = $this->id;
+        $fieldname = $this->name;
         return array(
-            "$fieldid,state" => get_string('state', 'dataformfield_entrystate'),
+            "$fieldid,state" => "$fieldname ". get_string('state', 'dataformfield_entrystate'),
         );
     }
 
