@@ -252,11 +252,12 @@ class dataformfield_entryauthor_entryauthor extends \mod_dataform\pluginbase\dat
      */
     public function get_sort_options_menu() {
         $fieldid = $this->id;
+        $fieldname = $this->name;
         return array(
-            "$fieldid,firstname" => get_string('userfirstname', 'dataformfield_entryauthor'),
-            "$fieldid,lastname" => get_string('userlastname', 'dataformfield_entryauthor'),
-            "$fieldid,username" => get_string('userusername', 'dataformfield_entryauthor'),
-            "$fieldid,idnumber" => get_string('useridnumber', 'dataformfield_entryauthor'),
+            "$fieldid,firstname" => "$fieldname ". get_string('userfirstname', 'dataformfield_entryauthor'),
+            "$fieldid,lastname" => "$fieldname ". get_string('userlastname', 'dataformfield_entryauthor'),
+            "$fieldid,username" => "$fieldname ". get_string('userusername', 'dataformfield_entryauthor'),
+            "$fieldid,idnumber" => "$fieldname ". get_string('useridnumber', 'dataformfield_entryauthor'),
         );
     }
 
