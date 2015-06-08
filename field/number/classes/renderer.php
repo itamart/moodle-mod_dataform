@@ -45,21 +45,21 @@ class dataformfield_number_renderer extends dataformfield_text_renderer {
     public function display_browse($entry, $params = null) {
         $field = $this->_field;
         $fieldid = $field->id;
+
+        $str = null;
         if (isset($entry->{"c{$fieldid}_content"})) {
             $number = (float) $entry->{"c{$fieldid}_content"};
-        } else {
-            $number = 0;
+
+            $decimals = (int) trim($field->param1);
+            // Only apply number formatting if param1 contains an integer number >= 0:.
+            if ($decimals) {
+                // Removes leading zeros (eg. '007' -> '7'; '00' -> '0').
+                $str = sprintf("%4.{$decimals}f", $number);
+            } else {
+                $str = (int) $number;
+            }
         }
 
-        $decimals = (int) trim($field->param1);
-        // Only apply number formatting if param1 contains an integer number >= 0:.
-        if ($decimals) {
-            // Removes leading zeros (eg. '007' -> '7'; '00' -> '0').
-            $str = sprintf("%4.{$decimals}f", $number);
-        } else {
-            $str = (int) $number;
-        }
-
-        return $str;
+        return (string) $str;
     }
 }

@@ -578,10 +578,17 @@ abstract class dataformfield {
      * @return bool
      */
     public function content_is_empty($contentname, $content) {
-        if (is_string($content)) {
-            trim($content);
+        // Null content is empty.
+        if (is_null($content)) {
+            return true;
         }
-        return empty($content);
+
+        // String content '' is empty.
+        if (is_string($content)) {
+            $content = trim($content);
+            return ($content === '');
+        }
+        return false;
     }
 
     /**
