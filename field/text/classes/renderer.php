@@ -87,7 +87,7 @@ class dataformfield_text_renderer extends \mod_dataform\pluginbase\dataformfield
         $entryid = $entry->id;
 
         $content = '';
-        if ($entryid > 0 and !empty($entry->{"c{$fieldid}_content"})) {
+        if ($entryid > 0 and isset($entry->{"c{$fieldid}_content"})) {
             $content = $entry->{"c{$fieldid}_content"};
         } else {
             // Default content.
@@ -129,7 +129,7 @@ class dataformfield_text_renderer extends \mod_dataform\pluginbase\dataformfield
                     $mform->setType($fieldname, PARAM_ALPHA);
                     break;
                 case 'numeric':
-                    $mform->setType($fieldname, PARAM_INT);
+                    $mform->setType($fieldname, PARAM_TEXT);
                     break;
                 case 'email':
                     $mform->setType($fieldname, PARAM_EMAIL);
