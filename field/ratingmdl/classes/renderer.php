@@ -183,7 +183,9 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         // The string we'll return.
         $ratinghtml = '';
 
-        $strrate = get_string("rate", "rating");
+        if (!$strrate = $field->rate_label) {
+            $strrate = get_string('rate', 'rating'). '...';
+        }
 
         // Rating params.
         $rateparams = '';
@@ -195,7 +197,7 @@ class dataformfield_ratingmdl_renderer extends mod_dataform\pluginbase\dataformf
         }
 
         // Select dropdown.
-        $scalearray = array(RATING_UNSET_RATING => $strrate. '...') + $rating->settings->scale->scaleitems;
+        $scalearray = array(RATING_UNSET_RATING => $strrate) + $field->get_scale_items($rating);
         $scaleattrs = array(
             'class' => 'postratingmenu ratinginput',
             'id' => "ratingmenu_{$fieldid}_$entryid"

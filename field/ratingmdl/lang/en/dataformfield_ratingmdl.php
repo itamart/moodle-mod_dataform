@@ -39,3 +39,16 @@ $string['ratingmdl:anyviewratings'] = 'Any Entry - View Ratings';
 /* EVENTS */
 $string['event_rating_created'] = 'Rating created';
 $string['event_rating_deleted'] = 'Rating deleted';
+/* SETTINGS */
+$string['preventzero'] = 'Prevent zero rating';
+$string['preventzero_help'] = 'By default point scales include a 0 value for rating. If set to Yes the 0 value will not be available for rating.';
+$string['ratelabel'] = 'Rate label';
+$string['ratelabel_help'] = 'Rate label';
+$string['repititionlimit'] = 'Repitition limit';
+$string['repititionlimit_help'] = 'The max number of times a value in the rating scale can be used by the users in scope for rating the entry. (Each user is still restricted to 1 rating per field)';
+$string['repititionscope'] = 'Repitition scope';
+$string['repititionscope_help'] = 'The scope of users to which the repitition limit applies.';
+$string['forceinorder'] = 'Force in order';
+$string['forceinorder_help'] = 'When in-order is forced, the user cannot use a particular value for rating before preceding values in the scale have been used the "limit" number of times (if applicable).';
+$string['eachuser'] = 'Each user separately';
+$string['allusers'] = 'All users as a whole';

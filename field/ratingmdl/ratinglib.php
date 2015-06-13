@@ -309,7 +309,8 @@ class ratingmdl_rating_manager extends rating_manager {
 
         $options->userid = !empty($rec->userid) ? $rec->userid : 0;
         $options->id = !empty($rec->id) ? $rec->id : 0;
-        if (!empty($rec->usersrating)) {
+        $ratingvalue = (string) $rec->usersrating;
+        if ($ratingvalue !== '') {
             $options->rating = min($rec->usersrating, $rec->settings->scale->max);
         } else {
             $options->rating = null;
