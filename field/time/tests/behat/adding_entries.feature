@@ -76,7 +76,7 @@ Feature: Adding entries with field
             | dataform1 | student1       | 2014-12-05 08:00  |
         And I am in dataform "Test time field" "Course 1" as "teacher1"
 
-        When I follow "Edit Entry 1"
+        When I follow "id_editentry1"
 
         Then I see "December 2014"
         #:Section

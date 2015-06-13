@@ -25,7 +25,7 @@ Feature: Entry choice
         #Section: Add filters.
         And the following dataform "filters" exist:
             | name          | dataform  | searchoptions                 |
-            | My slots      | dataform1 | AND,-2,currentuser,NOT,,      |
+            | My slots      | dataform1 | AND,EAU,currentuser,NOT,,      |
         #:Section
 
         #Section: Add views.

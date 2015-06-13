@@ -55,15 +55,15 @@ Feature: Dataform access permissions
         And I see "Add a new entry"
 
         # Update
-        And "Edit Entry 1" "link" exists
-        And "Edit Entry 2" "link" exists
-        And "Edit Entry 3" "link" exists
+        And "Edit" "link" should exist in the "1 Entry by" "table_row"
+        And "Edit" "link" should exist in the "2 Entry by" "table_row"
+        And "Edit" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         # Delete
-        And "Delete Entry 1" "link" exists
-        And "Delete Entry 2" "link" exists
-        And "Delete Entry 3" "link" exists
+        And "Delete" "link" should exist in the "1 Entry by" "table_row"
+        And "Delete" "link" should exist in the "2 Entry by" "table_row"
+        And "Delete" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         And I log out
@@ -88,15 +88,15 @@ Feature: Dataform access permissions
         And I see "Add a new entry"
 
         # Update
-        And "Edit Entry 1" "link" exists
-        And "Edit Entry 2" "link" exists
-        And "Edit Entry 3" "link" exists
+        And "Edit" "link" should exist in the "1 Entry by" "table_row"
+        And "Edit" "link" should exist in the "2 Entry by" "table_row"
+        And "Edit" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         # Delete
-        And "Delete Entry 1" "link" exists
-        And "Delete Entry 2" "link" exists
-        And "Delete Entry 3" "link" exists
+        And "Delete" "link" should exist in the "1 Entry by" "table_row"
+        And "Delete" "link" should exist in the "2 Entry by" "table_row"
+        And "Delete" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         And I log out
@@ -120,18 +120,18 @@ Feature: Dataform access permissions
         # ... same for other entries
 
         # Add/Update/delete own entry
-        And "Edit Entry 3" "link" exists
-        And "Delete Entry 3" "link" exists
+        And "Edit" "link" should exist in the "3 Entry by" "table_row"
+        And "Delete" "link" should exist in the "3 Entry by" "table_row"
         And I follow "Add a new entry"
         And I set the field "field_1_-1" to "My new entry in standard access"
         And I press "Save"
         And I see "My new entry in standard access"
-        And I follow "Edit Entry 6"
+        And I click on "Edit" "link" in the "My new entry in standard access" "table_row"
         And I set the field "field_1_6" to "My new entry in standard access - updated"
         And I press "Save"
         And I see "My new entry in standard access - updated"
         And I see "Num entries total: 6"
-        And I follow "Delete Entry 6"
+        And I click on "Delete" "link" in the "My new entry in standard access - updated" "table_row"
         And I see "You are about to delete 1 entry(s)"
         And I press "Continue"
         Then I see "Num entries total: 5"

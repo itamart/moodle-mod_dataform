@@ -49,7 +49,7 @@ Feature: Patterns
         When I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Test entry group field"
-        And I follow "Edit Entry 1"
+        And I follow "id_editentry1"
 
         Then I see "Group name is Group 1"
         And I see "Group idnumber is G1"
