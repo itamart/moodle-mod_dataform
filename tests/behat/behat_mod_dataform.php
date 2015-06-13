@@ -892,7 +892,7 @@ class behat_mod_dataform extends behat_base {
     public function i_cannot_edit_entry_in_dataform_view($entryid, $dataformid, $viewid) {
         $steps = array();
 
-        $steps[] = new Given('"Edit Entry '. $entryid. '" "link" does not exist');
+        $steps[] = new Given('"id_editentry'. $entryid. '" "link" does not exist');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&editentries='. $entryid. '"');
         $steps[] = new Given('"Save" "button" does not exist');
         $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '"');
@@ -912,7 +912,7 @@ class behat_mod_dataform extends behat_base {
     public function i_cannot_delete_entry_with_content_in_dataform_view($entryid, $content, $dataformid, $viewid) {
         $steps = array();
 
-        $steps[] = new Given('"Delete Entry '. $entryid. '" "link" does not exist');
+        $steps[] = new Given('"id_deleteentry'. $entryid. '" "link" does not exist');
         $url = 'view.php?d='. $dataformid. '&view='. $viewid. '&delete='. $entryid. '&sesskey='. sesskey();
         $steps[] = new Given('I go to dataform page "'. $url. '"');
         $steps[] = new Given('I see "'. $content. '"');
@@ -1339,7 +1339,7 @@ class behat_mod_dataform extends behat_base {
 
             // Delete the entries.
             foreach ($entryids as $entryid) {
-                $steps[] = new Given('I follow "Delete Entry '. $entryid. '"');
+                $steps[] = new Given('I follow "id_deleteentry'. $entryid. '"');
                 $steps[] = new Given('I press "Continue"');
             }
 

@@ -64,15 +64,15 @@ Feature: Dataform access permissions
         And I see "Add a new entry"
 
         # Update
-        And "Edit Entry 1" "link" exists
-        And "Edit Entry 2" "link" exists
-        And "Edit Entry 3" "link" exists
+        And "Edit" "link" should exist in the "1 Entry by" "table_row"
+        And "Edit" "link" should exist in the "2 Entry by" "table_row"
+        And "Edit" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         # Delete
-        And "Delete Entry 1" "link" exists
-        And "Delete Entry 2" "link" exists
-        And "Delete Entry 3" "link" exists
+        And "Delete" "link" should exist in the "1 Entry by" "table_row"
+        And "Delete" "link" should exist in the "2 Entry by" "table_row"
+        And "Delete" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         And I log out
@@ -97,15 +97,15 @@ Feature: Dataform access permissions
         And I see "Add a new entry"
 
         # Update
-        And "Edit Entry 1" "link" exists
-        And "Edit Entry 2" "link" exists
-        And "Edit Entry 3" "link" exists
+        And "Edit" "link" should exist in the "1 Entry by" "table_row"
+        And "Edit" "link" should exist in the "2 Entry by" "table_row"
+        And "Edit" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         # Delete
-        And "Delete Entry 1" "link" exists
-        And "Delete Entry 2" "link" exists
-        And "Delete Entry 3" "link" exists
+        And "Delete" "link" should exist in the "1 Entry by" "table_row"
+        And "Delete" "link" should exist in the "2 Entry by" "table_row"
+        And "Delete" "link" should exist in the "3 Entry by" "table_row"
         # ... same for other entries
 
         And I log out
