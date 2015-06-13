@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2013 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class entry_update extends base {
+class entry_update extends entry_base {
 
     /**
      * @return bool
@@ -102,14 +102,4 @@ class entry_update extends base {
 
         return false;
     }
-
-    /**
-     * @return null|array
-     */
-    public static function get_rules(\mod_dataform_access_manager $man, array $params) {
-        $viewid = $params['viewid'];
-
-        return $man->get_type_rules('entry');
-    }
-
 }

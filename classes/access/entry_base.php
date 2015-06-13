@@ -27,19 +27,21 @@ namespace mod_dataform\access;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * mod_dataform view capability class.
+ * mod_dataform entry view permission class.
  *
  * @package    mod_dataform
- * @copyright  2013 Itamar Tzadok {@link http://substantialmethods.com}
+ * @copyright  2015 Itamar Tzadok {@link http://substantialmethods.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class view_capability extends base {
+abstract class entry_base extends base {
 
     /**
      * @return null|array
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
-        return $man->get_type_rules('view');
+        return array_merge(
+            $man->get_type_rules('view'),
+            $man->get_type_rules('entry')
+        );
     }
-
 }

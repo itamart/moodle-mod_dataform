@@ -93,14 +93,23 @@ abstract class base {
         $accessman = \mod_dataform_access_manager::instance($dataformid);
         $accesstype = get_called_class();
 
+        $rulesapplied = false;
         if ($rules = $accesstype::get_rules($accessman, $params)) {
             foreach ($rules as $rule) {
-                if (!$rule->has_capability($capability)) {
-                    return false;
+                if ($rule->is_enabled() and $rule->is_applicable($params)) {
+                    $rulesapplied = true;
+                    if (!$rule->has_capability($capability)) {
+                        return false;
+                    }
                 }
             }
-        } else {
-            return has_capability($capability, \mod_dataform_dataform::instance($dataformid)->context);
+        }
+
+        if (!$rulesapplied) {
+            $dataformcontext = \mod_dataform_dataform::instance($dataformid)->context;
+            if (!has_capability($capability, $dataformcontext)) {
+                return false;
+            }
         }
 
         return true;
@@ -118,12 +127,19 @@ abstract class base {
         $accessman = \mod_dataform_access_manager::instance($dataformid);
         $accesstype = get_called_class();
 
+        $rulesapplied = false;
         if ($rules = $accesstype::get_rules($accessman, $params)) {
             foreach ($rules as $rule) {
-                $rule->require_capability($capability, $params);
+                if ($rule->is_enabled() and $rule->is_applicable($params)) {
+                    $rulesapplied = true;
+                    $rule->require_capability($capability, $params);
+                }
             }
-        } else {
-            require_capability($capability, \mod_dataform_dataform::instance($dataformid)->context);
+        }
+
+        if (!$rulesapplied) {
+            $dataformcontext = \mod_dataform_dataform::instance($dataformid)->context;
+            require_capability($capability, $dataformcontext);
         }
     }
 
