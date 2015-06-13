@@ -46,7 +46,7 @@ class view_access extends base {
         $view = $df->view_manager->get_view_by_id($viewid);
 
         // Views manager can access any view in any mode.
-        if (view_capability::has_capability('mod/dataform:manageviews', $params)) {
+        if (has_capability('mod/dataform:manageviews', $df->context)) {
             return true;
         }
 
@@ -81,8 +81,6 @@ class view_access extends base {
      * @return null|array
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
-        $viewid = $params['viewid'];
-
         return $man->get_type_rules('view');
     }
 
