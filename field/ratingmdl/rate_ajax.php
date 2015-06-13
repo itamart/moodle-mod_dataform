@@ -106,6 +106,13 @@ if (!$rm->check_rating_is_valid($params)) {
     die();
 }
 
+// Check that the rating value is in accordance with the field settings.
+if ($validationcode = $field->user_can_assign_the_rating_value($entryrating, $userrating)) {
+    $result->error = get_string("ratinginvalid$validationcode", 'dataformfield_ratingmdl');
+    echo json_encode($result);
+    die();
+}
+
 // Rating options used to update the rating then retrieving the aggregations.
 $ratingoptions = new stdClass;
 $ratingoptions->context = $context;

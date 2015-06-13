@@ -310,6 +310,46 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return false;
     }
 
+    /**
+     * Checks if the user can assign the specified rating value in the specified entry.
+     * Returns validation code:
+     *  0 - The user can assign this value in the entry.
+     *
+     * @param ratingmdl_rating $rating
+     * @param int $value The target rating value.
+     * @return int
+     */
+    public function user_can_assign_the_rating_value($rating, $value) {
+        $limit = $this->param3;
+        $force = $this->param5;
+
+        // If no limit and order not forced, the user can assign any value.
+        if (!$limit and !$force) {
+            return 0;
+        }
+
+        // If there is a limit, make sure the number of ratings for this
+        // value has not been reached.
+        if ($this->rating_value_at_limit($rating, $value)) {
+            return 1;
+        }
+
+        $scaleitems = $rating->settings->scale->scaleitems;
+        $firstitem = reset($scaleitems);
+
+        // If forcing in-order, make sure that there is at least "limit" number
+        // of ratings for the preceding value.
+        if ($force and $value != $firstitem) {
+            $valueindex = array_search($value, $scaleitems);
+            $precedingitem = $scaleitems[$valueindex - 1];
+            if (!$this->rating_value_at_limit($rating, $precedingitem)) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // SQL MANAGEMENT.
     /**
      * Whether this field content resides in dataform_contents.
@@ -446,13 +486,14 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
      */
     public function get_sort_options_menu() {
         $fieldid = $this->id;
+        $fieldname = $this->name;
         return array(
-            "$fieldid,usersrating" => get_string('usersrating', 'dataformfield_ratingmdl'),
-            "$fieldid,numratings" => get_string('numratings', 'dataformfield_ratingmdl'),
-            "$fieldid,avgratings" => get_string('avgratings', 'dataformfield_ratingmdl'),
-            "$fieldid,sumratings" => get_string('sumratings', 'dataformfield_ratingmdl'),
-            "$fieldid,maxratings" => get_string('maxratings', 'dataformfield_ratingmdl'),
-            "$fieldid,minratings" => get_string('minratings', 'dataformfield_ratingmdl'),
+            "$fieldid,usersrating" => "$fieldname ". get_string('usersrating', 'dataformfield_ratingmdl'),
+            "$fieldid,numratings" => "$fieldname ". get_string('numratings', 'dataformfield_ratingmdl'),
+            "$fieldid,avgratings" => "$fieldname ". get_string('avgratings', 'dataformfield_ratingmdl'),
+            "$fieldid,sumratings" => "$fieldname ". get_string('sumratings', 'dataformfield_ratingmdl'),
+            "$fieldid,maxratings" => "$fieldname ". get_string('maxratings', 'dataformfield_ratingmdl'),
+            "$fieldid,minratings" => "$fieldname ". get_string('minratings', 'dataformfield_ratingmdl'),
         );
     }
 
@@ -607,6 +648,34 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         return $this->_allratings;
     }
 
+    /**
+     *
+     * @return boolean
+     */
+    protected function rating_value_at_limit($rating, $value, $userid = 0) {
+        global $USER;
+
+        $userid = !$userid ? $USER->id : $userid;
+
+        if (!$limit = $this->param3) {
+            return false;
+        }
+
+        $options = array(
+            'rating' => $value,
+        );
+        if (!$separateraters = $this->param4) {
+            $options['userid'] = $userid;
+        }
+
+        if ($records = $this->get_rating_records($options)) {
+            if (count($records) < $limit) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // USING SCALE.
     /**
      * Returns the database column used to store the scale.
@@ -636,6 +705,15 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
 
     // GETTERS.
     /**
+     * Returns the configured "nothing" label for the rate dropdown.
+     *
+     * @return string
+     */
+    public function get_rate_label() {
+        return $this->param2;
+    }
+
+    /**
      * Returns the effective scaleid, either from the entry or from the field settings.
      *
      * @param stdClass $entry
@@ -648,6 +726,23 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         } else {
             return $this->_scaleid;
         }
+    }
+
+    /**
+     * Returns the scale items of the rating adjusted where 0 value needs
+     * to be omitted in numeric scales.
+     *
+     * @param ratingmdl_rating $rating
+     * @return array
+     */
+    public function get_scale_items($rating) {
+        $items = $rating->settings->scale->scaleitems;
+        if ($rating->settings->scale->isnumeric) {
+            if ($this->param6) {
+                array_shift($items);
+            }
+        }
+        return $items;
     }
 
     /**
