@@ -67,7 +67,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
     xmldb_dataform_upgrade_2014111000($dbman, $oldversion);
-    xmldb_dataform_upgrade_2014111006($dbman, $oldversion);
+    xmldb_dataform_upgrade_2015051100($dbman, $oldversion);
 
     return true;
 }
@@ -1175,7 +1175,7 @@ function xmldb_dataform_upgrade_2014111000($dbman, $oldversion) {
     return true;
 }
 
-function xmldb_dataform_upgrade_2014111006($dbman, $oldversion, $t = '') {
+function xmldb_dataform_upgrade_2015051100($dbman, $oldversion, $t = '') {
     global $CFG, $DB;
 
     list(, , , $newversion) = explode('_', __FUNCTION__);
