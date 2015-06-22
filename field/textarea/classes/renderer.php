@@ -233,19 +233,22 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
 
         $field = $this->_field;
         $fieldid = $field->id;
+        $df = $field->df;
 
         if (isset($entry->{"c{$fieldid}_content"})) {
             $contentid = $entry->{"c{$fieldid}_id"};
             $text = $entry->{"c{$fieldid}_content"};
             $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_PLAIN;
+            $contextid = $df->context->id;
+            $contentidhash = $df->get_content_id_hash($contentid);
 
             $text = file_rewrite_pluginfile_urls(
                 $text,
                 'pluginfile.php',
-                $field->get_df()->context->id,
+                $contextid,
                 'mod_dataform',
                 'content',
-                $contentid
+                $contentidhash
             );
 
             $options = new stdClass;

@@ -614,7 +614,12 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
     // FIELD CONTENT files.
     if ($filearea === 'content' and $context->contextlevel == CONTEXT_MODULE) {
 
-        $contentid = (int)array_shift($args);
+        $contentidhash = array_shift($args);
+
+        $df = \mod_dataform_dataform::instance($cm->instance);
+        if (!$contentid = $df->get_content_id_from_hash($contentidhash)) {
+            return false;
+        }
 
         if (!$content = $DB->get_record('dataform_contents', array('id' => $contentid))) {
             return false;
@@ -637,26 +642,6 @@ function mod_dataform_pluginfile($course, $cm, $context, $filearea, $args, $forc
         if ($dataform->id != $cm->instance) {
             // Hacker attempt - context does not match the contentid.
             return false;
-        }
-
-        // Group access.
-        if ($entry->groupid) {
-            $groupmode = groups_get_activity_groupmode($cm, $course);
-            if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
-                if (!groups_is_member($entry->groupid)) {
-                    return false;
-                }
-            }
-        }
-
-        // Separate participants.
-        if ($dataform->individualized) {
-            if (empty($USER->id)) {
-                return false;
-            }
-            if ($USER->id != $entry->userid and !has_capability('mod/dataform:manageentries', $context)) {
-                return false;
-            }
         }
 
         $relativepath = implode('/', $args);
