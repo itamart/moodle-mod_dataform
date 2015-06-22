@@ -128,6 +128,7 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
         $field = $this->_field;
         $fieldid = $field->id;
         $entryid = $entry->id;
+        $df = $field->df;
 
         $content = isset($entry->{"c{$fieldid}_content"}) ? $entry->{"c{$fieldid}_content"} : null;
         $content1 = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : null;
@@ -142,8 +143,10 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
             return $content2;
         }
 
+        $contextid = $df->context->id;
+
         $fs = get_file_storage();
-        $files = $fs->get_area_files($field->get_df()->context->id, 'mod_dataform', 'content', $contentid, 'sortorder', false);
+        $files = $fs->get_area_files($contextid, 'mod_dataform', 'content', $contentid, 'sortorder', false);
         if (!$files) {
             return '';
         }
@@ -160,7 +163,8 @@ class dataformfield_file_renderer extends mod_dataform\pluginbase\dataformfieldr
 
                 $filename = $file->get_filename();
                 $filenameinfo = pathinfo($filename);
-                $path = "/{$field->get_df()->context->id}/mod_dataform/content/$contentid";
+                $contentidhash = $df->get_content_id_hash($contentid);
+                $path = "/$contextid/mod_dataform/content/$contentidhash";
 
                 $strfiles[] = $this->display_file($file, $path, $altname, $params);
             }

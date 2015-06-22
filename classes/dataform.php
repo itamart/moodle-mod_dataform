@@ -1458,6 +1458,43 @@ class mod_dataform_dataform {
         return $DB->record_exists_select("dataform_{$table}", $where, $params);
     }
 
+    /**
+     *
+     */
+    protected function get_content_id_hash_string($contentid) {
+        global $USER;
+
+        $cmid = $this->cm->id;
+        $cmidnumber = $this->cm->idnumber;
+        $userid = $USER->id;
+
+        $hashstring = md5("$contentid,$userid,$cmid,$cmidnumber");
+        return $hashstring;
+    }
+
+    /**
+     *
+     */
+    public function get_content_id_hash($contentid) {
+        $hash = $this->get_content_id_hash_string($contentid);
+        $tokenhash = base64_encode("$contentid,$hash");
+
+        return $tokenhash;
+    }
+
+    /**
+     *
+     */
+    public function get_content_id_from_hash($tokenhash) {
+        list($contentid, $hash) = explode(',', base64_decode($tokenhash));
+
+        if ($this->get_content_id_hash_string($contentid) != $hash) {
+            return false;
+        }
+
+        return $contentid;
+    }
+
     // RSS.
 
     /**
