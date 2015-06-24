@@ -149,7 +149,7 @@ class manager {
             // Manage filters.
             'mod/dataform:managefilters' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -162,7 +162,7 @@ class manager {
             // Manage access.
             'mod/dataform:manageaccess' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -175,7 +175,7 @@ class manager {
             // Manage notifications.
             'mod/dataform:managenotifications' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -188,7 +188,7 @@ class manager {
             // Manage css.
             'mod/dataform:managecss' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -214,7 +214,7 @@ class manager {
             // Manage tools.
             'mod/dataform:managetools' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -356,7 +356,7 @@ class manager {
             // Add.
             'mod/dataform:entryearlyadd' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
@@ -421,7 +421,7 @@ class manager {
             // Add.
             'mod/dataform:entrylateadd' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
@@ -504,7 +504,7 @@ class manager {
             // Add.
             'mod/dataform:entryownadd' => array(
 
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
                 'archetypes' => array(
@@ -590,7 +590,7 @@ class manager {
 
             // Add.
             'mod/dataform:entrygroupadd' => array(
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -679,7 +679,7 @@ class manager {
 
             // Add.
             'mod/dataform:entryanyadd' => array(
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
@@ -762,7 +762,7 @@ class manager {
 
             // Add.
             'mod/dataform:entryanonymousadd' => array(
-                'riskbitmask' => RISK_SPAM | RISK_XSS,
+                'riskbitmask' => RISK_SPAM,
 
                 'captype' => 'write',
                 'contextlevel' => CONTEXT_MODULE,
