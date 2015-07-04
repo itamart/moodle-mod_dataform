@@ -281,9 +281,6 @@ class dataformview {
             $timeout = !empty($submission['timeout']) ? $submission['timeout'] : 0;
             if (!empty($submission['redirect'])) {
                 $redirecturl->param('view', $submission['redirect']);
-                if ($processedeids) {
-                    $redirecturl->param('eids', implode(',', $processedeids));
-                }
             }
 
             // Submission response.
@@ -293,9 +290,16 @@ class dataformview {
                 $response = $strnotify;
             }
 
-            // Return to form if needed (editentries is set in continue_editing() as needed).
-            if ($processedeids and $editentries = $this->editentries) {
-                $redirecturl->param('editentries', $editentries);
+            if ($processedeids) {
+                if ($editentries = $this->editentries) {
+                    // Return to form if needed.
+                    // (editentries is set in continue_editing() as needed).
+                    $redirecturl->param('editentries', $editentries);
+
+                } else if (!empty($submission['displayafter'])) {
+                    // Display after if set and not returning to form.
+                    $redirecturl->param('eids', implode(',', $processedeids));
+                }
             }
 
             redirect($redirecturl, $response, $timeout);

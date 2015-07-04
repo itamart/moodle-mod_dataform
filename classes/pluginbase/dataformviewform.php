@@ -148,10 +148,9 @@ class dataformviewform extends \moodleform {
         $view = $this->_view;
         $mform = &$this->_form;
         $paramtext = !empty($CFG->formatstringstriptags) ? PARAM_TEXT : PARAM_CLEAN;
-        $settings = $view->submission_settings;
 
-        // Header.
-        $mform->addElement('header', 'viewsubmissionhdr', get_string('submission', 'dataform'));
+        // EDITING Header.
+        $mform->addElement('header', 'vieweditinghdr', get_string('editing', 'dataform'));
 
         // What to display when editing.
         $options = array(
@@ -159,27 +158,22 @@ class dataformviewform extends \moodleform {
             dataformview::EDIT_SEPARATE => get_string('modeeditseparate', 'dataform'),
             dataformview::EDIT_INLINE => get_string('modeeditinline', 'dataform'),
         );
-        $mform->addElement('select', 'submissiondisplay', get_string('submissiondisplay', 'dataform'), $options);
-        if (!empty($settings['display'])) {
-            $mform->setDefault('submissiondisplay', $settings['display']);
-        }
+        $mform->addElement('select', 'submission[display]', get_string('submissiondisplay', 'dataform'), $options);
 
         // Save buttons.
         $buttons = $view->submission_buttons;
         foreach ($buttons as $name) {
             $grp = array();
-            $grp[] = &$mform->createElement('text', $name.'button_label', null);
+            $grp[] = &$mform->createElement('text', "submission[$name]", null);
             $grp[] = &$mform->createElement('checkbox', $name.'buttonenable', null, get_string('enable'));
             $mform->addGroup($grp, $name.'buttongrp', get_string($name.'button', 'dataform'), ' ', false);
             $mform->addHelpButton($name.'buttongrp', $name.'button', 'dataform');
-            $mform->setType($name.'button_label', $paramtext);
-            $mform->disabledIf($name.'button_label', $name.'buttonenable', 'notchecked');
-            // Button settings.
-            if (is_array($settings) and array_key_exists($name, $settings)) {
-                $mform->setDefault($name.'buttonenable', 1);
-                $mform->setDefault($name.'button_label', $settings[$name]);
-            }
+            $mform->setType("submission[$name]", $paramtext);
+            $mform->disabledIf("submission[$name]", $name.'buttonenable', 'notchecked');
         }
+
+        // SUBMISSION Header.
+        $mform->addElement('header', 'viewsubmissionhdr', get_string('submission', 'dataform'));
 
         // Redirect view after submission.
         $options = array('' => get_string('choosedots'));
@@ -190,23 +184,27 @@ class dataformviewform extends \moodleform {
             }
             $options = $options + $viewsmenu;
         }
-        $mform->addElement('select', 'submissionredirect', get_string('submissionredirect', 'dataform'), $options);
-        $mform->addHelpButton('submissionredirect', 'submissionredirect', 'dataform');
-        if (!empty($settings['redirect'])) {
-            $mform->setDefault('submissionredirect', $settings['redirect']);
-        }
+        $label = get_string('submissionredirect', 'dataform');
+        $mform->addElement('select', 'submission[redirect]', $label, $options);
+        $mform->addHelpButton('submission[redirect]', 'submissionredirect', 'dataform');
 
         // Response timeout.
         $options = range(0, 20);
         $options[0] = get_string('none');
-        $mform->addElement('select', 'submissiontimeout', get_string('submissiontimeout', 'dataform'), $options);
-        $mform->addHelpButton('submissiontimeout', 'submissiontimeout', 'dataform');
+        $label = get_string('submissiontimeout', 'dataform');
+        $mform->addElement('select', 'submission[timeout]', $label, $options);
+        $mform->addHelpButton('submission[timeout]', 'submissiontimeout', 'dataform');
 
         // Response for submission.
-        $mform->addElement('textarea', 'submissionmessage', get_string('submissionmessage', 'dataform'));
+        $mform->addElement('textarea', 'submission[message]', get_string('submissionmessage', 'dataform'));
         $mform->setType('submissionmessage', $paramtext);
-        $mform->disabledIf('submissionmessage', 'submissiontimeout', 'eq', 0);
-        $mform->addHelpButton('submissionmessage', 'submissionmessage', 'dataform');
+        $mform->disabledIf('submission[message]', 'submissiontimeout', 'eq', 0);
+        $mform->addHelpButton('submission[message]', 'submissionmessage', 'dataform');
+
+        // What to display after submission.
+        $label = get_string('submissiondisplayafter', 'dataform');
+        $mform->addElement('selectyesno', 'submission[displayafter]', $label);
+        $mform->addHelpButton('submission[displayafter]', 'submissiondisplayafter', 'dataform');
 
         // Set default save and cancel for new views.
         if (!$view->id) {
@@ -375,8 +373,21 @@ class dataformviewform extends \moodleform {
      *
      */
     public function data_preprocessing(&$data) {
+        $view = $this->_view;
+
         // Fix patterns in href attributes.
         $this->fix_patterns_in_href($data);
+        // Submission settings.
+        $submission = $view->submission_settings;
+        if (is_array($submission)) {
+            $data->submission = $submission;
+            $buttons = $view->submission_buttons;
+            foreach ($buttons as $name) {
+                if (array_key_exists($name, $submission)) {
+                    $data->{$name.'buttonenable'} = 1;
+                }
+            }
+        }
     }
 
     /**
@@ -385,44 +396,6 @@ class dataformviewform extends \moodleform {
     public function set_data($data) {
         $this->data_preprocessing($data);
         parent::set_data($data);
-    }
-
-    /**
-     *
-     */
-    public function get_data() {
-        if ($data = parent::get_data()) {
-            // Collate submission settings.
-            $settings = array();
-            // Submission display.
-            if (!empty($data->submissiondisplay)) {
-                $settings['display'] = $data->submissiondisplay;
-            }
-            // Buttons.
-            $buttons = $this->_view->get_submission_buttons();
-            foreach ($buttons as $name) {
-                $buttonenable = $name.'buttonenable';
-                if (!empty($data->$buttonenable)) {
-                    $buttoncontent = $name.'button_label';
-                    $settings[$name] = !empty($data->$buttoncontent) ? $data->$buttoncontent : null;
-                }
-            }
-
-            // Submission Redirect.
-            if (!empty($data->submissionredirect)) {
-                $settings['redirect'] = $data->submissionredirect;
-            }
-            if (!empty($data->submissiontimeout)) {
-                $settings['timeout'] = $data->submissiontimeout;
-            }
-            if (!empty($data->submissionmessage)) {
-                $settings['message'] = $data->submissionmessage;
-            }
-
-            $data->submission = $settings;
-
-        }
-        return $data;
     }
 
     /**
