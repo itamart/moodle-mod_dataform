@@ -108,7 +108,7 @@ class dataformfield_select_renderer extends mod_dataform\pluginbase\dataformfiel
             if ($field->param4 or has_capability('mod/dataform:managetemplates', $field->get_df()->context)) {
                 $mform->addElement('text', "{$fieldname}_newvalue", get_string('newvalue', 'dataform'));
                 $mform->setType("{$fieldname}_newvalue", PARAM_TEXT);
-                $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', 0);
+                $mform->disabledIf("{$fieldname}_newvalue", "{$fieldname}_selected", 'neq', '');
             }
             return;
         }
