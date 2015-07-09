@@ -240,7 +240,7 @@ class mod_dataform_entry_manager {
         ) = $filter->get_sql();
 
         $count = ' COUNT(e.id) ';
-        $whatsql = " DISTINCT $whatentry $whatuser $contentwhat $joinwhat";
+        $whatsql = " $whatentry $whatuser $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
 
