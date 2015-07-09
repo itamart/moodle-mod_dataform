@@ -563,6 +563,75 @@ class dataformfilter {
     }
 
     /**
+     * Appends one or more filters.
+     *
+     * @param array $filters List of dataformfilter objects to append.
+     * @return void
+     */
+    public function append(array $filters) {
+        foreach ($filters as $filter) {
+            if (!$filter) {
+                continue;
+            }
+
+            $this->id = $filter->id;
+
+            // Per page - append smaller.
+            if ($newperpage = $filter->perpage) {
+                if (!$perpage = $this->perpage or $newperpage < $perpage) {
+                    $this->perpage = $newperpage;
+
+                    // Set page and page num.
+                    $this->page = $filter->page;
+                    $this->pagenum = $filter->pagenum;
+                }
+            }
+
+            // Custom sort.
+            if ($newcustomsort = $filter->customsort) {
+                if (!$this->customsort) {
+                    $this->customsort = $newcustomsort;
+                } else {
+                    $customsort = unserialize($newcustomsort);
+                    $this->append_sort_options($customsort);
+                }
+            }
+
+            // Custom search.
+            if ($newcustomsearch = $filter->customsearch) {
+                if (!$this->customsearch) {
+                    $this->customsearch = $newcustomsearch;
+                } else {
+                    $customsearch = unserialize($newcustomsearch);
+                    $this->append_search_options($customsearch);
+                }
+            }
+
+            // Search.
+            if ($filter->search and !$this->search) {
+                $this->search = $filter->search;
+            }
+
+            // Set specific entries.
+            if ($eids = $filter->eids) {
+                $this->eids = $this->get_unique_list($this->eids, $eids);
+            }
+            // Set specific users.
+            if ($users = $filter->users) {
+                $this->users = $this->get_unique_list($this->users, $users);
+            }
+            // Set specific groups.
+            if ($groups = $filter->groups) {
+                $this->groups = $this->get_unique_list($this->groups, $groups);
+            }
+            // Set specific states.
+            if ($states = $filter->states) {
+                $this->states = $this->get_unique_list($this->states, $states);
+            }
+        }
+    }
+
+    /**
      *
      */
     public function append_sort_options(array $sorties) {
@@ -625,4 +694,21 @@ class dataformfilter {
             $this->search = $searchies;
         }
     }
+
+
+    /**
+     * Generates a unique list from the specified items. The items can be either array
+     * lists or comma separated lists.
+     *
+     * @param string|array $list1
+     * @param string|array $list2
+     * @param int $sort Sort flag of array_unique; defaults to SORT_NUMERIC.
+     * @return array
+     */
+    private function get_unique_list($items1, $items2, $sort = SORT_NUMERIC) {
+        $list1 = is_array($items1) ? $items1 : explode(',', $items1);
+        $list2 = is_array($items2) ? $items2 : explode(',', $items2);
+        return array_values(array_unique(array_merge($list1, $list2), $sort));
+    }
+
 }

@@ -1104,7 +1104,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
 
         $filterjump = '';
 
-        if (!$view->is_forcing_filter() and ($filter->id or $view->entry_manager->get_count(mod_dataform_entry_manager::COUNT_VIEWABLE))) {
+        if ($filter->id or $view->entry_manager->get_count(mod_dataform_entry_manager::COUNT_VIEWABLE)) {
             $fm = mod_dataform_filter_manager::instance($df->id);
             if (!$menufilters = $fm->get_filters(null, true)) {
                 $menufilters = array();
