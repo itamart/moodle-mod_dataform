@@ -337,8 +337,8 @@ class mod_dataform_entry_manager {
                     $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
                 } else {
                     // By page.
-                    $page = $filter->page ? $filter->page : 0;
                     $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
+                    $page = $numpages > 1 ? (int) $filter->page : 0;
 
                     if ($filter->selection) {
                         if ($filter->selection == self::SELECT_FIRST_PAGE) {
