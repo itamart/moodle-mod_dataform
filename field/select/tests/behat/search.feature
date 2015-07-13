@@ -17,6 +17,7 @@ Feature: Search by a select field
             | name      | dataform  | searchoptions                 |
             | Filter1   | dataform1 | AND,select,Content,,=,OP      |
             | Filter2   | dataform1 | AND,select,Content,,=,BS      |
+            | Filter3   | dataform1 | AND,select,Content,,=,op      |
 
         And the following dataform "entries" exist:
             | dataform  | user           | select_newvalue  |
@@ -38,3 +39,6 @@ Feature: Search by a select field
         Then I do not see "OP"
         And I do not see "TL"
 
+        When I set the field "id_filtersmenu" to "Filter3"
+        Then I see "OP"
+        And I do not see "TL"
