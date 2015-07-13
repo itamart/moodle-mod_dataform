@@ -136,15 +136,34 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     }
 
     /**
+     * Returns the index of the sepcified value in the field's options.
+     * If not found returns '#'. This assumes that the option indices are
+     * always numeric.
      *
+     * @param string $value
+     * @return int
      */
     public function get_search_value($value) {
         $options = $this->options_menu();
         if ($key = array_search($value, $options)) {
             return $key;
         } else {
-            return '';
+            return '#';
         }
+    }
+
+    /**
+     *
+     */
+    public function get_search_sql($search) {
+        if (!$search) {
+            return null;
+        }
+
+        // Convert the search value to option index.
+        $search[3] = $this->get_search_value($search[3]);
+
+        return parent::get_search_sql($search);
     }
 
     /**
