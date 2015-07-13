@@ -138,14 +138,15 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     /**
      * Returns the index of the sepcified value in the field's options.
      * If not found returns '#'. This assumes that the option indices are
-     * always numeric.
+     * always numeric. The comparison of the search value with the options
+     * is case insensitive.
      *
      * @param string $value
      * @return int
      */
     public function get_search_value($value) {
         $options = $this->options_menu();
-        if ($key = array_search($value, $options)) {
+        if ($key = array_search(strtolower($value), array_map('strtolower', $options))) {
             return $key;
         } else {
             return '#';
