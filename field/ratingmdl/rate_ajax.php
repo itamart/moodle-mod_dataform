@@ -72,8 +72,23 @@ $field = $df->field_manager->get_field_by_name($ratingarea);
 // Get the entry.
 $entry = $DB->get_record('dataform_entries', array('id' => $itemid));
 
+// Get the user's rating record if exists.
+$params = array(
+    'contextid' => $df->context->id,
+    'component' => 'mod_dataform',
+    'ratingarea' => $field->name,
+    'itemid' => $entry->id,
+    'userid' => $USER->id,
+);
+$ratingrec = $DB->get_record('rating', $params);
+
 // Get the entry rating.
-if (!$entryrating = $field->get_entry_rating($entry)) {
+$raterelement = "c$field->id". '_ratinguserid';
+$ratingelement = "c$field->id". '_usersrating';
+
+$entry->$raterelement = $USER->id;
+$entry->$ratingelement = !empty($ratingrec->rating) ? $ratingrec->rating : null;
+if (!$entryrating = $field->get_entry_rating($entry, true)) {
     $result->error = get_string('ratepermissiondenied', 'rating');
     echo json_encode($result);
     die();
@@ -85,6 +100,7 @@ $rm = new ratingmdl_rating_manager();
 // Check the module rating permissions.
 if (!$field->user_can_rate($entry, $USER->id)) {
     $result->error = get_string('ratepermissiondenied', 'rating');
+    $result->value = $entryrating->rating;
     echo json_encode($result);
     die();
 }
@@ -102,13 +118,15 @@ $params = array(
 );
 if (!$rm->check_rating_is_valid($params)) {
     $result->error = get_string('ratinginvalid', 'rating');
+    $result->value = $entryrating->rating;
     echo json_encode($result);
     die();
 }
 
 // Check that the rating value is in accordance with the field settings.
 if ($validationcode = $field->user_can_assign_the_rating_value($entryrating, $userrating)) {
-    $result->error = get_string("ratinginvalid$validationcode", 'dataformfield_ratingmdl');
+    $result->error = get_string("ratinginvalid$validationcode", 'dataformfield_ratingmdl', $userrating);
+    $result->value = $entryrating->rating;
     echo json_encode($result);
     die();
 }
@@ -153,9 +171,12 @@ $ratingoptions->aggregate = array(
     RATING_AGGREGATE_SUM,
 );
 
-$items = $rm->get_ratings($ratingoptions);
-$firstitem = reset($items);
-$aggr = $field->get_rating_display_aggregates($firstitem->rating);
+$firstrating = null;
+if ($items = $rm->get_ratings($ratingoptions)) {
+    $firstitem = reset($items);
+    $firstrating = $firstitem->rating;
+}
+$aggr = $field->get_rating_display_aggregates($firstrating);
 
 // Result.
 $result->success = true;

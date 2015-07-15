@@ -92,6 +92,7 @@ YUI.add('moodle-dataformfield_ratingmdl-rater', function(Y) {
                             }
                             else if (data.error){
                                 alert(data.error);
+                                scope.selector.set('selectedIndex', data.value);
                             }
                         } catch(e) {
                             alert(e.message + " " + outcome.responseText);

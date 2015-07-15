@@ -52,3 +52,9 @@ $string['forceinorder'] = 'Force in order';
 $string['forceinorder_help'] = 'When in-order is forced, the user cannot use a particular value for rating before preceding values in the scale have been used the "limit" number of times (if applicable).';
 $string['eachuser'] = 'Each user separately';
 $string['allusers'] = 'All users as a whole';
+/* ERRORS */
+$string['ratinginvalid1'] = 'The number of ratings with value {$a} has reached its limit. Please select another value.';
+$string['ratinginvalid2'] = 'Rating order applies. The first rating must be the first value in the rating scale.';
+$string['ratinginvalid3'] = 'Rating order applies. This rating value cannot be unset before all current ratings with higher values are unset.';
+$string['ratinginvalid4'] = 'Rating order applies. Your rating value must be consecutive to the rating with the highest value.';
+$string['ratinginvalid5'] = 'Rating order applies. The preceding rating value must reach a limit before the value {$a} can be assigned. Please select the preceding value.';

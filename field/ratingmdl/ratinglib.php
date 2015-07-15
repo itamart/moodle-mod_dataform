@@ -149,20 +149,24 @@ class ratingmdl_rating_manager extends rating_manager {
         }
 
         list($sql, $params) = $this->get_sql_aggregate($options);
-        if ($ratingrecords = $DB->get_records_sql($sql, $params)) {
-            foreach ($options->items as $itemid => $item) {
-                if (array_key_exists($itemid, $ratingrecords)) {
+        if (!$ratingrecords = $DB->get_records_sql($sql, $params)) {
+            return array();
+        }
 
-                    $rec = $ratingrecords[$itemid];
-                    $rec->context = $options->context;
-                    $rec->component = $options->component;
-                    $rec->ratingarea = $options->ratingarea;
-                    $rec->scaleid = $options->scaleid;
-                    $rec->settings = $this->get_rating_settings_object($options);
-                    $rec->aggregate = $options->aggregate;
+        foreach ($options->items as $itemid => $item) {
+            if (array_key_exists($itemid, $ratingrecords)) {
 
-                    $options->items[$itemid]->rating = $this->get_rating_object($item, $rec);
-                }
+                $rec = $ratingrecords[$itemid];
+                $rec->context = $options->context;
+                $rec->component = $options->component;
+                $rec->ratingarea = $options->ratingarea;
+                $rec->scaleid = $options->scaleid;
+                $rec->settings = $this->get_rating_settings_object($options);
+                $rec->aggregate = $options->aggregate;
+
+                $options->items[$itemid]->rating = $this->get_rating_object($item, $rec);
+            } else {
+                unset($options->items[$itemid]);
             }
         }
         return $options->items;
