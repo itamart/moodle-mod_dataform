@@ -26,13 +26,9 @@ class dataformfield_picture_form extends dataformfield_file_form {
     /**
      *
      */
-    protected function definition_appearance() {
+    protected function field_definition() {
         $field = &$this->_field;
         $mform = &$this->_form;
-
-        // Appearance.
-        $mform->addElement('header', 'appearancehdr', get_string('appearance'));
-        $mform->setExpanded('appearancehdr');
 
         // Files separator (param4).
         $options = array(
@@ -45,8 +41,8 @@ class dataformfield_picture_form extends dataformfield_file_form {
 
         // Display WxH.
         $grp = array();
-        $grp[] = &$mform->createElement('text', 'dispw', null, array('size' => '4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('text', 'disph', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('text', 'dispw', null, array('size' => '4'));
+        $grp[] = &$mform->createElement('text', 'disph', null, array('size' => '4'));
         $grp[] = &$mform->createElement('select', 'dispu', null, array('px' => 'px', 'em' => 'em', '%' => '%'));
         $mform->addGroup($grp, 'dispdim', get_string('displaydimensions', 'dataformfield_picture'), array(' x ', ' '), false);
         $mform->setType('dispw', PARAM_INT);
@@ -59,8 +55,8 @@ class dataformfield_picture_form extends dataformfield_file_form {
 
         // Max pic dimensions (crop if needed).
         $grp = array();
-        $grp[] = &$mform->createElement('text', 'maxw', null, array('size' => '4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('text', 'maxh', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('text', 'maxw', null, array('size' => '4'));
+        $grp[] = &$mform->createElement('text', 'maxh', null, array('size' => '4'));
         $mform->addGroup($grp, 'maxpicdim', get_string('maxdimensions', 'dataformfield_picture'), ' x ', false);
         $mform->setType('maxw', PARAM_INT);
         $mform->setType('maxh', PARAM_INT);
@@ -71,8 +67,8 @@ class dataformfield_picture_form extends dataformfield_file_form {
 
         // Thumbnail dimensions (crop if needed).
         $grp = array();
-        $grp[] = &$mform->createElement('text', 'thumbw', null, array('size' => '4', 'style' => 'width:inherit;'));
-        $grp[] = &$mform->createElement('text', 'thumbh', null, array('size' => '4', 'style' => 'width:inherit;'));
+        $grp[] = &$mform->createElement('text', 'thumbw', null, array('size' => '4'));
+        $grp[] = &$mform->createElement('text', 'thumbh', null, array('size' => '4'));
         $mform->addGroup($grp, 'thumbgrp', get_string('thumbdimensions', 'dataformfield_picture'), ' x ', false);
         $mform->setType('thumbw', PARAM_INT);
         $mform->setType('thumbh', PARAM_INT);
@@ -80,6 +76,9 @@ class dataformfield_picture_form extends dataformfield_file_form {
         $mform->addGroupRule('thumbgrp', array('thumbh' => array(array(null, 'numeric', null, 'client'))));
         $mform->setDefault('thumbw', $field->appearance->thumbw);
         $mform->setDefault('thumbh', $field->appearance->thumbw);
+
+        // File settings.
+        $this->definition_file_settings();
     }
 
     /**
