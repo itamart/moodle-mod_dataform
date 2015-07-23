@@ -58,8 +58,9 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
 
         // New contents.
         $value = (count($values) === 1 ? reset($values) : $values);
-        $timestamp = $this->get_timestamp_from_value($value);
-        $contents[] = $timestamp;
+        if ($timestamp = $this->get_timestamp_from_value($value)) {
+            $contents[] = $timestamp;
+        }
 
         return array($contents, $oldcontents);
     }
@@ -133,13 +134,13 @@ class dataformfield_time_time extends mod_dataform\pluginbase\dataformfield {
             $value = array_map('strtotime', explode('..', $value));
             // Must have valid timestamps.
             if (in_array(false, $value, true)) {
-                return null;
+                $value = '#';
             }
         } else {
             $value = strtotime($value);
             // Must have valid timestamps.
             if ($value === false) {
-                return null;
+                $value = '#';
             }
         }
 
