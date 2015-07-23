@@ -309,7 +309,9 @@ class dataformfilter {
                             list($fieldsql, $fieldparams, $fromcontent) = $fieldsqloptions;
                             $whereand[] = $fieldsql;
                             $searchparams = array_merge($searchparams, $fieldparams);
-                            $searchfrom[$fieldid] = $fieldid;
+                            if ($fromcontent) {
+                                $searchfrom[$fieldid] = $fieldid;
+                            }
                         }
                     }
                 }
@@ -321,7 +323,9 @@ class dataformfilter {
                             list($fieldsql, $fieldparams, $fromcontent) = $fieldsqloptions;
                             $whereor[] = $fieldsql;
                             $searchparams = array_merge($searchparams, $fieldparams);
-                            $searchfrom[$fieldid] = $fieldid;
+                            if ($fromcontent) {
+                                $searchfrom[$fieldid] = $fieldid;
+                            }
                         }
                     }
                 }

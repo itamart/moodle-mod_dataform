@@ -786,24 +786,54 @@ abstract class dataformfield {
         $varcharcontent = $this->get_sql_compare_text($element);
         $params = array();
 
-        if ($operator === '' and $not) {
-            list($sql, $params) = $DB->get_in_or_equal('', SQL_PARAMS_QM, '', false);
-            $sql = " $varcharcontent $sql ";
-        } else if ($operator === '=') {
+        $isdataformcontent = $this->is_dataform_content();
+
+        // NOT/IS EMPTY.
+        if ($operator === '') {
+            // Get entry ids where field has content.
+            $eids = $this->get_entry_ids_for_content('', $params);
+
+            if ($not) {
+                // NOT EMPTY.
+                if (!$eids) {
+                    $eids = array(-1);
+                    $isdataformcontent = false;
+                }
+                list($inids, $params) = $DB->get_in_or_equal($eids);
+            } else {
+                // IS EMPTY.
+                if (!$eids) {
+                    // No entry with content so no need for criterion.
+                    return null;
+                } else {
+                    list($inids, $params) = $DB->get_in_or_equal($eids, SQL_PARAMS_QM, '', false);
+                    $isdataformcontent = false;
+                }
+            }
+            $sql = " e.id $inids ";
+            return array($sql, $params, $isdataformcontent);
+        }
+
+        // SOMETHING.
+        if ($operator === '=') {
+            // EQUAL.
             $searchvalue = trim($value);
             list($sql, $params) = $DB->get_in_or_equal($searchvalue);
             $sql = " $varcharcontent $sql ";
         } else if ($operator === 'IN') {
+            // IN.
             $searchvalue = is_array($value) ? $value : array_map('trim', explode(',', $value));
             list($sql, $params) = $DB->get_in_or_equal($searchvalue);
             $sql = " $varcharcontent $sql ";
         } else if ($operator === 'BETWEEN') {
+            // BETWEEN.
             $searchvalue = is_array($value) ? $value : array_map('trim', explode(',', $value));
             list($arg1, $arg2) = ($searchvalue + array(''));
             $params[] = $arg1;
             $params[] = $arg2;
             $sql = " ($not $varcharcontent >= ? AND $varcharcontent <= ?) ";
         } else if ($operator === 'LIKE') {
+            // LIKE.
             $params = array("%$value%");
             $sql = $DB->sql_like($varcharcontent, '?', false);
         } else {
@@ -811,25 +841,28 @@ abstract class dataformfield {
             $sql = " $varcharcontent $operator ? ";
         }
 
-        // For all NOT criteria except NOT Empty, exclude entries
-        // which don't meet the positive criterion
+        // NOT SOMETHING.
+        // For all NOT something criteria,
+        // exclude entries which don't meet the positive criterion
         // because some fields may not have content records
         // and the respective entries may be filter out
         // despite meeting the criterion.
-        $excludeentries = (($not and $operator !== '') or (!$not and $operator === ''));
-
-        if ($excludeentries) {
+        if ($not and $operator !== '') {
             // Get entry ids for entries that meet the criterion.
-            if ($eids = $this->get_entry_ids_for_content($sql, $params)) {
+            $eids = $this->get_entry_ids_for_content($sql, $params);
+
+            if ($eids) {
                 // Get NOT IN sql.
                 list($notinids, $params) = $DB->get_in_or_equal($eids, SQL_PARAMS_QM, '', false);
                 $sql = " e.id $notinids ";
                 return array($sql, $params, false);
             } else {
+                // No content entries so no need for this criterion.
                 return null;
             }
         }
-        return array($sql, $params, $this->is_dataform_content());
+
+        return array($sql, $params, $isdataformcontent);
     }
 
     /**
@@ -884,14 +917,13 @@ abstract class dataformfield {
 
         $searchtable = $this->get_search_from_sql();
         $sql = "
-            SELECT
-                e.id
-            FROM
-                {dataform_entries} e
-                $searchtable
-            WHERE
-                $sqlwhere
+            SELECT e.id
+            FROM {dataform_entries} e $searchtable
         ";
+
+        if (!empty($sqlwhere)) {
+            $sql .= " WHERE $sqlwhere ";
+        }
 
         if ($entryids = $DB->get_records_sql_menu($sql, $params)) {
             return array_keys($entryids);
