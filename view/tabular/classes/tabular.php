@@ -104,10 +104,9 @@ class dataformview_tabular_tabular extends mod_dataform\pluginbase\dataformview 
         $tablehtml = trim($this->entry_template);
         $opengroupdiv = html_writer::start_tag('div', array('class' => 'entriesview'));
         $closegroupdiv = html_writer::end_tag('div');
-        if ($name) {
-            $name = ($name == 'newentry' ? get_string('entrynew', 'dataform') : $name);
-        }
-        $groupheading = $OUTPUT->heading($name, 3, 'main');
+
+        // Dropped: Add group heading.
+        $groupheading = '';
 
         $elements = array();
 
