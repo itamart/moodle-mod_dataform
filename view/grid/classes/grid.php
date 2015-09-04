@@ -127,11 +127,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
             }
         }
 
-        // Add group heading.
-        $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
-        if ($name) {
-            array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
-        }
+        // Dropped: Add group heading.
 
         return $elements;
     }
