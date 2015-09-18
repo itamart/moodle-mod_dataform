@@ -886,7 +886,7 @@ class mod_dataform_dataform {
      *
      * @return bool Always true.
      */
-    protected function reset_user_data($userid = null) {
+    public function reset_user_data($userid = null) {
         // Must have manage templates capability.
         require_capability('mod/dataform:managetemplates', $this->context);
 
