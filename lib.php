@@ -477,7 +477,7 @@ function dataform_reset_userdata($data) {
 
     $status = array();
 
-    if (!$dataforms = $DB->get_records('dataform', array('dataid' => $data->courseid), '', 'id')) {
+    if (!$dataforms = $DB->get_records('dataform', array('course' => $data->courseid), '', 'id')) {
         return $status;
     }
 
