@@ -163,7 +163,9 @@ class dataformview_csv_importform extends moodleform {
         $mform->addElement('selectyesno', 'addperparticipant', get_string('addperparticipant', 'dataformview_csv'));
 
         // Update existing entries.
-        // $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_csv'));.
+        if ($view->param6) {
+            $mform->addElement('selectyesno', 'updateexisting', get_string('updateexisting', 'dataformview_csv'));
+        }
 
         // Edit after import.
         // $mform->addElement('selectyesno', 'editafter', get_string('importeditimported', 'dataformview_csv'));.

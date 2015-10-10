@@ -57,8 +57,8 @@ class dataformview_csv_form extends dataformview_aligned_form {
         $mform->addElement('advcheckbox', 'param5',  get_string('import'), get_string('enable'), null, array(0, 1));
 
         // Allow update existing entries  (param4)
-        // $mform->addElement('advcheckbox', 'updateexisting',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));
-        // $mform->disabledIf('updateexisting', 'importenable', 'eq', 0);.
+        $mform->addElement('advcheckbox', 'param6',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));
+        $mform->disabledIf('param6', 'importenable', 'eq', 0);
 
         // Delimiter.
         $delimiters = csv_import_reader::get_delimiter_list();
