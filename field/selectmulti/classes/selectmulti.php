@@ -79,9 +79,11 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
             return parent::get_search_sql($search);
         }
 
+        $options = $this->options_menu();
+
         // Search with all required.
         if ($value == '-000-') {
-            if ($options = $this->options_menu()) {
+            if ($options) {
                 $optionkeys = array_keys($options);
                 $value = '#'. implode('#', $optionkeys). '#';
             }
