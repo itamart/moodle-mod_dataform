@@ -200,7 +200,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
 
         $fieldid = $this->id;
         $csvname = $importsetting['name'];
-        $allownew = !empty($importsetting['allownew']) ? true : false;
+        $allownew = !empty($importsetting['allownew']);
         $label = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
 
         if ($label) {

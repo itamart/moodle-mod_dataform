@@ -1245,7 +1245,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             // Adjust filter page if needed.
             // This may be needed if redirecting from entry form to paged view.
             if ($filter->eids and !$filter->page) {
-                if ($entryid = (is_array($filter->eids) ? reset($filter->eids) : $filter->eids) and $entryid > 0) {
+                if ($entryid = (is_array($filter->eids) ? $filter->eids[0] : $filter->eids) and $entryid > 0) {
                     $filter->page = $entryman->get_entry_position($entryid, $filter);
                 }
             }

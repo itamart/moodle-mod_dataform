@@ -142,8 +142,10 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
         $usercontext = context_user::instance($USER->id);
 
         // Upload files done only once.
-        if (!$draftid) {
-            $draftid = file_get_unused_draft_itemid();
+        if (!empty($settings['filepicker'])) {
+            if (!$draftid) {
+                $draftid = file_get_unused_draft_itemid();
+            }
             $zipdraftid = $settings['filepicker'];
 
             if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $zipdraftid, 'sortorder', false)) {
