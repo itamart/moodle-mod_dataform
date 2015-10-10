@@ -188,6 +188,8 @@ class mod_dataform_generator extends testing_module_generator {
      * @return stdClass generated object
      */
     public function create_view($record, array $options = null) {
+        global $DB;
+
         $record = (object)(array)$record;
         $df = new \mod_dataform_dataform($record->dataid);
         $view = $df->view_manager->get_view($record->type);
@@ -195,6 +197,18 @@ class mod_dataform_generator extends testing_module_generator {
 
         // Add data from record.
         foreach ($record as $var => $value) {
+            // Do not update submission when default.
+            if ($var == 'submission' and $value == 'default') {
+                continue;
+            }
+            // Convert filter name to id if applicable.
+            if ($var == 'filter' and $value) {
+                if ($filterid = $DB->get_field('dataform_filters', 'id', array('name' => $value))) {
+                    $view->filterid = $filterid;
+                }
+                continue;
+            }
+
             $view->$var = $value;
         }
 
