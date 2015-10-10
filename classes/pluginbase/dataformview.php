@@ -1649,15 +1649,15 @@ class dataformview {
     public function duplicate($name) {
         global $DB;
 
-        $data = clone($this->data);
-        unset($data->id);
-        $data->name = $name;
+        $newview = clone($this->data);
+        unset($newview->id);
+        $newview->name = $name;
         // Make sure patterns are serialized.
-        if ($data->patterns and is_array($data->patterns)) {
-            $data->patterns = serialize($data->patterns);
+        if ($newview->patterns and is_array($newview->patterns)) {
+            $newview->patterns = serialize($newview->patterns);
         }
 
-        if (!$viewid = $DB->insert_record('dataform_views', $data)) {
+        if (!$newview->id = $DB->insert_record('dataform_views', $newview)) {
             return false;
         }
 
@@ -1669,7 +1669,7 @@ class dataformview {
             if (count($files) > 1) {
                 foreach ($files as $file) {
                     $filerec = new \stdClass;
-                    $filerec->itemid = $viewid;
+                    $filerec->itemid = $newview->id;
                     $fs->create_file_from_storedfile($filerec, $file);
                 }
             }
@@ -1677,13 +1677,13 @@ class dataformview {
 
         // Trigger an event for duplicating this view.
         $eventparams = $this->default_event_params;
-        $eventparams['objectid'] = $viewid;
+        $eventparams['objectid'] = $newview->id;
         $eventparams['other']['viewname'] = $name;
         $event = \mod_dataform\event\view_created::create($eventparams);
-        $event->add_record_snapshot('dataform_views', $data);
+        $event->add_record_snapshot('dataform_views', $newview);
         $event->trigger();
 
-        return $viewid;
+        return $newview->id;
     }
 
     /**
@@ -1866,7 +1866,7 @@ class dataformview {
             }
 
             if (!empty($text)) {
-                $data->$editor = "ft:{$format}tr:{$trust}ct:$text";
+                $data->$editor = $text;
             } else {
                 $data->$editor = null;
             }
