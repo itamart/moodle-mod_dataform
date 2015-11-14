@@ -36,6 +36,7 @@ class dataformentry {
 
         $entry = new \stdClass;
         $entry->dataid = $df->id;
+        $entry->type = !empty($data->type) ? $data->type : '';
         $entry->userid = !empty($data->userid) ? $data->userid : $currentuserid;
         $entry->groupid = !empty($data->groupid) ? $data->groupid : $df->currentgroup;
         $entry->timecreated = !empty($data->timecreated) ? $data->timecreated : $now;

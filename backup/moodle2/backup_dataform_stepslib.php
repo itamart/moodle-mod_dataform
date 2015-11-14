@@ -54,19 +54,19 @@ class backup_dataform_activity_structure_step extends backup_activity_structure_
         $filters = new backup_nested_element('filters');
         $filter = new backup_nested_element('filter', array('id'), array(
             'name', 'description',
-            'visible', 'perpage', 'selection',
+            'visible', 'entrytype', 'perpage', 'selection',
             'search', 'customsort', 'customsearch'));
 
         $views = new backup_nested_element('views');
         $view = new backup_nested_element('view', array('id'), array(
             'type', 'name', 'description',
-            'visible', 'perpage', 'filterid', 'patterns', 'submission', 'section',
+            'visible', 'entrytype', 'perpage', 'filterid', 'patterns', 'submission', 'section',
             'param1', 'param2', 'param3', 'param4', 'param5',
             'param6', 'param7', 'param8', 'param9', 'param10'));
 
         $entries = new backup_nested_element('entries');
         $entry = new backup_nested_element('entry', array('id'), array(
-            'userid', 'groupid', 'timecreated', 'timemodified', 'state'));
+            'type', 'userid', 'groupid', 'timecreated', 'timemodified', 'state'));
 
         $contents = new backup_nested_element('contents');
         $content = new backup_nested_element('content', array('id'), array(
