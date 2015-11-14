@@ -78,7 +78,7 @@ if ($urlparams->duplicate and confirm_sesskey()) {
 
 // Any notifications?
 $df->notifications = array('problem' => array('defaultview' => null));
-if (!$views = $viewman->get_views(array('forceget' => true))) {
+if (!$views = $viewman->get_views(array('forceget' => true, 'sort' => 'name'))) {
     $df->notifications = array('problem' => array('getstartedviews' => get_string('viewnoneindataform', 'dataform')));
 } else if (!$df->defaultview) {
     $df->notifications = array('problem' => array('defaultview' => get_string('viewnodefault', 'dataform', '')));
