@@ -73,6 +73,15 @@ class dataformviewform extends \moodleform {
         $mform->addHelpButton('visible', 'viewvisibility', 'dataform');
         $mform->setDefault('visible', 1);
 
+        // Entry type.
+        $menu = array('' => get_string('choosedots'));
+        if ($entrytypes = $view->df->entrytypes) {
+            $types = array_map('trim', explode(',', $entrytypes));
+            $menu = array_merge($menu, array_combine($types, $types));
+        }
+        $mform->addElement('select', 'entrytype', get_string('entrytype', 'dataform'), $menu);
+        $mform->addHelpButton('entrytype', 'entrytype', 'dataform');
+
         // Filter.
         if (!$filtersmenu = \mod_dataform_filter_manager::instance($view->dataid)->get_filters(null, true)) {
             $filtersmenu = array(0 => get_string('filtersnonedefined', 'dataform'));

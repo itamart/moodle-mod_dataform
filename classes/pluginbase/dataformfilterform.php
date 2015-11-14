@@ -69,6 +69,17 @@ abstract class dataformfilterform extends \moodleform {
         $mform->addElement('selectyesno', 'visible', get_string('visible'));
         $mform->setDefault('visible', 1);
 
+        // Entry type.
+        $menu = array('' => get_string('choosedots'));
+        $df = \mod_dataform_dataform::instance($filter->dataid);
+        if ($entrytypes = $df->entrytypes) {
+            $types = array_map('trim', explode(',', $entrytypes));
+            $menu = array_merge($menu, array_combine($types, $types));
+        }
+        $mform->addElement('select', 'entrytype', get_string('entrytype', 'dataform'), $menu);
+        $mform->addHelpButton('entrytype', 'entrytype', 'dataform');
+        $mform->setDefault('entrytype', $filter->entrytype);
+
         // Entries per page.
         $mform->addElement('text', 'perpage', get_string('viewperpage', 'dataform'));
         $mform->setType('perpage', PARAM_INT);

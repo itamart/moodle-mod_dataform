@@ -52,6 +52,7 @@ class dataformfilter {
         $this->_instance->description = empty($data->description) ? '' : $data->description;
         $this->_instance->visible = !isset($data->visible) ? 1 : $data->visible;
 
+        $this->_instance->entrytype = empty($data->entrytype) ? '' : $data->entrytype;
         $this->_instance->perpage = empty($data->perpage) ? 0 : $data->perpage;
         $this->_instance->selection = empty($data->selection) ? 0 : $data->selection;
         $this->_instance->groupby = empty($data->groupby) ? '' : $data->groupby;

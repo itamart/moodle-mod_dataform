@@ -139,6 +139,9 @@ class dataformview {
         }
 
         // Get filter from other options.
+        if ($this->entrytype) {
+            $options['entrytype'] = $this->entrytype;
+        }
         if ($this->perpage and empty($options['perpage'])) {
             $options['perpage'] = $this->perpage;
         }
@@ -1815,6 +1818,7 @@ class dataformview {
         $this->name = !empty($data->name) ? trim($data->name) : $this->type;
         $this->description = !empty($data->description) ? $data->description : '';
         $this->visible = !empty($data->visible) ? $data->visible : 0;
+        $this->entrytype = !empty($data->entrytype) ? $data->entrytype : '';
         $this->perpage = !empty($data->perpage) ? $data->perpage : 0;
         $this->groupby = !empty($data->groupby) ? $data->groupby : '';
         $this->filterid = !empty($data->filterid) ? $data->filterid : 0;

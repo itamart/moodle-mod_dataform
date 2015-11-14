@@ -148,6 +148,7 @@ class mod_dataform_filter_manager {
         $filter = new \stdClass;
         $filter->dataid = $this->_dataformid;
         $filter->name = get_string('filternew', 'dataform');
+        $filter->entrytype = '';
         $filter->perpage = 0;
 
         return new mod_dataform\pluginbase\dataformfilter($filter);
@@ -369,6 +370,7 @@ class mod_dataform_filter_manager {
     public function get_filter_from_form($filter, $formdata, $finalize = false) {
         $filter->name = $formdata->name;
         $filter->description = !empty($formdata->description) ? $formdata->description : '';
+        $filter->entrytype = !empty($formdata->entrytype) ? $formdata->entrytype : '';
         $filter->perpage = !empty($formdata->perpage) ? $formdata->perpage : 0;
         $filter->visible = !empty($formdata->visible) ? $formdata->visible : 0;
         $filter->selection = !empty($formdata->selection) ? $formdata->selection : 0;
@@ -466,6 +468,7 @@ class mod_dataform_filter_manager {
         $filterid = self::USER_FILTER_QUICK;
         $instance = get_user_preferences("dataform-filter-$dfid-$viewid-$filterid", null);
         $filteroptions = (object) self::get_filter_options_from_url();
+
         // Neither saved filter nor new options.
         if (empty($instance) and empty($filteroptions)) {
             return null;
@@ -484,9 +487,20 @@ class mod_dataform_filter_manager {
                 if ($option == 'id') {
                     continue;
                 }
+
                 // Reset search if needed.
                 if ($option == 'searchreset' and empty($filteroptions->search)) {
                     $instance->search = '';
+                    continue;
+                }
+
+                // Merge filters.
+                if ($option == 'filters') {
+                    if (empty($instance->filters)) {
+                        $instance->filters = $val;
+                    } else {
+                        $instance->filters = array_merge($instance->filters, $val);
+                    }
                     continue;
                 }
 
@@ -670,15 +684,17 @@ class mod_dataform_filter_manager {
     /**
      *
      */
-    public static function get_filter_options_from_url($url = null) {
+    public static function get_filter_options_from_url(moodle_url $url = null) {
         $filteroptions = array(
             'id' => array('filter', 0, PARAM_INT),
+            'entrytype' => array('uentrytype', 0, PARAM_TEXT),
             'perpage' => array('uperpage', 0, PARAM_INT),
             'selection' => array('uselection', 0, PARAM_INT),
             'groupby' => array('ugroupby', 0, PARAM_INT),
             'search' => array('usearch', '', PARAM_RAW),
             'customsort' => array('usort', '', PARAM_RAW),
             'customsearch' => array('ucsearch', '', PARAM_RAW),
+            'filters' => array('ufilter', array(), PARAM_INT),
             'page' => array('page', 0, PARAM_INT),
             'eids' => array('eids', '', PARAM_TAGLIST),
             'users' => array('users', '', PARAM_SEQUENCE),
@@ -687,32 +703,19 @@ class mod_dataform_filter_manager {
 
         $options = array();
 
-        // Url provided.
-        if ($url) {
-            if ($url instanceof moodle_url) {
-                foreach ($filteroptions as $option => $args) {
-                    list($name, , ) = $args;
-                    if ($val = $url->get_param($name)) {
-                        if ($option == 'customsort') {
-                            $options[$option] = self::get_sort_options_from_query($val);
-                        } else if ($option == 'customsearch') {
-                            $searchoptions = self::get_search_options_from_query($val);
-                            $options[$option] = $searchoptions;
-                        } else if ($option == 'search') {
-                            $options[$option] = urldecode($val);
-                        } else {
-                            $options[$option] = $val;
-                        }
-                    }
-                }
-            }
-            return $options;
-        }
-
-        // Optional params.
         foreach ($filteroptions as $option => $args) {
-            list($name, , $type) = $args;
-            $val = optional_param($name, null, $type);
+            list($name, $default, $type) = $args;
+
+            // Get the value.
+            if ($url) {
+                $val = $url->get_param($name);
+            } else if (is_array($default)) {
+                $val = optional_param_array($name, null, $type);
+            } else {
+                $val = optional_param($name, null, $type);
+            }
+
+            // Get the option.
             if (!is_null($val)) {
                 if ($option == 'customsort') {
                     $options[$option] = self::get_sort_options_from_query($val);
@@ -726,6 +729,7 @@ class mod_dataform_filter_manager {
                 }
             }
         }
+
         return $options;
     }
 }

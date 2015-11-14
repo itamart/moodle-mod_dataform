@@ -68,6 +68,10 @@ $string['completionspecificgradegroup'] = 'Require specific grade';
 $string['completionspecificgradehelp'] = 'requiring specific grade to complete';
 
 // Entries.
+$string['entrytype'] = 'Entry type';
+$string['entrytype_help'] = 'You can specify an entry type when entry types are defined for the activity. Entries will then be filtered by that type. New entries added via a view with the specified type will be assigned that type. You can define entry types in the Entry (internal) field';
+$string['entrytypes'] = 'Entry types';
+$string['entrytypes_help'] = 'You can define entry types which can then be assigned to views and filters so as to restrict views to specific types of entries. Enter a comma separated list of entry type names. Each name should not exceed 32 characters and should consist of general plain text compatible with multilang filter (no html tags).';
 $string['entriesmax'] = 'Maximum entries';
 $string['entriesmax_help'] = 'The max number of entries a user without manageentries capability can add to the activity.
 <ul>
