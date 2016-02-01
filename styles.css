@@ -127,6 +127,10 @@
 }
 
 /** ENTRIES FORM **/
+#page-mod-dataform-view .entriesform {
+    overflow: auto;
+}
+
 #page-mod-dataform-embed.gecko .mform fieldset.hidden,
 #page-mod-dataform-view.gecko .mform fieldset.hidden {
   display: table-column;
@@ -180,6 +184,3 @@
     background-color: #DDD;
     color: #555;
 }
-
-/** FIELD INDEX **/
-#page-mod-dataform-field-index .fieldadd select,
