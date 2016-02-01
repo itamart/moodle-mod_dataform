@@ -261,8 +261,8 @@ function dataform_get_coursemodule_info($cm) {
  */
 function dataform_cm_info_dynamic(cm_info $cm) {
     if ($customdata = $cm->customdata and !empty($customdata->inlineview)) {
-        // The field 'customdata' is not empty IF AND ONLY IF we display content inline.
-        $cm->set_no_view_link();
+        // See CONTRIB-6109.
+        $cm->set_extra_classes('dataform-inlineview');
     }
 }
 
