@@ -26,9 +26,15 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/** PAGE MOD EMBED **/
+/** MODULE COURSE APPEARANCE **/
+.section .activity.dataform-inlineview .activityinstance {
+    display: none;
+}
+
+ /** PAGE MOD EMBED **/
  #page-mod-dataform-embed {
     margin: 0;
+    padding: 0;
     width: 100%;
 }
 
