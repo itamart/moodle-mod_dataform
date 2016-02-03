@@ -250,7 +250,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
      */
     public function get_csv_content($range = self::EXPORT_PAGE) {
         // Set content.
-        $filter = clone($this->filter);
+        $filter = $this->filter->clone;
         if ($range == self::EXPORT_ALL) {
             $filter->perpage = 0;
         }

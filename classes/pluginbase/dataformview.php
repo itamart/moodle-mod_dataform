@@ -286,7 +286,7 @@ class dataformview {
         $event->trigger();
 
         // Set content.
-        $filter = !empty($options['filter']) ? $options['filter'] : clone($this->filter);
+        $filter = !empty($options['filter']) ? $options['filter'] : $this->filter->clone;
         if ($this->user_is_editing() and !$this->in_edit_display_mode()) {
             // Display only the edited entries.
             $filter->eids = $this->editentries;
@@ -1109,7 +1109,7 @@ class dataformview {
                 $this->editentries = $update;
                 // Get entries only if updating existing entries.
                 if ($update != -1) {
-                    $filter = clone($this->filter);
+                    $filter = $this->filter->clone;
                     $filter->eids = explode(',', $update);
                     $entryman->set_content(array('filter' => $filter));
                     $elements = $this->get_entries_definition($entryman->entries);
