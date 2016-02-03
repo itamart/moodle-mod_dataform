@@ -82,7 +82,7 @@ class dataformfield_entryauthor_renderer extends mod_dataform\pluginbase\datafor
             $users[$USER->id] = $USER;
             // Add a supervisor's id.
             if (!in_array($entry->userid, array_keys($users))) {
-                $user = new object;
+                $user = new \stdClass;
                 $user->id = $entry->userid;
                 $user->firstname = $entry->firstname;
                 $user->lastname = $entry->lastname;

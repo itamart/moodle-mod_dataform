@@ -540,7 +540,7 @@ class mod_dataform_preset_manager {
         }
 
         $fs = get_file_storage();
-        $filerecord = new object;
+        $filerecord = new \stdClass;
         $filerecord->contextid = SYSCONTEXTID;
         $filerecord->component = 'mod_dataform';
         $filerecord->filearea = self::PRESET_SITEAREA;

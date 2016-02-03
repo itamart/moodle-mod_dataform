@@ -575,13 +575,13 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         // Get entry rating objects.
         $scaleid = $this->get_scaleid($entry);
 
-        $options = new object;
+        $options = new \stdClass;
         $options->context = $context;
         $options->component = 'mod_dataform';
         $options->ratingarea = $fieldname;
         $options->scaleid = $scaleid;
 
-        $rec = new object;
+        $rec = new \stdClass;
         $rec->itemid = $entry->id;
         $rec->context = $context;
         $rec->component = 'mod_dataform';
@@ -665,7 +665,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         if ($this->_allratings === null) {
             $rm = new ratingmdl_rating_manager();
 
-            $options = new object;
+            $options = new \stdClass;
             $options->context = $this->df->context;
             $options->component = 'mod_dataform';
             $options->ratingarea = $this->name;

@@ -301,7 +301,7 @@ class ratingmdl_rating_manager extends rating_manager {
 
         $rec = $ratingrecord;
 
-        $options = new object;
+        $options = new \stdClass;
         $options->context = $rec->context;
         $options->component = 'mod_dataform';
         $options->ratingarea = $rec->ratingarea;

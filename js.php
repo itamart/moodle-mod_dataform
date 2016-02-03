@@ -27,7 +27,7 @@
 
 require_once('../../config.php');
 
-$urlparams = new object;
+$urlparams = new \stdClass;
 $urlparams->d = optional_param('d', 0, PARAM_INT);
 $urlparams->id = optional_param('id', 0, PARAM_INT);
 $urlparams->jsedit = optional_param('jsedit', 0, PARAM_BOOL);   // edit mode
