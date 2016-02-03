@@ -45,8 +45,8 @@ class dataformview_csv_importform extends moodleform {
         $view = $this->_view;
         $mform = &$this->_form;
 
-        // Field settings.
-        $this->definition_field_settings();
+        // Csv content.
+        $this->definition_csv_content();
 
         // Import options.
         $this->definition_import_options();
@@ -54,8 +54,8 @@ class dataformview_csv_importform extends moodleform {
         // Csv settings.
         $this->definition_csv_settings();
 
-        // Csv content.
-        $this->definition_csv_content();
+        // Field settings.
+        $this->definition_field_settings();
 
         // Action buttons.
         $this->add_action_buttons();
@@ -116,7 +116,6 @@ class dataformview_csv_importform extends moodleform {
         $view = $this->_view;
 
         $mform->addElement('header', 'csvsettingshdr', get_string('csvsettings', 'dataformview_csv'));
-        $mform->setExpanded('csvsettingshdr');
 
         // Delimiter.
         $delimiters = csv_import_reader::get_delimiter_list();
@@ -140,7 +139,6 @@ class dataformview_csv_importform extends moodleform {
 
         // CSV content header.
         $mform->addElement('header', 'csvcontenthdr', get_string('csvcontent', 'dataformview_csv'));
-        $mform->setExpanded('csvcontenthdr');
 
         // Upload file.
         $mform->addElement('filepicker', 'importfile', get_string('uploadfile', 'dataformview_csv'));
