@@ -349,7 +349,11 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 $keyname = reset($fieldnames);
                 if ($field = $this->df->field_manager->get_field_by_name($keyname)) {
                     $params = array('fieldid' => $field->id);
-                    $existingkeys = $DB->get_records_menu('dataform_contents', $params, '', 'entryid,content');
+                    if ($recs = $DB->get_records('dataform_contents', $params, '', 'id,content,entryid')) {
+                        foreach ($recs as $rec) {
+                            $existingkeys[$rec->content] = $rec->entryid;
+                        }
+                    }
                 }
             }
         }
@@ -390,7 +394,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                         $entryid = $csvrecord['entryid'];
                     }
                 } else if ($existingkeys and !empty($csvrecord[$keyname])) {
-                    $entryid = array_search($csvrecord[$keyname], $existingkeys);
+                    $entryid = $existingkeys[$csvrecord[$keyname]];
                 }
             }
 
