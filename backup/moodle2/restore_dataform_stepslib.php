@@ -312,6 +312,13 @@ class restore_dataform_activity_structure_step extends restore_activity_structur
 
         $dataformnewid = $this->get_new_parentid('dataform');
 
+        // Inline view.
+        if ($inlineview = $DB->get_field('dataform', 'inlineview', array('id' => $dataformnewid))) {
+            if ($inlineview = $this->get_mappingid('dataform_view', $inlineview)) {
+                $DB->set_field('dataform', 'inlineview', $inlineview, array('id' => $dataformnewid));
+            }
+        }
+
         // Default view.
         if ($defaultview = $DB->get_field('dataform', 'defaultview', array('id' => $dataformnewid))) {
             if ($defaultview = $this->get_mappingid('dataform_view', $defaultview)) {
