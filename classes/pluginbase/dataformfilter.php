@@ -191,6 +191,15 @@ class dataformfilter {
     }
 
     /**
+     * Return a deep clone of this filter.
+     *
+     * @return dataformfilter
+     */
+    public function get_clone() {
+        return unserialize(serialize($this));
+    }
+
+    /**
      *
      */
     public function get_instance() {
