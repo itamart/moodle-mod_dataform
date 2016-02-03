@@ -142,7 +142,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
         $fields = $this->get_fields();
         $tags = array();
         $patterndefinitions = array();
-        $entry = new object;
+        $entry = new \stdClass;
 
         if ($fieldpatterns = $this->get_pattern_set('field')) {
             foreach ($fieldpatterns as $fieldid => $patterns) {
