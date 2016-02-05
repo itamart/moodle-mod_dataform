@@ -541,7 +541,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     /**
      *
      */
-    public function get_entry_ids_for_content($sql, $params) {
+    public function get_entry_ids_for_content($sql = '', array $params = array()) {
         return null;
     }
 
