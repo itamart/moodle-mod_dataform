@@ -916,6 +916,8 @@ class mod_dataform_renderer extends plugin_renderer_base {
      * Prints the Dataform tabs
      */
     protected function render_tabs($currenttab) {
+        global $PAGE;
+
         if (!$this->_dataformid) {
             return null;
         }
@@ -933,9 +935,17 @@ class mod_dataform_renderer extends plugin_renderer_base {
             return null;
         }
 
+        // Don't display if browsing and not editing.
+        if ($currenttab == 'browse' and !$PAGE->user_is_editing()) {
+            return null;
+        }
+
+        $manageurl = new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid));
+        $browseurl = new moodle_url('/mod/dataform/view.php', array('d' => $dfid));
+
         // Main level.
-        $browse = new tabobject('browse', new moodle_url('/mod/dataform/view.php', array('d' => $dfid)), get_string('browse', 'dataform'));
-        $manage = new tabobject('manage', new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid)), get_string('manage', 'dataform'));
+        $browse = new tabobject('browse', $browseurl, get_string('browse', 'dataform'));
+        $manage = new tabobject('manage', $manageurl, get_string('manage', 'dataform'));
 
         $maintabs = array($browse, $manage);
         // Add view edit tab.
