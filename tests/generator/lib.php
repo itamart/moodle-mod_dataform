@@ -227,7 +227,7 @@ class mod_dataform_generator extends testing_module_generator {
             foreach (explode(';', $record->sortoptions) as $sortoption) {
                 list($fieldname, $element, $sortdir) = explode(',', $sortoption);
                 if ($field = $fieldman->get_field_by_name($fieldname)) {
-                    $sorties[$field->id] = array($element, $sortdir);
+                    $sorties["$field->id,$element"] = $sortdir;
                 }
             }
             $filter->append_sort_options($sorties);
