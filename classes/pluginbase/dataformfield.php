@@ -783,7 +783,6 @@ abstract class dataformfield {
         global $DB;
 
         list($element, $not, $operator, $value) = $search;
-        $varcharcontent = $this->get_sql_compare_text($element);
         $params = array();
 
         $isdataformcontent = $this->is_dataform_content();
@@ -791,7 +790,7 @@ abstract class dataformfield {
         // NOT/IS EMPTY.
         if ($operator === '') {
             // Get entry ids where field has content.
-            $eids = $this->get_entry_ids_for_content('', $params);
+            $eids = $this->get_entry_ids_for_element($element);
 
             if ($not) {
                 // NOT EMPTY.
@@ -815,6 +814,8 @@ abstract class dataformfield {
         }
 
         // SOMETHING.
+        $varcharcontent = $this->get_sql_compare_text($element);
+
         if ($operator === '=') {
             // EQUAL.
             $searchvalue = trim($value);
@@ -907,17 +908,30 @@ abstract class dataformfield {
     }
 
     /**
+     * Returns array entry ids where the entry has any content in the given element.
+     * The default implementation is for fields whose content resides in the content
+     * field of dataform contents. In this case we retrieve the entry ids from all
+     * field content records we can find.
+     * Other fields have to override.
+     *
+     * @return null|array
+     */
+    public function get_entry_ids_for_element($element) {
+        return $this->get_entry_ids_for_content();
+    }
+
+    /**
      * Returns array of ids of entry which contain a certain content
      * as specified in the passed sql.
      *
      * @return null|array
      */
-    public function get_entry_ids_for_content($sqlwhere, $params) {
+    public function get_entry_ids_for_content($sqlwhere = '', array $params = array()) {
         global $DB;
 
         $searchtable = $this->get_search_from_sql();
         $sql = "
-            SELECT e.id
+            SELECT DISTINCT e.id
             FROM {dataform_entries} e $searchtable
         ";
 
