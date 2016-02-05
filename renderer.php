@@ -472,11 +472,13 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 continue;
             }
 
+            $fieldformclass = "dataformfield_{$field->type}_form";
+
             // Name.
-            if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
-                $fieldname = $field->name;
-            } else {
+            if (class_exists($fieldformclass)) {
                 $fieldname = html_writer::link(new moodle_url($editbaseurl, $sessparam + array('fid' => $fieldid)), $field->name);
+            } else {
+                $fieldname = $field->name;
             }
             // Type.
             $fieldtype = $field->image. '&nbsp;'. $field->typename;
