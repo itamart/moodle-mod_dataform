@@ -228,6 +228,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         // Table headers.
         $headers = array(
+            'browse' => array(null, 'center', false),
             'name' => array($strname, 'left', false),
             'type' => array($strtype, 'left', false),
             'description' => array($strdescription, 'left', false),
@@ -350,7 +351,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
             $attributes = array('id' => "id_viewselector$viewid", 'class' => 'viewselector');
             $viewselector = html_writer::checkbox("viewselector", $viewid, false, null, $attributes);
-            $viewactions = implode('&nbsp;&nbsp;&nbsp;', array($viewbrowse, $viewreset, $viewedit, $viewduplicate, $viewdelete, $viewselector));
+            $viewactions = implode('&nbsp;&nbsp;&nbsp;', array($viewreset, $viewedit, $viewduplicate, $viewdelete, $viewselector));
 
             $data = array();
             foreach (array_keys($headers) as $key) {
