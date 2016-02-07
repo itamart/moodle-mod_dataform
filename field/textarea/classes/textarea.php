@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield_textarea
- * @copyright 2014 Itamar Tzadok
+ * @copyright 2016 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -99,7 +99,6 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
             );
 
             $rec->content = $data->editor;
-            $rec->content1 = $data->{'editorformat'};
 
         } else {
             // Text area content.
@@ -117,33 +116,35 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
     /**
      *
      */
-    public function get_content_parts() {
-        return array('content', 'content1');
-    }
-
-    /**
-     *
-     */
     public function prepare_import_content($data, $importsettings, $csvrecord = null, $entryid = null) {
         $fieldid = $this->id;
 
         $data = parent::prepare_import_content($data, $importsettings, $csvrecord, $entryid);
 
+        // There is only one import pattern for this field.
+        $importsetting = reset($importsettings);
+
         if (isset($data->{"field_{$fieldid}_{$entryid}"})) {
+            $contenttext = $data->{"field_{$fieldid}_{$entryid}"};
+
+            // Replace new lines.
+            if (!empty($importsetting['newline'])) {
+                $contenttext = str_replace($importsetting['newline'], "\n", $contenttext);
+            }
+
             $iseditor = $this->is_editor();
+
             // For editors reformat in editor structure.
             if ($iseditor) {
-                $valuearr = explode('##', $data->{"field_{$fieldid}_{$entryid}"});
                 $content = array();
-                $content['text'] = !empty($valuearr[0]) ? $valuearr[0] : null;
-                $content['format'] = !empty($valuearr[1]) ? $valuearr[1] : FORMAT_MOODLE;
-                $content['trust'] = !empty($valuearr[2]) ? $valuearr[2] : $this->editoroptions['trusttext'];
+                $content['text'] = $contenttext;
+                $content['format'] = $this->text_format;
+                $content['trust'] = $this->text_trusted;
                 $data->{"field_{$fieldid}_{$entryid}_editor"} = $content;
+
                 unset($data->{"field_{$fieldid}_{$entryid}"});
-            }
-            // For simple text replace \r\n with new line.
-            if (!$iseditor) {
-                $data->{"field_{$fieldid}_{$entryid}"} = str_replace('\r\n', "\n", $data->{"field_{$fieldid}_{$entryid}"});
+            } else {
+               $data->{"field_{$fieldid}_{$entryid}"} = $contenttext;
             }
         }
 
@@ -159,5 +160,21 @@ class dataformfield_textarea_textarea extends mod_dataform\pluginbase\dataformfi
         } else {
             return array('');
         }
+    }
+
+    /**
+     *
+     */
+    public function get_text_trusted() {
+        $value = $this->param4 ? $this->param4 : 0;
+        return $value;
+    }
+
+    /**
+     *
+     */
+    public function get_text_format() {
+        $value = (int) $this->param7;
+        return $value;
     }
 }

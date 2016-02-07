@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield_textarea
- * @copyright 2014 Itamar Tzadok
+ * @copyright 2016 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,19 +40,22 @@ class dataformfield_textarea_form extends \mod_dataform\pluginbase\dataformfield
             '%' => '%'
         );
 
-        // Field width.
+        // Field width (param2).
         $colsunit = array('cols' => get_string('cols', 'editor'));
         $options = array(
             'units' => $colsunit + $sizeunits,
         );
         $this->add_field_size_elements('width', get_string('width', 'editor'), $options);
 
-        // Field height.
+        // Field height (param3).
         $rowsunit = array('rows' => get_string('rows', 'editor'));
         $options = array(
             'units' => $rowsunit + $sizeunits,
         );
         $this->add_field_size_elements('height', get_string('height', 'editor'), $options);
+
+        // Text format.
+        $mform->addElement('select', 'param7', get_string('format'), format_text_menu());
 
         // Trust text.
         $mform->addElement('selectyesno', 'param4', get_string('trusttext', 'dataformfield_textarea'));
