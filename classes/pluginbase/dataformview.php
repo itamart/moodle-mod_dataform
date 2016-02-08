@@ -240,28 +240,42 @@ class dataformview {
             $redirecturl->remove_params('eids');
             $redirecturl->remove_params('editentries');
 
-            // Submission time out and target view.
+            // TODO: handle filter removal if necessary.
+            // $redirecturl->remove_params('filter');
+
+            $response = $strnotify;
+            $timeout = 0;
+
+            // Are we returning to form?
+            if ($editentries = $this->editentries) {
+                if ($processedeids) {
+                    $processedentries = implode(',', $processedeids);
+                    // If we continue editing the same entries, simply return.
+                    if ($processedentries == $editentries) {
+                        return;
+                    }
+                }
+
+                // Otherwise, redirect to same view with new editentries param.
+                $redirecturl->param('editentries', $editentries);
+                redirect($redirecturl, $response, $timeout);
+            }
+
+            // We are not returning to form, so we need to apply redirection settings if any.
             $submission = $this->submission_settings;
             $timeout = !empty($submission['timeout']) ? $submission['timeout'] : 0;
             if (!empty($submission['redirect'])) {
                 $redirecturl->param('view', $submission['redirect']);
             }
 
-            // Submission response.
             if ($processedeids) {
-                $response = !empty($submission['message']) ? $submission['message'] : $strnotify;
-            } else {
-                $response = $strnotify;
-            }
+                // Submission response.
+                if (!empty($submission['message'])) {
+                    $response =  $submission['message'];
+                }
 
-            if ($processedeids) {
-                if ($editentries = $this->editentries) {
-                    // Return to form if needed.
-                    // (editentries is set in continue_editing() as needed).
-                    $redirecturl->param('editentries', $editentries);
-
-                } else if (!empty($submission['displayafter'])) {
-                    // Display after if set and not returning to form.
+                // Display after if set and not returning to form.
+                if (!empty($submission['displayafter'])) {
                     $redirecturl->param('eids', implode(',', $processedeids));
                 }
             }
