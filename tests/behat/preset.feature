@@ -110,7 +110,6 @@ Feature: Manage Dataform presets
         Then I am on homepage
         And I follow "Courses"
         And I follow "Course 2"
-        And I turn editing mode on
         And I add a "Dataform" to section "1"
         And I set the field "Name" to "Dataform Preset Without User Data in another course"
         And I press "Save and display"
@@ -128,7 +127,6 @@ Feature: Manage Dataform presets
         Then I am on homepage
         And I follow "Courses"
         And I follow "Course 1"
-        And I turn editing mode on
         And I add a "Dataform" to section "1"
         And I set the field "Name" to "Dataform Preset With User Data"
         And I press "Save and display"
@@ -145,7 +143,6 @@ Feature: Manage Dataform presets
         Then I am on homepage
         And I follow "Courses"
         And I follow "Course 2"
-        And I turn editing mode on
         And I add a "Dataform" to section "1"
         And I set the field "Name" to "Dataform Preset With User Data in another course"
         And I press "Save and display"
@@ -163,7 +160,6 @@ Feature: Manage Dataform presets
         Then I am on homepage
         And I follow "Courses"
         And I follow "Course 1"
-        And I turn editing mode on
         And I add a "Dataform" to section "1"
         And I set the field "Name" to "Dataform Preset uploaded"
         And I press "Save and display"
@@ -180,7 +176,6 @@ Feature: Manage Dataform presets
         Then I am on homepage
         And I follow "Courses"
         And I follow "Course 2"
-        And I turn editing mode on
         And I add a "Dataform" to section "1"
         And I set the field "Name" to "Dataform Preset With User Data in another course"
         And I press "Save and display"
