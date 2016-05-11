@@ -10,14 +10,13 @@ Feature: Set a certain number of entries as a completion condition for a datafor
         Given a fresh site with dataform "Dataform completion condition number entries"
 
         # Site completion enabling
-
-        Then I log in as "admin"
-        And I set the following administration settings values:
-          | Enable completion tracking | 1 |
-          | Enable conditional access | 1 |
-        And I log out
+        And the following config values are set as admin:
+          | enablecompletion | 1 |
+          | enableavailability | 1 |
 
         # Course completion enabling
+        And the following config values are set as admin:
+          | enablecompletion | 1 | moodlecourse |
 
         Then I log in as "teacher1"
         And I follow "Course 1"
