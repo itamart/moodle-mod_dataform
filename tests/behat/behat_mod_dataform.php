@@ -1563,9 +1563,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I log in as "teacher1"');
         $steps[] = new Given('I follow "Course 1"');
         $steps[] = new Given('I follow "Test Dataform"');
-        $steps[] = new Given('I follow "Manage"');
-
-        $steps[] = new Given('I follow "Access"');
+        $steps[] = new Given('I go to manage dataform "access"');
 
         // Add a rule.
         $steps[] = new Given('I follow "id_add_'. $ruletype. '_access_rule"');
@@ -1603,9 +1601,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I log in as "teacher1"');
         $steps[] = new Given('I follow "Course 1"');
         $steps[] = new Given('I follow "Test Dataform"');
-        $steps[] = new Given('I follow "Manage"');
-
-        $steps[] = new Given('I follow "Notifications"');
+        $steps[] = new Given('I navigate to "Notifications" node in "Dataform activity administration > Manage"');
 
         // Add a rule.
         $steps[] = new Given('I follow "id_add_'. $ruletype. '_notification_rule"');
