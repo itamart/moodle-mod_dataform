@@ -1350,9 +1350,11 @@ class dataformview {
             foreach ($matches[0] as $pattern) {
                 $cleanpattern = trim($pattern, '%');
                 list($fid, $formula) = explode(':=', $cleanpattern, 2);
+                // Remove decimals from formula.
+                list($formula, ) = explode(';', $formula);
                 // Skip an empty formula.
-                if (empty($formula) and $formula !== 0) {
-                    continue;
+                if (empty($formula)) {
+                    $formula = 0;
                 }
                 isset($formulas[$fid]) or $formulas[$fid] = array();
                 // Enclose formula in brackets to preserve precedence.
@@ -1399,24 +1401,21 @@ class dataformview {
 
             // Calculate.
             foreach ($replacements as $pattern => $formula) {
-                // Number of decimals can be set as ;n at the end of the formula.
-                $decimals = null;
-                if (strpos($formula, ';')) {
-                    list($formula, $decimals) = explode(';', $formula);
-                }
                 $calc = new \calc_formula("=$formula");
                 $result = $calc->evaluate();
                 if ($result === false) {
                     // False as result indicates some problem.
                     // We remove the formula altogether.
-                    $replacements[$pattern] = '';
+                    $replacement = '';
                 } else {
-                    // Set decimals.
+                    // Number of decimals can be set as ;n at the end of the pattern.
+                    list(, $decimals) = array_pad(explode(';', trim($pattern, '%')), 2, 0);
                     if (is_numeric($decimals)) {
                         $result = sprintf("%4.{$decimals}f", $result);
                     }
-                    $replacements[$pattern] = $result;
+                    $replacement = $result;
                 }
+                $replacements[$pattern] = $replacement;
             }
 
             $text = str_replace(array_keys($replacements), $replacements, $text);
