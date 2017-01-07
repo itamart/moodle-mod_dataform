@@ -33,6 +33,7 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
     protected $teacher;
     protected $student1;
     protected $student2;
+    protected $dataformgenerator;
 
     /**
      * Test set up.
@@ -47,8 +48,12 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
         // Reset dataform local cache.
         \mod_dataform_instance_store::unregister();
 
+        // Generator.
+        $generator = $this->getDataGenerator();
+        $this->dataformgenerator = $generator->get_plugin_generator('mod_dataform');
+
         // Create a course we are going to add a data module to.
-        $this->course = $this->getDataGenerator()->create_course();
+        $this->course = $generator->create_course();
         $courseid = $this->course->id;
 
         $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
@@ -77,13 +82,13 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
     public function test_is_not_empty() {
         global $DB;
 
-        $generator = $this->getDataGenerator();
-        $dataformgenerator = $generator->get_plugin_generator('mod_dataform');
-
         $this->setAdminUser();
 
+        // Add a group.
+        $group = $this->getDataGenerator()->create_group(array('courseid' => $this->course->id));
+
         // Add a dataform.
-        $dataform = $dataformgenerator->create_instance(array('course' => $this->course));
+        $dataform = $this->dataformgenerator->create_instance(array('course' => $this->course));
         $dataformid = $dataform->id;
         $df = \mod_dataform_dataform::instance($dataformid);
 
@@ -108,8 +113,14 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
         $importview = $df->view_manager->add_view('csv');
 
         // Import entries.
-        $eaufieldid = dataformfield_entryauthor_entryauthor::INTERNALID;
         $options = array('settings' => array());
+
+        $fieldid = dataformfield_entryauthor_entryauthor::INTERNALID;
+        $options['settings'][$fieldid] = array('id' => array('name' => 'EAU:id'));
+
+        $fieldid = dataformfield_entrygroup_entrygroup::INTERNALID;
+        $options['settings'][$fieldid] = array('id' => array('name' => 'EGR:id'));
+
         foreach ($fields as $type => $field) {
             $settings = array('name' => $type);
             if (in_array($type, array('select', 'radiobutton', 'selectmulti', 'checkbox'))) {
@@ -119,6 +130,7 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
         }
 
         $content1 = array(
+            'EGR:id' => $group->id,
             'text' => 'Some single line text.',
             'textarea' => 'First line of multiline text.<br /> Second line of multiline text.',
             'select' => 'SL 1',
@@ -131,6 +143,7 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
         );
 
         $content2 = array(
+            'EGR:id' => 0,
             'text' => '',
             'textarea' => '',
             'select' => '',
@@ -159,30 +172,33 @@ class mod_dataform_filter_search_testcase extends advanced_testcase {
         // Get an entry manager for a view.
         $entryman = $importview->entry_manager;
 
-        // Search is empty.
-        foreach ($fieldtypes as $type) {
-            $instance = $dataformgenerator->create_filter(array(
-                'dataid' => $df->id,
-                'searchoptions' => "AND,$type,content,,,",
-            ));
-            $filter = new \mod_dataform\pluginbase\dataformfilter($instance);
-            $entryman->set_content(array('filter' => $filter));
-            $this->assertEquals(3, $entryman->get_count($entryman::COUNT_VIEWABLE));
-            $this->assertEquals(2, $entryman->get_count($entryman::COUNT_FILTERED));
-        }
+        // Search entry group.
+        // Empty.
+        $this->validate_search($df, $entryman, "AND,EGR,id,,,", 3, 2);
 
-        // Search not empty.
+        // Not empty.
+        $this->validate_search($df, $entryman, "AND,EGR,id,NOT,,", 3, 1);
+
+        // Search fields.
         foreach ($fieldtypes as $type) {
-            $instance = $dataformgenerator->create_filter(array(
-                'dataid' => $df->id,
-                'searchoptions' => "AND,$type,content,NOT,,",
-            ));
-            $filter = new \mod_dataform\pluginbase\dataformfilter($instance);
-            $entryman->set_content(array('filter' => $filter));
-            $this->assertEquals(3, $entryman->get_count($entryman::COUNT_VIEWABLE));
-            $this->assertEquals(1, $entryman->get_count($entryman::COUNT_FILTERED));
+            // Empty.
+            $this->validate_search($df, $entryman, "AND,$type,content,,,", 3, 2);
+            // Not empty.
+            $this->validate_search($df, $entryman, "AND,$type,content,NOT,,", 3, 1);
         }
 
     }
+
+    protected function validate_search($df, $entryman, $searchoptions, $viewable, $filtered) {
+        $instance = $this->dataformgenerator->create_filter(array(
+            'dataid' => $df->id,
+            'searchoptions' => $searchoptions,
+        ));
+        $filter = new \mod_dataform\pluginbase\dataformfilter($instance);
+        $entryman->set_content(array('filter' => $filter));
+        $this->assertEquals($viewable, $entryman->get_count($entryman::COUNT_VIEWABLE));
+        $this->assertEquals($filtered, $entryman->get_count($entryman::COUNT_FILTERED));
+    }
+
 
 }

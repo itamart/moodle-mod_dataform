@@ -56,7 +56,10 @@ class mod_dataform_backup_restore_testcase extends advanced_testcase {
         $fieldtypes = array_keys(core_component::get_plugin_list('dataformfield'));
         $fieldtypescount = count($fieldtypes);
         foreach ($fieldtypes as $type) {
-            $df1->field_manager->add_field($type);
+            $field = $df1->field_manager->add_field($type);
+            if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
+                $fieldtypescount--;
+            }
         }
         // Add views.
         $viewtypes = array_keys(core_component::get_plugin_list('dataformview'));

@@ -137,23 +137,23 @@ class behat_mod_dataform extends behat_base {
 
         // Add a course.
         $data = array(
-            '| fullname | shortname | category  |',
-            '| Course 1 | C1        | 0         |',
+            array('fullname', 'shortname', 'category'),
+            array('Course 1', 'C1', '0'),
         );
-        $table = new TableNode(implode("\n", $data));
+        $table = new TableNode($data);
         $steps[] = new Given('the following "courses" exist:', $table);
 
         // Add users.
         $data = array(
-            '| username     | firstname | lastname  | email                 |',
-            '| teacher1     | Teacher   | 1         | teacher1@asd.com      |',
-            '| assistant1   | Assistant | 1         | assistant1@asd.com    |',
-            '| assistant2   | Assistant | 2         | assistant2@asd.com    |',
-            '| student1     | Student   | 1         | student1@asd.com      |',
-            '| student2     | Student   | 2         | student2@asd.com      |',
-            '| student3     | Student   | 3         | student3@asd.com      |',
+            array('username', 'firstname', 'lastname', 'email'),
+            array('teacher1', 'Teacher', '1', 'teacher1@asd.com '),
+            array('assistant1', 'Assistant', '1', 'assistant1@asd.com'),
+            array('assistant2', 'Assistant', '2', 'assistant2@asd.com'),
+            array('student1', 'Student', '1', 'student1@asd.com'),
+            array('student2', 'Student', '2', 'student2@asd.com'),
+            array('student3', 'Student', '3', 'student3@asd.com'),
         );
-        $table = new TableNode(implode("\n", $data));
+        $table = new TableNode($data);
         $steps[] = new Given('the following "users" exist:', $table);
 
         // Enrol users in course.
@@ -161,32 +161,32 @@ class behat_mod_dataform extends behat_base {
         $assistantrole = \mod_dataform\helper\testing::get_role_shortname('teacher');
         $studentrole = \mod_dataform\helper\testing::get_role_shortname('student');
         $data = array(
-            '| user         | course | role             |',
-            "| teacher1     | C1     | $teacherrole     |",
-            "| assistant1   | C1     | $assistantrole   |",
-            "| assistant2   | C1     | $assistantrole   |",
-            "| student1     | C1     | $studentrole     |",
-            "| student2     | C1     | $studentrole     |",
+            array('user', 'course', 'role'),
+            array('teacher1', 'C1', $teacherrole),
+            array('assistant1', 'C1', $assistantrole),
+            array('assistant2', 'C1', $assistantrole),
+            array('student1', 'C1', $studentrole),
+            array('student2', 'C1', $studentrole),
         );
-        $table = new TableNode(implode("\n", $data));
+        $table = new TableNode($data);
         $steps[] = new Given('the following "course enrolments" exist:', $table);
 
         // Add groups.
         $data = array(
-            '| name    | description | course  | idnumber |',
-            '| Group 1 | Anything    | C1 | G1   |',
-            '| Group 2 | Anything    | C1 | G2   |',
+            array('name', 'description', 'course', 'idnumber'),
+            array('Group 1', 'Anything', 'C1', 'G1'),
+            array('Group 2', 'Anything', 'C1', 'G2'),
         );
-        $table = new TableNode(implode("\n", $data));
+        $table = new TableNode($data);
         $steps[] = new Given('the following "groups" exist:', $table);
 
         // Add group members.
         $data = array(
-            '| user     | group  |',
-            '| student1 | G1 |',
-            '| student2 | G2 |',
+            array('user', 'group'),
+            array('student1', 'G1'),
+            array('student2', 'G2'),
         );
-        $table = new TableNode(implode("\n", $data));
+        $table = new TableNode($data);
         $steps[] = new Given('the following "group members" exist:', $table);
 
         return $steps;
@@ -205,10 +205,10 @@ class behat_mod_dataform extends behat_base {
 
         // Test dataform.
         $data = array(
-            '| activity | course | idnumber | name                 | intro                       |',
-            "| dataform   | C1     | dataform1  | $name | Test dataform description |",
+            array('activity', 'course', 'idnumber', 'name', 'intro'),
+            array('dataform', 'C1', 'dataform1', $name, $name),
         );
-        $table = new TableNode(implode("\n", $data));
+        $table = new TableNode($data);
         $steps[] = new Given('the following "activities" exist:', $table);
 
         return $steps;
@@ -303,15 +303,31 @@ class behat_mod_dataform extends behat_base {
             $datahash['gradeitems'] = serialize($gradeitems);
         }
 
-        $data = array(
-            '| activity | '. implode(' | ', array_keys($datahash)). ' | ',
-            '| dataform | '. implode(' | ', $datahash). ' | ',
-        );
+        $headers = array_keys($datahash);
+        array_unshift($headers, 'activity');
 
-        $table = new TableNode(implode("\n", $data));
+        $values = array_values($datahash);
+        array_unshift($values, 'dataform');
+
+        $data = array($headers, $values);
+
+        $table = new TableNode($data);
         $steps[] = new Given('the following "activities" exist:', $table);
 
         return $steps;
+    }
+
+    /**
+     * Resets user data in the specified dataform.
+     * This is a backend step.
+     *
+     * @Given /^user data in dataform "(?P<dataform_idn_string>(?:[^"]|\\")*)" is reset$/
+     * @param string $idnumber
+     */
+    public function user_data_in_dataform_is_reset($idnumber) {
+        $dataformid = $this->get_dataform_id($idnumber);
+        $df = new \mod_dataform_dataform($dataformid);
+        $df->reset_user_data();
     }
 
     /* ACTIVITY SETUP STEPS */
@@ -364,10 +380,8 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I turn editing mode on');
         $steps[] = new Given('I add a "Dataform" to section "1"');
 
-        $data = array(
-            'Name | Test Dataform',
-        );
-        $table = new TableNode(implode("\n", $data));
+        $data = array('Name', 'Test Dataform');
+        $table = new TableNode($data);
         $steps[] = new Given('I set the following fields to these values:', $table);
 
         $steps[] = new Given('I press "Save and display"');
@@ -777,7 +791,7 @@ class behat_mod_dataform extends behat_base {
 
         $fieldnode = $this->find_field($field);
         $value = $fieldnode->getValue();
-        $data = "$field | $text. $value";
+        $data = array($field, $text. $value);
         $table = new TableNode($data);
         $steps[] = new Given('I set the following fields to these values:', $table);
 
@@ -1202,19 +1216,37 @@ class behat_mod_dataform extends behat_base {
             return $steps;
         }
 
-        $dataformname = "View submission buttons";
+        $dataformname = 'View submission buttons';
+        $dataformidn = 'dfidn';
 
-        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
+        $submissionoptions = array(
+            'save' => '',
+            'savecont' => '',
+            'savenew' => '',
+            'savecontnew' => '',
+            'savenewcont' => '',
+            'cancel' => '',
+        );
+        $allbuttons = base64_encode(serialize($submissionoptions));
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "'. $dataformname. '"');
+        $steps[] = new Given('a fresh site for dataform scenario');
 
-        /* Field */
-        $steps[] = new Given('I go to manage dataform "fields"');
-        $steps[] = new Given('I add a dataform field "text" with "Field 01"');
+        // Dataform.
+        $arr = array(
+            array('course', 'C1'),
+            array('idnumber', $dataformidn),
+            array('name', $dataformname),
+        );
+        $table = new TableNode($arr);
+        $steps[] = new Given('the following dataform exists:', $table);
 
-        $steps[] = new Given('I log out');
+        // Fields.
+        $arr = array(
+            array('name', 'type', 'dataform', 'editable'),
+            array('Field 01', 'text', $dataformidn, 1),
+        );
+        $table = new TableNode($arr);
+        $steps[] = new Given('the following dataform "fields" exist:', $table);
 
         $entryid = 0;
         foreach ($items as $item) {
@@ -1223,75 +1255,47 @@ class behat_mod_dataform extends behat_base {
             $viewtype = $item['viewtype'];
             $viewname1 = !empty($item['viewname1']) ? $item['viewname1'] : "view{$viewtype}1";
             $viewname2 = !empty($item['viewname2']) ? $item['viewname2'] : "view{$viewtype}2";
+
             $actor = $item['actor'];
 
-            $steps[] = new Given('I log in as "teacher1"');
+            // Views (one default with ALL submission buttons and one with no submission buttons.
+            $arr = array(
+                array('name', 'type', 'dataform', 'default', 'visible', 'submission'),
+                array($viewname1, $viewtype, $dataformidn, 1, 1, $allbuttons),
+                array($viewname2, $viewtype, $dataformidn, 0, 1, ''),
+            );
+            $table = new TableNode($arr);
+            $steps[] = new Given('the following dataform "views" exist:', $table);
+
+            // Log in
+            $steps[] = new Given('I log in as "'. $actor. '"');
             $steps[] = new Given('I follow "Course 1"');
             $steps[] = new Given('I follow "'. $dataformname. '"');
 
-            // Add a view with ALL submission buttons.
-            $steps[] = new Given('I go to manage dataform "views"');
-            $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
-            $steps[] = new Given('I expand all fieldsets');
-            $steps[] = new Given('I set the field "Name" to "'. $viewname1. '"');
-            $steps[] = new Given('I set the field "savebuttonenable" to "checked"');
-            $steps[] = new Given('I set the field "savecontbuttonenable" to "checked"');
-            $steps[] = new Given('I set the field "savenewbuttonenable" to "checked"');
-            $steps[] = new Given('I set the field "savecontnewbuttonenable" to "checked"');
-            $steps[] = new Given('I set the field "savenewcontbuttonenable" to "checked"');
-            $steps[] = new Given('I set the field "cancelbuttonenable" to "checked"');
-            $steps[] = new Given('I press "Save changes"');
-
-            // Add a view with NO submission buttons.
-            $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
-            $steps[] = new Given('I expand all fieldsets');
-            $steps[] = new Given('I set the field "Name" to "'. $viewname2. '"');
-            $steps[] = new Given('I set the field "savebuttonenable" to ""');
-            $steps[] = new Given('I set the field "savecontbuttonenable" to ""');
-            $steps[] = new Given('I set the field "savenewbuttonenable" to ""');
-            $steps[] = new Given('I set the field "savecontnewbuttonenable" to ""');
-            $steps[] = new Given('I set the field "savenewcontbuttonenable" to ""');
-            $steps[] = new Given('I set the field "cancelbuttonenable" to ""');
-            $steps[] = new Given('I press "Save changes"');
-
-            // Set default view.
-            $steps[] = new Given('I set "'. $viewname1. '" as default view');
-
-            // Go to browse view.
-            $steps[] = new Given('I follow "Browse"');
-
-            // Log in as actor if needed.
-            if ($actor != 'teacher1') {
-                $steps[] = new Given('I log out');
-                $steps[] = new Given('I log in as "'. $actor. '"');
-                $steps[] = new Given('I follow "Course 1"');
-                $steps[] = new Given('I follow "'. $dataformname. '"');
-            }
-
             // SAVE: The entry should be added.
             $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 01"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 01"');
             $steps[] = new Given('I press "Save"');
             $entryids[1] = ++$entryid;
             $steps[] = new Given('I see "Entry 01"');
 
             // CANCEL: The entry should not be added.
             $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 02"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 02"');
             $steps[] = new Given('I press "Cancel"');
             $steps[] = new Given('I see "Entry 01"');
             $steps[] = new Given('I do not see "Entry 02"');
 
             // SAVE and CONTINUE: The entry should be added and should stay in form.
             $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 03"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 03"');
             $steps[] = new Given('I press "Save and Continue"');
             $entryids[2] = ++$entryid;
             $steps[] = new Given('I do not see "Add a new entry"');
             $steps[] = new Given('I do not see "Entry 01"');
-            $steps[] = new Given('the field "field_1_'. $entryids[2]. '" matches value "Entry 03"');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 03"');
 
-            $steps[] = new Given('I set the field "field_1_'. $entryids[2]. '" to "Entry 02"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 02"');
             $steps[] = new Given('I press "Save"');
             $steps[] = new Given('I see "Add a new entry"');
             $steps[] = new Given('I see "Entry 01"');
@@ -1299,7 +1303,7 @@ class behat_mod_dataform extends behat_base {
 
             // SAVE as NEW (existing entry): A new entry should be added.
             $steps[] = new Given('I follow "id_editentry'. $entryids[2]. '"');
-            $steps[] = new Given('I set the field "field_1_'. $entryids[2]. '" to "Entry 03"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 03"');
             $steps[] = new Given('I press "Save as New"');
             $entryids[3] = ++$entryid;
             $steps[] = new Given('I see "Add a new entry"');
@@ -1309,7 +1313,7 @@ class behat_mod_dataform extends behat_base {
 
             // SAVE as NEW (new entry): The entry should be added.
             $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 04"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 04"');
             $steps[] = new Given('I press "Save as New"');
             $entryids[4] = ++$entryid;
             $steps[] = new Given('I see "Add a new entry"');
@@ -1320,13 +1324,13 @@ class behat_mod_dataform extends behat_base {
 
             // SAVE and START NEW (new entry): The entry should be added and and new entry form opened.
             $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 05"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 05"');
             $steps[] = new Given('I press "Save and Start New"');
             $entryids[5] = ++$entryid;
             $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field "field_1_-1" matches value ""');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value ""');
 
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 06"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 06"');
             $steps[] = new Given('I press "Save"');
             $entryids[6] = ++$entryid;
             $steps[] = new Given('I see "Add a new entry"');
@@ -1339,14 +1343,14 @@ class behat_mod_dataform extends behat_base {
 
             // SAVE and START NEW (existing entry): The entry should be updated and new entry form opened.
             $steps[] = new Given('I follow "id_editentry'. $entryids[4]. '"');
-            $steps[] = new Given('the field "field_1_'. $entryids[4]. '" matches value "Entry 04"');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 04"');
 
-            $steps[] = new Given('I set the field "field_1_'. $entryids[4]. '" to "Entry 04 modified"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 04 modified"');
             $steps[] = new Given('I press "Save and Start New"');
             $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field "field_1_-1" matches value ""');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value ""');
 
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 07"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 07"');
             $steps[] = new Given('I press "Save"');
             $entryids[7] = ++$entryid;
             $steps[] = new Given('I see "Add a new entry"');
@@ -1360,13 +1364,13 @@ class behat_mod_dataform extends behat_base {
 
             // SAVE as NEW and CONTINUE (new entry): The entry should be added and and remain in its form.
             $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field "field_1_-1" to "Entry 08"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 08"');
             $steps[] = new Given('I press "Save as New and Continue"');
             $entryids[8] = ++$entryid;
             $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field "field_1_'. $entryids[8]. '" matches value "Entry 08"');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 08"');
 
-            $steps[] = new Given('I set the field "field_1_'. $entryids[8]. '" to "Entry 08 modified"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 08 modified"');
             $steps[] = new Given('I press "Save"');
             $steps[] = new Given('I see "Add a new entry"');
             $steps[] = new Given('I see "Entry 01"');
@@ -1380,13 +1384,13 @@ class behat_mod_dataform extends behat_base {
 
             // SAVE as NEW and CONTINUE (existing entry): The entry should be added and remain in its form.
             $steps[] = new Given('I follow "id_editentry'. $entryids[8]. '"');
-            $steps[] = new Given('the field "field_1_'. $entryids[8]. '" matches value "Entry 08 modified"');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 08 modified"');
 
-            $steps[] = new Given('I set the field "field_1_'. $entryids[8]. '" to "Entry 09"');
+            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 09"');
             $steps[] = new Given('I press "Save as New and Continue"');
             $entryids[9] = ++$entryid;
             $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field "field_1_'. $entryids[9]. '" matches value "Entry 09"');
+            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 09"');
 
             $steps[] = new Given('I press "Save"');
             $steps[] = new Given('I see "Add a new entry"');
@@ -1407,13 +1411,9 @@ class behat_mod_dataform extends behat_base {
 
             // I shouldn't be able to edit via the url.
 
-            // Delete the entries.
-            foreach ($entryids as $entryid) {
-                $steps[] = new Given('I follow "id_deleteentry'. $entryid. '"');
-                $steps[] = new Given('I press "Continue"');
-            }
-
             $steps[] = new Given('I log out');
+
+            $steps[] = new Given("user data in dataform \"$dataformidn\" is reset");
         }
 
         return $steps;
@@ -1969,14 +1969,11 @@ class behat_mod_dataform extends behat_base {
     protected function convert_data_to_table($formfields, $data, $delimiter = "\t") {
         $vals = explode($delimiter, trim($data));
         $names = array_slice($formfields, 0, count($vals));
-        $tabledata = array_map(
-            function($name, $val) {
-                return "$name|$val";
-            },
+        $tabledata = array(
             $names,
-            $vals
+            $vals,
         );
-        return new TableNode(implode("\n", $tabledata));
+        return new TableNode($tabledata);
     }
 
     /**
@@ -2032,6 +2029,5 @@ class behat_mod_dataform extends behat_base {
         }
         return $id;
     }
-
 
 }

@@ -10,7 +10,7 @@ Feature: Dataform max entries
         And I follow "Course 1"
 
         When I follow "Max Entries test"
-        And I follow "Edit settings"
+        And I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "Maximum entries" to "1"
         And I press "Save and display"
@@ -68,6 +68,5 @@ Feature: Dataform max entries
         And I do not see "Add a new entry"
 
         When I go to dataform page "view.php?d=1&view=1&editentries=-1"
-        Then I do not see "New entry"
-        And "field_1_-1" "field" should not exist
+        Then "field_1_-1" "field" should not exist
 
