@@ -127,16 +127,21 @@ class dataformfield_entry_entry extends \mod_dataform\pluginbase\dataformfield_i
     public function get_entry_ids_for_element($element) {
         global $DB;
 
-        $params = array('dataid' => $this->dataid);
+        $conditions = array();
+        $params = array();
+
+        $conditions[] = ' dataid = ? ';
+        $params[] = $this->dataid;
 
         if ($element == 'type') {
-            $where = ' type != ? ';
+            $conditions[] = ' type != ? ';
             $params[] = '';
         } else if ($element == 'id') {
-            $where = ' id != ? ';
+            $conditions[] = ' id != ? ';
             $params[] = 0;
         }
 
+        $where = implode(' AND ', $conditions);
         if ($eids = $DB->get_records_select_menu('dataform_entries', $where, $params, '', 'id,id as eid')) {
             return $eids;
         }
