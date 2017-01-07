@@ -147,7 +147,7 @@ Feature: Multiple grade items
         And I follow "Test multiple grade items"
 
         #Section: Add default grade item
-        And I follow "Edit settings"
+        And I navigate to "Edit settings" in current page administration
         And I set the following fields to these values:
         | Type              | Point     |
         | Maximum points    | 4        |

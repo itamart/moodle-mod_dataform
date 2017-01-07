@@ -30,7 +30,7 @@ Feature: Set a certain number of entries as a completion condition for a datafor
         # Dataform completion enabling
 
         Then I follow "Dataform completion condition number entries"
-        And I follow "Edit settings"
+        And I navigate to "Edit settings" in current page administration
         And I set the following fields to these values:
           | Completion tracking | Show activity as complete when conditions are met |
           | completionentriesenabled | 1 |
