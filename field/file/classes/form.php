@@ -84,12 +84,8 @@ class dataformfield_file_form extends mod_dataform\pluginbase\dataformfieldform 
         $mform =& $this->_form;
 
         // Accetped types (param3).
-        $options = array();
-        $options['*'] = get_string('filetypeany', 'dataform');
-        $options['*.jpg,*.gif,*.png'] = get_string('filetypeimage', 'dataform');
-        $options['*.html'] = get_string('filetypehtml', 'dataform');
-
-        $mform->addElement('select', 'param3', get_string('filetypes', 'dataform'), $options);
+        $mform->addElement('text', 'param3', get_string('filetypes', 'dataform'));
+        $mform->setType('param3', PARAM_RAW);
         $mform->setDefault('param3', '*');
 
     }
