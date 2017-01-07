@@ -65,7 +65,7 @@ class entriesform extends \moodleform {
                     }
                     // If the element is an array, it contains a function.
                     list($func, $params) = $element;
-                    call_user_func_array($func, array_merge(array($mform), $params));
+                    call_user_func_array($func, array_merge(array(&$mform), $params));
                 }
             }
         }
