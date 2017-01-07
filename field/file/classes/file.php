@@ -190,12 +190,4 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
         return true;
     }
 
-    /**
-     * Overriding parent to return no sort/search options.
-     *
-     * @return array
-     */
-    public function get_sort_options_menu() {
-        return array();
-    }
 }
