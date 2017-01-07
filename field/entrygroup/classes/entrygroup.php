@@ -211,5 +211,29 @@ class dataformfield_entrygroup_entrygroup extends \mod_dataform\pluginbase\dataf
         return array($sql, null);
     }
 
+    /**
+     * Returns array entry ids where the entry has a group id.
+     *
+     * @return null|array
+     */
+    public function get_entry_ids_for_element($element) {
+        global $DB;
+
+        $conditions = array();
+        $params = array();
+
+        $conditions[] = ' dataid = ? ';
+        $params[] = $this->dataid;
+
+        $conditions[] = ' groupid != ? ';
+        $params[] = 0;
+
+        $where = implode(' AND ', $conditions);
+        if ($eids = $DB->get_records_select_menu('dataform_entries', $where, $params, '', 'id,id as eid')) {
+            return $eids;
+        }
+
+        return null;
+    }
 
 }
