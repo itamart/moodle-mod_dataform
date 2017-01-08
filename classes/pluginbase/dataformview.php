@@ -331,7 +331,8 @@ class dataformview {
     protected function set_entries_content(array $options) {
         $this->entry_manager->set_content($options);
         // Adjust page in case changed by selection method (e.g. random selection).
-        $this->filter->page = $this->entry_manager->page;
+        // Currently commented out; see CONTRIB-6122.
+        // $this->filter->page = $this->entry_manager->page;
     }
 
     /**
