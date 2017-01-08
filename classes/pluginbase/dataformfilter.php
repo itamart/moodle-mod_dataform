@@ -62,6 +62,8 @@ class dataformfilter {
 
         // Other attributes.
         $this->_attributes = new \stdClass;
+        $this->_attributes->view = empty($data->view) ? array() : $data->view;
+        $this->_attributes->filters = empty($data->filters) ? array() : $data->filters;
         $this->_attributes->eids = empty($data->eids) ? '' : $data->eids;
         $this->_attributes->users = empty($data->users) ? '' : $data->users;
         $this->_attributes->groups = empty($data->groups) ? '' : $data->groups;
@@ -210,6 +212,13 @@ class dataformfilter {
     /**
      *
      */
+    public function get_attributes() {
+        return $this->_attributes;
+    }
+
+    /**
+     *
+     */
     public function get_custom_search_fields() {
         if (!$customsearch = $this->customsearch) {
             return array();
@@ -230,44 +239,92 @@ class dataformfilter {
     /**
      *
      */
-    public function get_sql() {
+    public function get_sql($viewid = 0) {
         $this->init_filter_sql();
 
         // Get all fields (see CONTRIB-5225).
         $df = \mod_dataform_dataform::instance($this->dataid);
         $fields = $df->field_manager->get_fields(array('forceget' => true));
+
         // Get content fields.
         $fieldkeys = $this->contentfields ? array_fill_keys($this->contentfields, null) : null;
         $contentfields = $fieldkeys ? array_intersect_key($fields, $fieldkeys) : array();
 
+        // ENTRY ID sql.
+        $searchsql = $this->get_entry_id_sql();
+        list($whereeids, $eidparams) = $searchsql;
+
+        // ENTRY TYPE sql.
+        $searchsql = $this->get_entry_type_sql();
+        list($wheretype, $etypeparams) = $searchsql;
+
+        // USER sql.
+        $searchsql = $this->get_user_sql($viewid);
+        list($whatuser, $fromuser, $whereuser, $userparams) = $searchsql;
+
+        // GROUP sql.
+        $searchsql = $this->get_group_sql();
+        list($wheregroup, $groupparams) = $searchsql;
+
         // SEARCH sql.
         $searchsql = $this->get_search_sql($fields);
         list($searchtables, $searchwhere, $searchparams) = $searchsql;
+
         // SORT sql.
         $sortsql = $this->get_sort_sql($fields);
         list($sorttables, $sortwhere, $sortorder, $sortparams) = $sortsql;
+
         // CONTENT sql ($dataformcontent is an array of fieldid whose content needs to be fetched).
         $contentsql = $this->get_content_sql($contentfields);
         list($contentwhat, $contenttables, $contentwhere, $contentparams, $dataformcontent) = $contentsql;
+
         // JOIN sql (does't use params).
         list($joinwhat, $jointables, ) = $this->get_join_sql($fields);
 
-        return array(
-            $searchtables,
-            $searchwhere,
-            $searchparams,
-            $sorttables,
-            $sortwhere,
-            $sortorder,
-            $sortparams,
-            $contentwhat,
-            $contenttables,
-            $contentwhere,
-            $contentparams,
-            $dataformcontent,
-            $joinwhat,
-            $jointables,
-        );
+        // Sql for fetching the entries.
+        $count = ' COUNT(e.id) ';
+
+        $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid, e.type ';
+        $tables = " {dataform_entries} e $fromuser ";
+        $wheredfid = " e.dataid = ? ";
+
+        $whatsql = " $whatentry $whatuser $contentwhat $joinwhat";
+        $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
+        $wheresql = " $wheredfid $wheretype $whereuser $wheregroup $sortwhere $whereeids $searchwhere $contentwhere";
+
+        // Fetch filtered entries with content.
+        $sqlselect  = "SELECT $whatsql FROM $fromsql WHERE $wheresql $sortorder";
+
+        // Count total entries the user is authorized to view (without additional filtering).
+        $sqlcountmax = "SELECT $count FROM $tables $sorttables WHERE $wheredfid $wheretype $whereuser $wheregroup $sortwhere";
+
+        // Count entries in this particular view call (with filtering; only of searching).
+        $filtering = ($searchwhere or $whereeids);
+        $sqlcountfiltered = $filtering ? "SELECT $count FROM $fromsql WHERE $wheresql" : null;
+
+        // Params array for the sql.
+        $params = array();
+        $params[] = $this->dataid;
+        $params = array_merge($params, $etypeparams, $userparams, $groupparams, $sortparams);
+        $allparams = array_merge($params, $eidparams, $searchparams, $contentparams);
+
+        $sql = new \stdClass;
+        $sql->select = $sqlselect;
+        $sql->countmax = $sqlcountmax;
+        $sql->countfiltered = $sqlcountfiltered;
+        $sql->what = $whatsql;
+        $sql->whatcontent = $contentwhat;
+        $sql->from = $fromsql;
+        $sql->where = $wheresql;
+        $sql->sortorder = $sortorder;
+        $sql->params = $params;
+        $sql->allparams = $allparams;
+        $sql->dataformcontent = $dataformcontent;
+        $sql->page = $this->page;
+        $sql->perpage = $this->perpage;
+        $sql->selection = $this->selection;
+
+        return $sql;
     }
 
     /**
@@ -280,6 +337,149 @@ class dataformfilter {
         $this->_searchfields = $this->get_custom_search_fields();
         $this->_sortfields = $this->get_custom_sort_fields();
         $this->_joins = array();
+    }
+
+
+    /**
+     *
+     */
+    public function get_entry_type_sql() {
+        global $DB, $USER;
+
+        // Params array for the sql.
+        $params = array();
+
+        $where = '';
+        // Specific entry type requested.
+        if ($this->entrytype) {
+            $where = " AND e.type = ? ";
+            $params[] = $this->entrytype;
+        }
+
+        return array($where, $params);
+    }
+
+    /**
+     *
+     */
+    public function get_entry_id_sql() {
+        global $DB, $USER;
+
+        // Params array for the sql.
+        $params = array();
+
+        $where = '';
+
+        // Specific entry ids requested.
+        if ($this->eids) {
+            // Make sure we have an array here.
+            if (!is_array($this->eids)) {
+                $this->eids = explode(',', $this->eids);
+            }
+            list($ineids, $params) = $DB->get_in_or_equal($this->eids);
+            $where = " AND e.id $ineids ";
+        }
+
+        return array($where, $params);
+    }
+
+    /**
+     *
+     */
+    public function get_user_sql($viewid) {
+        global $DB, $USER;
+
+        // Params array for the sql.
+        $params = array();
+
+        $whatuser = '';
+        $fromuser = '';
+        $whereuser = '';
+
+        // Filter only in non-grouped mode.
+        if (!$this->grouped) {
+            // Access base params: dataform and view.
+            $accessparams = array('dataformid' => $this->dataid, 'viewid' => $viewid);
+
+            $whatuser = ', '. \user_picture::fields('u', array('idnumber', 'username'), 'uid ');
+            $fromuser = ' JOIN {user} u ON u.id = e.userid ';
+            $whereuser = '';
+
+            if ($this->users) {
+                list($inusers, $userparams) = $DB->get_in_or_equal($this->users);
+                $whereuser .= " AND e.userid $inusers ";
+                $params = array_merge($params, $userparams);
+            }
+
+            // Exclude own entries.
+            if (!\mod_dataform\access\view_capability::has_capability('mod/dataform:entryownview', $accessparams)) {
+                $whereuser .= " AND e.userid <> ? ";
+                $params[] = $USER->id;
+            }
+
+            // Exclude guest/anonymous.
+            if (!\mod_dataform\access\view_capability::has_capability('mod/dataform:entryanonymousview', $accessparams)) {
+                $whereuser .= " AND e.userid <> ? ";
+                $params[] = 0;
+            }
+
+            // Exclude other entries.
+            $viewany = \mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
+            $entriesmanager = \mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
+            if (($this->individualized and !$entriesmanager) or !$viewany) {
+                $whereuser .= " AND e.userid = ? ";
+                $params[] = $USER->id;
+            }
+        }
+
+        return array($whatuser, $fromuser, $whereuser, $params);
+    }
+
+    /**
+     *
+     */
+    public function get_group_sql() {
+        global $DB;
+
+        // Params array for the sql.
+        $params = array();
+        $where = '';
+
+        // GROUP FILTERING.
+        $currentgroup = $this->currentgroup;
+        $groupmode = $this->groupmode;
+        $df = \mod_dataform_dataform::instance($this->dataid);
+        $canaccessallgroups = has_capability('moodle/site:accessallgroups', $df->context);
+
+        // Specific groups requested.
+        if ($this->groups) {
+            list($ingroups, $groupparams) = $DB->get_in_or_equal($this->groups);
+            $where .= " AND e.groupid $ingroups ";
+            $params = array_merge($params, $groupparams);
+        }
+
+        // Current group.
+        if ($currentgroup) {
+            // If requesting specific entries, they might be from other groups.
+            // We want to allow access even if we're in a group.
+            if ($this->eids and $canaccessallgroups) {
+                // Don't apply group condition.
+            } else {
+                list($ingroups, $groupparams) = $DB->get_in_or_equal(array($currentgroup, 0));
+                $where .= " AND e.groupid $ingroups ";
+                $params = array_merge($params, $groupparams);
+            }
+        }
+
+        // All participants in separate groups mode, must have accessallgroups.
+        if (!$currentgroup and $groupmode == SEPARATEGROUPS) {
+            if (!$canaccessallgroups) {
+                $where .= " AND e.groupid = ? ";
+                $params[] = 0;
+            }
+        }
+
+        return array($where, $params);
     }
 
     /**
@@ -307,7 +507,6 @@ class dataformfilter {
                 }
 
                 $field = $fields[$fieldid];
-                $internalfield = ($field instanceof \mod_dataform\pluginbase\dataformfield_internal);
 
                 // Register join field if applicable.
                 $this->register_join_field($field);
@@ -319,9 +518,7 @@ class dataformfilter {
                             list($fieldsql, $fieldparams, $fromcontent) = $fieldsqloptions;
                             $whereand[] = $fieldsql;
                             $searchparams = array_merge($searchparams, $fieldparams);
-                            if ($fromcontent) {
-                                $searchfrom[$fieldid] = $fieldid;
-                            }
+                            $searchfrom[$fieldid] = $fromcontent;
                         }
                     }
                 }
@@ -333,9 +530,7 @@ class dataformfilter {
                             list($fieldsql, $fieldparams, $fromcontent) = $fieldsqloptions;
                             $whereor[] = $fieldsql;
                             $searchparams = array_merge($searchparams, $fieldparams);
-                            if ($fromcontent) {
-                                $searchfrom[$fieldid] = $fieldid;
-                            }
+                            $searchfrom[$fieldid] = $fromcontent;
                         }
                     }
                 }
@@ -377,7 +572,10 @@ class dataformfilter {
 
         // Compile sql for search settings.
         if ($searchfrom) {
-            foreach ($searchfrom as $fieldid) {
+            foreach ($searchfrom as $fieldid => $fromcontent) {
+                if (!$fromcontent) {
+                    continue;
+                }
                 // Add only tables which are not already added.
                 if (empty($this->_filteredtables) or !in_array($fieldid, $this->_filteredtables)) {
                     $this->_filteredtables[] = $fieldid;
@@ -394,9 +592,6 @@ class dataformfilter {
         }
 
         $wheresearch = $searchwhere ? ' AND '. implode(' AND ', $searchwhere) : '';
-
-        // Register referred tables.
-        $this->_filteredtables = $searchfrom;
         $searchparams = array_values($searchparams);
 
         return array($searchtables, $wheresearch, $searchparams);
@@ -594,7 +789,14 @@ class dataformfilter {
                 continue;
             }
 
-            $this->id = $filter->id;
+            // Append child filters.
+            $appended = array($this->id => $this->id);
+            $filter->append_child_filters($appended);
+
+            // Entry type - append only if not already set.
+            if (!$this->entrytype and $entrytype = $filter->entrytype) {
+                $this->entrytype = $entrytype;
+            }
 
             // Per page - append smaller.
             if ($newperpage = $filter->perpage) {
@@ -632,6 +834,11 @@ class dataformfilter {
                 $this->search = $filter->search;
             }
 
+            // Set specific child filters.
+            if ($filters = $filter->filters) {
+                $this->filters = array_merge($this->filters, $filters);
+            }
+
             // Set specific entries.
             if ($eids = $filter->eids) {
                 $this->eids = $this->get_unique_list($this->eids, $eids);
@@ -648,6 +855,41 @@ class dataformfilter {
             if ($states = $filter->states) {
                 $this->states = $this->get_unique_list($this->states, $states);
             }
+            // Set specific page.
+            if ($page = $filter->page) {
+                $this->page = $page;
+            }
+        }
+    }
+
+    /**
+     * Appends to the filter its child filters.
+     *
+     * @param array $appended List of appended filter ids.
+     * @return void
+     */
+    public function append_child_filters(array &$appended = array()) {
+        if (!$this->filters) {
+            return;
+        }
+
+        $fm = \mod_dataform_filter_manager::instance($this->dataid);
+
+        $appended[$this->id] = $this->id;
+        foreach ($this->filters as $fid) {
+            if (array_key_exists($fid, $appended)) {
+                continue;
+            }
+
+            // Get the filter.
+            $filter = $fm->get_filter_by_id($fid);
+
+            // Append its child filters.
+            $appended[$fid] = $fid;
+            $filter->append_child_filters($appended);
+
+            // Append to this filter.
+            $this->append(array($filter));
         }
     }
 
@@ -726,8 +968,17 @@ class dataformfilter {
      * @return array
      */
     private function get_unique_list($items1, $items2, $sort = SORT_NUMERIC) {
-        $list1 = is_array($items1) ? $items1 : explode(',', $items1);
-        $list2 = is_array($items2) ? $items2 : explode(',', $items2);
+        $list1 = array();
+        $list2 = array();
+
+        if (!empty($items1)) {
+            $list1 = is_array($items1) ? $items1 : explode(',', $items1);
+        }
+
+        if (!empty($items2)) {
+            $list2 = is_array($items2) ? $items2 : explode(',', $items2);
+        }
+
         return array_values(array_unique(array_merge($list1, $list2), $sort));
     }
 

@@ -54,6 +54,8 @@ class mod_dataform_entry_manager {
     protected $_countfiltered = 0;
     /** @var int Number of page of retrieved entries. */
     protected $_page = 0;
+    /** @var array Local sql cache. */
+    protected $_sql = array();
 
     /**
      * Returns and caches (for the current script) if not already, an entries manager for the specified Dataform.
@@ -128,6 +130,12 @@ class mod_dataform_entry_manager {
      *
      */
     public function set_content(array $options = null) {
+        // Load sql from filter.
+        if (!empty($options['filter'])) {
+            $this->_sql = $options['filter']->get_sql($this->viewid);
+            unset($options['filter']);
+        }
+
         if (isset($options['entriesset'])) {
             $entriesset = $options['entriesset'];
         } else {
@@ -146,152 +154,16 @@ class mod_dataform_entry_manager {
     /**
      *
      */
-    public function get_sql_query(\mod_dataform\pluginbase\dataformfilter $filter) {
-        global $DB, $USER;
-
-        // Params array for the sql.
-        $params = array();
-        $params[] = $this->dataformid;
-
-        // Access base params: this dataform and this view.
-        $accessparams = array('dataformid' => $this->dataformid, 'viewid' => $this->viewid);
-
-        // ENTRY TYPE FILTERING.
-        $wheretype = '';
-        // Specific entry type requested.
-        if ($filter->entrytype) {
-            $wheretype .= " AND e.type = ? ";
-            $params[] = $filter->entrytype;
-        }
-        // USER FILTERING.
-        if ($filter->grouped) {
-            // Grouped entries without user info; don't filter by user.
-            $whatuser = '';
-            $fromuser = '';
-            $whereuser = '';
-        } else {
-            $whatuser = ', '. user_picture::fields('u', array('idnumber', 'username'), 'uid ');
-            $fromuser = ' JOIN {user} u ON u.id = e.userid ';
-            $whereuser = '';
-            // Limit to requested users.
-            if ($filter->users) {
-                list($inusers, $userparams) = $DB->get_in_or_equal($filter->users);
-                $whereuser .= " AND e.userid $inusers ";
-                $params = array_merge($params, $userparams);
-            }
-            // Exclude own entries.
-            if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryownview', $accessparams)) {
-                $whereuser .= " AND e.userid <> ? ";
-                $params[] = $USER->id;
-            }
-            // Exclude guest/anonymous.
-            if (!mod_dataform\access\view_capability::has_capability('mod/dataform:entryanonymousview', $accessparams)) {
-                $whereuser .= " AND e.userid <> ? ";
-                $params[] = 0;
-            }
-            // Exclude other entries.
-            $viewany = mod_dataform\access\view_capability::has_capability('mod/dataform:entryanyview', $accessparams);
-            $entriesmanager = mod_dataform\access\view_capability::has_capability('mod/dataform:manageentries', $accessparams);
-            if (($filter->individualized and !$entriesmanager) or !$viewany) {
-                $whereuser .= " AND e.userid = ? ";
-                $params[] = $USER->id;
-            }
-        }
-        // GROUP FILTERING.
-        $currentgroup = $filter->currentgroup;
-        $groupmode = $filter->groupmode;
-        $wheregroup = '';
-        // Specific groups requested.
-        if ($filter->groups) {
-            list($ingroups, $groupparams) = $DB->get_in_or_equal($filter->groups);
-            $wheregroup .= " AND e.groupid $ingroups ";
-            $params = array_merge($params, $groupparams);
-        }
-        // Current group.
-        if ($currentgroup) {
-            list($ingroups, $groupparams) = $DB->get_in_or_equal(array($currentgroup, 0));
-            $wheregroup .= " AND e.groupid $ingroups ";
-            $params = array_merge($params, $groupparams);
-        }
-
-        // All participants in separate groups mode, must have accessallgroups.
-        if (!$currentgroup and $groupmode == SEPARATEGROUPS) {
-            $df = mod_dataform_dataform::instance($this->dataformid);
-            if (!has_capability('moodle/site:accessallgroups', $df->context)) {
-                $wheregroup .= " AND e.groupid = ? ";
-                $params[] = 0;
-            }
-        }
-
-        // Sql for fetching the entries.
-        $whatentry = ' e.id, e.dataid, e.state, e.timecreated, e.timemodified, e.userid, e.groupid, e.type ';
-        $tables = " {dataform_entries} e $fromuser ";
-        $wheredfid = " e.dataid = ? ";
-
-        // FILTER SQL.
-        list(
-            $searchtables,
-            $searchwhere,
-            $searchparams,
-            $sorttables,
-            $sortwhere,
-            $sortorder,
-            $sortparams,
-            $contentwhat,
-            $contenttables,
-            $contentwhere,
-            $contentparams,
-            $dataformcontent,
-            $joinwhat,
-            $jointables,
-        ) = $filter->get_sql();
-
-        $count = ' COUNT(e.id) ';
-        $whatsql = " $whatentry $whatuser $contentwhat $joinwhat";
-        $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
-        $wheresql = " $wheredfid $wheretype $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
-
-        $sqlselect  = "SELECT $whatsql FROM $fromsql WHERE $wheresql $sortorder";
-
-        // Count total entries the user is authorized to view (without additional filtering).
-        $sqlcountmax = "SELECT $count FROM $tables $sorttables WHERE $wheredfid $wheretype $whereuser $wheregroup $sortwhere";
-        // Count entries in this particular view call (with filtering; only of searching).
-        $sqlcountfiltered = $searchwhere ? "SELECT $count FROM $fromsql WHERE $wheresql" : null;
-
-        $params = array_merge($params, $sortparams);
-        $allparams = array_merge($params, $searchparams, $contentparams);
-
-        $sql = new stdClass;
-        $sql->what = $whatsql;
-        $sql->whatcontent = $contentwhat;
-        $sql->from = $fromsql;
-        $sql->where = $wheresql;
-        $sql->sortorder = $sortorder;
-        $sql->select = $sqlselect;
-        $sql->countmax = $sqlcountmax;
-        $sql->countfiltered = $sqlcountfiltered;
-        $sql->params = $params;
-        $sql->allparams = $allparams;
-        $sql->dataformcontent = $dataformcontent;
-
-        return $sql;
-    }
-
-    /**
-     *
-     */
     public function fetch_entries(array $options = null) {
         global $DB;
 
-        // No filter no entries.
-        if (empty($options['filter'])) {
-            return null;
+        if (!empty($options['filter'])) {
+            $sql = $options['filter']->get_sql($this->viewid);
+        } else {
+            $sql = $this->sql;
         }
 
-        // Get a clone.
-        $filter = $options['filter']->clone;
-
-        if (!$sql = $this->get_sql_query($filter)) {
+        if (!$sql) {
             return null;
         }
 
@@ -315,57 +187,48 @@ class mod_dataform_entry_manager {
         $entries->entries = null;
         $entries->page = 0;
 
+        // Get the entry records.
         if ($searchcount) {
-            // Get the entry records.
-            if ($filter->eids) {
-                // Specific entries may be requested (eids).
-                $entryids = !is_array($filter->eids) ? explode(',', $filter->eids) : $filter->eids;
+            $perpage = $sql->perpage;
+            $selection = $sql->selection;
 
-                list($ineids, $eidparams) = $DB->get_in_or_equal($entryids);
-                $andwhereeid = " AND e.id $ineids ";
+            if ($perpage and $selection == self::SELECT_RANDOM_ENTRIES) {
+                // Get random entries.
+                $sqlselect = "SELECT DISTINCT e.id FROM $sql->from WHERE $sql->where";
+                $entryids = $DB->get_records_sql($sqlselect, $sql->allparams);
+                // Get a random subset of ids.
+                $randids = array_rand($entryids, min($perpage, count($entryids)));
+                // Get the entries.
+                list($insql, $paramids) = $DB->get_in_or_equal($randids);
+                $andwhereids = " AND e.id $insql ";
+                $sqlselect = "SELECT $sql->what FROM $sql->from WHERE $sql->where $andwhereids";
+                $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
 
-                $sqlselect = "SELECT $sql->what $sql->whatcontent
-                              FROM $sql->from
-                              WHERE $sql->where $andwhereeid $sql->sortorder";
+            } else if ($perpage) {
+                // Get page.
+                $page = $sql->page;
 
-                $entries->entries = $DB->get_records_sql($sqlselect, array_merge($sql->allparams, $eidparams));
+                // !$filter->groupby and $perpage = $filter->perpage and $filter->selection != self::SELECT_RANDOM_ENTRIES
+                $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
+                $page = $numpages > 1 ? (int) $page : 0;
 
-            } else if (!$filter->groupby and $perpage = $filter->perpage) {
-                // Get perpage subset.
-                if ($filter->selection == self::SELECT_RANDOM_ENTRIES) {
-                    // Get ids of found entries.
-                    $sqlselect = "SELECT DISTINCT e.id FROM $sql->from WHERE $sql->where";
-                    $entryids = $DB->get_records_sql($sqlselect, $sql->allparams);
-                    // Get a random subset of ids.
-                    $randids = array_rand($entryids, min($perpage, count($entryids)));
-                    // Get the entries.
-                    list($insql, $paramids) = $DB->get_in_or_equal($randids);
-                    $andwhereids = " AND e.id $insql ";
-                    $sqlselect = "SELECT $sql->what FROM $sql->from WHERE $sql->where $andwhereids";
-                    $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
-                } else {
-                    // By page.
-                    $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
-                    $page = $numpages > 1 ? (int) $filter->page : 0;
-
-                    if ($filter->selection) {
-                        if ($filter->selection == self::SELECT_FIRST_PAGE) {
-                            // First page.
-                            $page = 0;
-                        } else if ($filter->selection == self::SELECT_LAST_PAGE) {
-                            // Last page.
-                            $page = $numpages - 1;
-                        } else if ($filter->selection == self::SELECT_NEXT_PAGE) {
-                            // Next page.
-                            $page = ($page % $numpages);
-                        } else if ($filter->selection == self::SELECT_RANDOM_PAGE) {
-                            // Random page.
-                            $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
-                        }
+                if ($selection) {
+                    if ($selection == self::SELECT_FIRST_PAGE) {
+                        // First page.
+                        $page = 0;
+                    } else if ($selection == self::SELECT_LAST_PAGE) {
+                        // Last page.
+                        $page = $numpages - 1;
+                    } else if ($selection == self::SELECT_NEXT_PAGE) {
+                        // Next page.
+                        $page = ($page % $numpages);
+                    } else if ($selection == self::SELECT_RANDOM_PAGE) {
+                        // Random page.
+                        $page = $numpages > 1 ? rand(0, ($numpages - 1)) : 0;
                     }
-                    $entries->page = $page;
-                    $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams, $page * $perpage, $perpage);
                 }
+                $entries->page = $page;
+                $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams, $page * $perpage, $perpage);
             } else {
                 // Get everything.
                 $entries->entries = $DB->get_records_sql($sql->select, $sql->allparams);
@@ -433,27 +296,25 @@ class mod_dataform_entry_manager {
     public function count_entries(array $options = null) {
         global $DB;
 
-        if (!empty($options['filter'])) {
-            // Get a clone.
-            $filter = $options['filter']->clone;
+        $sql = null;
 
-            if (!$sql = $this->get_sql_query($filter)) {
+        if (!empty($options['filter'])) {
+            if (!$sql = $options['filter']->get_sql($this->viewid)) {
                 return 0;
             }
-
-            $sqlcount = $sql->countfiltered ? $sql->countfiltered : $sql->countmax;
-            $params = $sql->allparams;
-
-            // If specific entries requested (eids).
-            if ($filter->eids) {
-                list($ineids, $eidparams) = $DB->get_in_or_equal($filter->eids);
-                $sqlcount .= " AND e.id $ineids ";
-                $params = array_merge($params, $eidparams);
-            }
-            return $DB->count_records_sql($sqlcount, $params);
         }
-        // No filter so return total count.
-        return $DB->count_records('dataform_entries', array('dataid' => $this->dataformid));
+
+        // Load sql from local cache.
+        if (!$sql and !$sql = $this->sql) {
+            // No sql so return total count.
+            return $DB->count_records('dataform_entries', array('dataid' => $this->dataformid));
+        }
+
+        // We have sql to count by.
+        $sqlcount = $sql->countfiltered ? $sql->countfiltered : $sql->countmax;
+        $params = $sql->allparams;
+
+        return $DB->count_records_sql($sqlcount, $params);
     }
 
     /**
@@ -470,7 +331,7 @@ class mod_dataform_entry_manager {
             return 0;
         }
 
-        if (!$filter or !$sql = $this->get_sql_query($filter)) {
+        if (!$filter or !$sql = $filter->get_sql($this->viewid)) {
             return 0;
         }
 
@@ -1032,6 +893,15 @@ class mod_dataform_entry_manager {
      */
     public function get_page() {
         return $this->_page;
+    }
+
+    /**
+     * Returns the sql query.
+     *
+     * @return stdClass
+     */
+    public function get_sql() {
+        return $this->_sql;
     }
 
     /**

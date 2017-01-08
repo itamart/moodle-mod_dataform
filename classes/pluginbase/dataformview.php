@@ -119,6 +119,7 @@ class dataformview {
     public function set_viewfilter(array $options = array()) {
         $fm = \mod_dataform_filter_manager::instance($this->dataid);
 
+        $filterid = 0;
         $forcedfilter = null;
         $filterfromid = null;
         $filterfromoptions = null;
@@ -127,6 +128,7 @@ class dataformview {
         // Get forced filter if set.
         if ($this->filterid) {
             $forcedfilter = $fm->get_filter_by_id($this->filterid, array('view' => $this));
+            $filterid = $forcedfilter->id;
         }
 
         // Get filter from id option.
@@ -134,6 +136,7 @@ class dataformview {
             $fid = $options['id'];
             if ($fid != $this->filterid) {
                 $filterfromid = $fm->get_filter_by_id($fid, array('view' => $this));
+                $filterid = $filterfromid->id;
             }
             unset($options['id']);
         }
@@ -162,6 +165,7 @@ class dataformview {
         if ($filterspecified) {
             $filter = $forcedfilter ? $forcedfilter : $fm->get_filter_blank();
             $filter->append(array($filterfromid, $filterfromoptions, $filterfromurl));
+            $filter->id = $filterid;
         } else {
             // If no filter specified and there is default filter, use default.
             $fid = $this->df->defaultfilter ? $this->df->defaultfilter : 0;
@@ -172,6 +176,8 @@ class dataformview {
         if ($patternfields = $this->get_pattern_set('field')) {
             $filter->contentfields = array_keys($patternfields);
         }
+
+        $filter->view = $this->id;
 
         $this->_filter = $filter;
     }
