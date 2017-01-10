@@ -330,20 +330,43 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
 
         // If there is a limit, make sure the number of ratings for this
         // value has not been reached.
-        if ($this->rating_value_at_limit($rating, $value)) {
+        if ($value != RATING_UNSET_RATING and $this->rating_value_at_limit($rating, $value)) {
             return 1;
         }
 
-        $scaleitems = $rating->settings->scale->scaleitems;
-        $firstitem = reset($scaleitems);
-
         // If forcing in-order, make sure that there is at least "limit" number
         // of ratings for the preceding value.
-        if ($force and $value != $firstitem) {
-            $valueindex = array_search($value, $scaleitems);
-            $precedingitem = $scaleitems[$valueindex - 1];
-            if (!$this->rating_value_at_limit($rating, $precedingitem)) {
-                return 1;
+        if ($force) {
+            $scaleitems = $this->get_scale_items($rating);
+            $first = key($scaleitems);
+            $highest = $this->get_highest_rating_value($rating);
+            $oldvalue = $rating->rating;
+
+            if ($highest == RATING_UNSET_RATING) {
+                // Rating value must be the first.
+                if ($value != $first) {
+                    return 2;
+                } else {
+                    return 0;
+                }
+            }
+
+            if ($value == RATING_UNSET_RATING) {
+                // Cannot unset if there is a highest value.
+                if ($oldvalue != $highest) {
+                    return 3;
+                } else {
+                    return 0;
+                }
+            }
+
+            $offest = $value - $highest;
+            // Trying to rate a lower value or too high.
+            if ($offest != 1) {
+                return 4;
+            }
+            if (!$this->rating_value_at_limit($rating, $highest)) {
+                return 5;
             }
         }
 
@@ -518,7 +541,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
     /**
      *
      */
-    public function get_entry_ids_for_content($sql, $params) {
+    public function get_entry_ids_for_content($sql = '', array $params = array()) {
         return null;
     }
 
@@ -552,13 +575,13 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         // Get entry rating objects.
         $scaleid = $this->get_scaleid($entry);
 
-        $options = new object;
+        $options = new \stdClass;
         $options->context = $context;
         $options->component = 'mod_dataform';
         $options->ratingarea = $fieldname;
         $options->scaleid = $scaleid;
 
-        $rec = new object;
+        $rec = new \stdClass;
         $rec->itemid = $entry->id;
         $rec->context = $context;
         $rec->component = 'mod_dataform';
@@ -603,6 +626,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         }
 
         $itemid = !empty($options['itemid']) ? $options['itemid'] : 0;
+        $userid = !empty($options['userid']) ? $options['userid'] : 0;
         $rating = !empty($options['rating']) ? $options['rating'] : null;
 
         $raterecords = array();
@@ -617,6 +641,11 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
 
             // Limit to specified rating value.
             if ($rating !== null and $raterecord->rating != $rating) {
+                continue;
+            }
+
+            // Limit to specified rater.
+            if ($userid and $raterecord->userid != $userid) {
                 continue;
             }
 
@@ -636,7 +665,7 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
         if ($this->_allratings === null) {
             $rm = new ratingmdl_rating_manager();
 
-            $options = new object;
+            $options = new \stdClass;
             $options->context = $this->df->context;
             $options->component = 'mod_dataform';
             $options->ratingarea = $this->name;
@@ -661,19 +690,52 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
             return false;
         }
 
-        $options = array(
-            'rating' => $value,
-        );
-        if (!$separateraters = $this->param4) {
-            $options['userid'] = $userid;
-        }
+        $allraters = $this->param4;
 
-        if ($records = $this->get_rating_records($options)) {
-            if (count($records) < $limit) {
-                return true;
+        if ($allrecords = $this->get_all_rating_records()) {
+            $count = 0;
+            foreach ($allrecords as $recordid => $raterecord) {
+                if (!$allraters and $raterecord->userid != $userid) {
+                    continue;
+                }
+
+                // Break if we already found the respective records.
+                if ($raterecord->rating == $value) {
+                    $count++;
+                    if ($count >= $limit) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
+    }
+
+    /**
+     *
+     * @return boolean
+     */
+    protected function get_highest_rating_value($rating, $userid = 0) {
+        global $USER;
+
+        $userid = !$userid ? $USER->id : $userid;
+
+        $allraters = $this->param4;
+
+        $max = RATING_UNSET_RATING;
+        if ($allrecords = $this->get_all_rating_records()) {
+            foreach ($allrecords as $recordid => $raterecord) {
+                if (!$allraters and $raterecord->userid != $userid) {
+                    continue;
+                }
+
+                // Break if we already found the respective records.
+                if ($raterecord->rating > $max) {
+                    $max = $raterecord->rating;
+                }
+            }
+        }
+        return $max;
     }
 
     // USING SCALE.
@@ -736,11 +798,11 @@ class dataformfield_ratingmdl_ratingmdl extends mod_dataform\pluginbase\dataform
      * @return array
      */
     public function get_scale_items($rating) {
-        $items = $rating->settings->scale->scaleitems;
-        if ($rating->settings->scale->isnumeric) {
-            if ($this->param6) {
-                array_shift($items);
-            }
+        $scale = $rating->settings->scale;
+        $items = $scale->scaleitems;
+        // Remove 0 rating if required.
+        if ($scale->isnumeric and $this->param6) {
+            unset($items[0]);
         }
         return $items;
     }

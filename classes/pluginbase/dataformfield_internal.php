@@ -38,6 +38,27 @@ abstract class dataformfield_internal extends dataformfield {
     }
 
     /**
+     * Override parent. No need to create internal fields.
+     */
+    public function create($data) {
+        return $this->id;
+    }
+
+    /**
+     * Override parent. No need to update internal fields.
+     */
+    public function update($data) {
+        return $this->id;
+    }
+
+    /**
+     * Override parent. No need to delete internal fields.
+     */
+    public function delete() {
+        return true;
+    }
+
+    /**
      *
      */
     public function get_content_parts() {

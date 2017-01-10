@@ -43,9 +43,13 @@ if ($urlparams->fid) {
     $field = $df->field_manager->get_field($urlparams->type);
 }
 
-// Must have add instance capability in the dataform context.
-$requiredcapability = "dataformfield/$field->type:addinstance";
-require_capability($requiredcapability, $df->context);
+$internalfield = ($field instanceof \mod_dataform\pluginbase\dataformfield_internal);
+
+// Must have add instance capability in the dataform context for user fields.
+if (!$internalfield) {
+    $requiredcapability = "dataformfield/$field->type:addinstance";
+    require_capability($requiredcapability, $df->context);
+}
 
 $mform = $field->get_form();
 

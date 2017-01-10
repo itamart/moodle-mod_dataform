@@ -331,7 +331,7 @@ class mod_dataform_dataform {
         // Make sure there is at least dataform id param.
         $urlparams['d'] = $this->id;
         // Get the edit mode.
-        $urlparams['edit'] = optional_param('edit', 0, PARAM_BOOL);
+        $urlparams['edit'] = optional_param('edit', -1, PARAM_BOOL);
 
         // MANAGER.
         $manager = has_capability('mod/dataform:managetemplates', $this->context);
@@ -600,7 +600,7 @@ class mod_dataform_dataform {
      * @return void
      */
     protected function set_page_editing_mode($pagefile, $urlparams) {
-        global $PAGE, $USER;
+        global $PAGE, $USER, $OUTPUT;
 
         if ($pagefile == 'external') {
             return;
@@ -616,11 +616,14 @@ class mod_dataform_dataform {
                 $USER->editing = $urlparams['edit'];
             }
 
-            $buttons = '<table><tr><td><form method="get" action="'. $PAGE->url. '"><div>'.
-                '<input type="hidden" name="d" value="'.$this->id.'" />'.
-                '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing() ? 0 : 1).'" />'.
-                '<input type="submit" value="'.get_string($PAGE->user_is_editing() ? 'blockseditoff' : 'blocksediton').'" /></div></form></td></tr></table>';
-            $PAGE->set_button($buttons);
+            if ($PAGE->user_is_editing()) {
+                $caption = get_string('turneditingoff');
+                $url = new moodle_url($PAGE->url, array('edit'=>'0', 'sesskey'=>sesskey()));
+            } else {
+                $caption = get_string('turneditingon');
+                $url = new moodle_url($PAGE->url, array('edit'=>'1', 'sesskey'=>sesskey()));
+            }
+            $PAGE->set_button($OUTPUT->single_button($url, $caption, 'get'));
         }
     }
 
@@ -886,7 +889,7 @@ class mod_dataform_dataform {
      *
      * @return bool Always true.
      */
-    protected function reset_user_data($userid = null) {
+    public function reset_user_data($userid = null) {
         // Must have manage templates capability.
         require_capability('mod/dataform:managetemplates', $this->context);
 
@@ -1456,6 +1459,43 @@ class mod_dataform_dataform {
         $where = " dataid = ? AND name = ? AND id <> ? ";
 
         return $DB->record_exists_select("dataform_{$table}", $where, $params);
+    }
+
+    /**
+     *
+     */
+    protected function get_content_id_hash_string($contentid) {
+        global $USER;
+
+        $cmid = $this->cm->id;
+        $cmidnumber = $this->cm->idnumber;
+        $userid = $USER->id;
+
+        $hashstring = md5("$contentid,$userid,$cmid,$cmidnumber");
+        return $hashstring;
+    }
+
+    /**
+     *
+     */
+    public function get_content_id_hash($contentid) {
+        $hash = $this->get_content_id_hash_string($contentid);
+        $tokenhash = base64_encode("$contentid,$hash");
+
+        return $tokenhash;
+    }
+
+    /**
+     *
+     */
+    public function get_content_id_from_hash($tokenhash) {
+        list($contentid, $hash) = explode(',', base64_decode($tokenhash));
+
+        if ($this->get_content_id_hash_string($contentid) != $hash) {
+            return false;
+        }
+
+        return $contentid;
     }
 
     // RSS.

@@ -79,7 +79,7 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
         $fs = get_file_storage();
         if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftarea, 'sortorder', false)) {
             // There are files to upload so add/update content record.
-            $rec = new object;
+            $rec = new \stdClass;
             $rec->fieldid = $fieldid;
             $rec->entryid = $entryid;
             $rec->content = 1;
@@ -142,8 +142,10 @@ class dataformfield_file_file extends mod_dataform\pluginbase\dataformfield {
         $usercontext = context_user::instance($USER->id);
 
         // Upload files done only once.
-        if (!$draftid) {
-            $draftid = file_get_unused_draft_itemid();
+        if (!empty($settings['filepicker'])) {
+            if (!$draftid) {
+                $draftid = file_get_unused_draft_itemid();
+            }
             $zipdraftid = $settings['filepicker'];
 
             if ($files = $fs->get_area_files($usercontext->id, 'user', 'draft', $zipdraftid, 'sortorder', false)) {

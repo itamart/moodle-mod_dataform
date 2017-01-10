@@ -9,6 +9,7 @@ Feature: Navigation tabs
         And I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Navigation tabs test"
+        And I turn editing mode on
 
         Then I see "Browse"
         And I see "Manage"

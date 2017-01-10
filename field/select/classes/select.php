@@ -136,14 +136,20 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
     }
 
     /**
+     * Returns the index of the sepcified value in the field's options.
+     * If not found returns '#'. This assumes that the option indices are
+     * always numeric. The comparison of the search value with the options
+     * is case insensitive.
      *
+     * @param string $value
+     * @return int
      */
     public function get_search_value($value) {
         $options = $this->options_menu();
-        if ($key = array_search($value, $options)) {
+        if ($key = array_search(strtolower($value), array_map('strtolower', $options))) {
             return $key;
         } else {
-            return '';
+            return '#';
         }
     }
 
@@ -155,10 +161,9 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
             return null;
         }
 
-        // The search value must be found in the field options.
-        if (!$search[3] = $this->get_search_value($search[3])) {
-            return null;
-        }
+        // Convert the search value to option index.
+        $search[3] = $this->get_search_value($search[3]);
+
         return parent::get_search_sql($search);
     }
 
@@ -195,7 +200,7 @@ class dataformfield_select_select extends mod_dataform\pluginbase\dataformfield 
 
         $fieldid = $this->id;
         $csvname = $importsetting['name'];
-        $allownew = !empty($importsetting['allownew']) ? true : false;
+        $allownew = !empty($importsetting['allownew']);
         $label = !empty($csvrecord[$csvname]) ? $csvrecord[$csvname] : null;
 
         if ($label) {

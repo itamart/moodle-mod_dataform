@@ -1,49 +1,64 @@
-@dataformfilter
+@mod @mod_dataform @dataformfilter
 Feature: Filtering
 
-    @javascript
-    Scenario: Filtering
+    Background:
+    #Section: Activity setup.
         Given a fresh site with dataform "Test dataform filtering"
 
-        #Section: Add a text field.
         And the following dataform "fields" exist:
             | name         | type          | dataform  |
             | Text field   | text          | dataform1 |
-        #:Section
 
-        #Section: Add an aligned view.
         And the following dataform "views" exist:
-            | name          | type      | dataform  | default   |
-            | Aligned view  | aligned   | dataform1 | 1         |
+            | name         | type      | dataform  | default   |
+            | Main View    | grid      | dataform1 | 1         |
 
-        And view "Aligned view" in dataform "1" has the following view template:
+        And view "Main View" in dataform "1" has the following view template:
             """
             <div>
-                <div class="exporthide">
-                    <div class="addnewentry-wrapper">##addnewentry##</div>
-                    <div class="quickfilters-wrapper">
-                        <div class="quickfilter">Current filter ##filtersmenu##</div>
-                        <div class="quickfilter">Search ##quicksearch##</div>
-                        <div class="quickfilter">Per page ##quickperpage##</div>
-                        <div class="clearfix"></div>
+                <div class="addnewentry-wrapper">##addnewentry##</div>
+                <div class="quickfilters-wrapper">
+                    <div class="quickfilter">Current filter ##filtersmenu##</div>
+                    <div class="quickfilter">
+                        <a href="javascript:document.querySelector('#quicksearch form').submit();">Search</a>
+                        <div id="quicksearch">##quicksearch##</div>
                     </div>
-                    <div>##advancedfilter##</div>
-                    <div>##paging:bar##</div>
+                    <div class="quickfilter">Per page ##quickperpage##</div>
+                    <div class="clearfix"></div>
                 </div>
-                <div>##entries##</div>
+                <div>##advancedfilter##</div>
+                <div>##paging:bar##</div>
+                <div>
+                    <table class="generaltable">
+                        ##entries##
+                    </table>
+                </div>
             </div>
             """
-        #:Section
 
+        And view "Main View" in dataform "1" has the following entry template:
+            """
+            <tr>
+                <td>[[entryid]]</td>
+                <td>[[EAU:name]]</td>
+                <td>[[Text field]] by [[EAU:firstname]] [[EAU:lastname]]</td>
+            </tr>
+            """
+    #:Section
+
+
+    @javascript @dataformfiltering1
+    Scenario: Filtering
+    #Section: Steps.
         #Section: Add entries.
         And the following dataform "entries" exist:
-            | dataform  | user          | group | timecreated   | timemodified  | Text field   |
-            | dataform1 | teacher1      |       |               |               | Entry 01     |
-            | dataform1 | teacher1      |       |               |               | Entry 02     |
-            | dataform1 | teacher1      |       |               |               | Entry 03     |
-            | dataform1 | teacher1      |       |               |               | Entry 04     |
-            | dataform1 | teacher1      |       |               |               | Entry 05     |
-            | dataform1 | teacher1      |       |               |               | Entry 06     |
+            | dataform  | user          | Text field   |
+            | dataform1 | teacher1      | Entry 01     |
+            | dataform1 | teacher1      | Entry 02     |
+            | dataform1 | teacher1      | Entry 03     |
+            | dataform1 | teacher1      | Entry 04     |
+            | dataform1 | teacher1      | Entry 05     |
+            | dataform1 | teacher1      | Entry 06     |
         #:Section
 
         #Section: Log in.
@@ -112,11 +127,11 @@ Feature: Filtering
         #:Section
 
         #Section: Quick search.
-        #Then I set the field "usearch" to "Entry 01"
-        #And I press Enter on "usearch" "field"
-        #And I see "Quick filter"
-        #And I see "Entry 01"
-        #And I do not see "Entry 02"
+        Then I set the field "usearch" to "Entry 01"
+        And I click on "Search" "link"
+        And I see "Quick filter"
+        And I see "Entry 01"
+        And I do not see "Entry 02"
         #:Section
 
         ### Define and apply a standard filter ###
@@ -240,3 +255,114 @@ Feature: Filtering
         And I see "Entry 05"
         And I see "Entry 06"
         #:Section
+    #:Section
+
+    @javascript @dataformfiltering2
+    Scenario Outline: Filtering a view with forced filter.
+    #Section: Steps.
+        #Section: Add entries.
+        And the following dataform "entries" exist:
+            | dataform  | user          | Text field   |
+            | dataform1 | teacher1      | Entry 01     |
+            | dataform1 | student1      | Entry 01     |
+            | dataform1 | teacher1      | Entry 02     |
+            | dataform1 | student1      | Entry 02     |
+            | dataform1 | teacher1      | Entry 03     |
+            | dataform1 | student1      | Entry 03     |
+        #:Section
+
+        #Section: Add filters.
+        And the following dataform "filters" exist:
+            | name              | dataform  | visible   | searchoptions                 |
+            | My Entries        | dataform1 | 0         | AND,EAU,currentuser,NOT,,     |
+            | Two Last Entries  | dataform1 | 1         | OR,Text field,content,,=,Entry 02;OR,Text field,content,,=,Entry 03     |
+        #:Section
+
+        #Section: Adjust the view filter.
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Test dataform filtering"
+        Then I go to manage dataform "views"
+        And I set the field with xpath "//select[@name='fid']" to "My Entries"
+        And I log out
+        #:Section
+
+        #Section: Log in.
+        And I log in as "<user>"
+        And I follow "Course 1"
+        And I follow "Test dataform filtering"
+
+        And I see "Entry 01 by <user name>"
+        And I see "Entry 02 by <user name>"
+        And I see "Entry 03 by <user name>"
+        And I do not see "Entry 01 by <other name>"
+        And I do not see "Entry 02 by <other name>"
+        And I do not see "Entry 03 by <other name>"
+        #:Section
+
+        #Section: Quick per page.
+        And I do not see "Quick filter"
+        And I do not see "Next"
+        And I do not see "Previous"
+
+        Then I set the field "uperpage" to "1"
+        And I see "Quick filter"
+        And I see "Next"
+        And I do not see "Previous"
+        And I see "Entry 01 by <user name>"
+        And I do not see "Entry 02"
+
+        Then I click on ".page1 a" "css_element"
+        And I see "Quick filter"
+        And I see "Next"
+        And I see "Previous"
+        And I do not see "Entry 01"
+        And I see "Entry 02 by <user name>"
+
+        Then I set the field "uperpage" to "2"
+        And I see "Quick filter"
+        And I do not see "Next"
+        And I see "Previous"
+        And I do not see "Entry 01"
+        And I do not see "Entry 02"
+        And I see "Entry 03 by <user name>"
+
+        Then I set the field "uperpage" to "3"
+        And I see "Quick filter"
+        And I do not see "Next"
+        And I do not see "Previous"
+        And I see "Entry 01 by <user name>"
+        And I see "Entry 02 by <user name>"
+        And I see "Entry 03 by <user name>"
+
+        Then I set the field "id_filtersmenu" to "* Reset quick filter"
+        And I do not see "Quick filter"
+        And I do not see "Next"
+        And I do not see "Previous"
+        And I see "Entry 01 by <user name>"
+        And I see "Entry 02 by <user name>"
+        And I see "Entry 03 by <user name>"
+        #:Section
+
+        #Section: Quick search.
+        Then I set the field "usearch" to "Entry 01"
+        And I click on "Search" "link"
+        And I see "Quick filter"
+        And I see "Entry 01 by <user name>"
+        And I do not see "Entry 01 by <other name>"
+        And I do not see "Entry 02"
+        And I do not see "Entry 03"
+        #:Section
+
+        #Section: Predefined filter.
+        Then I set the field "id_filtersmenu" to "Two Last Entries"
+        And I do not see "Entry 01"
+        And I do not see "<other name>"
+        And I see "Entry 02 by <user name>"
+        And I see "Entry 03 by <user name>"
+        #:Section
+    #:Section
+    Examples:
+        | user      | user name | other name    |
+        | teacher1  | Teacher 1 | Student 1     |
+        | student1  | Student 1 | Teacher 1 |

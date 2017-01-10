@@ -421,9 +421,10 @@ $string['wrongdataid'] = 'Wrong dataform id provided';
 $string['submission'] = 'Submission';
 
 // VIEW SETTING.
-$string['modeeditonly'] = 'Show only edited entries';
-$string['modeeditseparate'] = 'Show edited entries separated from other entries';
-$string['modeeditinline'] = 'Show edited entries inline with other entries';
+$string['editing'] = 'Editing';
+$string['modeeditonly'] = 'Only edited entries';
+$string['modeeditseparate'] = 'Edited entries separated from other entries';
+$string['modeeditinline'] = 'Edited entries inline with other entries';
 $string['submissiondisplay'] = 'Display when editing';
 $string['availablefrom'] = 'Available from';
 $string['availableto'] = 'Available to';
@@ -453,6 +454,8 @@ $string['submissionmessage'] = 'Response to submission';
 $string['submissionmessage_help'] = 'A message to display to user after successful submission and before the user is redirected to teh target view.';
 $string['submissiondefaultmessage'] = 'Thank you';
 $string['submitfailure'] = 'Your submission could not be saved. Please try again.';
+$string['submissiondisplayafter'] = 'Display only edited entries';
+$string['submissiondisplayafter_help'] = 'By default all the viewable entries will be displayed after submission. Set to \'Yes\' if you want to display only the edited entry(s).';
 
 $string['patternsreplacement'] = 'Patterns Replacement';
 
@@ -664,7 +667,6 @@ $string['separateentries'] = 'Each entry in a separate file';
 $string['separateparticipants'] = 'Separate participants';
 $string['separateparticipants_help'] = 'Separate participants';
 $string['settings'] = 'Settings';
-$string['showall'] = 'Show all entries';
 $string['spreadsheettype'] = 'Spreadsheet type';
 $string['submissionsinpopup'] = 'Submissions in popup';
 $string['submission'] = 'Submission';

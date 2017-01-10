@@ -164,7 +164,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
             $fieldsettings = array();
             // Collect field import settings from formdata by field, pattern and element.
             foreach ($formdata as $name => $value) {
-                if (strpos($name, 'f_') !== false) {   // assuming only field settings start with f_
+                if (strpos($name, 'f_') !== false) {
                     list(, $fieldid, $pattern, $setting) = explode('_', $name);
                     if (!array_key_exists($fieldid, $fieldsettings)) {
                         $fieldsettings[$fieldid] = array();
@@ -250,7 +250,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
      */
     public function get_csv_content($range = self::EXPORT_PAGE) {
         // Set content.
-        $filter = clone($this->filter);
+        $filter = $this->filter->clone;
         if ($range == self::EXPORT_ALL) {
             $filter->perpage = 0;
         }
@@ -298,7 +298,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 if (isset($patternvalues[$pattern])) {
                     $row[] = $patternvalues[$pattern];
                 } else {
-                    $row[] = '';
+                    $row[] = $pattern;
                 }
             }
             $csvcontent[] = $row;
@@ -311,7 +311,7 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
      * @param array  $options associative delimiter,enclosure,encoding,updateexisting,settings
      */
     public function process_csv($data, $csvcontent, $options = null) {
-        global $CFG;
+        global $CFG, $DB;
 
         require_once("$CFG->libdir/csvlib.class.php");
 
@@ -340,7 +340,23 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
         }
 
         // Are we updating existing entries?
-        $updateexisting = !empty($options['updateexisting']) and !empty($csvfieldnames['entryid']);
+        $existingkeys = array();
+        $keyname = null;
+        if ($updateexisting = !empty($options['updateexisting'])) {
+            if (isset($fieldnames['entryid'])) {
+                $keyname = 'entryid';
+            } else {
+                $keyname = reset($fieldnames);
+                if ($field = $this->df->field_manager->get_field_by_name($keyname)) {
+                    $params = array('fieldid' => $field->id);
+                    if ($recs = $DB->get_records('dataform_contents', $params, '', 'id,content,entryid')) {
+                        foreach ($recs as $rec) {
+                            $existingkeys[$rec->content] = $rec->entryid;
+                        }
+                    }
+                }
+            }
+        }
 
         // Are we adding the imported entries to every participant?
         $addperparticipant = (!empty($options['addperparticipant']) and $users = $this->df->grade_manager->get_gradebook_users());
@@ -350,21 +366,6 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
 
         while ($csvrecord = $cir->next()) {
             $csvrecord = array_combine($fieldnames, $csvrecord);
-
-            // Update an existing entry.
-            if ($updateexisting and $csvrecord['entryid'] > 0) {
-
-                // Set the entry id.
-                $entryid = $csvrecord['entryid'];
-                $data->eids[$entryid] = $entryid;
-
-                // Iterate the fields and collate their entry content.
-                foreach ($fieldsettings as $fieldid => $importsettings) {
-                    $field = $this->df->field_manager->get_field_by_id($fieldid);
-                    $data = $field->prepare_import_content($data, $importsettings, $csvrecord, $entryid);
-                }
-                continue;
-            }
 
             // Add the entry for every participant.
             if ($addperparticipant) {
@@ -385,10 +386,23 @@ class dataformview_csv_csv extends dataformview_aligned_aligned {
                 continue;
             }
 
-            // Add a new entry.
+            // Get the entry id.
+            $entryid = 0;
+            if ($updateexisting and $keyname) {
+                if ($keyname == 'entryid') {
+                    if (!empty($csvrecord['entryid'])) {
+                        $entryid = $csvrecord['entryid'];
+                    }
+                } else if ($existingkeys and !empty($csvrecord[$keyname])) {
+                    $entryid = $existingkeys[$csvrecord[$keyname]];
+                }
+            }
 
-            $i++;
-            $entryid = -$i;
+            if (!$entryid) {
+                $i++;
+                $entryid = -$i;
+            }
+
             $data->eids[$entryid] = $entryid;
 
             // Iterate the fields and collate their entry content.

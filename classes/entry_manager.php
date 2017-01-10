@@ -240,7 +240,7 @@ class mod_dataform_entry_manager {
         ) = $filter->get_sql();
 
         $count = ' COUNT(e.id) ';
-        $whatsql = " DISTINCT $whatentry $whatuser $contentwhat $joinwhat";
+        $whatsql = " $whatentry $whatuser $contentwhat $joinwhat";
         $fromsql  = " $tables $sorttables $searchtables $contenttables $jointables";
         $wheresql = " $wheredfid $whereuser $wheregroup $sortwhere $searchwhere $contentwhere";
 
@@ -337,8 +337,8 @@ class mod_dataform_entry_manager {
                     $entries->entries = $DB->get_records_sql($sqlselect, $sql->allparams + $paramids);
                 } else {
                     // By page.
-                    $page = $filter->page ? $filter->page : 0;
                     $numpages = $searchcount > $perpage ? ceil($searchcount / $perpage) : 1;
+                    $page = $numpages > 1 ? (int) $filter->page : 0;
 
                     if ($filter->selection) {
                         if ($filter->selection == self::SELECT_FIRST_PAGE) {
@@ -620,49 +620,54 @@ class mod_dataform_entry_manager {
         }
 
         $df = mod_dataform_dataform::instance($this->dataformid);
+        $entries = array();
+
+        if (!is_array($eids)) {
+            if ($eids < 0) {
+                // Adding new entries.
+                $eids = array_reverse(range($eids, -1));
+            } else {
+                // Updating existing entries.
+                $eids = explode(',', $eids);
+            }
+        }
 
         // Adding or updating entries.
         if ($action == 'update') {
-            $entries = array();
-
-            if (!is_array($eids)) {
-                if ($eids < 0) {
-                    // Adding new entries.
-                    $eids = array_reverse(range($eids, -1));
-                } else {
-                    // Updating existing entries.
-                    $eids = explode(',', $eids);
-                }
-            }
-
             // Prepare the entries to process.
-            foreach ($eids as $eid) {
+            foreach ($eids as $ind => $eid) {
                 if ($eid > 0) {
                     // Existing entry from view.
                     if (isset($this->entries[$eid])) {
                         $entries[$eid] = $this->entries[$eid];
+                        unset($eids[$ind]);
                     }
 
-                } else if ($eid < 0) {
-                    // New entry.
-                    $entry = new stdClass;
-                    $entry->id = 0;
-                    $entry->groupid = $df->currentgroup;
-                    $entry->userid = $USER->id;
-                    $entries[$eid] = $entry;
+                } else {
+                    if ($eid < 0) {
+                        // New entry.
+                        $entry = new stdClass;
+                        $entry->id = 0;
+                        $entry->groupid = $df->currentgroup;
+                        $entry->userid = $USER->id;
+                        $entries[$eid] = $entry;
+                    }
+                    unset($eids[$ind]);
                 }
             }
-            return $entries;
         }
 
         // All other types of processing must refer to specific entry ids.
-        if ($action != 'update') {
-            $eids = !is_array($eids) ? explode(',', $eids) : $eids;
+        if ($eids) {
             list($inids, $params) = $DB->get_in_or_equal($eids);
             $params[] = $df->id;
-            $entries = $DB->get_records_select('dataform_entries', " id $inids AND dataid = ? ", $params);
-            return $entries;
+            $ents = $DB->get_records_select('dataform_entries', " id $inids AND dataid = ? ", $params);
+            if ($ents) {
+                $entries = $entries + $ents;
+            }
         }
+
+        return $entries;
     }
 
     /**

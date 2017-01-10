@@ -67,7 +67,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2014041100($dbman, $oldversion);
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
     xmldb_dataform_upgrade_2014111000($dbman, $oldversion);
-    xmldb_dataform_upgrade_2014111006($dbman, $oldversion);
+    xmldb_dataform_upgrade_2015051100($dbman, $oldversion, 2014111012);
 
     return true;
 }
@@ -272,7 +272,7 @@ function xmldb_dataform_upgrade_2012070601($dbman, $oldversion) {
             foreach ($dataforms as $dfid => $dataform) {
                 if (!empty($dataform->defaultsort)) {
                     // Add a new 'Default filter' filter.
-                    $filter = new object;
+                    $filter = new \stdClass;
                     $filter->dataid = $dfid;
                     $filter->name = $strdefault. '_0';
                     $filter->description = '';
@@ -337,7 +337,7 @@ function xmldb_dataform_upgrade_2012082900($dbman, $oldversion) {
                 $context = context_course::instance($df->course);
                 if ($presets = $fs->get_area_files($context->id, 'mod_dataform', 'course_packages')) {
 
-                    $filerecord = new object;
+                    $filerecord = new \stdClass;
                     $filerecord->contextid = $context->id;
                     $filerecord->component = 'mod_dataform';
                     $filerecord->filearea = 'course_presets';
@@ -354,7 +354,7 @@ function xmldb_dataform_upgrade_2012082900($dbman, $oldversion) {
         }
 
         // Move presets from site_packages to site_presets.
-        $filerecord = new object;
+        $filerecord = new \stdClass;
         $filerecord->contextid = SYSCONTEXTID;
         $filerecord->component = 'mod_dataform';
         $filerecord->filearea = 'site_presets';
@@ -1175,11 +1175,9 @@ function xmldb_dataform_upgrade_2014111000($dbman, $oldversion) {
     return true;
 }
 
-function xmldb_dataform_upgrade_2014111006($dbman, $oldversion, $t = '') {
+function xmldb_dataform_upgrade_2015051100($dbman, $oldversion, $newversion) {
     global $CFG, $DB;
 
-    list(, , , $newversion) = explode('_', __FUNCTION__);
-    $newversion = $t ? (double) ("$newversion.$t") : $newversion;
     if ($oldversion < $newversion) {
         // Change gradecalc column to gradeitems dataform.
         $table = new xmldb_table('dataform');

@@ -327,7 +327,7 @@ class dataformviewpatterns {
         $entryman = $view->entry_manager;
         $entriescount = $entryman->entries ? $entryman->get_count(\mod_dataform_entry_manager::COUNT_VIEWABLE) : 0;
 
-        if (!$view->is_forcing_filter() and ($filter->id or $entriescount)) {
+        if ($filter->id or $entriescount) {
             $output = $PAGE->get_renderer('mod_dataform', 'dataformview');
 
             switch ($tag) {

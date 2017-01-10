@@ -98,8 +98,7 @@ class dataformfield_text_renderer extends \mod_dataform\pluginbase\dataformfield
 
         // Width.
         if ($field->param2) {
-            $widthunit = !$field->param3 ? $field->param3 : 'px';
-            $fieldattr['style'] = 'width:'. s($field->param2). s($widthunit). ';';
+            $fieldattr['style'] = 'width:'. s($field->param2). s($field->param3). ';';
         }
 
         // Class.

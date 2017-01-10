@@ -116,89 +116,53 @@ class dataformview {
     /**
      *
      */
-    public function set_viewfilter(array $options = null) {
+    public function set_viewfilter(array $options = array()) {
         $fm = \mod_dataform_filter_manager::instance($this->dataid);
 
-        $fid = !empty($options['id']) ? $options['id'] : 0;
+        $forcedfilter = null;
+        $filterfromid = null;
+        $filterfromoptions = null;
+        $filterfromurl = null;
 
-        $eids = !empty($options['eids']) ? $options['eids'] : null;
-        $users = !empty($options['users']) ? $options['users'] : null;
-        $groups = !empty($options['groups']) ? $options['groups'] : null;
-        $page = !empty($options['page']) ? $options['page'] : 0;
-
-        $perpage = !empty($options['perpage']) ? $options['perpage'] : $this->perpage;
-        $groupby = !empty($options['groupby']) ? $options['groupby'] : $this->groupby;
-        $customsort = !empty($options['customsort']) ? $options['customsort'] : null;
-        $search = !empty($options['search']) ? $options['search'] : null;
-        $customsearch = !empty($options['customsearch']) ? $options['customsearch'] : null;
-        $csort = !empty($options['csort']) ? $options['csort'] : null;
-        $csearch = !empty($options['csearch']) ? $options['csearch'] : null;
-
-        // Url options.
-        if ($urloptions = ($this->is_active() ? $fm::get_filter_options_from_url() : null)) {
-            // Options that do not require permission.
-            $eids = $eids ? $eids : (!empty($urloptions['eids']) ? $urloptions['eids'] : null);
-            $users = $users ? $users : (!empty($urloptions['users']) ? $urloptions['users'] : null);
-            $groups = $groups ? $groups : (!empty($urloptions['groups']) ? $urloptions['groups'] : null);
-            $page = $page ? $page : (!empty($urloptions['page']) ? $urloptions['page'] : 0);
-
-            // Options that require permission
-            // $params = array('dataformid' => $this->dataid, 'viewid' => $this->id);
-            // If (\mod_dataform\access\view_filter_override::validate($params)) {
-            // }.
-        }
-
+        // Get forced filter if set.
         if ($this->filterid) {
-            $fid = $this->filterid;
+            $forcedfilter = $fm->get_filter_by_id($this->filterid, array('view' => $this));
         }
 
-        $filter = $fm->get_filter_by_id($fid, array('view' => $this));
-
-        // Set specific entry id.
-        if ($eids) {
-            $filter->eids = $eids;
-        }
-        // Set specific users.
-        if ($users) {
-            $filter->users = is_array($users) ? $users : explode(',', $users);
-        }
-        // Set specific groups.
-        if ($groups) {
-            $filter->groups = is_array($groups) ? $groups : explode(',', $groups);
-        }
-        // Add view specific perpage.
-        if ($perpage) {
-            $filter->perpage = $perpage;
-        }
-        // Add view specific groupby.
-        if ($groupby) {
-            $filter->groupby = $groupby;
+        // Get filter from id option.
+        if (!empty($options['id'])) {
+            $fid = $options['id'];
+            if ($fid != $this->filterid) {
+                $filterfromid = $fm->get_filter_by_id($fid, array('view' => $this));
+            }
+            unset($options['id']);
         }
 
-        // Add page.
-        if ($page) {
-            $filter->page = $page;
+        // Get filter from other options.
+        if ($this->perpage and empty($options['perpage'])) {
+            $options['perpage'] = $this->perpage;
         }
-        // Append sort options.
-        if ($customsort) {
-            $filter->append_sort_options($customsort);
-        }
-        // Append search options.
-        if ($search) {
-            $filter->append_search_options($search);
-        }
-        // Append custom search options.
-        if ($customsearch) {
-            $filter->append_search_options($customsearch);
+        if (!empty($options)) {
+            $options['dataid'] = $this->dataid;
+            $filterfromoptions = new dataformfilter((object) $options);
         }
 
-        // Append custom sort options.
-        if ($csort) {
-            $filter->append_sort_options($csort);
+        // Get filter from url.
+        if ($urloptions = ($this->is_active() ? $fm::get_filter_options_from_url() : null)) {
+            $urloptions['dataid'] = $this->dataid;
+            $filterfromurl = new dataformfilter((object) $urloptions);
         }
-        // Append custom search options.
-        if ($csearch) {
-            $filter->append_search_options($csearch);
+
+        $filterspecified = ($forcedfilter or $filterfromid or $filterfromoptions or $filterfromurl);
+
+        // Get the base filter for this view.
+        if ($filterspecified) {
+            $filter = $forcedfilter ? $forcedfilter : $fm->get_filter_blank();
+            $filter->append(array($filterfromid, $filterfromoptions, $filterfromurl));
+        } else {
+            // If no filter specified and there is default filter, use default.
+            $fid = $this->df->defaultfilter ? $this->df->defaultfilter : 0;
+            $filter = $fm->get_filter_by_id($fid, array('view' => $this));
         }
 
         // Content fields.
@@ -218,7 +182,7 @@ class dataformview {
     public function set_page($pagefile = null, array $options = null) {
 
         // Filter.
-        $foptions = !empty($options['filter']) ? array('id' => $options['filter']) : null;
+        $foptions = !empty($options['filter']) ? array('id' => $options['filter']) : array();
         $this->set_viewfilter($foptions);
     }
 
@@ -276,26 +240,44 @@ class dataformview {
             $redirecturl->remove_params('eids');
             $redirecturl->remove_params('editentries');
 
-            // Submission time out and target view.
+            // TODO: handle filter removal if necessary.
+            // $redirecturl->remove_params('filter');
+
+            $response = $strnotify;
+            $timeout = 0;
+
+            // Are we returning to form?
+            if ($editentries = $this->editentries) {
+                if ($processedeids) {
+                    $processedentries = implode(',', $processedeids);
+                    // If we continue editing the same entries, simply return.
+                    if ($processedentries == $editentries) {
+                        return;
+                    }
+                }
+
+                // Otherwise, redirect to same view with new editentries param.
+                $redirecturl->param('editentries', $editentries);
+                redirect($redirecturl, $response, $timeout);
+            }
+
+            // We are not returning to form, so we need to apply redirection settings if any.
             $submission = $this->submission_settings;
             $timeout = !empty($submission['timeout']) ? $submission['timeout'] : 0;
             if (!empty($submission['redirect'])) {
                 $redirecturl->param('view', $submission['redirect']);
-                if ($processedeids) {
+            }
+
+            if ($processedeids) {
+                // Submission response.
+                if (!empty($submission['message'])) {
+                    $response =  $submission['message'];
+                }
+
+                // Display after if set and not returning to form.
+                if (!empty($submission['displayafter'])) {
                     $redirecturl->param('eids', implode(',', $processedeids));
                 }
-            }
-
-            // Submission response.
-            if ($processedeids) {
-                $response = !empty($submission['message']) ? $submission['message'] : $strnotify;
-            } else {
-                $response = $strnotify;
-            }
-
-            // Return to form if needed (editentries is set in continue_editing() as needed).
-            if ($processedeids and $editentries = $this->editentries) {
-                $redirecturl->param('editentries', $editentries);
             }
 
             redirect($redirecturl, $response, $timeout);
@@ -315,7 +297,7 @@ class dataformview {
         $event->trigger();
 
         // Set content.
-        $filter = !empty($options['filter']) ? $options['filter'] : clone($this->filter);
+        $filter = !empty($options['filter']) ? $options['filter'] : $this->filter->clone;
         if ($this->user_is_editing() and !$this->in_edit_display_mode()) {
             // Display only the edited entries.
             $filter->eids = $this->editentries;
@@ -1138,7 +1120,7 @@ class dataformview {
                 $this->editentries = $update;
                 // Get entries only if updating existing entries.
                 if ($update != -1) {
-                    $filter = clone($this->filter);
+                    $filter = $this->filter->clone;
                     $filter->eids = explode(',', $update);
                     $entryman->set_content(array('filter' => $filter));
                     $elements = $this->get_entries_definition($entryman->entries);
@@ -1681,15 +1663,15 @@ class dataformview {
     public function duplicate($name) {
         global $DB;
 
-        $data = clone($this->data);
-        unset($data->id);
-        $data->name = $name;
+        $newview = clone($this->data);
+        unset($newview->id);
+        $newview->name = $name;
         // Make sure patterns are serialized.
-        if ($data->patterns and is_array($data->patterns)) {
-            $data->patterns = serialize($data->patterns);
+        if ($newview->patterns and is_array($newview->patterns)) {
+            $newview->patterns = serialize($newview->patterns);
         }
 
-        if (!$viewid = $DB->insert_record('dataform_views', $data)) {
+        if (!$newview->id = $DB->insert_record('dataform_views', $newview)) {
             return false;
         }
 
@@ -1701,7 +1683,7 @@ class dataformview {
             if (count($files) > 1) {
                 foreach ($files as $file) {
                     $filerec = new \stdClass;
-                    $filerec->itemid = $viewid;
+                    $filerec->itemid = $newview->id;
                     $fs->create_file_from_storedfile($filerec, $file);
                 }
             }
@@ -1709,13 +1691,13 @@ class dataformview {
 
         // Trigger an event for duplicating this view.
         $eventparams = $this->default_event_params;
-        $eventparams['objectid'] = $viewid;
+        $eventparams['objectid'] = $newview->id;
         $eventparams['other']['viewname'] = $name;
         $event = \mod_dataform\event\view_created::create($eventparams);
-        $event->add_record_snapshot('dataform_views', $data);
+        $event->add_record_snapshot('dataform_views', $newview);
         $event->trigger();
 
-        return $viewid;
+        return $newview->id;
     }
 
     /**
@@ -1898,7 +1880,7 @@ class dataformview {
             }
 
             if (!empty($text)) {
-                $data->$editor = "ft:{$format}tr:{$trust}ct:$text";
+                $data->$editor = $text;
             } else {
                 $data->$editor = null;
             }

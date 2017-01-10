@@ -556,6 +556,72 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
+     * Updates the submission settings of the specified view.
+     *
+     * @Given /^view "(?P<viewname_string>(?:[^"]|\\")*)" in "(?P<dataform_string>(?:[^"]|\\")*)" has the following submission settings:$/
+     * @param string $viewname
+     * @param string $didnumber
+     * @param TableNode $data
+     */
+    public function view_in_has_the_following_submission_settings($viewname, $didnumber, TableNode $data) {
+        global $DB;
+
+        $data = (object) $data->getRowsHash();
+
+        // Get the dataform id.
+        if (!$dataformid = $DB->get_field('course_modules', 'instance', array('idnumber' => $didnumber))) {
+            throw new Exception('The specified dataform with idnumber "' . $idnumber . '" does not exist');
+        }
+
+        $df = new \mod_dataform_dataform($dataformid);
+
+        // Get the view.
+        if (!$view = $df->view_manager->get_view_by_name($viewname)) {
+            return;
+        }
+
+        // Collate submission settings.
+        $settings = array();
+        // Submission display.
+        if (!empty($data->submissiondisplay)) {
+            $settings['display'] = $data->submissiondisplay;
+        }
+        // Buttons.
+        $buttons = $view->get_submission_buttons();
+        foreach ($buttons as $name) {
+            $buttonenable = $name.'buttonenable';
+            if (!empty($data->$buttonenable)) {
+                $buttoncontent = $name.'button_label';
+                $settings[$name] = !empty($data->$buttoncontent) ? $data->$buttoncontent : null;
+            }
+        }
+
+        // Submission Redirect.
+        if (!empty($data->submissionredirect)) {
+            if ($redirectview = $df->view_manager->get_view_by_name($data->submissionredirect)) {
+                $settings['redirect'] = $redirectview->id;
+            }
+        }
+        // Submission timeout.
+        if (!empty($data->submissiontimeout)) {
+            $settings['timeout'] = $data->submissiontimeout;
+        }
+        // Submission message.
+        if (!empty($data->submissionmessage)) {
+            $settings['message'] = $data->submissionmessage;
+        }
+        // Display after submission.
+        if (!empty($data->submissiondisplayafter)) {
+            $settings['displayafter'] = 1;
+        }
+
+        $view->submission = $settings;
+
+        // Update the view.
+        $view->update($view->data);
+    }
+
+    /**
      * Sets the css template of the specified dataform to the text passed as PyStringNode.
      *
      * @Given /^dataform "(?P<dataform_id_string>(?:[^"]|\\")*)" has the following css:$/
@@ -1497,9 +1563,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I log in as "teacher1"');
         $steps[] = new Given('I follow "Course 1"');
         $steps[] = new Given('I follow "Test Dataform"');
-        $steps[] = new Given('I follow "Manage"');
-
-        $steps[] = new Given('I follow "Access"');
+        $steps[] = new Given('I go to manage dataform "access"');
 
         // Add a rule.
         $steps[] = new Given('I follow "id_add_'. $ruletype. '_access_rule"');
@@ -1537,9 +1601,7 @@ class behat_mod_dataform extends behat_base {
         $steps[] = new Given('I log in as "teacher1"');
         $steps[] = new Given('I follow "Course 1"');
         $steps[] = new Given('I follow "Test Dataform"');
-        $steps[] = new Given('I follow "Manage"');
-
-        $steps[] = new Given('I follow "Notifications"');
+        $steps[] = new Given('I navigate to "Notifications" node in "Dataform activity administration > Manage"');
 
         // Add a rule.
         $steps[] = new Given('I follow "id_add_'. $ruletype. '_notification_rule"');

@@ -52,15 +52,13 @@ class dataformview_csv_form extends dataformview_aligned_form {
 
         // Enable import  (param4).
         $mform->addElement('advcheckbox', 'param4',  get_string('export', 'grades'), get_string('enable'), null, array(0, 1));
-        $mform->setDefault('param4', 1);
 
-        // Enable import  (param4).
+        // Enable import  (param5).
         $mform->addElement('advcheckbox', 'param5',  get_string('import'), get_string('enable'), null, array(0, 1));
-        $mform->setDefault('param5', 1);
 
         // Allow update existing entries  (param4)
-        // $mform->addElement('advcheckbox', 'updateexisting',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));
-        // $mform->disabledIf('updateexisting', 'importenable', 'eq', 0);.
+        $mform->addElement('advcheckbox', 'param6',  null, get_string('allowupdateexisting', 'dataformview_csv'), null, array(0, 1));
+        $mform->disabledIf('param6', 'importenable', 'eq', 0);
 
         // Delimiter.
         $delimiters = csv_import_reader::get_delimiter_list();
@@ -91,6 +89,12 @@ class dataformview_csv_form extends dataformview_aligned_form {
             $data->enclosure,
             $data->encoding
         ) = explode(',', $csvsettings);
+
+        // Enable Import and Export when adding a new instance.
+        if (empty($data->id)) {
+            $data->param4 = 1;
+            $data->param5 = 1;
+        }
 
         // BC for exporttype stored in param3.
         if (!empty($data->param3)) {

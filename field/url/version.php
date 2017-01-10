@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_url';
-$plugin->version = 2014111006;
+$plugin->version = 2014111012;
 $plugin->requires = 2014111000;

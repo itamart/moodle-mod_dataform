@@ -92,11 +92,8 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
             $elements = array_merge($elements, $entrydefinitions);
         }
 
-        // Add group heading.
-        $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
-        if ($name) {
-            array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
-        }
+        // Dropped: Add group heading.
+
         // Wrap with entriesview.
         array_unshift($elements, html_writer::start_tag('div', array('class' => 'entriesview')));
         array_push($elements, html_writer::end_tag('div'));
@@ -145,7 +142,7 @@ class dataformview_rss_rss extends mod_dataform\pluginbase\dataformview implemen
         $fields = $this->get_fields();
         $tags = array();
         $patterndefinitions = array();
-        $entry = new object;
+        $entry = new \stdClass;
 
         if ($fieldpatterns = $this->get_pattern_set('field')) {
             foreach ($fieldpatterns as $fieldid => $patterns) {

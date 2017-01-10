@@ -127,11 +127,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
             }
         }
 
-        // Add group heading.
-        $name = ($name == 'newentry') ? get_string('entrynew', 'dataform') : $name;
-        if ($name) {
-            array_unshift($elements, $OUTPUT->heading($name, 3, 'main'));
-        }
+        // Dropped: Add group heading.
 
         return $elements;
     }
@@ -176,7 +172,7 @@ class dataformview_grid_grid extends mod_dataform\pluginbase\dataformview {
         $fields = $this->get_fields();
         $tags = array();
         $patterndefinitions = array();
-        $entry = new object;
+        $entry = new \stdClass;
 
         if ($fieldpatterns = $this->get_pattern_set('field')) {
             foreach ($fieldpatterns as $fieldid => $patterns) {

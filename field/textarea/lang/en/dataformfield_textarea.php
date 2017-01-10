@@ -16,10 +16,11 @@
 
 /**
  * @package dataformfield_textarea
- * @copyright 2014 Itamar Tzadok
+ * @copyright 2016 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Text area';
 $string['textarea:addinstance'] = 'Add a new Text area dataformfield';
 $string['trusttext'] = 'Trust text';
+$string['newline'] = 'New line';

@@ -135,7 +135,7 @@ class mod_dataform_filter_manager {
 
         // DF FILTER.
         if ($filterid > 0 and $this->get_filters() and isset($this->_filters[$filterid])) {
-            return clone($this->_filters[$filterid]);
+            return $this->_filters[$filterid]->clone;
         }
 
         return $this->get_filter_blank();
@@ -273,7 +273,7 @@ class mod_dataform_filter_manager {
                                 while ($df->name_exists('filters', $filter->name)) {
                                     $filter->name = 'Copy of '. $filter->name;
                                 }
-                                $newfilter = clone($filter);
+                                $newfilter = $filter->clone;
                                 $newfilter->id = 0;
                                 $newfilter->update();
 

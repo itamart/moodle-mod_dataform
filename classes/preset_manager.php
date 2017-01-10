@@ -285,37 +285,33 @@ class mod_dataform_preset_manager {
         $bc->set_status(backup::STATUS_AWAITING);
 
         $bc->execute_plan();
+
+        $results = $bc->get_results();
         $bc->destroy();
+        unset($bc);
 
-        $fs = get_file_storage();
-        if ($users and !$anon) {
-            $contextid = $df->context->id;
-            $files = $fs->get_area_files($contextid, 'backup', 'activity', 0, 'timemodified', false);
-        } else {
-            $usercontext = context_user::instance($USER->id);
-            $contextid = $usercontext->id;
-            $files = $fs->get_area_files($contextid, 'user', 'backup', 0, 'timemodified', false);
-        }
-        if (!empty($files)) {
+        if ($file = $results['backup_destination']) {
+            $fs = get_file_storage();
+
             $coursecontext = context_course::instance($df->course->id);
-            foreach ($files as $file) {
-                if ($file->get_contextid() != $contextid) {
-                    continue;
-                }
-                $preset = new object;
-                $preset->contextid = $coursecontext->id;
-                $preset->component = 'mod_dataform';
-                $preset->filearea = self::PRESET_COURSEAREA;
-                $preset->filepath = '/';
-                $preset->filename = clean_filename(str_replace(' ', '_', $df->name).
-                                    '-dataform-preset-'.
-                                    gmdate("Ymd_Hi"). '-'.
-                                    str_replace(' ', '-', get_string("preset$userdata", 'dataform')). '.mbz');
+            $presetname = clean_filename(
+                str_replace(' ', '_', $df->name).
+                '-dataform-preset-'.
+                gmdate("Ymd_Hi"). '-'.
+                str_replace(' ', '-', get_string("preset$userdata", 'dataform')). '.mbz'
+            );
 
-                $fs->create_file_from_storedfile($preset, $file);
-                $file->delete();
-                return true;
-            }
+
+            $preset = new \stdClass;
+            $preset->contextid = $coursecontext->id;
+            $preset->component = 'mod_dataform';
+            $preset->filearea = self::PRESET_COURSEAREA;
+            $preset->filepath = '/';
+            $preset->filename = $presetname;
+
+            $fs->create_file_from_storedfile($preset, $file);
+            $file->delete();
+            return true;
         }
         return false;
     }
@@ -544,7 +540,7 @@ class mod_dataform_preset_manager {
         }
 
         $fs = get_file_storage();
-        $filerecord = new object;
+        $filerecord = new \stdClass;
         $filerecord->contextid = SYSCONTEXTID;
         $filerecord->component = 'mod_dataform';
         $filerecord->filearea = self::PRESET_SITEAREA;

@@ -289,6 +289,9 @@ class mod_dataform_events_testcase extends advanced_testcase {
      */
     protected function try_crud_field($type, $df) {
         $field = $df->field_manager->get_field($type);
+        if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
+            return;
+        }
 
         // CREATE
         // Trigger and capture the event.

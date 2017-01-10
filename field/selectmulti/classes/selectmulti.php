@@ -74,16 +74,20 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
     public function get_search_sql($search) {
         list($element, $not, $operator, $value) = $search;
 
-        // If no options, no search.
-        if (!$options = $this->options_menu()) {
-            return null;
+        // NOT/IS EMPTY - delegate to parent.
+        if ($operator === '') {
+            return parent::get_search_sql($search);
         }
 
-        $optionkeys = array_keys($options);
+        $options = $this->options_menu();
 
         // Search with all required.
         if ($value == '-000-') {
-            $value = '#'. implode('#', $optionkeys). '#';
+            if ($options) {
+                $optionkeys = array_keys($options);
+                $value = '#'. implode('#', $optionkeys). '#';
+            }
+
             $search = array($element, $not, $operator, $value);
             return parent::get_search_sql($search);
         }
@@ -248,7 +252,7 @@ class dataformfield_selectmulti_selectmulti extends mod_dataform\pluginbase\data
 
         $fieldid = $this->id;
         $csvname = $importsetting['name'];
-        $allownew = $importsetting['allownew'];
+        $allownew = !empty($importsetting['allownew']);
         $labels = !empty($csvrecord[$csvname]) ? explode('#', $csvrecord[$csvname]) : null;
 
         if ($labels) {

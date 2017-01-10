@@ -228,6 +228,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
         // Table headers.
         $headers = array(
+            'browse' => array(null, 'center', false),
             'name' => array($strname, 'left', false),
             'type' => array($strtype, 'left', false),
             'description' => array($strdescription, 'left', false),
@@ -350,7 +351,7 @@ class mod_dataform_renderer extends plugin_renderer_base {
 
             $attributes = array('id' => "id_viewselector$viewid", 'class' => 'viewselector');
             $viewselector = html_writer::checkbox("viewselector", $viewid, false, null, $attributes);
-            $viewactions = implode('&nbsp;&nbsp;&nbsp;', array($viewbrowse, $viewreset, $viewedit, $viewduplicate, $viewdelete, $viewselector));
+            $viewactions = implode('&nbsp;&nbsp;&nbsp;', array($viewreset, $viewedit, $viewduplicate, $viewdelete, $viewselector));
 
             $data = array();
             foreach (array_keys($headers) as $key) {
@@ -472,11 +473,13 @@ class mod_dataform_renderer extends plugin_renderer_base {
                 continue;
             }
 
+            $fieldformclass = "dataformfield_{$field->type}_form";
+
             // Name.
-            if ($field instanceof \mod_dataform\pluginbase\dataformfield_internal) {
-                $fieldname = $field->name;
-            } else {
+            if (class_exists($fieldformclass)) {
                 $fieldname = html_writer::link(new moodle_url($editbaseurl, $sessparam + array('fid' => $fieldid)), $field->name);
+            } else {
+                $fieldname = $field->name;
             }
             // Type.
             $fieldtype = $field->image. '&nbsp;'. $field->typename;
@@ -914,6 +917,8 @@ class mod_dataform_renderer extends plugin_renderer_base {
      * Prints the Dataform tabs
      */
     protected function render_tabs($currenttab) {
+        global $PAGE;
+
         if (!$this->_dataformid) {
             return null;
         }
@@ -931,9 +936,17 @@ class mod_dataform_renderer extends plugin_renderer_base {
             return null;
         }
 
+        // Don't display if browsing and not editing.
+        if ($currenttab == 'browse' and !$PAGE->user_is_editing()) {
+            return null;
+        }
+
+        $manageurl = new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid));
+        $browseurl = new moodle_url('/mod/dataform/view.php', array('d' => $dfid));
+
         // Main level.
-        $browse = new tabobject('browse', new moodle_url('/mod/dataform/view.php', array('d' => $dfid)), get_string('browse', 'dataform'));
-        $manage = new tabobject('manage', new moodle_url('/mod/dataform/view/index.php', array('d' => $dfid)), get_string('manage', 'dataform'));
+        $browse = new tabobject('browse', $browseurl, get_string('browse', 'dataform'));
+        $manage = new tabobject('manage', $manageurl, get_string('manage', 'dataform'));
 
         $maintabs = array($browse, $manage);
         // Add view edit tab.
@@ -1104,7 +1117,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
 
         $filterjump = '';
 
-        if (!$view->is_forcing_filter() and ($filter->id or $view->entry_manager->get_count(mod_dataform_entry_manager::COUNT_VIEWABLE))) {
+        if ($filter->id or $view->entry_manager->get_count(mod_dataform_entry_manager::COUNT_VIEWABLE)) {
             $fm = mod_dataform_filter_manager::instance($df->id);
             if (!$menufilters = $fm->get_filters(null, true)) {
                 $menufilters = array();
@@ -1245,7 +1258,7 @@ class mod_dataform_dataformview_renderer extends plugin_renderer_base {
             // Adjust filter page if needed.
             // This may be needed if redirecting from entry form to paged view.
             if ($filter->eids and !$filter->page) {
-                if ($entryid = (is_array($filter->eids) ? reset($filter->eids) : $filter->eids) and $entryid > 0) {
+                if ($entryid = (is_array($filter->eids) ? $filter->eids[0] : $filter->eids) and $entryid > 0) {
                     $filter->page = $entryman->get_entry_position($entryid, $filter);
                 }
             }

@@ -16,7 +16,7 @@
 
 /**
  * @package dataformfield_textarea
- * @copyright 2014 Itamar Tzadok
+ * @copyright 2016 Itamar Tzadok
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') or die();
@@ -178,11 +178,10 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
             // EDITOR.
             $component = 'mod_dataform';
             $contentid = isset($entry->{"c{$fieldid}_id"}) ? $entry->{"c{$fieldid}_id"} : null;
-            $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_HTML;
 
             $data = new \stdClass;
             $data->$fieldname = $entrycontent ? $entrycontent : $defaultcontent;
-            $data->{"{$fieldname}format"} = $format;
+            $data->{"{$fieldname}format"} = $field->text_format;
 
             // If we are using default content, adjust component and content id.
             if ($defaultcontent and !$contentid) {
@@ -220,7 +219,7 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
 
         if (isset($entry->{"c{$fieldid}_content"})) {
             $text = $entry->{"c{$fieldid}_content"};
-            return str_word_count($text);
+            return str_word_count(strip_tags($text));
         } else {
             return '';
         }
@@ -233,22 +232,25 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
 
         $field = $this->_field;
         $fieldid = $field->id;
+        $df = $field->df;
 
         if (isset($entry->{"c{$fieldid}_content"})) {
             $contentid = $entry->{"c{$fieldid}_id"};
             $text = $entry->{"c{$fieldid}_content"};
-            $format = isset($entry->{"c{$fieldid}_content1"}) ? $entry->{"c{$fieldid}_content1"} : FORMAT_PLAIN;
+            $format = $field->text_format;
+            $contextid = $df->context->id;
+            $contentidhash = $df->get_content_id_hash($contentid);
 
             $text = file_rewrite_pluginfile_urls(
                 $text,
                 'pluginfile.php',
-                $field->get_df()->context->id,
+                $contextid,
                 'mod_dataform',
                 'content',
-                $contentid
+                $contentidhash
             );
 
-            $options = new stdClass;
+            $options = new \stdClass;
             $options->para = false;
             $str = format_text($text, $format, $options);
             return $str;
@@ -258,23 +260,35 @@ class dataformfield_textarea_renderer extends mod_dataform\pluginbase\dataformfi
     }
 
     /**
+     * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()}
+     * to allow only the base pattern and add setting for new line conversion.
+     */
+    public function get_pattern_import_settings(&$mform, $patternname, $header) {
+        $field = $this->_field;
+        $fieldid = $field->id;
+        $fieldname = $field->name;
+
+        // Only [[fieldname]] can be imported.
+        if ($patternname != $fieldname) {
+            return array(array(), array());
+        }
+
+        $name = "f_{$fieldid}_";
+
+        list($grp, $labels) = parent::get_pattern_import_settings($mform, $patternname, $header);
+
+        $grp[] = &$mform->createElement('text', "{$name}_newline", null);
+        $mform->setType("{$name}_newline", PARAM_TEXT);
+        $labels = array_merge($labels, array(' '. get_string('newline', 'dataformfield_textarea'). ': '));
+
+        return array($grp, $labels);
+    }
+
+    /**
      *
      */
     public function pluginfile_patterns() {
         return array("[[{$this->_field->name}]]");
-    }
-
-    /**
-     * Overriding {@link dataformfieldrenderer::get_pattern_import_settings()}
-     * to allow only the base pattern.
-     */
-    public function get_pattern_import_settings(&$mform, $patternname, $header) {
-        // Only [[fieldname]] can be imported.
-        if ($patternname != $this->_field->name) {
-            return array(array(), array());
-        }
-
-        return parent::get_pattern_import_settings($mform, $patternname, $header);
     }
 
     /**
