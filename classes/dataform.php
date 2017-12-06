@@ -393,6 +393,9 @@ class mod_dataform_dataform {
         // EDITING (not on external pages).
         $this->set_page_editing_mode($pagefile, $urlparams);
 
+        // SETTINGS MENU.
+        $PAGE->force_settings_menu();
+
         // AUTO REFRESH.
         if (!empty($urlparams['refresh']) and !$externalpage) {
             $PAGE->set_periodic_refresh_delay($urlparams['refresh']);
