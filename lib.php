@@ -750,31 +750,31 @@ function dataform_extend_settings_navigation(settings_navigation $settings, navi
         }
 
         // Manage.
-        $manage = $dfnode->add(get_string('manage', 'dataform'));
+        $manage = $dfnode;
 
         if ($manager['views']) {
             $params = array('id' => $PAGE->cm->id);
-            $manage->add(get_string('views', 'dataform'), new moodle_url('/mod/dataform/view/index.php', $params));
+            $manage->add(get_string('dataform:manageviews', 'dataform'), new moodle_url('/mod/dataform/view/index.php', $params));
         }
 
         if ($manager['fields']) {
             $params = array('id' => $PAGE->cm->id);
-            $manage->add(get_string('fields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', $params));
+            $manage->add(get_string('dataform:managefields', 'dataform'), new moodle_url('/mod/dataform/field/index.php', $params));
         }
 
         if ($manager['filters']) {
             $params = array('id' => $PAGE->cm->id);
-            $manage->add(get_string('filters', 'dataform'), new moodle_url('/mod/dataform/filter/index.php', $params));
+            $manage->add(get_string('dataform:managefilters', 'dataform'), new moodle_url('/mod/dataform/filter/index.php', $params));
         }
 
         if ($manager['access']) {
             $params = array('id' => $PAGE->cm->id);
-            $manage->add(get_string('access', 'dataform'), new moodle_url('/mod/dataform/access/index.php', $params));
+            $manage->add(get_string('dataform:manageaccess', 'dataform'), new moodle_url('/mod/dataform/access/index.php', $params));
         }
 
         if ($manager['notifications']) {
             $params = array('id' => $PAGE->cm->id);
-            $manage->add(get_string('notifications'), new moodle_url('/mod/dataform/notification/index.php', $params));
+            $manage->add(get_string('dataform:managenotifications', 'dataform'), new moodle_url('/mod/dataform/notification/index.php', $params));
         }
 
         if ($manager['css']) {
