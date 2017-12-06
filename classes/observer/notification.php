@@ -106,8 +106,8 @@ class notification {
         global $SITE;
         $res = array();
 
-        $message = new \stdClass;
-        $message->siteshortname   = format_string($SITE->fullname);
+        $message = new \core\message\message();
+        $message->courseid        = $data['courseid'];
         $message->component       = 'mod_dataform';
         $message->name            = 'dataform_notification';
         $message->userfrom        = $data['sender'];
@@ -191,6 +191,7 @@ class notification {
 
         // Prepare the message data.
         $message = array();
+        $message['courseid'] = $event->courseid;
         $message['subject'] = $this->get_subject($event, $data);
         $message['content'] = $content;
         $message['contentformat'] = $this->get_content_format($data);
@@ -256,7 +257,7 @@ class notification {
 
         // No reply.
         if (empty($data->sender)) {
-            $data->sender = \core_user::NOREPLY_USER;
+            return \core_user::get_noreply_user();
         }
 
         return \core_user::get_user($data->sender);
