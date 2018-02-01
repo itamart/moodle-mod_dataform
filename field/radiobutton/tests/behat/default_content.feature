@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformentry @dataformfield @dataformfield_radiobutton @dataformfield_radiobutton_defaultcontent
+@set_dataform @dataformentry @dataformfield @dataformfield_radiobutton @dataformfield_radiobutton_defaultcontent
 Feature: Default content
     In order to work with a dataform activity
     As a teacher
@@ -19,7 +19,7 @@ Feature: Default content
 
 
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test radiobutton field default content"
 
         And I go to manage dataform "fields"
@@ -36,7 +36,7 @@ Feature: Default content
 
         # Add an entry with changing its content.
         When I follow "Add a new entry"
-        And I click on "Theory" "radio"
+        And I click on "//input[@value='4']" "xpath_element"
         And I press "Save"
         Then I see "Theory"
 

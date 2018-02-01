@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfilter @dataformfield @dataformfield_entrystate
+@set_dataform @dataformfilter @dataformfield @dataformfield_entrystate
 Feature: Filtering
 
     @javascript
@@ -46,7 +46,7 @@ Feature: Filtering
 
         #Section: Log in.
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Filtering entry state"
         And I see "Entry 01"
         And I see "Entry 02"

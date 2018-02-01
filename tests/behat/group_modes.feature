@@ -6,7 +6,7 @@ Feature: Group modes
         Given I start afresh with dataform "Test group modes"
 
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test group modes"
 
         ## Add a text field.
@@ -30,7 +30,7 @@ Feature: Group modes
 
         # Set separate participants
         #---------------------------
-        When I follow "Edit settings"
+        When I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "Group mode" to "Visible groups"
         And I press "Save and display"
@@ -62,7 +62,7 @@ Feature: Group modes
         # Student 1's view
         #---------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test group modes"
 
         # Group 1
@@ -90,12 +90,12 @@ Feature: Group modes
         # Separate groups
         #================
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test group modes"
 
         # Set separate participants
         #---------------------------
-        When I follow "Edit settings"
+        When I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "Group mode" to "Separate groups"
         And I press "Save and display"
@@ -127,7 +127,7 @@ Feature: Group modes
         # Student 1's view
         #---------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test group modes"
 
         # Only Group 1 is available

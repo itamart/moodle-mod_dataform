@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformactivity @dataformaccess
+@mod @mod_dataform @set_dataform@dataformactivity @dataformaccess
 Feature: Dataform access permissions
 
     @javascript
@@ -36,10 +36,10 @@ Feature: Dataform access permissions
             | dataform1 | student3      |       |               |               | 5 Entry by Student 03     |
 
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test access late"
 
-        Then I follow "Edit settings"
+        Then I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "id_timedue_enabled" to "checked"
         And I set the field "id_timedue_month" to "1"
@@ -80,7 +80,7 @@ Feature: Dataform access permissions
         # Assistant access
         #---------------------------
         Given I log in as "assistant1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test access late"
 
         # View
@@ -113,7 +113,7 @@ Feature: Dataform access permissions
         # Student 1 access
         #---------------------------
         Given I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test access late"
 
         # View

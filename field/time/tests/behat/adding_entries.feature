@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_time
+@set_dataform @dataformfield @dataformfield_time
 Feature: Adding entries with field
 
     Background:
@@ -8,6 +8,7 @@ Feature: Adding entries with field
         And the following dataform "fields" exist:
             | name      | type  | dataform  |
             | Time 01   | time  | dataform1 |
+            | Title     | text  | dataform1 |
 
         ## View
         And the following dataform "views" exist:
@@ -67,16 +68,17 @@ Feature: Adding entries with field
             """
             [[EAU:picture]]
             [[EAU:name]]
+            [[Title]]
             [[!Time 01]]
-            [[EAC:edit]]
+            [[EAC:edit]]||editentry
             [[EAC:delete]]
             """
         And the following dataform "entries" exist:
-            | dataform  | user           | Time 01           |
-            | dataform1 | student1       | 2014-12-05 08:00  |
+            | dataform  | user           | Title    | Time 01           |
+            | dataform1 | student1       | Entry 01 | 2014-12-05 08:00  |
         And I am in dataform "Test time field" "Course 1" as "teacher1"
 
-        When I follow "id_editentry1"
+        When I click on ".editentry a" "css_element" in the "Entry 01" "table_row"
 
         Then I see "December 2014"
         #:Section
@@ -85,9 +87,17 @@ Feature: Adding entries with field
     Scenario: Teacher adds entry without content.
         #Section:
         Given I am in dataform "Test time field" "Course 1" as "teacher1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[EAU:picture]]
+            [[EAU:name]]
+            [[Time 01]]
+            [[EAC:edit]]||editentry
+            [[EAC:delete]]
+            """
         When I follow "Add a new entry"
         And I press "Save"
-        Then "id_editentry1" "link" should exist
+        Then ".editentry a" "css_element" should exist
         #:Section
 
     @javascript

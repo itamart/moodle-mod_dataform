@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformview @dataformviewsubmissionbuttons
+@mod @mod_dataform @set_dataform@dataformviewsubmissionbuttons
 Feature: View submission buttons
 
     @javascript
@@ -6,8 +6,8 @@ Feature: View submission buttons
         Given I run dataform scenario "view submission buttons" with:
             | viewtype  | actor     |
             | aligned   | student1  |
-            | csv       | student1  |
-            | grid      | student1  |
-            | interval  | student1  |
-            | rss       | student1  |
-            | tabular   | student1  |
+#            | csv       | student1  |
+#            | grid      | student1  |
+#            | interval  | student1  |
+#            | rss       | student1  |
+#            | tabular   | student1  |

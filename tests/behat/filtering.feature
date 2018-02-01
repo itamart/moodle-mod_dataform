@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfilter
+@mod @mod_dataform @set_dataform@dataformfilter
 Feature: Filtering
 
     Background:
@@ -63,7 +63,7 @@ Feature: Filtering
 
         #Section: Log in.
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test dataform filtering"
         And I see "Entry 01"
         And I see "Entry 02"
@@ -280,7 +280,7 @@ Feature: Filtering
 
         #Section: Adjust the view filter.
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test dataform filtering"
         Then I go to manage dataform "views"
         And I set the field with xpath "//select[@name='fid']" to "My Entries"
@@ -289,7 +289,7 @@ Feature: Filtering
 
         #Section: Log in.
         And I log in as "<user>"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test dataform filtering"
 
         And I see "Entry 01 by <user name>"

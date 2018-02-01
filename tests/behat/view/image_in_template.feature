@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformview @dataformviewimageintemplate @_file_upload
+@mod @mod_dataform @set_dataform@dataformviewimageintemplate @_file_upload
 Feature: View image in template
 
     @javascript

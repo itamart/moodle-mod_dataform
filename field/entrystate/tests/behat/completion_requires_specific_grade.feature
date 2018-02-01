@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_entrystate
+@set_dataform @dataformfield @dataformfield_entrystate
 Feature: Completion
 
     @javascript
@@ -25,9 +25,9 @@ Feature: Completion
 
         # Course completion enabling
         Then I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I turn editing mode on
-        And I click on "Edit settings" "link" in the "Administration" "block"
+        And I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "Enable completion tracking" to "Yes"
         And I press "Save and display"
@@ -53,7 +53,7 @@ Feature: Completion
         And I set "View 01" as default view
 
         ## Completion
-        Then I follow "Edit settings"
+        Then I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "Completion tracking" to "Show activity as complete when conditions are met"
         And I set the field "completionspecificgradeenabled" to "1"
@@ -76,13 +76,13 @@ Feature: Completion
 
         # Student 1 not yet completed
         Then I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Dataform completion requires specific grade']" "xpath_element"
         And I log out
 
         # Teacher updates entries
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform completion requires specific grade"
         And I follow "entrystate_1_2"
         And I follow "entrystate_2_2"
@@ -93,13 +93,13 @@ Feature: Completion
 
         # Student 1 completed
         And I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Dataform completion requires specific grade']" "xpath_element"
         And I log out
 
         # Teacher reverts approval
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform completion requires specific grade"
         And I follow "View 01"
         And I follow "entrystate_3_0"
@@ -107,13 +107,13 @@ Feature: Completion
 
         # Student 1 not yet completed
         Then I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Not completed: Dataform completion requires specific grade']" "xpath_element"
         And I log out
 
         # Teacher approves another one for Student 1
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform completion requires specific grade"
         And I follow "View 01"
         And I follow "entrystate_4_2"
@@ -121,5 +121,5 @@ Feature: Completion
 
         # Student 1 completed
         And I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I hover "//li[contains(concat(' ', normalize-space(@class), ' '), ' modtype_dataform ')]/descendant::img[@alt='Completed: Dataform completion requires specific grade']" "xpath_element"

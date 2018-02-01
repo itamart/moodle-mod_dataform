@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformgrading
+@mod @mod_dataform @set_dataform@dataformgrading
 Feature: Auto grading
 
     @javascript
@@ -12,7 +12,7 @@ Feature: Auto grading
             | name                  | Auto grade by number of entries |
             | intro                 | Auto grade by number of entries |
             | grade                 | 80        |
-            | gradeitem 0 ca        | ##numentries## |
+            | gradeitem 0 ca        | SUM(##numentries##) |
         #:Section
 
         #Section: Add view
@@ -35,13 +35,13 @@ Feature: Auto grading
 
         #Section: Grades
         Then I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
 
         And I follow "Auto grade by number of entries"
         And I navigate to "Edit settings" in current page administration
         And I press "Save and display"
 
-        And I follow "Gradebook"
+        And I am on "Course 1" course gradebook
         And I should see "4.00" in the "Student 1" "table_row"
         And I should see "2.00" in the "Student 2" "table_row"
         #:Section

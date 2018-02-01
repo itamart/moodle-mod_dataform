@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformentry @dataformfield @dataformfield_selectmulti @dataformfield_selectmulti_defaultcontent
+@set_dataform @dataformentry @dataformfield @dataformfield_selectmulti @dataformfield_selectmulti_defaultcontent
 Feature: Default content
     In order to work with a dataform activity
     As a teacher
@@ -19,7 +19,7 @@ Feature: Default content
 
 
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test selectmulti field default content"
 
         And I go to manage dataform "fields"

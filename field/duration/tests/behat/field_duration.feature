@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_duration @dataformfieldtest
+@set_dataform @dataformfield @dataformfield_duration @dataformfieldtest
 Feature: Add dataform entries
 
     @javascript
@@ -15,49 +15,61 @@ Feature: Add dataform entries
             | name     | type      | dataform  | default   |
             | View 01  | aligned   | dataform1 | 1         |
 
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test duration field"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[Duration]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I am in dataform "Test duration field" "Course 1" as "teacher1"
 
         # No rules no content
         And I follow "Add a new entry"
         And I press "Save"
-        Then "id_editentry1" "link" should exist
+        Then "Edit" "link" should exist in the "1" "table_row"
 
         # No rules with content
-        And I follow "id_editentry1"
+        And I click on "Edit" "link" in the "1" "table_row"
         And I set the field "id_field_1_1_number" to "61"
         And I press "Save"
         Then I see "61 minutes"
 
-        When I follow "id_editentry1"
+        When I click on "Edit" "link" in the "1" "table_row"
         And I set the field "id_field_1_1_number" to ""
         And I press "Save"
         Then I do not see "61 minutes"
 
         # Required *
-        When I go to manage dataform "views"
-        And I follow "id_editview1"
-        And I expand all fieldsets
-        And I replace in field "Entry template" "[[Duration]]" with "[[*Duration]]"
-        And I press "Save changes"
-        And I follow "Browse"
-        And I follow "id_editentry1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[*Duration]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I click on "Edit" "link" in the "1" "table_row"
         And I set the field "id_field_1_1_number" to ""
         And I set the field "id_field_1_1_timeunit" to "minutes"
-        Then I see "You must supply a value here."
+        #Then I see "You must supply a value here."
+        Then "id_field_1_1_number" "field" exists
+
         And I set the field "id_field_1_1_number" to "53"
         And I press "Save"
         Then I see "53 minutes"
 
         # No edit !
-        When I go to manage dataform "views"
-        And I follow "id_editview1"
-        And I expand all fieldsets
-        And I replace in field "Entry template" "[[*Duration]]" with "[[!Duration]]"
-        And I press "Save changes"
-        And I follow "Browse"
-        And I follow "id_editentry1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[!Duration]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I click on "Edit" "link" in the "1" "table_row"
         Then "id_field_1_1_number" "field" should not exist
         And I press "Save"
         Then I see "53 minutes"

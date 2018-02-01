@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_select @dataformfilter @dataformfieldselectsearch
+@set_dataform @dataformfield @dataformfield_select @dataformfilter @dataformfieldselectsearch
 Feature: Search by a select field
 
     @javascript
@@ -25,7 +25,7 @@ Feature: Search by a select field
             | dataform1 | teacher1       | TL               |
 
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test select field search"
 
         Then I see "OP"

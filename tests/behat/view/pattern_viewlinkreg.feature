@@ -1,9 +1,8 @@
-@mod @mod_dataform @dataformview @dataformviewpattern
+@mod @mod_dataform @set_dataform@dataformviewpattern
 Feature: Pattern ##viewlink:viewname;some label;some args;##.
 
     @javascript
     Scenario: Use the ##viewlink:viewname;some label;;## pattern.
-        #Section:
         Given I start afresh with dataform "Test the viewlink:viewname;some label pattern"
         And the following dataform "fields" exist:
             | name         | type          | dataform  |
@@ -24,9 +23,8 @@ Feature: Pattern ##viewlink:viewname;some label;some args;##.
             """
 
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test the viewlink:viewname;some label pattern"
         And I follow "Click me to go to View 02"
 
         Then I see "I am View 02"
-        #:Section

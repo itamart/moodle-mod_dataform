@@ -1,9 +1,8 @@
-@mod @mod_dataform @dataformview @dataformviewpattern
+@mod @mod_dataform @set_dataform@dataformviewpattern
 Feature: Pattern ##viewlink:viewname##.
 
     @javascript
     Scenario: Navigate to another view.
-        #Section:
         Given I start afresh with dataform "Test the viewlink:viewname pattern"
         And the following dataform "fields" exist:
             | name         | type          | dataform  |
@@ -24,9 +23,8 @@ Feature: Pattern ##viewlink:viewname##.
             """
 
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test the viewlink:viewname pattern"
         And I click on "a" "css_element" in the "div.viewlink" "css_element"
 
         Then I see "I am View 02"
-        #:Section

@@ -1,9 +1,8 @@
-@mod @mod_dataform @dataformview @dataformviewpattern
+@mod @mod_dataform @set_dataform@dataformviewpattern
 Feature: Pattern ##addnewentries##.
 
     @javascript
     Scenario: Open multiple new entries for editing.
-        #Section:
         Given I start afresh with dataform "Test the addnewentries pattern"
         And the following dataform "fields" exist:
             | name         | type          | dataform  |
@@ -18,7 +17,7 @@ Feature: Pattern ##addnewentries##.
             """
 
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test the addnewentries pattern"
         And I set the field "Add new entries" to "3"
 
@@ -26,11 +25,9 @@ Feature: Pattern ##addnewentries##.
         And "field_1_-2" "field" exists
         And "field_1_-3" "field" exists
         And "field_1_-4" "field" does not exist
-        #:Section
 
     @javascript
     Scenario: Student opens multiple new entries for editing.
-        #Section:
         Given I start afresh with dataform "Test the addnewentries pattern"
         And the following dataform "fields" exist:
             | name         | type          | dataform  |
@@ -45,7 +42,7 @@ Feature: Pattern ##addnewentries##.
             """
 
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test the addnewentries pattern"
         And I set the field "Add new entries" to "3"
 
@@ -53,4 +50,3 @@ Feature: Pattern ##addnewentries##.
         And "field_1_-2" "field" exists
         And "field_1_-3" "field" exists
         And "field_1_-4" "field" does not exist
-        #:Section

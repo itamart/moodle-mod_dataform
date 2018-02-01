@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformentry @dataformfield @dataformfield_text @dataformfield_text_defaultcontent
+@set_dataform @dataformentry @dataformfield @dataformfield_text @dataformfield_text_defaultcontent
 Feature: Default content
     In order to work with a dataform activity
     As a teacher
@@ -18,9 +18,7 @@ Feature: Default content
             | View 01  | aligned   | dataform1 | 1         |
 
 
-        When I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test text field default content"
+        And I am in dataform "Test text field default content" "Course 1" as "teacher1"
 
         And I go to manage dataform "fields"
         And I follow "Test Field"

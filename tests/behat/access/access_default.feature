@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformactivity @dataformaccess
+@mod @mod_dataform @set_dataform@dataformactivity @dataformaccess
 Feature: Dataform access permissions
 
     @javascript
@@ -36,7 +36,7 @@ Feature: Dataform access permissions
             | dataform1 | student3      |       |               |               | 5 Entry by Student 03     |
 
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test access default"
 
         # Teacher access
@@ -71,7 +71,7 @@ Feature: Dataform access permissions
         # Assistant access
         #---------------------------
         Given I log in as "assistant1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test access default"
 
         # View
@@ -104,7 +104,7 @@ Feature: Dataform access permissions
         # Student 1 access
         #---------------------------
         Given I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test access default"
 
         # View

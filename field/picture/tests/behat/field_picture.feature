@@ -1,61 +1,69 @@
-@mod @mod_dataform @dataformfield @dataformfield_picture @_file_upload
+@set_dataform @dataformfield @dataformfield_picture @_file_upload
 Feature: Add dataform entries
     In order to work with a dataform activity
     As a teacher
     I need to add dataform entries to a dataform instance
-    
+
 
     @javascript
     Scenario: Use required or noedit patterns
         Given I start afresh with dataform "Test picture field"
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test picture field"
 
-        # Add fields
-        When I go to manage dataform "fields"
-        And I add a dataform field "picture" with "Picture 01"        
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  |
+            | Picture01       | picture          | dataform1 |
 
-        # Add a default view
-        When I follow "Views"
-        And I add a dataform view "aligned" with "View 01"        
-        Then I see "View 01"
-        And I see "Default view is not set."
-        When I set "View 01" as default view
-        Then I do not see "Default view is not set."
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[Picture01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I am in dataform "Test picture field" "Course 1" as "teacher1"
 
         # No rules no content
-        When I follow "Browse"
         And I follow "Add a new entry"
         And I press "Save"
-        Then "id_editentry1" "link" should exist        
+        Then "Edit" "link" should exist in the "1" "table_row"
 
         # Required *
-        When I go to manage dataform "views"
-        And I follow "id_editview1"
-        And I expand all fieldsets
-        And I fill textarea "Entry template" with "[[*Picture 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
-        And I press "Save changes"
-        And I follow "Browse"
-        And I follow "id_editentry1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[*Picture01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I click on "Edit" "link" in the "1" "table_row"
         Then I see "Maximum size for new files:"
         When I press "Save"
         Then I do not see "Add a new entry"
-        And "id_editentry1" "link" should not exist
+        And "Edit" "link" should not exist in the "1" "table_row"
         And I see "Maximum size for new files:"
-        When I upload "mod/dataform/tests/fixtures/test_image.jpg" file to "Picture 01" filemanager
+        When I upload "mod/dataform/tests/fixtures/test_image.jpg" file to "Picture01" filemanager
         And I press "Save"
         Then I see "Add a new entry"
-        And "id_editentry1" "link" should exist
+        And "Edit" "link" should exist in the "1" "table_row"
 
         # No edit !
-        When I go to manage dataform "views"
-        And I follow "id_editview1"
-        And I expand all fieldsets
-        And I fill textarea "Entry template" with "[[!Picture 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
-        And I press "Save changes"
-        And I follow "Browse"
-        And I follow "id_editentry1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[!Picture01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I click on "Edit" "link" in the "1" "table_row"
         Then I do not see "Maximum size for new files:"
         And I press "Save"
-        Then "id_editentry1" "link" should exist
+        Then "Edit" "link" should exist in the "1" "table_row"

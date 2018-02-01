@@ -1,11 +1,11 @@
-@mod @mod_dataform @dataformactivity
+@mod @mod_dataform @set_dataform@dataformactivity
 Feature: Add dataform to courses
 
     @javascript
     Scenario: Add a dataform to a course
         Given a fresh site for dataform scenario
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
 
         ## Add a dataform
         Then I turn editing mode on
@@ -18,5 +18,5 @@ Feature: Add dataform to courses
         Then I delete "Dataform activity 01" activity
         
         Then I am on homepage
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         Then I do not see "Dataform activity 01"

@@ -1,13 +1,11 @@
-@mod @mod_dataform @dataformactivity
+@mod @mod_dataform @set_dataform@dataformactivity
 Feature: Dataform max entries
 
     @javascript
     Scenario: Students cannot add more than max entries
-        # 69 steps
-
         Given I start afresh with dataform "Max Entries test"
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
 
         When I follow "Max Entries test"
         And I navigate to "Edit settings" in current page administration
@@ -54,7 +52,7 @@ Feature: Dataform max entries
         # Student cannot submit more than max
         #---------------------------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Max Entries test"
         Then I see "Entry 01"
         And I see "Entry 02"

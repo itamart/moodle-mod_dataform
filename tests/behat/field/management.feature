@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield
+@mod @mod_dataform @set_dataform
 Feature: Field management
 
     @javascript

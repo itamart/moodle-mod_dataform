@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_entryauthor
+@set_dataform @dataformfield @dataformfield_entryauthor
 Feature: Entry choice
     With this feature the teacher1 can allow students to take ownership
     on a predefined entry. For example, the teacher1 can add project entries,
@@ -106,7 +106,7 @@ Feature: Entry choice
             | dataform1 | teacher1       | Slot 5            | 2014-12-06 16:00  | 2014-12-07 00:00  |
 
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Entry choice"
         And I follow "Select entries"
         And I click on "Assign me" "button" in the "Slot 1" "table_row"
@@ -115,7 +115,7 @@ Feature: Entry choice
         Then "Unassign me" "button" should exist in the "Slot 1" "table_row"
         And "Unassign me" "button" should exist in the "Slot 5" "table_row"
         And "Assign me" "button" should not exist in the "Slot 2" "table_row"
-        And I follow "Project entries"
+        And I am on view "Project entries" in dataform "dataform1"
         And I see "Slot 1"
         And I see "Slot 5"
         And I do not see "Slot 2"
@@ -133,13 +133,13 @@ Feature: Entry choice
             | dataform1 | student1       | Slot 5            | 2014-12-06 16:00  | 2014-12-07 00:00  |
 
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Entry choice"
         And I follow "Select entries"
         And I click on "Unassign me" "button" in the "Slot 1" "table_row"
 
         Then "Assign me" "button" should exist in the "Slot 1" "table_row"
-        And I follow "Project entries"
+        And I am on view "Project entries" in dataform "dataform1"
         And I do not see "Slot 1"
     #:Scenario
 
@@ -155,7 +155,7 @@ Feature: Entry choice
             | dataform1 | student1       | Slot 5            | 2014-12-06 16:00  | 2014-12-07 00:00  |
 
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Entry choice"
         And I follow "Select entries"
         And I click on "Assign me" "button" in the "Slot 1" "table_row"
@@ -177,7 +177,7 @@ Feature: Entry choice
             | dataform1 | student1       | Slot 5            | 2014-12-06 16:00  | 2014-12-07 00:00  |
 
         When I log in as "student2"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Entry choice"
         And I follow "Select entries"
 

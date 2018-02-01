@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformentry @dataformfield @dataformfield_selectmulti
+@set_dataform @dataformentry @dataformfield @dataformfield_selectmulti
 Feature: Add dataform entries
     In order to work with a dataform activity
     As a teacher
@@ -8,43 +8,50 @@ Feature: Add dataform entries
     @javascript
     Scenario: Use required or noedit patterns
         Given I start afresh with dataform "Test selectmulti field"
-        And I log in as "teacher1"
-        And I follow "Course 1"
-        And I follow "Test selectmulti field"
 
-        # Add fields
-        When I go to manage dataform "fields"
-        And I add a dataform field "selectmulti" with "Selectmulti 01"
-        And I set dataform field "Selectmulti 01" options to "SLM 01\nSLM 02\nSLM 03\nSLM 04"
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  | param1 |
+            | Selectmulti01| selectmulti   | dataform1 | {SLM 01,SLM 02,SLM 03,SLM 04} |
 
-        # Add a default view
-        When I follow "Views"
-        And I add a dataform view "aligned" with "View 01"
-        Then I see "View 01"
-        And I see "Default view is not set."
-        When I set "View 01" as default view
-        Then I do not see "Default view is not set."
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[Selectmulti01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I am in dataform "Test selectmulti field" "Course 1" as "teacher1"
 
         # No rules no content
-        When I follow "Browse"
         And I follow "Add a new entry"
         And I press "Save"
         Then I do not see "SLM 01"
         And I do not see "SLM 02"
         And I do not see "SLM 03"
         And I do not see "SLM 04"
-        And "id_editentry1" "link" should exist
+        And "Edit" "link" should exist in the "1" "table_row"
 
         # Required *
-        When I go to manage dataform "views"
-        And I follow "id_editview1"
-        And I expand all fieldsets
-        And I fill textarea "Entry template" with "[[*Selectmulti 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
-        And I press "Save changes"
-        And I follow "Browse"
-        And I follow "id_editentry1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[*Selectmulti01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I click on "Edit" "link" in the "1" "table_row"
         And I press "Save"
-        Then I see "You must supply a value here."
+        #Then I see "You must supply a value here."
+        Then "id_field_1_1_selected" "field" exists
+
         And I set the field "id_field_1_1_selected" to "SLM 03"
         And I press "Save"
         Then I do not see "SLM 01"
@@ -53,13 +60,15 @@ Feature: Add dataform entries
         And I do not see "SLM 04"
 
         # No edit !
-        When I go to manage dataform "views"
-        And I follow "id_editview1"
-        And I expand all fieldsets
-        And I fill textarea "Entry template" with "[[!Selectmulti 01]]\n[[EAC:edit]]\n[[EAC:delete]]"
-        And I press "Save changes"
-        And I follow "Browse"
-        And I follow "id_editentry1"
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[!Selectmulti01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I click on "Edit" "link" in the "1" "table_row"
         Then "id_field_1_1_selected" "select" should not exist
         And I press "Save"
         Then I do not see "SLM 01"
@@ -72,7 +81,7 @@ Feature: Add dataform entries
     Scenario Outline: Add dataform entry with selectmulti field
         Given I start afresh with dataform "Test selectmulti field"
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test selectmulti field"
 
         # Add a field field

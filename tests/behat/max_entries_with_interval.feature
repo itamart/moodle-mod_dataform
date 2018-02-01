@@ -1,17 +1,15 @@
-@mod @mod_dataform @dataformactivity
+@mod @mod_dataform @set_dataform@dataformactivity
 Feature: Dataform max entries
 
     @javascript
     Scenario: Students cannot add more than max entries every interval
-        # 125 steps
-
         Given I start afresh with dataform "Max entries with interval"
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Max entries with interval"
         Then I see "This dataform appears to be new or with incomplete setup"
 
-        When I follow "Edit settings"
+        When I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
 
         And the "timeavailable[day]" "select" should be disabled
@@ -50,12 +48,12 @@ Feature: Dataform max entries
         Then I see "Add a new entry"
 
         When I follow "Add a new entry"
-        And I set the field with xpath "//input[@class='Field_01']" to "Teacher Entry 01"
+        And I set the field "field_1_-1" to "Teacher Entry 01"
         And I press "Save"
         Then I see "Entry 01"
 
         When I follow "Add a new entry"
-        And I set the field with xpath "//input[@class='Field_01']" to "Teacher Entry 02"
+        And I set the field "field_1_-1" to "Teacher Entry 02"
         And I press "Save"
         Then I see "Teacher Entry 01"
         And I see "Teacher Entry 02"
@@ -66,13 +64,13 @@ Feature: Dataform max entries
         # Student cannot submit more than max
         #---------------------------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Max entries with interval"
         Then I see "Entry 01"
         And I see "Entry 02"
 
         When I follow "Add a new entry"
-        And I set the field with xpath "//input[@class='Field_01']" to "Student Entry 01"
+        And I set the field "field_1_-1" to "Student Entry 01"
         And I press "Save"
         Then I see "Teacher Entry 01"
         And I see "Teacher Entry 02"
@@ -90,17 +88,17 @@ Feature: Dataform max entries
         # Teacher can submit more than max
         #---------------------------
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Max entries with interval"
         Then I see "Add a new entry"
 
         When I follow "Add a new entry"
-        And I set the field with xpath "//input[@class='Field_01']" to "Teacher Entry 03"
+        And I set the field "field_1_-1" to "Teacher Entry 03"
         And I press "Save"
         Then I see "Entry 01"
 
         When I follow "Add a new entry"
-        And I set the field with xpath "//input[@class='Field_01']" to "Teacher Entry 04"
+        And I set the field "field_1_-1" to "Teacher Entry 04"
         And I press "Save"
         Then I see "Teacher Entry 01"
         And I see "Teacher Entry 02"
@@ -114,7 +112,7 @@ Feature: Dataform max entries
         # Student cannot submit more than max
         #---------------------------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Max entries with interval"
         Then I see "Teacher Entry 01"
         And I see "Teacher Entry 02"
@@ -123,7 +121,7 @@ Feature: Dataform max entries
         And I see "Teacher Entry 04"
 
         When I follow "Add a new entry"
-        And I set the field with xpath "//input[@class='Field_01']" to "Student Entry 02"
+        And I set the field "field_1_-1" to "Student Entry 02"
         And I press "Save"
         Then I see "Teacher Entry 01"
         And I see "Teacher Entry 02"

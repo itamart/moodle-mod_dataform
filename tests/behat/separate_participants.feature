@@ -1,18 +1,18 @@
-@mod @mod_dataform @dataformactivity
+@mod @mod_dataform @set_dataform@dataformactivity
 Feature: Dataform activity individualized
 
     @javascript
     Scenario: Students cannot see teacher's entries or other students' entries
         Given I start afresh with dataform "Dataform separate participants test"
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
 
         # As teacher1 add a dataform and an entry
-        #---------------------------------------------
         Then I see "This dataform appears to be new or with incomplete setup"
 
-        When I follow "Edit settings"
+        When I navigate to "Edit settings" in current page administration
+        And I expand all fieldsets
         And I set the field "Separate participants" to "Yes"
         And I press "Save and display"
         Then I see "This dataform appears to be new or with incomplete setup"
@@ -38,7 +38,7 @@ Feature: Dataform activity individualized
         # As student1 add an entry and should not be able to see other entries
         #---------------------------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
 
@@ -52,7 +52,7 @@ Feature: Dataform activity individualized
         # As assistan1 add an entry and should not be able to see other entries
         #---------------------------------------------
         When I log in as "assistant1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
         And I do not see "student1"
@@ -68,7 +68,7 @@ Feature: Dataform activity individualized
         # As student2 add an entry and should not be able to see other entries
         #---------------------------------------------
         When I log in as "student2"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
         And I do not see "assistant1"
@@ -86,7 +86,7 @@ Feature: Dataform activity individualized
         # As student1 I should not be able to access other entries via url
         #---------------------------------------------
         When I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
         Then I do not see "teacher1"
         And I do not see "assistant1"
@@ -110,7 +110,7 @@ Feature: Dataform activity individualized
         # As teacher1 make sure I see all entries
         #---------------------------------------------
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
         Then I see "teacher1"
         And I see "assistant1"

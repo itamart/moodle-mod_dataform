@@ -92,7 +92,6 @@ class behat_mod_dataform extends behat_base {
         return array();
     }
 
-
     /**
      * Resets (truncates) all dataform tables to remove any records and reset sequences.
      * This set of steps is essential for any standalone scenario that adds entries with content
@@ -133,7 +132,6 @@ class behat_mod_dataform extends behat_base {
         // Clean up instance store cache.
         \mod_dataform_instance_store::unregister();
 
-        $steps = array();
 
         // Add a course.
         $data = array(
@@ -141,7 +139,7 @@ class behat_mod_dataform extends behat_base {
             array('Course 1', 'C1', '0'),
         );
         $table = new TableNode($data);
-        $steps[] = new Given('the following "courses" exist:', $table);
+        $this->execute('behat_data_generators::the_following_exist', array('courses', $table));
 
         // Add users.
         $data = array(
@@ -154,7 +152,7 @@ class behat_mod_dataform extends behat_base {
             array('student3', 'Student', '3', 'student3@asd.com'),
         );
         $table = new TableNode($data);
-        $steps[] = new Given('the following "users" exist:', $table);
+        $this->execute('behat_data_generators::the_following_exist', array('users', $table));
 
         // Enrol users in course.
         $teacherrole = \mod_dataform\helper\testing::get_role_shortname('editingteacher');
@@ -169,7 +167,7 @@ class behat_mod_dataform extends behat_base {
             array('student2', 'C1', $studentrole),
         );
         $table = new TableNode($data);
-        $steps[] = new Given('the following "course enrolments" exist:', $table);
+        $this->execute('behat_data_generators::the_following_exist', array('course enrolments', $table));
 
         // Add groups.
         $data = array(
@@ -178,7 +176,7 @@ class behat_mod_dataform extends behat_base {
             array('Group 2', 'Anything', 'C1', 'G2'),
         );
         $table = new TableNode($data);
-        $steps[] = new Given('the following "groups" exist:', $table);
+        $this->execute('behat_data_generators::the_following_exist', array('groups', $table));
 
         // Add group members.
         $data = array(
@@ -187,9 +185,7 @@ class behat_mod_dataform extends behat_base {
             array('student2', 'G2'),
         );
         $table = new TableNode($data);
-        $steps[] = new Given('the following "group members" exist:', $table);
-
-        return $steps;
+        $this->execute('behat_data_generators::the_following_exist', array('group members', $table));
     }
 
     /**
@@ -201,7 +197,7 @@ class behat_mod_dataform extends behat_base {
      * @param string $name
      */
     public function i_start_afresh_with_dataform($name) {
-        $steps = $this->start_afresh_steps();
+        $this->start_afresh_steps();
 
         // Test dataform.
         $data = array(
@@ -209,9 +205,7 @@ class behat_mod_dataform extends behat_base {
             array('dataform', 'C1', 'dataform1', $name, $name),
         );
         $table = new TableNode($data);
-        $steps[] = new Given('the following "activities" exist:', $table);
-
-        return $steps;
+        $this->execute('behat_data_generators::the_following_exist', array('activities', $table));
     }
 
     /**
@@ -279,7 +273,6 @@ class behat_mod_dataform extends behat_base {
      * @param TableNode $data
      */
     public function the_following_dataform_exists(TableNode $data) {
-        $steps = array();
 
         $datahash = $data->getRowsHash();
 
@@ -296,6 +289,7 @@ class behat_mod_dataform extends behat_base {
             if (empty($gradeitems[$itemnumber])) {
                 $gradeitems[$itemnumber] = array();
             }
+
             $gradeitems[$itemnumber][$var] = $value;
             unset($datahash[$key]);
         }
@@ -312,9 +306,7 @@ class behat_mod_dataform extends behat_base {
         $data = array($headers, $values);
 
         $table = new TableNode($data);
-        $steps[] = new Given('the following "activities" exist:', $table);
-
-        return $steps;
+        $this->execute('behat_data_generators::the_following_exist', array('activities', $table));
     }
 
     /**
@@ -340,18 +332,14 @@ class behat_mod_dataform extends behat_base {
      * @param string $data
      */
     public function i_add_a_dataform_with($data) {
-        $steps = array();
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I turn editing mode on');
-        $steps[] = new Given('I add a "Dataform" to section "1"');
-        $steps[] = new Given('I expand all fieldsets');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_am_on_course_homepage_with_editing_mode_on', array('Course 1'));
+        $this->execute('behat_course::i_add_to_section', array('Dataform', '1'));
+        $this->execute('behat_forms::i_expand_all_fieldsets', array());
 
-        $steps = array_merge($steps, $this->dataform_form_fill_steps($data));
+        $this->dataform_form_fill_steps($data);
 
-        $steps[] = new Given('I press "Save and return to course"');
-
-        return $steps;
+        $this->execute('behat_forms::press_button', array('Save and return to course'));
     }
 
     /**
@@ -374,19 +362,15 @@ class behat_mod_dataform extends behat_base {
      * @param TableNode $table
      */
     public function i_add_a_test_dataform() {
-        $steps = array();
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I turn editing mode on');
-        $steps[] = new Given('I add a "Dataform" to section "1"');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_am_on_course_homepage_with_editing_mode_on', array('Course 1'));
+        $this->execute('behat_course::i_add_to_section', array('Dataform', '1'));
 
         $data = array('Name', 'Test Dataform');
         $table = new TableNode($data);
-        $steps[] = new Given('I set the following fields to these values:', $table);
+        $this->execute('behat_forms::i_set_the_following_fields_to_these_values', array($table));
 
-        $steps[] = new Given('I press "Save and display"');
-
-        return $steps;
+        $this->execute('behat_forms::press_button', array('Save and display'));
     }
 
     /**
@@ -397,12 +381,8 @@ class behat_mod_dataform extends behat_base {
      * @Given /^I delete this dataform$/
      */
     public function i_delete_this_dataform() {
-        $steps = array();
-
-        $steps[] = new Given('I navigate to "Delete activity" node in "Dataform activity administration"');
-        $steps[] = new Given('I press "Yes"');
-
-        return $steps;
+        $this->execute('behat_navigation::i_navigate_to_node_in', array('Delete activity', 'Dataform activity administration'));
+        $this->execute('behat_forms::press_button', array('Yes'));
     }
 
     /**
@@ -413,11 +393,9 @@ class behat_mod_dataform extends behat_base {
      * @param string $tabname
      */
     public function i_go_to_manage_dataform($tabname) {
-        $node = get_string($tabname, 'dataform');
-        $path = "Dataform activity administration > Manage";
-        return array(
-            new Given('I navigate to "'. $node. '" node in "'. $path. '"'),
-        );
+        $node = get_string("dataform:manage$tabname", 'dataform');
+        $path = "Dataform activity administration";
+        $this->execute('behat_navigation::i_navigate_to_node_in', array($node, $path));
     }
 
     /* FIELD */
@@ -434,21 +412,18 @@ class behat_mod_dataform extends behat_base {
         $fieldclass = 'dataformfield_'. $type;
         $pluginname = get_string('pluginname', $fieldclass);
 
-        $steps = array();
 
         // Open the form.
-        $steps[] = new Given('I set the field "' . get_string('fieldadd', 'dataform'). '" to "'. $pluginname. '"');
+        $this->execute('behat_forms::i_set_the_field_to', array(get_string('fieldadd', 'dataform'), $pluginname));
 
         // Fill the form.
         $func = "field_form_fill_steps_$type";
         $func = method_exists($this, $func) ? $func : "field_form_fill_steps_base";
-        $steps = array_merge($steps, $this->$func($data));
+        $this->$func($data);
 
         // Save.
-        $steps[] = new Given('I press "' . get_string('savechanges') . '"');
-        $steps[] = new Given('I wait to be redirected');
-
-        return $steps;
+        $this->execute('behat_forms::press_button', array(get_string('savechanges')));
+        $this->execute('behat_general::i_wait_to_be_redirected', array());
     }
 
     /**
@@ -460,16 +435,14 @@ class behat_mod_dataform extends behat_base {
      * @param string $content
      */
     public function i_set_dataform_field_options_to($name, $content) {
-        $steps = array();
 
-        $steps[] = new Given('I follow "'. $name. '"');
-        $steps[] = new Given('I expand all fieldsets');
+        $this->execute('behat_general::click_link', array($name));
+        $this->execute('behat_forms::i_expand_all_fieldsets', array());
 
         $content = implode("\n", explode('\n', $content));
-        $steps[] = new Given('I set the field "Options" to "'. $content. '"');
-        $steps[] = new Given('I press "Save changes"');
+        $this->execute('behat_forms::i_set_the_field_to', array('Options', $content));
+        $this->execute('behat_forms::press_button', array('Save changes'));
 
-        return $steps;
     }
 
     /* VIEW */
@@ -486,10 +459,9 @@ class behat_mod_dataform extends behat_base {
         $viewclass = 'dataformview_'. $type;
         $pluginname = get_string('pluginname', $viewclass);
 
-        $steps = array();
 
         // Open the form.
-        $steps[] = new Given('I set the field "' . get_string('viewadd', 'dataform'). '" to "'. $pluginname. '"');
+        $this->execute('behat_forms::i_set_the_field_to', array(get_string('viewadd', 'dataform'), $pluginname));
 
         // Fill the form.
         $formfields = array(
@@ -511,13 +483,11 @@ class behat_mod_dataform extends behat_base {
             'param10',
         );
         $table = $this->convert_data_to_table($formfields, $data);
-        $steps[] = new Given('I set the following fields to these values:', $table);
+        $this->execute('behat_forms::i_set_the_following_fields_to_these_values', array($table));
 
         // Save.
-        $steps[] = new Given('I press "' . get_string('savechanges') . '"');
-        $steps[] = new Given('I wait to be redirected');
-
-        return $steps;
+        $this->execute('behat_forms::press_button', array(get_string('savechanges')));
+        $this->execute('behat_general::i_wait_to_be_redirected', array());
     }
 
     /**
@@ -531,9 +501,7 @@ class behat_mod_dataform extends behat_base {
     public function i_set_as_default_view($name) {
         // Click the Default button of the view.
         $idsetdefault = 'id_'. str_replace(' ', '_', $name). '_set_default';
-        $steps[] = new Given('I follow "' . $idsetdefault. '"');
-
-        return $steps;
+        $this->execute('behat_general::click_link', array($idsetdefault));
     }
 
     /**
@@ -674,10 +642,9 @@ class behat_mod_dataform extends behat_base {
      */
     public function i_add_a_dataform_filter_with($data) {
 
-        $steps = array();
 
         // Open the form.
-        $steps[] = new Given('I follow "'. get_string('filteradd', 'dataform'). '"');
+        $this->execute('behat_general::click_link', array(get_string('filteradd', 'dataform')));
 
         // Fill the form.
         $formfields = array(
@@ -709,13 +676,12 @@ class behat_mod_dataform extends behat_base {
             'searchvalue2',
         );
         $table = $this->convert_data_to_table($formfields, $data);
-        $steps[] = new Given('I set the following fields to these values:', $table);
+        $this->execute('behat_forms::i_set_the_following_fields_to_these_values', array($table));
 
         // Save.
-        $steps[] = new Given('I press "' . get_string('savechanges') . '"');
-        $steps[] = new Given('I wait to be redirected');
+        $this->execute('behat_forms::press_button', array(get_string('savechanges')));
+        $this->execute('behat_general::i_wait_to_be_redirected', array());
 
-        return $steps;
     }
 
     /**
@@ -728,17 +694,12 @@ class behat_mod_dataform extends behat_base {
      * @param string $direction 0|1 (Ascending|Descending)
      */
     public function i_set_sort_criterion_to($number, $fieldelement, $direction) {
-
-        $steps = array();
-
         $i = (int) $number - 1;
         $sortfield = "sortfield$i";
         $sortdir = "sortdir$i";
 
-        $steps[] = new Given('I set the field "'. $sortfield. '" to "'. $fieldelement. '"');
-        $steps[] = new Given('I set the field "'. $sortdir. '" to "'. $direction. '"');
-
-        return $steps;
+        $this->execute('behat_forms::i_set_the_field_to', array($sortfield, $fieldelement));
+        $this->execute('behat_forms::i_set_the_field_to', array($sortdir, $direction));
     }
 
     /**
@@ -753,9 +714,6 @@ class behat_mod_dataform extends behat_base {
      * @param string $operator <empty>|=|>|<|>=|<=|BETWEEN|LIKE|IN
      */
     public function i_set_search_criterion_to($number, $andor, $field, $not, $operator, $value) {
-
-        $steps = array();
-
         $i = (int) $number - 1;
         $searchandor = "searchandor$i";
         $searchfield = "searchfield$i";
@@ -763,13 +721,11 @@ class behat_mod_dataform extends behat_base {
         $searchoperator = "searchoperator$i";
         $searchvalue = "searchvalue$i";
 
-        $steps[] = new Given('I set the field "'. $searchandor. '" to "'. $andor. '"');
-        $steps[] = new Given('I set the field "'. $searchfield. '" to "'. $field. '"');
-        $steps[] = new Given('I set the field "'. $searchnot. '" to "'. $not. '"');
-        $steps[] = new Given('I set the field "'. $searchoperator. '" to "'. $operator. '"');
-        $steps[] = new Given('I set the field "'. $searchvalue. '" to "'. $value. '"');
-
-        return $steps;
+        $this->execute('behat_forms::i_set_the_field_to', array($searchandor, $andor));
+        $this->execute('behat_forms::i_set_the_field_to', array($searchfield, $field));
+        $this->execute('behat_forms::i_set_the_field_to', array($searchnot, $not));
+        $this->execute('behat_forms::i_set_the_field_to', array($searchoperator, $operator));
+        $this->execute('behat_forms::i_set_the_field_to', array($searchvalue, $value));
     }
 
     /* FORM EDITING */
@@ -783,15 +739,13 @@ class behat_mod_dataform extends behat_base {
      * @param string $field
      */
     public function i_prepend_to_field($text, $field) {
-        $steps = array();
 
         $fieldnode = $this->find_field($field);
         $value = $fieldnode->getValue();
         $data = array($field, $text. $value);
         $table = new TableNode($data);
-        $steps[] = new Given('I set the following fields to these values:', $table);
+        $this->execute('behat_forms::i_set_the_following_fields_to_these_values', array($table));
 
-        return $steps;
     }
 
     /**
@@ -843,15 +797,11 @@ class behat_mod_dataform extends behat_base {
     public function i_upload_image_to_editor($imagename, $locator) {
         global $CFG;
 
-        $steps = array();
-
         $path = "$CFG->wwwroot/mod/dataform/tests/fixtures/$imagename";
-        $steps[] = new Given('I click on "Image" "button"');
-        $steps[] = new Given('I set the field "Enter URL" to "'. $path. '"');
-        $steps[] = new Given('I set the field "Description not necessary" to "checked"');
-        $steps[] = new Given('I click on "Save image" "button"');
-
-        return $steps;
+        $this->execute('behat_general::i_click_on', array('Image', 'button'));
+        $this->execute('behat_forms::i_set_the_field_to', array('Enter URL', $path));
+        $this->execute('behat_forms::i_set_the_field_to', array('Description not necessary', 'checked'));
+        $this->execute('behat_general::i_click_on', array('Save image', 'button'));
     }
 
     /**
@@ -864,7 +814,7 @@ class behat_mod_dataform extends behat_base {
      * @param PyStringNode $content
      */
     public function i_set_the_field_to($name, PyStringNode $content) {
-        return array(new Given('I set the field "'. $name. '" to "'. $content. '"'));
+        $this->execute('behat_forms::i_set_the_field_to', array($name, $content));
     }
 
     /**
@@ -878,8 +828,7 @@ class behat_mod_dataform extends behat_base {
     public function i_fill_textarea_with($name, $content) {
 
         $content = implode("\n", explode('\n', $content));
-
-        return array(new Given('I set the field "'. $name. '" to "'. $content. '"'));
+        $this->execute('behat_forms::i_set_the_field_to', array($name, $content));
     }
 
     /**
@@ -903,17 +852,16 @@ class behat_mod_dataform extends behat_base {
      * Enters the specified dataform in the specified course as the specified user.
      *
      * @Given /^I am in dataform "(?P<dataformname_string>(?:[^"]|\\")*)" "(?P<coursename_string>(?:[^"]|\\")*)" as "(?P<username_string>(?:[^"]|\\")*)"$/
+     * @Given /^I am in dataform "(?P<dataformname_string>(?:[^"]|\\")*)" "(?P<coursename_string>(?:[^"]|\\")*)"$/
      * @param string $dataformname
      * @param string $coursename
      */
-    public function i_am_in_dataform_as($dataformname, $coursename, $username) {
-        $steps = array();
-
-        $steps[] = new Given('I log in as "' . $username. '"');
-        $steps[] = new Given('I follow "' . $coursename. '"');
-        $steps[] = new Given('I follow "' . $dataformname. '"');
-
-        return $steps;
+    public function i_am_in_dataform_as($dataformname, $coursename, $username = null) {
+        if ($username) {
+            $this->execute('behat_auth::i_log_in_as', array($username));
+        }
+        $this->execute('behat_navigation::i_am_on_course_homepage', array($coursename));
+        $this->execute('behat_general::click_link', array($dataformname));
     }
 
     /**
@@ -927,6 +875,21 @@ class behat_mod_dataform extends behat_base {
     }
 
     /**
+     * Opens the specified dataform view.
+     *
+     * @Given /^I am on view "(?P<viewname_string>(?:[^"]|\\")*)" in dataform "(?P<idnumber_string>(?:[^"]|\\")*)"$/
+     * @throws coding_exception
+     * @param string $viewname The full name of the view.
+     * @param string $idnumber The id number of the dataform.
+     * @return void
+     */
+    public function i_am_on_view_in_dataform($viewname, $idnumber) {
+        $dataformid = $this->get_dataform_id($idnumber);
+        $viewid = $this->get_dataform_view_id($viewname, $dataformid);
+        $this->i_go_to_dataform_page("view.php?d=$dataformid&view=$viewid");
+    }
+
+    /**
      * Adds a dataform entry with the specified values.
      * The step begins on the front page of a dataform activity ready to browse.
      *
@@ -934,13 +897,9 @@ class behat_mod_dataform extends behat_base {
      * @param string $data
      */
     public function i_add_a_dataform_entry_with($data) {
-        $steps = array();
-
-        $steps[] = new Given('I follow "Add a new entry"');
-        $steps[] = new Given('I set the following fields to these values:', $data);
-        $steps[] = new Given('I press "Save"');
-
-        return $steps;
+        $this->execute('behat_general::click_link', array('Add a new entry'));
+        $this->execute('behat_forms::i_set_the_following_fields_to_these_values', array($data));
+        $this->execute('behat_forms::press_button', array('Save'));
     }
 
     /**
@@ -951,14 +910,10 @@ class behat_mod_dataform extends behat_base {
      * @param string $viewid
      */
     public function i_cannot_add_a_new_entry_in_dataform_view($dataformid, $viewid) {
-        $steps = array();
-
-        $steps[] = new Given('I do not see "Add a new entry"');
-        $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&editentries=-1"');
-        $steps[] = new Given('I do not see "Save"');
-        $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '"');
-
-        return $steps;
+        $this->i_do_not_see('Add a new entry');
+        $this->i_go_to_dataform_page("view.php?d=$dataformid&view=$viewid&editentries=-1");
+        $this->i_do_not_see('Save');
+        $this->i_go_to_dataform_page("view.php?d=$dataformid&view=$viewid");
     }
 
     /**
@@ -970,14 +925,10 @@ class behat_mod_dataform extends behat_base {
      * @param string $viewid
      */
     public function i_cannot_edit_entry_in_dataform_view($entryid, $dataformid, $viewid) {
-        $steps = array();
-
-        $steps[] = new Given('"id_editentry'. $entryid. '" "link" does not exist');
-        $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '&editentries='. $entryid. '"');
-        $steps[] = new Given('"Save" "button" does not exist');
-        $steps[] = new Given('I go to dataform page "view.php?d='. $dataformid. '&view='. $viewid. '"');
-
-        return $steps;
+        $this->does_not_exist("id_editentry$entryid", 'link');
+        $this->i_go_to_dataform_page("view.php?d=$dataformid&view=$viewid&editentries=$entryid");
+        $this->does_not_exist('Save', 'button');
+        $this->i_go_to_dataform_page("view.php?d=$dataformid&view=$viewid");
     }
 
     /**
@@ -990,14 +941,10 @@ class behat_mod_dataform extends behat_base {
      * @param string $viewid
      */
     public function i_cannot_delete_entry_with_content_in_dataform_view($entryid, $content, $dataformid, $viewid) {
-        $steps = array();
-
-        $steps[] = new Given('"id_deleteentry'. $entryid. '" "link" does not exist');
+        $this->does_not_exist("id_deleteentry$entryid", 'link');
         $url = 'view.php?d='. $dataformid. '&view='. $viewid. '&delete='. $entryid. '&sesskey='. sesskey();
-        $steps[] = new Given('I go to dataform page "'. $url. '"');
-        $steps[] = new Given('I see "'. $content. '"');
-
-        return $steps;
+        $this->i_go_to_dataform_page($url);
+        $this->i_see($content);
     }
 
     /* REPHRASES */
@@ -1010,7 +957,7 @@ class behat_mod_dataform extends behat_base {
      * @param string $text
      */
     public function i_see($text) {
-        return (array(new Given('I should see "'. $text. '"')));
+        return ($this->execute('behat_general::assert_page_contains_text', array($text)));
     }
 
     /**
@@ -1021,7 +968,7 @@ class behat_mod_dataform extends behat_base {
      * @param string $text
      */
     public function i_do_not_see($text) {
-        return (array(new Given('I should not see "'. $text. '"')));
+        return ($this->execute('behat_general::assert_page_not_contains_text', array($text)));
     }
 
     /**
@@ -1035,7 +982,7 @@ class behat_mod_dataform extends behat_base {
      * @param string $selectortype The selector type
      */
     public function exists($element, $selectortype) {
-        return (array(new Given('"'. $element. '" "'. $selectortype. '" should exist')));
+        return ($this->execute('behat_general::should_exist', array($element, $selectortype)));
     }
 
     /**
@@ -1049,7 +996,23 @@ class behat_mod_dataform extends behat_base {
      * @param string $selectortype The selector type
      */
     public function does_not_exist($element, $selectortype) {
-        return (array(new Given('"'. $element. '" "'. $selectortype. '" should not exist')));
+        return ($this->execute('behat_general::should_not_exist', array($element, $selectortype)));
+    }
+
+    /* UTILITY STEPS */
+    /**
+     * Opens the course homepage.
+     *
+     * @Given /^I am on "(?P<coursefullname_string>(?:[^"]|\\")*)" course gradebook$/
+     * @throws coding_exception
+     * @param string $coursefullname The full name of the course.
+     * @return void
+     */
+    public function i_am_on_course_gradebook($coursefullname) {
+        global $DB;
+        $course = $DB->get_record("course", array("fullname" => $coursefullname), 'id', MUST_EXIST);
+        $url = new moodle_url('/grade/report/grader/index.php', ['id' => $course->id]);
+        $this->getSession()->visit($this->locate_path($url->out_as_local_url(false)));
     }
 
     /* SCENARIOS */
@@ -1061,33 +1024,30 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function scenario_view_management(TableNode $data) {
-        $steps = array();
 
         if (!$items = $data->getHash()) {
-            return $steps;
+            return;
         }
 
         $dataformname = "View management";
 
-        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
+        $this->i_start_afresh_with_dataform($dataformname);
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "'. $dataformname. '"');
-        $steps[] = new Given('I go to manage dataform "views"');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
+        $this->execute('behat_general::click_link', array($dataformname));
+        $this->i_go_to_manage_dataform('views');
 
         foreach ($items as $item) {
             $viewtype = $item['viewtype'];
             $viewname = !empty($item['viewname']) ? $item['viewname'] : "view$viewtype";
 
-            $steps[] = new Given('I add a dataform view "'. $viewtype. '" with "'. $viewname. '"');
-            $steps[] = new Given('I see "'. $viewname. '"');
-            $steps[] = new Given('I follow "Delete '. $viewname. '"');
-            $steps[] = new Given('I press "Continue"');
-            $steps[] = new Given('I do not see "'. $viewname. '"');
+            $this->i_add_a_dataform_view_with($viewtype, $viewname);
+            $this->i_see($viewname);
+            $this->execute('behat_general::click_link', array("Delete $viewname"));
+            $this->execute('behat_forms::press_button', array('Continue'));
+            $this->i_do_not_see($viewname);
         }
-
-        return $steps;
     }
 
     /**
@@ -1097,23 +1057,37 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function scenario_view_required_field(TableNode $data) {
-        $steps = array();
 
         if (!$items = $data->getHash()) {
-            return $steps;
+            return;
         }
 
-        $dataformname = "View required field";
+        $this->start_afresh_steps();
 
-        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
+        $dataformname = 'View required field';
+        $dataformidn = 'dfidn';
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "'. $dataformname. '"');
+        // Dataform.
+        $arr = array(
+            array('course', 'C1'),
+            array('idnumber', $dataformidn),
+            array('name', $dataformname),
+        );
+        $table = new TableNode($arr);
+        $this->the_following_dataform_exists($table);
 
-        /* Field */
-        $steps[] = new Given('I go to manage dataform "fields"');
-        $steps[] = new Given('I add a dataform field "text" with "Text 01"');
+        // Get the dataform so that we can replace patterns in the views.
+        $df = mod_dataform_dataform::instance($this->get_dataform_id($dataformidn));
+
+        $this->i_am_in_dataform_as($dataformname, 'Course 1', 'teacher1');
+
+        // Field.
+        $arr = array(
+            array('name', 'type', 'dataform'),
+            array('Field 01', 'text', $dataformidn),
+        );
+        $table = new TableNode($arr);
+        $this->the_following_dataform_exist('fields', $table);
 
         foreach ($items as $item) {
             $viewtype = $item['viewtype'];
@@ -1121,26 +1095,30 @@ class behat_mod_dataform extends behat_base {
             $entrytemplate = $item['entrytemplate'];
 
             /* View */
-            $steps[] = new Given('I go to manage dataform "views"');
-            $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
-            $steps[] = new Given('I expand all fieldsets');
-            $steps[] = new Given('I set the field "Name" to "'. $viewname. '"');
-            $steps[] = new Given('I replace in field "'. $entrytemplate. '" "[[Text 01]]" with "[[*Text 01]]"');
-            $steps[] = new Given('I press "Save changes"');
+            $arr = array(
+                array('name', 'type', 'dataform', 'default'),
+                array($viewname, $viewtype, $dataformidn, 1),
+            );
+            $table = new TableNode($arr);
+            $this->the_following_dataform_exist('views', $table);
 
-            $steps[] = new Given('I set "'. $viewname. '" as default view');
+            // Replace the field pattern in entry template with required.
+            $view = $df->view_manager->get_view_by_name($viewname);
+            $view->replace_patterns_in_view(array('[[Field 01]]'), array('[[*Field 01]]'));
 
-            $steps[] = new Given('I follow "Browse"');
+            // Go to the view.
+            $this->i_am_on_view_in_dataform($viewname, $dataformidn);
 
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I press "Save"');
-            $steps[] = new Given('I see "You must supply a value here."');
-            $steps[] = new Given('I set the field "id_field_1_-1" to "The field is required in '. $viewname. '"');
-            $steps[] = new Given('I press "Save"');
-            $steps[] = new Given('I see "The field is required in '. $viewname. '"');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_general::i_click_on', array('id_field_1_-1', 'field'));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('You must supply a value here');
+            $this->execute('behat_general::should_exist', array('Save', 'button'));
+
+            $this->execute('behat_forms::i_set_the_field_to', array('id_field_1_-1', "The field is required in $viewname"));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see("The field is required in $viewname");
         }
-
-        return $steps;
     }
 
     /**
@@ -1150,51 +1128,49 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function scenario_view_image_in_template(TableNode $data) {
-        $steps = array();
 
         if (!$items = $data->getHash()) {
-            return $steps;
+            return;
         }
 
         $dataformname = "View image in template";
 
-        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
+        $this->i_start_afresh_with_dataform($dataformname);
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I navigate to "My private files" node in "My profile"');
-        $steps[] = new Given('I upload "mod/dataform/tests/fixtures/test_image.jpg" file to "Files" filemanager');
-        $steps[] = new Given('I click on "Save changes" "button"');
-        $steps[] = new Given('I am on homepage');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_navigate_to_node_in', array('My private files', 'My profile'));
+        $this->execute('behat_repository_upload::i_upload_file_to_filemanager', array('mod/dataform/tests/fixtures/test_image.jpg', 'Files'));
+        $this->execute('behat_general::i_click_on', array('Save changes', 'button'));
+        $this->execute('behat_general::i_am_on_home_page');
 
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "'. $dataformname. '"');
+        $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
+        $this->execute('behat_general::click_link', array($dataformname));
 
         foreach ($items as $item) {
             $viewtype = $item['viewtype'];
             $viewname = !empty($item['viewname']) ? $item['viewname'] : "view$viewtype";
 
             /* View */
-            $steps[] = new Given('I go to manage dataform "views"');
-            $steps[] = new Given('I set the field "Add a view" to "'. $viewtype. '"');
-            $steps[] = new Given('I expand all fieldsets');
-            $steps[] = new Given('I set the field "Name" to "'. $viewname. '"');
-            $steps[] = new Given('I click on "Image" "button"');
-            $steps[] = new Given('I click on "Browse repositories..." "button"');
-            $steps[] = new Given('I click on "Private files" "link"');
-            $steps[] = new Given('I click on "test_image.jpg" "link"');
-            $steps[] = new Given('I click on "Select this file" "button"');
-            $steps[] = new Given('I click on "Description not necessary" "checkbox"');
-            $steps[] = new Given('I click on "Save image" "button"');
-            $steps[] = new Given('I press "Save changes"');
+            $this->i_go_to_manage_dataform('views');
+            $this->execute('behat_forms::i_set_the_field_to', array('Add a view', $viewtype));
+            $this->execute('behat_forms::i_expand_all_fieldsets', array());
+            $this->execute('behat_forms::i_set_the_field_to', array('Name', $viewname));
+            $this->execute('behat_general::i_click_on', array('Image', 'button'));
+            $this->execute('behat_general::i_click_on', array('Browse repositories...', 'button'));
+            $this->execute('behat_general::i_click_on', array('Private files', 'link'));
+            $this->execute('behat_general::i_click_on', array('test_image.jpg', 'link'));
+            $this->execute('behat_general::i_click_on', array('Select this file', 'button'));
+            $this->execute('behat_general::i_click_on', array('Description not necessary', 'checkbox'));
+            $this->execute('behat_general::i_click_on', array('Save image', 'button'));
+            $this->execute('behat_forms::press_button', array('Save changes'));
 
-            $steps[] = new Given('I set "'. $viewname. '" as default view');
+            $this->i_set_as_default_view($viewname);
 
-            $steps[] = new Given('I follow "Browse"');
+            $this->execute('behat_general::click_link', array('Browse'));
 
-            $steps[] = new Given('"//img[contains(@src, \'pluginfile.php\')]" "xpath_element" should exist');
-            $steps[] = new Given('"//img[contains(@src, \'test_image.jpg\')]" "xpath_element" should exist');
+            $this->execute('behat_general::should_exist', array('//img[contains(@src, \'pluginfile.php\')]', 'xpath_element'));
+            $this->execute('behat_general::should_exist', array('//img[contains(@src, \'test_image.jpg\')]', 'xpath_element'));
         }
-        return $steps;
     }
 
     /**
@@ -1206,10 +1182,9 @@ class behat_mod_dataform extends behat_base {
     protected function scenario_view_submission_buttons(TableNode $data) {
         global $DB;
 
-        $steps = array();
 
         if (!$items = $data->getHash()) {
-            return $steps;
+            return;
         }
 
         $dataformname = 'View submission buttons';
@@ -1225,7 +1200,7 @@ class behat_mod_dataform extends behat_base {
         );
         $allbuttons = base64_encode(serialize($submissionoptions));
 
-        $steps[] = new Given('a fresh site for dataform scenario');
+        $this->start_afresh_steps();
 
         // Dataform.
         $arr = array(
@@ -1234,7 +1209,7 @@ class behat_mod_dataform extends behat_base {
             array('name', $dataformname),
         );
         $table = new TableNode($arr);
-        $steps[] = new Given('the following dataform exists:', $table);
+        $this->the_following_dataform_exists($table);
 
         // Fields.
         $arr = array(
@@ -1242,11 +1217,9 @@ class behat_mod_dataform extends behat_base {
             array('Field 01', 'text', $dataformidn, 1),
         );
         $table = new TableNode($arr);
-        $steps[] = new Given('the following dataform "fields" exist:', $table);
+        $this->the_following_dataform_exist('fields', $table);
 
-        $entryid = 0;
         foreach ($items as $item) {
-            $entryids = array();
 
             $viewtype = $item['viewtype'];
             $viewname1 = !empty($item['viewname1']) ? $item['viewname1'] : "view{$viewtype}1";
@@ -1261,158 +1234,149 @@ class behat_mod_dataform extends behat_base {
                 array($viewname2, $viewtype, $dataformidn, 0, 1, ''),
             );
             $table = new TableNode($arr);
-            $steps[] = new Given('the following dataform "views" exist:', $table);
+            $this->the_following_dataform_exist('views', $table);
 
             // Log in
-            $steps[] = new Given('I log in as "'. $actor. '"');
-            $steps[] = new Given('I follow "Course 1"');
-            $steps[] = new Given('I follow "'. $dataformname. '"');
+            $this->execute('behat_auth::i_log_in_as', array($actor));
+            $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
+            $this->execute('behat_general::click_link', array($dataformname));
+
+            $field01xpath = "//div[contains(concat(' ', normalize-space(@class), ' '), ' Field_01 ')]//input[@type='text']";
 
             // SAVE: The entry should be added.
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 01"');
-            $steps[] = new Given('I press "Save"');
-            $entryids[1] = ++$entryid;
-            $steps[] = new Given('I see "Entry 01"');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 01'));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('Entry 01');
 
             // CANCEL: The entry should not be added.
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 02"');
-            $steps[] = new Given('I press "Cancel"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I do not see "Entry 02"');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 02'));
+            $this->execute('behat_forms::press_button', array('Cancel'));
+            $this->i_see('Entry 01');
+            $this->i_do_not_see('Entry 02');
 
             // SAVE and CONTINUE: The entry should be added and should stay in form.
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 03"');
-            $steps[] = new Given('I press "Save and Continue"');
-            $entryids[2] = ++$entryid;
-            $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('I do not see "Entry 01"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 03"');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 03'));
+            $this->execute('behat_forms::press_button', array('Save and Continue'));
+            $this->i_do_not_see('Add a new entry');
+            $this->i_do_not_see('Entry 01');
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, 'Entry 03'));
 
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 02"');
-            $steps[] = new Given('I press "Save"');
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 02'));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
 
             // SAVE as NEW (existing entry): A new entry should be added.
-            $steps[] = new Given('I follow "id_editentry'. $entryids[2]. '"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 03"');
-            $steps[] = new Given('I press "Save as New"');
-            $entryids[3] = ++$entryid;
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
-            $steps[] = new Given('I see "Entry 03"');
+            $this->execute('behat_general::i_click_on_in_the', array('Edit', 'link', 'Entry 02', 'table_row'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 03'));
+            $this->execute('behat_forms::press_button', array('Save as New'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
+            $this->i_see('Entry 03');
 
             // SAVE as NEW (new entry): The entry should be added.
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 04"');
-            $steps[] = new Given('I press "Save as New"');
-            $entryids[4] = ++$entryid;
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
-            $steps[] = new Given('I see "Entry 03"');
-            $steps[] = new Given('I see "Entry 04"');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 04'));
+            $this->execute('behat_forms::press_button', array('Save as New'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
+            $this->i_see('Entry 03');
+            $this->i_see('Entry 04');
 
             // SAVE and START NEW (new entry): The entry should be added and and new entry form opened.
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 05"');
-            $steps[] = new Given('I press "Save and Start New"');
-            $entryids[5] = ++$entryid;
-            $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value ""');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 05'));
+            $this->execute('behat_forms::press_button', array('Save and Start New'));
+            $this->i_do_not_see('Add a new entry');
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, ''));
 
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 06"');
-            $steps[] = new Given('I press "Save"');
-            $entryids[6] = ++$entryid;
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
-            $steps[] = new Given('I see "Entry 03"');
-            $steps[] = new Given('I see "Entry 04"');
-            $steps[] = new Given('I see "Entry 05"');
-            $steps[] = new Given('I see "Entry 06"');
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 06'));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
+            $this->i_see('Entry 03');
+            $this->i_see('Entry 04');
+            $this->i_see('Entry 05');
+            $this->i_see('Entry 06');
 
             // SAVE and START NEW (existing entry): The entry should be updated and new entry form opened.
-            $steps[] = new Given('I follow "id_editentry'. $entryids[4]. '"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 04"');
+            $this->execute('behat_general::i_click_on_in_the', array('Edit', 'link', 'Entry 04', 'table_row'));
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, 'Entry 04'));
 
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 04 modified"');
-            $steps[] = new Given('I press "Save and Start New"');
-            $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value ""');
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 04 modified'));
+            $this->execute('behat_forms::press_button', array('Save and Start New'));
+            $this->i_do_not_see('Add a new entry');
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, ''));
 
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 07"');
-            $steps[] = new Given('I press "Save"');
-            $entryids[7] = ++$entryid;
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
-            $steps[] = new Given('I see "Entry 03"');
-            $steps[] = new Given('I see "Entry 04 modified"');
-            $steps[] = new Given('I see "Entry 05"');
-            $steps[] = new Given('I see "Entry 06"');
-            $steps[] = new Given('I see "Entry 07"');
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 07'));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
+            $this->i_see('Entry 03');
+            $this->i_see('Entry 04 modified');
+            $this->i_see('Entry 05');
+            $this->i_see('Entry 06');
+            $this->i_see('Entry 07');
 
             // SAVE as NEW and CONTINUE (new entry): The entry should be added and and remain in its form.
-            $steps[] = new Given('I follow "Add a new entry"');
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 08"');
-            $steps[] = new Given('I press "Save as New and Continue"');
-            $entryids[8] = ++$entryid;
-            $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 08"');
+            $this->execute('behat_general::click_link', array('Add a new entry'));
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 08'));
+            $this->execute('behat_forms::press_button', array('Save as New and Continue'));
+            $this->i_do_not_see('Add a new entry');
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, 'Entry 08'));
 
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 08 modified"');
-            $steps[] = new Given('I press "Save"');
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
-            $steps[] = new Given('I see "Entry 03"');
-            $steps[] = new Given('I see "Entry 04 modified"');
-            $steps[] = new Given('I see "Entry 05"');
-            $steps[] = new Given('I see "Entry 06"');
-            $steps[] = new Given('I see "Entry 07"');
-            $steps[] = new Given('I see "Entry 08 modified"');
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 08 modified'));
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
+            $this->i_see('Entry 03');
+            $this->i_see('Entry 04 modified');
+            $this->i_see('Entry 05');
+            $this->i_see('Entry 06');
+            $this->i_see('Entry 07');
+            $this->i_see('Entry 08 modified');
 
             // SAVE as NEW and CONTINUE (existing entry): The entry should be added and remain in its form.
-            $steps[] = new Given('I follow "id_editentry'. $entryids[8]. '"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 08 modified"');
+            $this->execute('behat_general::i_click_on_in_the', array('Edit', 'link', 'Entry 08 modified', 'table_row'));
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, 'Entry 08 modified'));
 
-            $steps[] = new Given('I set the field with xpath "//input[@class=\'Field_01\']" to "Entry 09"');
-            $steps[] = new Given('I press "Save as New and Continue"');
-            $entryids[9] = ++$entryid;
-            $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('the field with xpath "//input[@class=\'Field_01\']" matches value "Entry 09"');
+            $this->execute('behat_forms::i_set_the_field_with_xpath_to', array($field01xpath, 'Entry 09'));
+            $this->execute('behat_forms::press_button', array('Save as New and Continue'));
+            $this->i_do_not_see('Add a new entry');
+            $this->execute('behat_forms::the_field_with_xpath_matches_value', array($field01xpath, 'Entry 09'));
 
-            $steps[] = new Given('I press "Save"');
-            $steps[] = new Given('I see "Add a new entry"');
-            $steps[] = new Given('I see "Entry 01"');
-            $steps[] = new Given('I see "Entry 02"');
-            $steps[] = new Given('I see "Entry 03"');
-            $steps[] = new Given('I see "Entry 04 modified"');
-            $steps[] = new Given('I see "Entry 05"');
-            $steps[] = new Given('I see "Entry 06"');
-            $steps[] = new Given('I see "Entry 07"');
-            $steps[] = new Given('I see "Entry 08 modified"');
-            $steps[] = new Given('I see "Entry 09"');
+            $this->execute('behat_forms::press_button', array('Save'));
+            $this->i_see('Add a new entry');
+            $this->i_see('Entry 01');
+            $this->i_see('Entry 02');
+            $this->i_see('Entry 03');
+            $this->i_see('Entry 04 modified');
+            $this->i_see('Entry 05');
+            $this->i_see('Entry 06');
+            $this->i_see('Entry 07');
+            $this->i_see('Entry 08 modified');
+            $this->i_see('Entry 09');
 
             // No submission buttons.
-            $steps[] = new Given('I follow "'. $viewname2. '"');
-            $steps[] = new Given('I do not see "Add a new entry"');
-            $steps[] = new Given('"id_editentry1" "link" does not exist');
+            $this->i_am_on_view_in_dataform($viewname2, $dataformidn);
+            $this->i_do_not_see('Add a new entry');
+            $this->does_not_exist('id_editentry1', 'link');
 
             // I shouldn't be able to edit via the url.
 
-            $steps[] = new Given('I log out');
-
-            $steps[] = new Given("user data in dataform \"$dataformidn\" is reset");
+            $this->execute('behat_auth::i_log_out', array());
+            $this->user_data_in_dataform_is_reset($dataformidn);
         }
 
-        return $steps;
     }
 
     /**
@@ -1422,126 +1386,38 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function scenario_field_management(TableNode $data) {
-        $steps = array();
 
         if (!$items = $data->getHash()) {
-            return $steps;
+            return;
         }
 
         $dataformname = "Field management";
 
-        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
+        $this->i_start_afresh_with_dataform($dataformname);
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "'. $dataformname. '"');
-        $steps[] = new Given('I go to manage dataform "fields"');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
+        $this->execute('behat_general::click_link', array($dataformname));
+        $this->i_go_to_manage_dataform('fields');
 
         foreach ($items as $item) {
             $fieldtype = $item['fieldtype'];
             $fieldname = !empty($item['fieldname']) ? $item['fieldname'] : "field$fieldtype";
 
             // Add.
-            $steps[] = new Given('I add a dataform field "'. $fieldtype. '" with "'. $fieldname. '"');
-            $steps[] = new Given('I see "'. $fieldname. '"');
+            $this->i_add_a_dataform_field_with($fieldtype, $fieldname);
+            $this->i_see($fieldname);
             // Edit.
-            $steps[] = new Given('I follow "Edit '. $fieldname. '"');
-            $steps[] = new Given('I see "Editing \''. $fieldname. '\'"');
-            $steps[] = new Given('I set the field "Description" to "'. $fieldname. ' modified"');
-            $steps[] = new Given('I press "Save changes"');
-            $steps[] = new Given('I see "'. $fieldname. ' modified"');
+            $this->execute('behat_general::click_link', array("Edit $fieldname"));
+            $this->i_see("Editing '$fieldname'");
+            $this->execute('behat_forms::i_set_the_field_to', array('Description', "$fieldname modified"));
+            $this->execute('behat_forms::press_button', array('Save changes'));
+            $this->i_see("$fieldname modified");
             // Delete.
-            $steps[] = new Given('I follow "Delete '. $fieldname. '"');
-            $steps[] = new Given('I press "Continue"');
-            $steps[] = new Given('I do not see "'. $fieldname. '"');
+            $this->execute('behat_general::click_link', array("Delete $fieldname"));
+            $this->execute('behat_forms::press_button', array('Continue'));
+            $this->i_do_not_see($fieldname);
         }
-
-        return $steps;
-    }
-
-    /**
-     * Returns list of steps for field default content scenario.
-     *
-     * @param TableNode $data Scenario data.
-     * @return array Array of Given objects.
-     */
-    protected function scenario_field_default_content(TableNode $data = null) {
-        $steps = array();
-
-        if ($data) {
-            if (!$items = $data->getHash()) {
-                return $steps;
-            }
-        } else {
-            // Try to get all field types.
-            if ($plugins = core_component::get_plugin_list('dataformfield')) {
-                $items = array();
-                foreach (array_keys($plugins) as $fieldtype) {
-                    $items[] = array(
-                        'fieldtype' => $fieldtype,
-                    );
-                }
-            } else {
-                return $steps;
-            }
-        }
-
-        $dataformname = "Field default content";
-        $viewname = 'View01';
-
-        $steps[] = new Given('a fresh site with dataform "'. $dataformname. '"');
-
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "'. $dataformname. '"');
-
-        // Add a tabular view.
-        $steps[] = new Given('I go to manage dataform "views"');
-        $steps[] = new Given('I add a dataform view "tabular" with "'. $viewname. '"');
-        $steps[] = new Given('I set "'. $viewname. '" as default view');
-
-        $options = array(
-            'dataformname' => $dataformname,
-            'viewname' => $viewname,
-        );
-
-        $testcount = 0;
-        foreach ($items as $item) {
-            $fieldtype = $item['fieldtype'];
-            $stepsclass = "\\dataformfield_$fieldtype\\test\\behat\\defaultcontent";
-
-            if (!class_exists($stepsclass)) {
-                continue;
-            }
-
-            $fieldname = !empty($item['fieldname']) ? $item['fieldname'] : null;
-            $options['fieldname'] = $fieldname;
-            $options['fieldid'] = $testcount + 1;
-
-            if (!$itemsteps = $stepsclass::steps($options)) {
-                continue;
-            }
-
-            $testcount++;
-            $steps = array_merge($steps, $itemsteps);
-
-            // Delete all entries.
-            $steps[] = new Given('I set the field "entryselectallnone" to "checked"');
-            $steps[] = new Given('I follow "id_entry_bulkaction_delete"');
-            $steps[] = new Given('I press "Continue"');
-
-            // Delete all fields.
-            $steps[] = new Given('I go to manage dataform "fields"');
-            $steps[] = new Given('I set the field "fieldselectallnone" to "checked"');
-            $steps[] = new Given('I follow "id_field_bulkaction_delete"');
-            $steps[] = new Given('I press "Continue"');
-        }
-
-        if (!$testcount) {
-            return array();
-        }
-
-        return $steps;
     }
 
     /**
@@ -1556,30 +1432,27 @@ class behat_mod_dataform extends behat_base {
         $typename = get_string('typename', "block_dataformaccess$ruletype");
         $rulename = !empty($data['rulename']) ? $data['rulename'] : "New $typename rule";
 
-        $steps = array();
 
-        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+        $this->i_start_afresh_with_dataform('Test Dataform');
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "Test Dataform"');
-        $steps[] = new Given('I go to manage dataform "access"');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
+        $this->execute('behat_general::click_link', array('Test Dataform'));
+        $this->i_go_to_manage_dataform('access');
 
         // Add a rule.
-        $steps[] = new Given('I follow "id_add_'. $ruletype. '_access_rule"');
-        $steps[] = new Given('I see "'. "New $typename rule". '"');
+        $this->execute('behat_general::click_link', array('id_add_'. $ruletype. '_access_rule'));
+        $this->i_see("New $typename rule");
 
         // Update the rule.
-        $steps[] = new Given('I follow "id_editaccess'. $ruletype. '1"');
-        $steps[] = new Given('I set the field "Name" to "'. "New $typename rule". ' modified"');
-        $steps[] = new Given('I press "Save changes"');
-        $steps[] = new Given('I see "'. "New $typename rule". ' modified"');
+        $this->execute('behat_general::click_link', array('id_editaccess'. $ruletype. '1'));
+        $this->execute('behat_forms::i_set_the_field_to', array('Name', "New $typename rule modified"));
+        $this->execute('behat_forms::press_button', array('Save changes'));
+        $this->i_see("New $typename rule modified");
 
         // Delete the rule.
-        $steps[] = new Given('I follow "id_deleteaccess'. $ruletype. '1"');
-        $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
-
-        return $steps;
+        $this->execute('behat_general::click_link', array('id_deleteaccess'. $ruletype. '1'));
+        $this->i_do_not_see("New $typename rule modified");
     }
 
     /**
@@ -1594,32 +1467,29 @@ class behat_mod_dataform extends behat_base {
         $typename = get_string('typename', "block_dataformnotification$ruletype");
         $rulename = !empty($data['rulename']) ? $data['rulename'] : "New $typename rule";
 
-        $steps = array();
 
-        $steps[] = new Given('a fresh site with dataform "Test Dataform"');
+        $this->i_start_afresh_with_dataform('Test Dataform');
 
-        $steps[] = new Given('I log in as "teacher1"');
-        $steps[] = new Given('I follow "Course 1"');
-        $steps[] = new Given('I follow "Test Dataform"');
-        $steps[] = new Given('I navigate to "Notifications" node in "Dataform activity administration > Manage"');
+        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
+        $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
+        $this->execute('behat_general::click_link', array('Test Dataform'));
+        $this->execute('behat_navigation::i_navigate_to_in_current_page_administration', array('Manage notification rules'));
 
         // Add a rule.
-        $steps[] = new Given('I follow "id_add_'. $ruletype. '_notification_rule"');
-        $steps[] = new Given('I see "'. "New $typename rule". '"');
+        $this->execute('behat_general::click_link', array('id_add_'. $ruletype. '_notification_rule'));
+        $this->i_see("New $typename rule");
 
         // Update the rule.
-        $steps[] = new Given('I follow "id_editnotification'. $ruletype. '1"');
-        $steps[] = new Given('I set the field "Name" to "'. "New $typename rule". ' modified"');
-        $steps[] = new Given('I set the field "Events" to "Entry created"');
-        $steps[] = new Given('I set the field "Admin" to "Check"');
-        $steps[] = new Given('I press "Save changes"');
-        $steps[] = new Given('I see "'. "New $typename rule". ' modified"');
+        $this->execute('behat_general::click_link', array('id_editnotification'. $ruletype. '1'));
+        $this->execute('behat_forms::i_set_the_field_to', array('Name', "New $typename rule modified"));
+        $this->execute('behat_forms::i_set_the_field_to', array('Events', 'Entry created'));
+        $this->execute('behat_forms::i_set_the_field_to', array('Admin', 'Check'));
+        $this->execute('behat_forms::press_button', array('Save changes'));
+        $this->i_see("New $typename rule modified");
 
         // Delete the rule.
-        $steps[] = new Given('I follow "id_deletenotification'. $ruletype. '1"');
-        $steps[] = new Given('I do not see "'. "New $typename rule". ' modified"');
-
-        return $steps;
+        $this->execute('behat_general::click_link', array('id_deletenotification'. $ruletype. '1'));
+        $this->i_do_not_see("New $typename rule modified");
     }
 
     /* HELPERS */
@@ -1631,7 +1501,6 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function dataform_form_fill_steps($data) {
-        $steps = array();
 
         $formfields = array(
             'Name',
@@ -1662,10 +1531,9 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            $steps[] = new Given('I set the field "' . $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1675,7 +1543,6 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function dataform_form_match_steps($data) {
-        $steps = array();
 
         $formfields = array(
             'Name',
@@ -1707,14 +1574,13 @@ class behat_mod_dataform extends behat_base {
             }
 
             if ($name == 'Description') {
-                $steps[] = new Given('the field "'. $name. '" matches value "<p>'. $val. '</p>"');
+                $this->execute('behat_forms::the_field_matches_value', array($name, "<p>$val</p>"));
                 continue;
             }
 
-            $steps[] = new Given('the field "'. $name. '" matches value "'. $val. '"');
+            $this->execute('behat_forms::the_field_matches_value', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1724,7 +1590,6 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function field_form_fill_steps_base($data) {
-        $steps = array();
 
         $formfields = array(
             'Name',
@@ -1742,10 +1607,9 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1755,10 +1619,10 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function field_form_fill_steps_selectmulti($data) {
-        $steps = $this->field_form_fill_steps_base($data);
+        $this->field_form_fill_steps_base($data);
 
         if (!$data = $this->truncate_data_vals($data, 5)) {
-            return $steps;
+            return;
         }
 
         $formfields = array(
@@ -1781,10 +1645,9 @@ class behat_mod_dataform extends behat_base {
                 $val = implode("\n", explode('\n', $val));
             }
 
-            $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1804,10 +1667,10 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function field_form_fill_steps_select($data) {
-        $steps = $this->field_form_fill_steps_base($data);
+        $this->field_form_fill_steps_base($data);
 
         if (!$data = $this->truncate_data_vals($data, 5)) {
-            return $steps;
+            return;
         }
 
         $formfields = array(
@@ -1829,10 +1692,9 @@ class behat_mod_dataform extends behat_base {
                 $val = implode("\n", explode('\n', $val));
             }
 
-            $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1842,10 +1704,10 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function field_form_fill_steps_text($data) {
-        $steps = $this->field_form_fill_steps_base($data);
+        $this->field_form_fill_steps_base($data);
 
         if (!$data = $this->truncate_data_vals($data, 5)) {
-            return $steps;
+            return;
         }
 
         $formfields = array(
@@ -1866,10 +1728,9 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1879,10 +1740,10 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function field_form_fill_steps_number($data) {
-        $steps = $this->field_form_fill_steps_base($data);
+        $this->field_form_fill_steps_base($data);
 
         if (!$data = $this->truncate_data_vals($data, 5)) {
-            return $steps;
+            return;
         }
 
         $formfields = array(
@@ -1899,10 +1760,9 @@ class behat_mod_dataform extends behat_base {
                 continue;
             }
 
-            $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1912,10 +1772,10 @@ class behat_mod_dataform extends behat_base {
      * @return array Array of Given objects.
      */
     protected function field_form_fill_steps_radiobutton($data) {
-        $steps = $this->field_form_fill_steps_base($data);
+        $this->field_form_fill_steps_base($data);
 
         if (!$data = $this->truncate_data_vals($data, 5)) {
-            return $steps;
+            return;
         }
 
         $formfields = array(
@@ -1938,10 +1798,9 @@ class behat_mod_dataform extends behat_base {
                 $val = implode("\n", explode('\n', $val));
             }
 
-            $steps[] = new Given('I set the field "'. $name. '" to "'. $val. '"');
+            $this->execute('behat_forms::i_set_the_field_to', array($name, $val));
         }
 
-        return $steps;
     }
 
     /**
@@ -1965,10 +1824,10 @@ class behat_mod_dataform extends behat_base {
     protected function convert_data_to_table($formfields, $data, $delimiter = "\t") {
         $vals = explode($delimiter, trim($data));
         $names = array_slice($formfields, 0, count($vals));
-        $tabledata = array(
-            $names,
-            $vals,
-        );
+        $tabledata = array();
+        foreach ($names as $key => $name) {
+            $tabledata[] = array($name, $vals[$key]);
+        }
         return new TableNode($tabledata);
     }
 
@@ -2002,6 +1861,22 @@ class behat_mod_dataform extends behat_base {
 
         if (!$id = $DB->get_field('course_modules', 'instance', array('idnumber' => $idnumber))) {
             throw new Exception('The specified dataform with idnumber "' . $idnumber . '" does not exist');
+        }
+
+        return $id;
+    }
+
+    /**
+     * Gets the view id from the dataform id by view name.
+     * @throws Exception
+     * @param string $dataformid.
+     * @return int
+     */
+    protected function get_dataform_view_id($viewname, $dataformid) {
+        global $DB;
+
+        if (!$id = $DB->get_field('dataform_views', 'id', array('name' => $viewname, 'dataid' => $dataformid))) {
+            throw new Exception('The specified dataform view with name "' . $viewname . '" does not exist');
         }
 
         return $id;

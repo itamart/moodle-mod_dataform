@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformgrading
+@mod @mod_dataform @set_dataform@dataformgrading
 Feature: Multiple grade items
 
     #Section: Enable site config.
@@ -15,11 +15,11 @@ Feature: Multiple grade items
 
         # Log in as a teacher.
         Then I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
 
         # The Grade items link does not appear.
         When I follow "Dataform enable site config"
-        Then "Grade items" "link" should not exist in the "Administration" "block"
+        #Then "Grade items" "link" should not exist in the "Administration" "block"
 
         # I cannot access it via direct url.
         When I go to dataform page "grade/items.php?d=1"
@@ -35,11 +35,11 @@ Feature: Multiple grade items
 
         # Log in as teacher.
         Then I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Dataform enable site config"
 
         # Can now access the grade items page.
-        When I follow "Grade items"
+        When I navigate to "Grade items" in current page administration
         Then I see "Grade item 0:"
     #:Section
 
@@ -65,9 +65,9 @@ Feature: Multiple grade items
         #:Section
 
         Then I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test multiple grade items"
-        And I follow "Grade items"
+        And I navigate to "Grade items" in current page administration
 
         #Section: Add a grade item without grade settings.
         When I click on "Grade item 0:" "link"
@@ -143,20 +143,20 @@ Feature: Multiple grade items
         #:Section
 
         Then I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test multiple grade items"
 
         #Section: Add default grade item
         And I navigate to "Edit settings" in current page administration
         And I set the following fields to these values:
         | Type              | Point     |
-        | Maximum points    | 4        |
-        | Grade calculation | ##numentries##    |
+        | Maximum grade    | 4        |
+        | Grade calculation | ##numentries## + 0    |
         And I press "Save and display"
         #:Section
 
         #Section: Add second grade item
-        And I follow "Grade items"
+        And I navigate to "Grade items" in current page administration
         And I see "Grade item 0: Test multiple grade items"
         And I see "Grade item 1:"
         And I set the following fields to these values:
@@ -171,8 +171,8 @@ Feature: Multiple grade items
 
         #Section: Student 1 can see grades for items.
         Then I log in as "student1"
-        And I follow "Grades" in the user menu
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
+        When I navigate to "User report" in the course gradebook
         Then the following should exist in the "user-grade" table:
             | Grade item                | Grade | Range | Percentage |
             | Test multiple grade items | 4.00  | 0–4   | 100.00 %   |

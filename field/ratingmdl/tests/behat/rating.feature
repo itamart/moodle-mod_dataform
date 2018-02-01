@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformfield @dataformfield_ratingmdl @dataformfield_ratingmdl_rating
+@set_dataform @dataformfield @dataformfield_ratingmdl @dataformfield_ratingmdl_rating
 Feature: Rating
 
     @javascript
@@ -11,7 +11,7 @@ Feature: Rating
         #---------------------------
 
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test ratingmdl field"
 
         ## Fields
@@ -20,14 +20,14 @@ Feature: Rating
         And I expand all fieldsets
         And I set the field "Name" to "rating1"
         And I set the field "Type" to "Point"
-        And I set the field "Maximum points" to "100"
+        And I set the field "Maximum grade" to "100"
         And I press "Save changes"
 
         And I set the field "Add a field" to "ratingmdl"
         And I expand all fieldsets
         And I set the field "Name" to "rating2"
         And I set the field "Type" to "Point"
-        And I set the field "Maximum points" to "24"
+        And I set the field "Maximum grade" to "24"
         And I press "Save changes"
 
         ## View
@@ -91,7 +91,7 @@ Feature: Rating
         # Student rating
         #---------------------------
         And I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test ratingmdl field"
 
         Then I set the field "ratingmenu_1_1" to "96"

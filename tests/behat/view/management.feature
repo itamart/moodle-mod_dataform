@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformview @dataformviewmanagement
+@mod @mod_dataform @set_dataform@dataformviewmanagement
 Feature: View management
 
     @javascript

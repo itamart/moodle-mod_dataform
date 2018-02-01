@@ -1,68 +1,69 @@
-@mod @mod_dataform @dataformfield @dataformfield_file @_file_upload
+@set_dataform @dataformfield @dataformfield_file @_file_upload
 Feature: Add dataform entries
     In order to work with a dataform activity
     As a teacher
     I need to add dataform entries to a dataform instance
 
-    Background:
-        Given a fresh site for dataform scenario
-
-        And the following dataform exists:
-            | course                | C1        |
-            | idnumber              | dataform1 |
-            | name                  | Dataform test file field |
-            | intro                 | Dataform test file field |
-
-        And the following dataform "fields" exist:
-            | name          | type      | dataform  | editable |
-            | File01        | file      | dataform1 | 1        |
-
-        And the following dataform "views" exist:
-            | name      | type    | dataform  | default   | visible |
-            | View01    | aligned | dataform1 | 1         | 1       |
-
-        And I log in as "teacher1"
-        And I follow "Course 1"
 
     @javascript
     Scenario: Use required or noedit patterns
-        # No rules no content
-        And view "View01" in dataform "1" has the following entry template:
-            """
-            [[File01]]
-            [[EAC:edit]]||entryedit
-            [[EAC:delete]]
-            """
-        And I follow "Dataform test file field"
+        Given I start afresh with dataform "Test file field"
 
+        ## Field
+        And the following dataform "fields" exist:
+            | name         | type          | dataform  |
+            | File01       | file          | dataform1 |
+
+        ## View
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[ENT:id]]||entryid
+            [[File01]]||entrycontent
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
+        And I am in dataform "Test file field" "Course 1" as "teacher1"
+
+        # No rules no content
         And I follow "Add a new entry"
         And I press "Save"
+        Then "Edit" "link" should exist in the "1" "table_row"
 
         # Required *
-        And view "View01" in dataform "1" has the following entry template:
+        And view "View 01" in dataform "1" has the following entry template:
             """
-            [[*File01]]
+            [[ENT:id]]||entryid
+            [[*File01]]||entrycontent
             [[EAC:edit]]||entryedit
-            [[EAC:delete]]
+            [[EAC:delete]]||entrydelete
             """
-        And I follow "Dataform test file field"
 
-        And I click on "tbody tr:nth-child(1) .entryedit a" "css_element"
+        And I click on "Edit" "link" in the "1" "table_row"
+        Then I see "Maximum size for new files:"
         When I press "Save"
+        Then I do not see "Add a new entry"
+        And "Edit" "link" should not exist in the "1" "table_row"
+
+        And I see "Maximum size for new files:"
         When I upload "mod/dataform/tests/fixtures/test_dataform_entries.csv" file to "File01" filemanager
         And I press "Save"
         Then I see "test_dataform_entries.csv"
 
         # No edit !
-        And view "View01" in dataform "1" has the following entry template:
+        And view "View 01" in dataform "1" has the following entry template:
             """
-            [[!File01]]
+            [[ENT:id]]||entryid
+            [[!File01]]||entrycontent
             [[EAC:edit]]||entryedit
-            [[EAC:delete]]
+            [[EAC:delete]]||entrydelete
             """
-        And I follow "Dataform test file field"
 
-        And I click on "tbody tr:nth-child(1) .entryedit a" "css_element"
+        And I click on "Edit" "link" in the "1" "table_row"
         Then I do not see "Maximum size for new files:"
         And I press "Save"
-    #:Scenario
+        Then "Edit" "link" should exist in the "1" "table_row"

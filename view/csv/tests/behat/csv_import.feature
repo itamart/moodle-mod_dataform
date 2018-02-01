@@ -1,11 +1,11 @@
-@mod @mod_dataform @dataformview @dataformview_csv @_file_upload
+@set_dataform @dataformview @dataformview_csv @_file_upload
 Feature: Import entries
 
     @javascript
     Scenario: Add dataform entries
         Given I start afresh with dataform "Test csv import"
         And I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Test csv import"
 
         # Add a csv view and put author:username edit and delete patterns

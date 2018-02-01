@@ -1,4 +1,4 @@
-@mod @mod_dataform @dataformview @dataformviewrequiredfield
+@mod @mod_dataform @set_dataform@dataformviewrequiredfield
 Feature: View required field
 
     @javascript
