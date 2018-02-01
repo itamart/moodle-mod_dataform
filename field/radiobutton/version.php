@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformfield_radiobutton';
-$plugin->version = 2015111604;
-$plugin->requires = 2015111600;
+$plugin->version = 2017051502;
+$plugin->requires = 2017051500;
