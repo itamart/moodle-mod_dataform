@@ -49,6 +49,10 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
             } else {
                 if ($cleanpattern == "[[$fieldname:options]]") {
                     $replacements[$pattern] = $this->display_options($entry);
+
+                } else if ($cleanpattern == "[[$fieldname:hasselection]]") {
+                    $replacements[$pattern] = $this->display_has_selection($entry);
+
                 } else {
                     $replacements[$pattern] = $this->display_browse($entry);
                 }
@@ -145,6 +149,16 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
     /**
      *
      */
+    public function display_has_selection($entry, $params = null) {
+        $field = $this->_field;
+        $fieldid = $field->id;
+
+        return (int) isset($entry->{"c{$fieldid}_content"});
+    }
+
+    /**
+     *
+     */
     public function display_options($entry) {
         $field = $this->_field;
         $fieldid = $field->id;
@@ -217,6 +231,7 @@ class dataformfield_selectmulti_renderer extends mod_dataform\pluginbase\datafor
         $patterns["[[$fieldname]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:addnew]]"] = array(true, $fieldname);
         $patterns["[[$fieldname:options]]"] = array(false);
+        $patterns["[[$fieldname:hasselection]]"] = array(false);
 
         return $patterns;
     }
