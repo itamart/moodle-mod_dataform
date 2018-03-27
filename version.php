@@ -16,7 +16,7 @@
 
 /**
  * @package mod_dataform
- * @copyright 2014 Itamar Tzadok {@link http://substantialmethods.com}
+ * @copyright 2018 Itamar Tzadok {@link http://substantialmethods.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * The Dataform has been developed as an enhanced counterpart
@@ -26,7 +26,7 @@
  */
 
 $plugin->component = 'mod_dataform';
-$plugin->release  = '2.8.12 (Build: 20180315)';
-$plugin->version = 2014111012;
+$plugin->release  = '2.8.13';
+$plugin->version = 2014111013;
 $plugin->requires = 2014111000;
 $plugin->maturity = MATURITY_STABLE;
