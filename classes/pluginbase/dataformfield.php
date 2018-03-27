@@ -286,7 +286,6 @@ abstract class dataformfield {
      */
     public function is_visible($entry) {
         // Get the view id from the base url.
-        // @TODO should include viewid in the entry data.
         $viewid = null;
         if (!empty($entry->baseurl)) {
             $viewid = $entry->baseurl->get_param('view');
@@ -301,7 +300,12 @@ abstract class dataformfield {
      * @return bool
      */
     public function is_editable($entry) {
-        $params = array('dataformid' => $this->dataid, 'fieldid' => $this->id, 'entry' => $entry);
+        // Get the view id from the base url.
+        $viewid = null;
+        if (!empty($entry->baseurl)) {
+            $viewid = $entry->baseurl->get_param('view');
+        }
+        $params = array('dataformid' => $this->dataid, 'viewid' => $viewid, 'fieldid' => $this->id, 'entry' => $entry);
         return \mod_dataform\access\field_update::validate($params);
     }
 
