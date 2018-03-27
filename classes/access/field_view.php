@@ -124,7 +124,7 @@ class field_view extends base {
      * @return null|array
      */
     public static function get_rules(\mod_dataform_access_manager $man, array $params) {
-        return $man->get_type_rules('field');
+        return $man->get_type_rules('entry');
     }
 
     /**
