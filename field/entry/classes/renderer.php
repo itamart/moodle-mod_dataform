@@ -61,7 +61,7 @@ class dataformfield_entry_renderer extends mod_dataform\pluginbase\dataformfield
         $entryid = $entry->id;
         $fieldname = "entry_{$entryid}_type";
 
-        $selected = $entry->type;
+        $selected = !empty($entry->type) ? $entry->type : null;
 
         // Entry type.
         $menu = array('' => get_string('choosedots'));
