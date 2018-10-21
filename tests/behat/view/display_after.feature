@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformview-displayafter
+@mod @mod_dataform @set_dataform @dataformview-displayafter
 Feature: Display after submission.
 
     Background:

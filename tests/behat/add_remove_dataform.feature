@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformactivity
+@mod @mod_dataform @set_dataform @dataformactivity
 Feature: Add dataform to courses
 
     @javascript

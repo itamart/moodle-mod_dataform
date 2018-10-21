@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformfilter
+@mod @mod_dataform @set_dataform @dataformfilter
 Feature: Filtering
 
     Background:

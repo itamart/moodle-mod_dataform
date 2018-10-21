@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformactivity @dataformaccess
+@mod @mod_dataform @set_dataform @dataformactivity @dataformaccess
 Feature: Dataform access permissions
 
     @javascript

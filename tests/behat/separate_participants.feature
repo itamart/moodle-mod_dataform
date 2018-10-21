@@ -1,35 +1,32 @@
-@mod @mod_dataform @set_dataform@dataformactivity
+@mod @mod_dataform @set_dataform @dataformactivity
 Feature: Dataform activity individualized
 
-    @javascript
+    @javascript @dataformactivity-separate-participants
     Scenario: Students cannot see teacher's entries or other students' entries
         Given I start afresh with dataform "Dataform separate participants test"
+
+        And the following dataform "views" exist:
+            | name     | type      | dataform  | default   |
+            | View 01  | aligned   | dataform1 | 1         |
+
+        And view "View 01" in dataform "1" has the following entry template:
+            """
+            [[EAU:username]]||username
+            [[EAC:edit]]||entryedit
+            [[EAC:delete]]||entrydelete
+            """
+
         And I log in as "teacher1"
         And I am on "Course 1" course homepage
         And I follow "Dataform separate participants test"
 
         # As teacher1 add a dataform and an entry
-        Then I see "This dataform appears to be new or with incomplete setup"
-
         When I navigate to "Edit settings" in current page administration
         And I expand all fieldsets
         And I set the field "Separate participants" to "Yes"
         And I press "Save and display"
-        Then I see "This dataform appears to be new or with incomplete setup"
 
-        When I go to manage dataform "views"
-        And I set the field "Add a view" to "aligned"
-        And I expand all fieldsets
-        And I set the field "Name" to "View 01"
-        And I fill textarea "Entry template" with "[[EAU:username]]\n[[EAC:edit]]\n[[EAC:delete]]"
-        And I press "Save changes"
-        Then I see "View 01"
-
-        When I set "View 01" as default view
-        Then I do not see "Default view is not set."
-
-        When I follow "Browse"
-        And I follow "Add a new entry"
+        When I follow "Add a new entry"
         And I press "Save"
         Then I see "teacher1"
 

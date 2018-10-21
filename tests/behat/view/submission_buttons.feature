@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformviewsubmissionbuttons
+@mod @mod_dataform @set_dataform @dataformviewsubmissionbuttons
 Feature: View submission buttons
 
     @javascript

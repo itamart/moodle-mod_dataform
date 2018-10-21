@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformviewpattern
+@mod @mod_dataform @set_dataform @dataformviewpattern
 Feature: Pattern ##addnewentry##.
 
     @javascript

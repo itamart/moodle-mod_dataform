@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformactivity
+@mod @mod_dataform @set_dataform @dataformactivity
 Feature: Set a certain number of entries as a completion condition for a dataform
     In order to ensure students are participating in the activity.
     As a teacher

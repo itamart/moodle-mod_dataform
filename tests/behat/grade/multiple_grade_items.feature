@@ -1,4 +1,4 @@
-@mod @mod_dataform @set_dataform@dataformgrading
+@mod @mod_dataform @set_dataform @dataformgrading
 Feature: Multiple grade items
 
     #Section: Enable site config.
