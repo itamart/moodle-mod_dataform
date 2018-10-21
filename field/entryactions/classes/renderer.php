@@ -149,7 +149,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $url = !empty($options['baseurl']) ? $options['baseurl'] : $PAGE->url;
         $str = get_string('multiduplicate', 'dataform');
-        $actionlink = new action_menu_link($url, new pix_icon('t/copy', $str), $str, true, array('id' => 'id_entry_bulkaction_duplicate'));
+        $actionlink = new action_menu_link($url, new pix_icon('t/copy', $str), $str, true, array('class' => 'id_entry_bulkaction_duplicate'));
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('entry', 'duplicate', $url->out(false)));
         return $OUTPUT->render($actionlink);
     }
@@ -166,7 +166,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $url = !empty($options['baseurl']) ? $options['baseurl'] : $PAGE->url;
         $str = get_string('multiedit', 'dataform');
-        $actionlink = new action_menu_link($url, new pix_icon('t/edit', $str), $str, true, array('id' => 'id_entry_bulkaction_editentries'));
+        $actionlink = new action_menu_link($url, new pix_icon('t/edit', $str), $str, true, array('class' => 'id_entry_bulkaction_editentries'));
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('entry', 'editentries', $url->out(false)));
         return $OUTPUT->render($actionlink);
     }
@@ -183,7 +183,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
 
         $url = !empty($options['baseurl']) ? $options['baseurl'] : $PAGE->url;
         $str = get_string('multidelete', 'dataform');
-        $actionlink = new action_menu_link($url, new pix_icon('t/delete', $str), $str, true, array('id' => 'id_entry_bulkaction_delete'));
+        $actionlink = new action_menu_link($url, new pix_icon('t/delete', $str), $str, true, array('class' => 'id_entry_bulkaction_delete'));
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('entry', 'delete', $url->out(false)));
         return $OUTPUT->render($actionlink);
     }
@@ -207,7 +207,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             $url->param('format', $format);
         }
         $str = get_string('multiexport', 'dataform');
-        $actionlink = new action_menu_link($url, new pix_icon('t/portfolioadd', $str), $str, true, array('id' => 'id_entry_bulkaction_export'));
+        $actionlink = new action_menu_link($url, new pix_icon('t/portfolioadd', $str), $str, true, array('class' => 'id_entry_bulkaction_export'));
         $PAGE->requires->js_init_call('M.mod_dataform.util.init_bulk_action', array('entry', 'export', $url->out(false)));
         return $OUTPUT->render($actionlink);
     }
@@ -295,7 +295,7 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         }
 
         $str = get_string('edit');
-        $attributes = array('id' => "id_editentry$entry->id");
+        $attributes = array('class' => "id_editentry$entry->id");
         $actionlink = new action_menu_link($url, new pix_icon('t/edit', $str), $str, true, $attributes);
         if (!empty($options['actionmenu'])) {
             return $actionlink;

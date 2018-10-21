@@ -91,11 +91,11 @@ M.mod_dataform.util.init_select_allnone = function(Y, elemname) {
  */
 M.mod_dataform.util.init_bulk_action = function(Y, elemname, action, url, defaultval) {
     Y.use('node', function (Y) {
-        if (!Y.one('#id_' + elemname + '_bulkaction_' + action)) {
+        if (!Y.one('.id_' + elemname + '_bulkaction_' + action)) {
             return;
         }
 
-        Y.one('#id_' + elemname + '_bulkaction_' + action).on('click', function (e) {
+        Y.one('.id_' + elemname + '_bulkaction_' + action).on('click', function (e) {
             e.preventDefault();
 
             var selected = [];
