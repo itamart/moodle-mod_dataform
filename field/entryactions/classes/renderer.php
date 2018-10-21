@@ -69,6 +69,10 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
                 // Edit for each view.
                 list(, , $viewname) = explode(':', trim($pattern, '[]'));
                 $str = $this->display_edit($entry, array('view' => $viewname));
+            } else if (strpos($pattern, "[[$fieldname:add:") === 0 and !$editing) {
+                // Add for each view.
+                list(, , $viewname) = explode(':', trim($pattern, '[]'));
+                $str = $this->display_add(array('view' => $viewname));
             } else {
                 switch ($pattern) {
                     // Reference.
@@ -135,6 +139,43 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
             }
         }
         return $replacements;
+    }
+
+    /**
+     *
+     */
+    protected function display_add(array $options = null) {
+        global $PAGE, $OUTPUT;
+
+        if (!$showentryactions = empty($options['entryactions'])) {
+            return '';
+        }
+
+        $field = $this->_field;
+
+        $url = !empty($options['baseurl']) ? $options['baseurl'] : $PAGE->url;
+
+        if (!empty($options['view'])) {
+            // Designated view from pattern.
+            $views = $this->get_views_menu();
+            if ($viewid = array_search($options['view'], $views)) {
+                $viewname = $options['view'];
+                $url->param('view', $viewid);
+                $url->param('editentries', -1);
+            } else {
+                // View does not exist or cannot be accessed.
+                return '';
+            }
+        }
+
+        $accessparams = array('dataformid' => $field->dataid, 'viewid' => $viewid);
+        if (!\mod_dataform\access\entry_add::validate($accessparams)) {
+            return '';
+        }
+
+        $str = get_string('entryaddnew', 'dataform');
+        $actionlink = new action_menu_link($url, new pix_icon('t/add', $str), $str, true, array('class' => 'id_entry_add_new_entry'));
+        return $OUTPUT->render($actionlink);
     }
 
     /**
@@ -498,6 +539,13 @@ class dataformfield_entryactions_renderer extends mod_dataform\pluginbase\datafo
         $patterns["[[$fieldname:bulkedit]]"] = array(true, $cat);
         $patterns["[[$fieldname:bulkdelete]]"] = array(true, $cat);
         $patterns["[[$fieldname:bulkexport]]"] = array(true, $cat);
+
+        // Hidden patterns for view designated add.
+        if ($views = $this->get_views_menu()) {
+            foreach ($views as $viewname) {
+                $patterns["[[$fieldname:add:$viewname]]"] = array(false);
+            }
+        }
 
         return $patterns;
     }
