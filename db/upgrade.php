@@ -68,7 +68,7 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2014051301($dbman, $oldversion);
     xmldb_dataform_upgrade_2014111000($dbman, $oldversion);
     xmldb_dataform_upgrade_2015051100($dbman, $oldversion);
-    xmldb_dataform_upgrade_2015061800_01($dbman, $oldversion);
+    xmldb_dataform_upgrade_2017051504($dbman, $oldversion);
 
     return true;
 }
@@ -1179,8 +1179,7 @@ function xmldb_dataform_upgrade_2014111000($dbman, $oldversion) {
 function xmldb_dataform_upgrade_2015051100($dbman, $oldversion) {
     global $CFG, $DB;
 
-    list(, , , $newversion, $t) = array_pad(explode('_', __FUNCTION__), 5, '');
-    $newversion = $t ? (double) ("$newversion.$t") : $newversion;
+    list(, , , $newversion) = explode('_', __FUNCTION__);
     if ($oldversion < $newversion) {
         // Change gradecalc column to gradeitems dataform.
         $table = new xmldb_table('dataform');
@@ -1215,11 +1214,10 @@ function xmldb_dataform_upgrade_2015051100($dbman, $oldversion) {
     return true;
 }
 
-function xmldb_dataform_upgrade_2015061800_01($dbman, $oldversion) {
+function xmldb_dataform_upgrade_2017051504($dbman, $oldversion) {
     global $CFG, $DB;
 
-    list(, , , $newversion, $t) = array_pad(explode('_', __FUNCTION__), 5, '');
-    $newversion = $t ? (double) ("$newversion.$t") : $newversion;
+    list(, , , $newversion) = explode('_', __FUNCTION__);
     if ($oldversion < $newversion) {
         // Add field entrytypes to dataform.
         $table = new xmldb_table('dataform');
