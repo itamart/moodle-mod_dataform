@@ -60,7 +60,7 @@ class mod_dataform_grade_items_form extends moodleform {
         $mform = $this->_form;
         $dataformid = $this->_customdata['dataformid'];
 
-        $name = $type = $scale = $point = $cat = $guide = $calc = '';
+        $name = $type = $scale = $point = $cat = $guide = $calc = $locked = '';
         if (!empty($gradeitem)) {
             $name = $gradeitem->itemname;
             $type = ($gradeitem->gradetype == GRADE_TYPE_VALUE ? 'point' : 'scale');
@@ -69,6 +69,7 @@ class mod_dataform_grade_items_form extends moodleform {
             $cat = $gradeitem->categoryid;
             $guide = $gradeitem->gradeguide;
             $calc = $gradeitem->gradecalc;
+            $locked = $gradeitem->locked;
         }
 
         // Header.
@@ -114,6 +115,13 @@ class mod_dataform_grade_items_form extends moodleform {
         $grademan->get_form_definition_grading_calc($mform, $gcalcelement, $gguideelement);
         $mform->setDefault($gcalcelement, $calc);
         $mform->disabledIf($gcalcelement, "gradeitem[$i][modgrade_type]", 'eq', 'none');
+
+        // Locking.
+        $cb = &$mform->addElement('advcheckbox', "gradeitem[$i][locked]", get_string('locked', 'grades'));
+        $mform->addHelpButton("gradeitem[$i][locked]", 'locked', 'grades');
+        if ($locked) {
+            $cb->setChecked(true);
+        }
 
         // Must have name.
         $mform->disabledIf("gradeitem[$i]", "gradeitem[$i][itemname]", 'eq', '');

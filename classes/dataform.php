@@ -778,14 +778,11 @@ class mod_dataform_dataform {
         if (!$data->grade) {
             $grademan->delete_grade_items();
         } else {
-            $gradedata = array('grade' => $data->grade);
-            // Update name if there is only one grade item.
-            if (!$gradeitems = $grademan->grade_items or count($gradeitems) < 2) {
-                $gradedata['name'] = $this->name;
+            // Add the locking setting.
+            if (property_exists($params, 'locked')) {
+                $data->locked = !empty($params->locked);
             }
-
-            $itemparams = $grademan->get_grade_item_params_from_data($gradedata);
-
+            $itemparams = $grademan->get_grade_item_params_from_data($data);
             $this->grade_manager->update_grade_item(0, $itemparams);
         }
 

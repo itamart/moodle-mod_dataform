@@ -259,6 +259,10 @@ class mod_dataform_mod_form extends moodleform_mod {
             // Grading formula.
             $grademan->get_form_definition_grading_calc($mform, 'gradecalc', $gradeguide);
             $mform->disabledIf('gradecalc', 'grade[modgrade_type]', 'eq', 'none');
+
+            // Locking.
+            $mform->addElement('advcheckbox', 'locked', get_string('locked', 'grades'));
+            $mform->addHelpButton('locked', 'locked', 'grades');
         }
     }
 
@@ -326,13 +330,16 @@ class mod_dataform_mod_form extends moodleform_mod {
         // Set up the grade calc and grade guide.
         if ($this->_instance) {
             $df = \mod_dataform_dataform::instance($this->_instance);
-            if ($gradeitems = $df->grade_items) {
-                if (!empty($gradeitems[0]['ca'])) {
-                    $data['gradecalc'] = $gradeitems[0]['ca'];
+            if ($gradeitems = $df->grade_manager->grade_items) {
+                if (!empty($gradeitems[0]->gradecalc)) {
+                    $data['gradecalc'] = $gradeitems[0]->gradecalc;
                 }
-                if (!empty($gradeitems[0]['ru'])) {
-                    $data['gradeguide'] = $gradeitems[0]['ru'];
+                if (!empty($gradeitems[0]->gradeguide)) {
+                    $data['gradeguide'] = $gradeitems[0]->gradeguide;
                 }
+
+                // Set the locked option.
+                $data['locked'] = !empty($gradeitems[0]->locked);
             }
         }
     }
