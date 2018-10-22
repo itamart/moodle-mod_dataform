@@ -227,8 +227,12 @@ class dataformfield_entrystate_entrystate extends mod_dataform\pluginbase\datafo
         }
 
         // Add role users if needed.
-        if ($roleids and $roleusers = get_role_users($roleids, $this->df->context)) {
-            $recipients = $recipients + $roleusers;
+        if ($roleids) {
+            foreach ($roleids as $roleid) {
+                if ($roleusers = get_role_users($roleid, $this->df->context)) {
+                    $recipients = $recipients + $roleusers;
+                }
+            }
         }
 
         // Send.
