@@ -1194,7 +1194,7 @@ class mod_dataform_dataform {
                 $params = array_merge($params, $uparams);
                 $entries = $DB->get_records_select_menu(
                     'dataform_entries',
-                    " userid $inuid ",
+                    " dataid = ? AND userid $inuid ",
                     $params,
                     'userid',
                     'id,userid'
