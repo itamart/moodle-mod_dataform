@@ -666,9 +666,6 @@ class mod_dataform_entry_manager {
                 $event->add_record_snapshot('dataform_entries', $entry);
                 $event->trigger();
 
-                // Update calculated grades if applicable.
-                $df->grade_manager->update_calculated_grades($entry);
-
                 $processed[$entry->id] = $entry;
             }
         }
@@ -727,9 +724,6 @@ class mod_dataform_entry_manager {
             $event = \mod_dataform\event\entry_created::create($eventparams);
             $event->add_record_snapshot('dataform_entries', $entry);
             $event->trigger();
-
-            // Update calculated grades if applicable.
-            $df->grade_manager->update_calculated_grades($entry);
         }
         return $processed;
     }
@@ -779,9 +773,6 @@ class mod_dataform_entry_manager {
             $event = \mod_dataform\event\entry_deleted::create($eventparams);
             $event->add_record_snapshot('dataform_entries', $entry);
             $event->trigger();
-
-            // Update calculated grades if applicable.
-            $df->grade_manager->update_calculated_grades($entry);
         }
 
         return $processed;
