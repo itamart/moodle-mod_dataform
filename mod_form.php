@@ -263,6 +263,9 @@ class mod_dataform_mod_form extends moodleform_mod {
             // Locking.
             $mform->addElement('advcheckbox', 'locked', get_string('locked', 'grades'));
             $mform->addHelpButton('locked', 'locked', 'grades');
+
+            $mform->addElement('hidden', 'gradeval');
+            $mform->setType('gradeval', PARAM_RAW);
         }
     }
 
@@ -329,8 +332,11 @@ class mod_dataform_mod_form extends moodleform_mod {
 
         // Set up the grade calc and grade guide.
         if ($this->_instance) {
-            $df = \mod_dataform_dataform::instance($this->_instance);
-            if ($gradeitems = $df->grade_manager->grade_items) {
+            $grademan = \mod_dataform_grade_manager::instance($this->_instance);
+            if ($gradeitems = $grademan->grade_items) {
+                if ($gradeitems[0]->has_grades()) {
+                    $data['gradeval'] = $data['grade'];
+                }
                 if (!empty($gradeitems[0]->gradecalc)) {
                     $data['gradecalc'] = $gradeitems[0]->gradecalc;
                 }
@@ -357,8 +363,13 @@ class mod_dataform_mod_form extends moodleform_mod {
      */
     public function get_data() {
         $data = parent::get_data();
+
         if (!$data) {
             return false;
+        }
+
+        if (!$data->grade and $data->gradeval) {
+            $data->grade = $data->gradeval;
         }
 
         if (empty($data->timeavailable)) {
