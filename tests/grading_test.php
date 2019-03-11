@@ -307,29 +307,80 @@ class mod_dataform_grading_testcase extends advanced_testcase {
         // Fetch the grade item.
         $gitem = $this->fetch_grade_item($df->id, 0);
 
+        // Instantiate the grading task to simulate scheduled grading.
+        $gradingtask = new \mod_dataform\task\grade_update();
+
         // Student 1 grade.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(null, $grade->finalgrade);
 
         // Add 5 entries.
         $this->setUser($this->student1);
-        $eids = range(-1, -5, -1);
+
         $data = (object) array('submitbutton_save' => 'Save');
-        list(, $eids) = $entryman->process_entries('update', $eids, $data, true);
+        list(, $eids) = $entryman->process_entries('update', array(-1,-2,-3,-4,-5), $data, true);
+
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
 
         // Grade should be 5.
         $grade = $gitem->get_grade($this->student1->id, false);
-        $this->assertEquals(5, (int) $grade->finalgrade);
-
+        $this->assertEquals(5, $grade->finalgrade);
         // Delete 1 entry.
         $entrytodelete = reset($eids);
         list(, $eids) = $entryman->process_entries('delete', $entrytodelete, null, true);
+
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
 
         // Grade should be 4.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(4, $grade->finalgrade);
 
         $this->setAdminUser();
+    }
+
+    /**
+     * Set up function. In this instance we are setting up dataform
+     * entries to be used in the unit tests.
+     */
+    public function test_calculated_grading_error() {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $this->setAdminUser();
+
+        // Course.
+        $courseid = $this->course->id;
+
+        // Dataform.
+        $params = array(
+            'name' => 'Calculated Grade Dataform',
+            'course' => $courseid,
+            'grade' => 100,
+            'gradeitems' => serialize(array(0 => array('ca' => '1/0'))),
+        );
+        $dataform = $this->getDataGenerator()->create_module('dataform', $params);
+        $df = mod_dataform_dataform::instance($dataform->id);
+
+        // Fetch the grade item.
+        $gitem = $this->fetch_grade_item($df->id, 0);
+
+        // Instantiate the grading task to simulate scheduled grading.
+        $gradingtask = new \mod_dataform\task\grade_update();
+
+        // Student 1 grade.
+        $grade = $gitem->get_grade($this->student1->id, false);
+        $this->assertEquals(null, $grade->finalgrade);
+
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
+
+        // Grade should be null.
+        $grade = $gitem->get_grade($this->student1->id, false);
+        $this->assertEquals(null, $grade->finalgrade);
+
     }
 
     /**

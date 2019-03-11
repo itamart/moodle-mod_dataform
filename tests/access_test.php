@@ -73,40 +73,6 @@ class mod_dataform_access_testcase extends advanced_testcase {
     }
 
     /**
-     * Sets up a dataform activity in a course.
-     *
-     * @return mod_dataform_dataform
-     */
-    protected function get_a_dataform($dataformid = null) {
-        $this->setAdminUser();
-
-        // The generator used to create a data module.
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
-
-        if (!$dataformid) {
-            // Create a dataform instance.
-            $data = $generator->create_instance(array('course' => $this->course));
-            $dataformid = $data->id;
-        }
-        return mod_dataform_dataform::instance($dataformid);
-    }
-
-    /**
-     * Sets the user.
-     *
-     * @return void
-     */
-    protected function set_user($username) {
-        if ($username == 'admin') {
-            $this->setAdminUser();
-        } else if ($username == 'guest') {
-            $this->setGuestUser();
-        } else {
-            $this->setUser($this->$username);
-        }
-    }
-
-    /**
      * Test view events for standard types.
      */
     public function test_access() {
@@ -172,4 +138,138 @@ class mod_dataform_access_testcase extends advanced_testcase {
         load_capability_def('mod_dataform');
         load_capability_def('mod_dataform');
     }
+
+    /**
+     * Test view events for standard types.
+     */
+    public function test_view_access() {
+        global $DB;
+
+        $df = $this->get_a_dataform();
+        $view = $df->view_manager->add_view('aligned');
+
+        $params = array('dataformid' => $df->id, 'viewid' => $view->id);
+        $roles = $DB->get_records_menu('role', array(), '', 'shortname,id');
+        $teacherrid = $roles['editingteacher'];
+        $assistantrid = $roles['teacher'];
+        $studentrid = $roles['student'];
+
+        // All can access.
+        $case = array(
+            'name' => 'All access',
+            'teacher' => true,
+            'assistant' => true,
+            'student' => true
+        );
+        $this->validate_case($case, $params);
+
+        // Deny student in the module context.
+        $this->set_permission($df->context, $studentrid, 'mod/dataform:viewaccess', 'Prevent');
+        $case = array(
+            'name' => 'Student cannot access',
+            'teacher' => true,
+            'assistant' => true,
+            'student' => false
+        );
+        $this->validate_case($case, $params);
+        $this->unset_permission($df->context, $studentrid, 'mod/dataform:viewaccess');
+
+        // Deny assistant in the module context.
+        $this->set_permission($df->context, $assistantrid, 'mod/dataform:viewaccess', 'Prevent');
+        $case = array(
+            'name' => 'Assistant cannot access',
+            'teacher' => true,
+            'assistant' => false,
+            'student' => true
+        );
+        $this->validate_case($case, $params);
+        $this->unset_permission($df->context, $assistantrid, 'mod/dataform:viewaccess');
+
+        // Prevent teacher in the module context but can still access.
+        $this->set_permission($df->context, $teacherrid, 'mod/dataform:viewaccess', 'Prevent');
+        $case = array(
+            'name' => 'Teacher prevented but can access',
+            'teacher' => true,
+        );
+        $this->validate_case($case, $params);
+        $this->unset_permission($df->context, $teacherrid, 'mod/dataform:viewaccess');
+    }
+
+    /**
+     *
+     */
+    protected function validate_case($case, $params) {
+        $case = (object) $case;
+        $name = $case->name;
+
+        foreach (array('teacher', 'assistant', 'student') as $user) {
+            if (!isset($case->$user)) {
+                continue;
+            }
+
+            $canaccess = $case->$user;
+            $thiscase = "$name - $user";
+            $this->setUser($this->$user);
+            $hasaccess = \mod_dataform\access\view_access::validate($params);
+            $result = ($hasaccess == $canaccess ? $thiscase : '');
+            $this->assertEquals($thiscase, $result);
+        }
+    }
+
+    /**
+     * Sets up a dataform activity in a course.
+     *
+     * @return mod_dataform_dataform
+     */
+    protected function get_a_dataform($dataformid = null) {
+        $this->setAdminUser();
+
+        // The generator used to create a data module.
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_dataform');
+
+        if (!$dataformid) {
+            // Create a dataform instance.
+            $data = $generator->create_instance(array('course' => $this->course));
+            $dataformid = $data->id;
+        }
+        return mod_dataform_dataform::instance($dataformid);
+    }
+
+    /**
+     * Sets the user.
+     *
+     * @return void
+     */
+    protected function set_user($username) {
+        if ($username == 'admin') {
+            $this->setAdminUser();
+        } else if ($username == 'guest') {
+            $this->setGuestUser();
+        } else {
+            $this->setUser($this->$username);
+        }
+    }
+
+    /**
+     *
+     */
+    protected function set_permission($context, $roleid, $capability, $perm) {
+        // Get permission constant.
+        $permission = constant('CAP_'. strtoupper($perm));
+        // Assign the capability.
+        assign_capability($capability, $permission, $roleid, $context->id);
+        // Mark context dirty.
+        $context->mark_dirty();
+    }
+
+    /**
+     *
+     */
+    protected function unset_permission($context, $roleid, $capability) {
+        // Unassign the capability.
+        unassign_capability($capability, $roleid, $context->id);
+        // Mark context dirty.
+        $context->mark_dirty();
+    }
+
 }

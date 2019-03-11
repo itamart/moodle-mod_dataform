@@ -115,6 +115,10 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         );
         $gitem = grade_item::fetch($params);
 
+        // Instantiate the grading task to simulate scheduled grading.
+        $gradingtask = new \mod_dataform\task\grade_update;
+        $gradingtask->set_custom_data(['dataformid' => $df->id, 'userid' => 0]);
+
         // No grade yet for Student 1.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(null, $grade->finalgrade);
@@ -129,6 +133,9 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryid3 = $eids[2];
         $entryid4 = $eids[3];
 
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
+
         // Grade 0 for Student 1.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(0, $grade->finalgrade);
@@ -141,6 +148,9 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         );
         $entryman->set_content(array('filter' => $view->filter));
         $entryman->process_entries('update', array($entryid1), (object) $data, true);
+
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
 
         // Grade for Student 1 is 1.
         $grade = $gitem->get_grade($this->student1->id, false);
@@ -155,6 +165,9 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryman->set_content(array('filter' => $view->filter));
         $entryman->process_entries('update', array($entryid2, $entryid3), (object) $data, true);
 
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
+
         // Grade for Student 1 is 3.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(3, $grade->finalgrade);
@@ -167,6 +180,9 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $entryman->set_content(array('filter' => $view->filter));
         $entryman->process_entries('update', array($entryid1), (object) $data, true);
 
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
+
         // Grade for Student 1 is 2.
         $grade = $gitem->get_grade($this->student1->id, false);
         $this->assertEquals(2, $grade->finalgrade);
@@ -175,9 +191,12 @@ class dataformfield_entrystate_grading_testcase extends advanced_testcase {
         $gradeitems = serialize(array(0 => array('ca' => 'SUM(##:entrystate##)*2')));
         $df->update((object) array('gradeitems' => $gradeitems));
 
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
+
         // Grade for Student 1 is 4.
         $grade = $gitem->get_grade($this->student1->id, false);
-        $this->assertEquals(2, $grade->finalgrade);
+        $this->assertEquals(4, $grade->finalgrade);
 
         // Grade for Student 2 is 0.
         $grade = $gitem->get_grade($this->student2->id, false);

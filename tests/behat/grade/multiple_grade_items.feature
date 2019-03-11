@@ -1,7 +1,6 @@
-@mod @mod_dataform @set_dataform @dataformgrading
+@mod @mod_dataform @set_dataform @dataformgrading @dataformgrading-multiplegradeitems
 Feature: Multiple grade items
 
-    #Section: Enable site config.
     @javascript @dataformgrading-enablesiteconfig
     Scenario: Enable site config.
         Given a fresh site for dataform scenario
@@ -41,51 +40,46 @@ Feature: Multiple grade items
         # Can now access the grade items page.
         When I navigate to "Grade items" in current page administration
         Then I see "Grade item 0:"
-    #:Section
+    #:Scenario
 
-    #Section: Add a grade item without grade settings.
     @javascript @dataformgrading-multigradeitems
     Scenario: Add a grade item without grade settings.
         Given a fresh site for dataform scenario
         Given the following config values are set as admin:
           | dataform_multigradeitems | 1 |
 
-        #Section: Add activity
+        # Add activity
         And the following dataform exists:
             | course                | C1        |
             | idnumber              | dataform1 |
             | name                  | Test multiple grade items |
             | intro                 | Test multiple grade items |
-        #:Section
 
-        #Section: Add view
+        # Add view
         And the following dataform "views" exist:
             | name     | type      | dataform  | default   |
             | View 01  | aligned   | dataform1 | 1         |
-        #:Section
 
         Then I log in as "teacher1"
         And I am on "Course 1" course homepage
         And I follow "Test multiple grade items"
         And I navigate to "Grade items" in current page administration
 
-        #Section: Add a grade item without grade settings.
+        # Add a grade item without grade settings.
         When I click on "Grade item 0:" "link"
         And I press "Save changes"
         Then I do not see "Grade item 0: Test multiple grade items"
         And I do not see "Grade item 1:"
-        #:Section
 
-        #Section: Add first grade item
+        # Add first grade item
         When I click on "Grade item 0:" "link"
         And I set the following fields to these values:
         | gradeitem[0][modgrade_type]   | Point                 |
         | gradeitem[0][modgrade_point]  | 90        |
         And I press "Save changes"
         Then I see "Grade item 0: Test multiple grade items"
-        #:Section
 
-        #Section: Add second grade item without grade settings.
+        # Add second grade item without grade settings.
         When I click on "Grade item 1:" "link"
         And I set the following fields to these values:
         | gradeitem[1][itemname]        | Test multiple grade items     |
@@ -94,9 +88,8 @@ Feature: Multiple grade items
         And I do not see "Grade item 1: Test multiple grade items"
         And I do not see "Grade item 1: Test multiple grade items_1"
         And I do not see "Grade item 2:"
-        #:Section
 
-        #Section: Add second grade item with the same name as the first.
+        # Add second grade item with the same name as the first.
         When I click on "Grade item 1:" "link"
         And I set the following fields to these values:
         | gradeitem[1][itemname]        | Test multiple grade items    |
@@ -105,32 +98,27 @@ Feature: Multiple grade items
         Then I see "Grade item 0: Test multiple grade items"
         And I see "Grade item 1: Test multiple grade items_1"
         And I see "Grade item 2:"
-        #:Section
+    #:Scenario
 
-    #:Section
-
-    #Section: Add two grade items.
     @javascript @dataformgrading-addtwogradeitems
     Scenario: Add two grade items.
         Given a fresh site for dataform scenario
         Given the following config values are set as admin:
           | dataform_multigradeitems | 1 |
 
-        #Section: Add activity
+        # Add activity
         And the following dataform exists:
             | course                | C1        |
             | idnumber              | dataform1 |
             | name                  | Test multiple grade items |
             | intro                 | Test multiple grade items |
-        #:Section
 
-        #Section: Add view
+        # Add view
         And the following dataform "views" exist:
             | name     | type      | dataform  | default   |
             | View 01  | aligned   | dataform1 | 1         |
-        #:Section
 
-        #Section: Add entries
+        # Add entries
         And the following dataform "entries" exist:
             | dataform  | user          | group | timecreated   | timemodified  |
             | dataform1 | student1      |       |               |               |
@@ -140,22 +128,20 @@ Feature: Multiple grade items
             | dataform1 | student2      |       |               |               |
             | dataform1 | student2      |       |               |               |
             | dataform1 | student3      |       |               |               |
-        #:Section
 
         Then I log in as "teacher1"
         And I am on "Course 1" course homepage
         And I follow "Test multiple grade items"
 
-        #Section: Add default grade item
+        # Add default grade item
         And I navigate to "Edit settings" in current page administration
         And I set the following fields to these values:
         | Type              | Point     |
         | Maximum grade    | 4        |
         | Grade calculation | ##numentries## + 0    |
         And I press "Save and display"
-        #:Section
 
-        #Section: Add second grade item
+        # Add second grade item
         And I navigate to "Grade items" in current page administration
         And I see "Grade item 0: Test multiple grade items"
         And I see "Grade item 1:"
@@ -165,11 +151,11 @@ Feature: Multiple grade items
         | gradeitem[1][modgrade_point]  | 32        |
         | gradeitem[1][gradecalc]       | ##numentries## * 2   |
         And I press "Save changes"
-        #:Section
 
         And I log out
+        And the dataform grades are updated
 
-        #Section: Student 1 can see grades for items.
+        # Student 1 can see grades for items.
         Then I log in as "student1"
         And I am on "Course 1" course homepage
         When I navigate to "User report" in the course gradebook
@@ -179,6 +165,5 @@ Feature: Multiple grade items
             | Second grade item         | 8.00  | 0–32  | 25.00 %   |
             | Course total              | 12.00 | 0–36  | 33.33 %   |
         And I log out
-        #:Section
-    #:Section
+    #:Scenario
 

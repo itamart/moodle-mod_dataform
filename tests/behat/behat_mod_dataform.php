@@ -77,6 +77,15 @@ class behat_mod_dataform extends behat_base {
     );
 
     /**
+     * Run the moodle cron.
+     *
+     * @Given /^the Moodle cron is executed$/
+     */
+    public function the_moodle_cron_is_executed() {
+        $this->getSession()->visit($this->locate_path("/admin/cron.php"));
+    }
+
+    /**
      * Runs the specified scenario if exists.
      *
      * @Given /^I run dataform scenario "(?P<scenario_name_string>(?:[^"]|\\")*)"$/
@@ -396,6 +405,22 @@ class behat_mod_dataform extends behat_base {
         $node = get_string("dataform:manage$tabname", 'dataform');
         $path = "Dataform activity administration";
         $this->execute('behat_navigation::i_navigate_to_node_in', array($node, $path));
+    }
+
+    /* ACTIVITY GRADING */
+
+    /**
+     * Executes the dataform grading task.
+     *
+     * @Given /^the dataform grades are updated$/
+     */
+    public function the_dataform_grades_are_updated() {
+        // Reset dataform local cache.
+        \mod_dataform_instance_store::unregister();
+        // Instantiate the grading task to simulate scheduled grading.
+        $gradingtask = new \mod_dataform\task\grade_update;
+        // Simulate execution of the scheduled grading task.
+        $gradingtask->execute();
     }
 
     /* FIELD */
@@ -1418,41 +1443,6 @@ class behat_mod_dataform extends behat_base {
             $this->execute('behat_forms::press_button', array('Continue'));
             $this->i_do_not_see($fieldname);
         }
-    }
-
-    /**
-     * Returns list of steps for manage access rule scenario.
-     *
-     * @param TableNode $data Scenario data.
-     * @return array Array of Given objects.
-     */
-    protected function scenario_access_rule_management(TableNode $data) {
-        $data = $data->getRowsHash();
-        $ruletype = $data['ruletype'];
-        $typename = get_string('typename', "block_dataformaccess$ruletype");
-        $rulename = !empty($data['rulename']) ? $data['rulename'] : "New $typename rule";
-
-
-        $this->i_start_afresh_with_dataform('Test Dataform');
-
-        $this->execute('behat_auth::i_log_in_as', array('teacher1'));
-        $this->execute('behat_navigation::i_am_on_course_homepage', array('Course 1'));
-        $this->execute('behat_general::click_link', array('Test Dataform'));
-        $this->i_go_to_manage_dataform('access');
-
-        // Add a rule.
-        $this->execute('behat_general::click_link', array('id_add_'. $ruletype. '_access_rule'));
-        $this->i_see("New $typename rule");
-
-        // Update the rule.
-        $this->execute('behat_general::click_link', array('id_editaccess'. $ruletype. '1'));
-        $this->execute('behat_forms::i_set_the_field_to', array('Name', "New $typename rule modified"));
-        $this->execute('behat_forms::press_button', array('Save changes'));
-        $this->i_see("New $typename rule modified");
-
-        // Delete the rule.
-        $this->execute('behat_general::click_link', array('id_deleteaccess'. $ruletype. '1'));
-        $this->i_do_not_see("New $typename rule modified");
     }
 
     /**
