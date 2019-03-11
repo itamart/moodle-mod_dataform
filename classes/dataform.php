@@ -783,7 +783,7 @@ class mod_dataform_dataform {
                 $data->locked = !empty($params->locked);
             }
             $itemparams = $grademan->get_grade_item_params_from_data($data);
-            $this->grade_manager->update_grade_item(0, $itemparams);
+            $grademan->update_grade_item(0, $itemparams);
         }
 
         // Trigger event.
