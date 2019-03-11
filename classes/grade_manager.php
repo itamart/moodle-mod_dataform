@@ -20,6 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once("$CFG->libdir/gradelib.php");
+
 /**
  * Grade manager class.
  */
@@ -127,8 +129,7 @@ class mod_dataform_grade_manager {
     public function get_grade_items() {
         global $CFG;
 
-        if ($this->_gradeitems == null) {
-            require_once("$CFG->libdir/gradelib.php");
+        if ($this->_gradeitems === null) {
 
             // Get the items.
             $params = array(
@@ -205,7 +206,6 @@ class mod_dataform_grade_manager {
      * @return int GRADE_UPDATE_OK, GRADE_UPDATE_FAILED, GRADE_UPDATE_MULTIPLE or GRADE_UPDATE_ITEM_LOCKED.
      */
     public function update_grade_item($itemnumber, array $options = null) {
-
         $dataformid = $this->_dataformid;
         $courseid = 0;
 
@@ -217,48 +217,93 @@ class mod_dataform_grade_manager {
             $courseid = $this->courseid;
         }
 
-        $params = array();
-        if ($reset = !empty($options['reset'])) {
-            $params['reset'] = true;
-        }
+        $options['courseid'] = $courseid;
+        $options['iteminstance'] = $dataformid;
+
 
         $gradeitems = $this->grade_items;
 
+        // New name.
+        $newname = !empty($options['itemname']) ? $options['itemname'] : null;
+
         if (!$gradeitems or !array_key_exists($itemnumber, $gradeitems)) {
-            // Add a new item.
-            $itemornumber = $gradeitems ? count($gradeitems) : 0;
+            $itemnumber = $gradeitems ? count($gradeitems) : 0;
+            $itemname = $newname ? $newname : $df->name;
+            $itemname = $this->get_name_for_item($itemnumber, $itemname);
+            // Create a new item.
+            $gradeitem = new grade_item();
+            $gradeitem->courseid = $options['courseid'];
+            $gradeitem->itemname = $itemname;
+            $gradeitem->itemtype = 'mod';
+            $gradeitem->itemmodule = 'dataform';
+            $gradeitem->iteminstance = $options['iteminstance'];
+            $gradeitem->itemnumber = $itemnumber;
+            $gradeitem->needsupdate = false;
+            $gradeitem->gradetype = GRADE_TYPE_NONE;
+
+            $gradeitem->insert('mod/dataform');
+            $this->grade_items = null;
         } else {
-            // Update existing.
-            $itemornumber = $gradeitems[$itemnumber];
+            $gradeitem = $gradeitems[$itemnumber];
+            $itemname = $newname ? $newname : $gradeitem->itemname;
         }
 
-        $itemparams = $this->get_grade_item_update_params($itemornumber, $options);
-        $params = array_merge($params, $itemparams);
-        $itemnumber = $params['itemnumber'];
+        $update = false;
 
-        $res = grade_update(
-            'mod/dataform',
-            $courseid,
-            'mod',
-            'dataform',
-            $dataformid,
-            $itemnumber,
-            null,
-            $params
-        );
-
-        if ($res != GRADE_UPDATE_OK) {
-            return $res;
+        // Make sure the name is unique.
+        $itemname = $this->get_name_for_item($gradeitem->itemnumber, $itemname);
+        if ($itemname != $gradeitem->itemname) {
+            $gradeitem->itemname = $itemname;
+            $update = true;
+        }
+        // Make sure the idnumber is unique.
+        $idnumber = $this->get_idnumber_for_item($gradeitem, $options);
+        if ($idnumber != $gradeitem->idnumber) {
+            $gradeitem->idnumber = $idnumber;
+            $update = true;
+        }
+        // Apply grade options.
+        if ($options['gradetype'] != $gradeitem->gradetype) {
+            $gradeitem->gradetype = $options['gradetype'];
+            $update = true;
+        }
+        if ($options['grademax'] != $gradeitem->grademax) {
+            $gradeitem->grademax = $options['grademax'];
+            $update = true;
+        }
+        if ($options['scaleid'] != $gradeitem->scaleid) {
+            $gradeitem->scaleid = $options['scaleid'];
+            $update = true;
+        }
+        // Category id.
+        if (isset($options['categoryid']) and $options['categoryid'] != $gradeitem->categoryid) {
+            $gradeitem->categoryid = $options['categoryid'];
+            $update = true;
         }
 
-        // Additional grade item updates (e.g. category).
-        $gradeitem = $this->adjust_grade_item($itemnumber, $options);
+        if ($update) {
+            $gradeitem->update('mod/dataform');
+        }
 
-        // Update grades.
-        $this->update_grades();
+        // Set locked.
+        if (isset($options['locked']) and $gradeitem->locked != $options['locked']) {
+            if ($gradeitem->needsupdate) {
+                $gradeitem->regrading_finished();
+            }
+            $gradeitem->set_locked($options['locked'], false, false);
+        }
 
-        // Update the local cache.
+        // Reset.
+        if (!empty($options['reset'])) {
+            $grade_item->delete_all_grades('reset');
+        }
+
+        // Reset local cache.
         $this->grade_items = null;
+
+
+        // We do not update the grades here.
+        // It is done in a scheduled task.
 
         return GRADE_UPDATE_OK;
     }
@@ -348,49 +393,50 @@ class mod_dataform_grade_manager {
             return GRADE_UPDATE_OK;
         }
 
-        // Get user grades for all grade items.
+        // Get user grades for unlocked grade items.
         $grades = $this->get_user_grades($userid);
 
-        foreach ($this->grade_items as $itemnumber => $unused) {
-            if ($grades) {
-                foreach ($grades as $userid => $itemgrades) {
-                    if (!empty($itemgrades[$itemnumber])) {
-                        // Update the user grade.
-                        $grade = $itemgrades[$itemnumber];
-                        $res = grade_update(
-                            'mod/dataform',
-                            $df->course->id,
-                            'mod',
-                            'dataform',
-                            $df->id,
-                            $itemnumber,
-                            $grade
-                        );
-                        if ($res != GRADE_UPDATE_OK) {
-                            return $res;
-                        }
-                    }
+        if ($grades) {
+            // Collate all grades per grade item.
+            $gradeitemnumbers = array_keys($this->grade_items);
+            $gradeitemgrades = array_fill_keys($gradeitemnumbers, []);
+            foreach ($grades as $uid => $itemgrades) {
+                foreach ($itemgrades as $itemnumber => $usergrade) {
+                    $gradeitemgrades[$itemnumber][$uid] = $usergrade;
                 }
-            } else if ($userid and $nullifnone) {
-                // No grades and need to nullify.
-                $grade = (object) array(
-                    'userid' => $userid,
-                    'rawgrade' => null,
-                );
-                $res = grade_update(
-                    'mod/dataform',
-                    $df->course->id,
-                    'mod',
-                    'dataform',
-                    $df->id,
-                    $itemnumber,
-                    $grade
-                );
-                if ($res != GRADE_UPDATE_OK) {
-                    return $res;
+            }
+
+            // Send the grades to the gradebook.
+            foreach ($gradeitemgrades as $itemnumber => $usergrades) {
+                if ($usergrades) {
+                    $grade = $usergrades;
+                } else if ($userid and $nullifnone) {
+                    // No grades and need to nullify.
+                    $grade = (object) array(
+                        'userid' => $userid,
+                        'rawgrade' => null,
+                    );
+                } else {
+                    $grade = null;
+                }
+
+                if ($grade) {
+                    $res = grade_update(
+                        'mod/dataform',
+                        $df->course->id,
+                        'mod',
+                        'dataform',
+                        $df->id,
+                        $itemnumber,
+                        $grade
+                    );
+                    if ($res != GRADE_UPDATE_OK) {
+                        return $res;
+                    }
                 }
             }
         }
+
         return GRADE_UPDATE_OK;
     }
 
@@ -532,7 +578,7 @@ class mod_dataform_grade_manager {
     }
 
     /**
-     * Returns user's grades in the dataform instance per grade items and settings.
+     * Returns user's grades in the dataform instance per unlocked grade items and settings.
      * For simple direct grading you can use grade calculation to automate the grading.
      * Simple direct with no calculation returns nothing because the grades are overriden
      * in the gradebook and cannot be changed from the activity.
@@ -559,14 +605,24 @@ class mod_dataform_grade_manager {
         }
 
         $grades = array();
+        $userentryids = null;
         foreach ($this->grade_items as $itemnumber => $gradeitem) {
+            // Don't get the grades for locked items.
+            if ($gradeitem->locked) {
+                continue;
+            }
             $itemgrades = array();
             if (!empty($gradeitem->gradingarea)) {
                 // Advanced grading.
                 $itemgrades = $this->get_user_grades_advanced($gradeitem, $userids);
             } else if (!empty($gradeitem->gradecalc)) {
                 // Get calculated grades where applicable.
-                $itemgrades = $this->get_user_grades_calculated($gradeitem, $userids);
+                if ($userentryids === null) {
+                    // Get the entry ids per user.
+                    $userentryids = $df->get_entry_ids_per_user($userids);
+                }
+
+                $itemgrades = $this->get_user_grades_calculated($gradeitem, $userids, $userentryids);
             }
 
             if ($itemgrades) {
@@ -639,8 +695,8 @@ class mod_dataform_grade_manager {
      * @param array $userids The user ids whose grades should be retrieved.
      * @return array|null
      */
-    protected function get_user_grades_calculated($gradeitem, array $userids) {
-        global $CFG;
+    protected function get_user_grades_calculated($gradeitem, array $userids, array $userentryids) {
+        global $CFG, $DB;
 
         if (!$df = $this->df) {
             return null;
@@ -656,51 +712,94 @@ class mod_dataform_grade_manager {
         // Users container.
         $users = array_fill_keys($userids, array());
 
-        // Grades container.
-        $grades = array();
-        foreach ($users as $userid => $unused) {
-            $grades[$userid] = (object) array(
-                'id' => $userid,
-                'userid' => $userid,
-                'rawgrade' => null
-            );
+        // Get user entry counts for numentries pattern.
+        if (strpos($formula, '##numentries##') !== false) {
+            $patterns['##numentries##'] = 0;
+            foreach ($users as $userid => $unused) {
+                $users[$userid]['##numentries##'] = (!empty($userentryids[$userid]) ? count($userentryids[$userid]) : 0);
+            }
+        }
 
-            // Num entries pattern.
-            if (strpos($formula, '##numentries##') !== false) {
-                $patterns['##numentries##'] = 0;
-                if ($numentries = $df->get_entries_count_per_user($df::COUNT_ALL, $userid)) {
-                    foreach ($numentries as $userid => $count) {
-                        $users[$userid]['##numentries##'] = $count->numentries;
+        // Extract grading field patterns from the formula.
+        if (preg_match_all("/##\d*:[^#]+##/", $formula, $matches)) {
+            $fields = array();
+            foreach ($matches[0] as $pattern) {
+                $patterns[$pattern] = 0;
+
+                list($targetval, $fieldpattern) = explode(':', trim($pattern, '#'), 2);
+
+                list($fieldname) = explode(':', $fieldpattern);
+
+                if (!array_key_exists($fieldname, $fields)) {
+                    $fields[$fieldname] = [
+                        'field' => null,
+                        'patterns' => []
+                    ];
+                }
+                $fields[$fieldname]['patterns'][$pattern] = $fieldpattern;
+            }
+
+            // Get the fields records from DB by names.
+            $params = [$df->id];
+            list($innames, $fparams) = $DB->get_in_or_equal(array_keys($fields));
+            $sqlselects = " dataid = ? AND name $innames ";
+            $params = array_merge($params, $fparams);
+            $fieldrecs = $DB->get_records_select('dataform_fields', $sqlselects, $params);
+
+            // Get the field ids and fields for the pattern fields.
+            $fieldids = [];
+            if ($fieldrecs) {
+                foreach ($fieldrecs as $fieldid => $rec) {
+                    if (array_key_exists($rec->name, $fields)) {
+                        $fieldids[] = $fieldid;
+                        $fields[$rec->name]['field'] = $df->field_manager->get_field($rec);
                     }
                 }
             }
 
-            // Extract grading field patterns from the formula.
-            if (preg_match_all("/##\d*:[^#]+##/", $formula, $matches)) {
-                // Get the entry ids per user.
-                $entryids = $df->get_entry_ids_per_user($userid);
+            // All entry ids.
+            $allentryids = [];
+            foreach ($userentryids as $entryids) {
+                $allentryids = array_merge($allentryids, $entryids);
+            }
 
-                foreach ($matches[0] as $pattern) {
-                    $patterns[$pattern] = 0;
+            // Get the content for all fields where applicable.
+            $fieldcontents = [];
+            if ($allentryids and $fieldids) {
+                $fieldcontents = array_fill_keys($fieldids, []);
 
-                    list($targetval, $fieldpattern) = explode(':', trim($pattern, '#'), 2);
+                list($eids, $eparams) = $DB->get_in_or_equal($allentryids);
+                list($fids, $fparams) = $DB->get_in_or_equal($fieldids);
+                $params = array_merge($eparams, $fparams);
+                $contents = $DB->get_records_select('dataform_contents', "entryid {$eids} AND fieldid {$fids}", $params);
 
-                    // Get the field from the pattern.
-                    if (!$field = $df->field_manager->get_field_by_pattern("[[$fieldpattern]]")) {
-                        continue;
+                if ($contents) {
+                    foreach ($contents as $contentid => $content) {
+                        $fieldcontens[$content->fieldid][$content->entryid] = $content;
                     }
+                }
+                unset($contents);
+            }
 
+            foreach ($fields as $fieldobj) {
+                if (!$fieldobj['field']) {
+                    continue;
+                }
+                $field = $fieldobj['field'];
+
+                $fieldcontent = !empty($fieldcontens[$field->id]) ? $fieldcontens[$field->id] : null;
+
+                // Get user values for each pattern.
+                foreach ($fieldobj['patterns'] as $pattern => $fieldpattern) {
                     $uservalues = null;
-
-                    // Get user values for the pattern.
                     // The field must either has helper\contentperuser component,
                     // or be an instance of interface grading.
                     $helper = "dataformfield_$field->type\\helper\\contentperuser";
                     if (class_exists($helper)) {
-                        $uservalues = $helper::get_content($field, $fieldpattern, $entryids);
+                        $uservalues = $helper::get_content($field, $fieldpattern, $userentryids, $fieldcontent);
                     } else if ($field instanceof mod_dataform\interfaces\grading) {
                         // BC - this method for grading user values is depracated.
-                        $uservalues = $field->get_user_values($fieldpattern, $entryids, $userid);
+                        $uservalues = $field->get_user_values($fieldpattern, $userentryids, $userid);
                     }
 
                     // Leave pattern value at 0 if no user values.
@@ -726,13 +825,14 @@ class mod_dataform_grade_manager {
         }
 
         // For each user calculate the formula and create a grade object.
-        foreach ($grades as $userid => $grade) {
-            // If no values, no grade for this user.
-            if (empty($users[$userid])) {
-                continue;
-            }
+        $grades = array();
+        foreach ($users as $userid => $values) {
+            $grades[$userid] = (object) array(
+                'id' => $userid,
+                'userid' => $userid,
+                'rawgrade' => null
+            );
 
-            $values = $users[$userid];
             $replacements = array_merge($patterns, $values);
             $calculation = str_replace(array_keys($replacements), $replacements, $formula);
 
@@ -740,76 +840,10 @@ class mod_dataform_grade_manager {
             $result = $calc->evaluate();
             // False as result indicates some problem.
             if ($result !== false) {
-                $grade->rawgrade = $result;
+                $grades[$userid]->rawgrade = $result;
             }
         }
-
         return $grades;
-    }
-
-    /**
-     * Compiles the item params for update grade item.
-     *
-     * @param grade_item|int $itemornumber
-     * @param array $options.
-     * @return array
-     */
-    public function get_grade_item_update_params($itemornumber, $options) {
-        $gradeitems = $this->grade_items;
-        $existingitem = false;
-
-        if ($itemornumber instanceof \grade_item) {
-            $itemnumber = $itemornumber->itemnumber;
-            $existingitem = true;
-        } else if ($gradeitems and array_key_exists($itemornumber, $gradeitems)) {
-            $itemnumber = $itemornumber;
-            $itemornumber = $gradeitems[$itemnumber];
-            $existingitem = true;
-        } else {
-            $itemnumber = $itemornumber;
-        }
-
-        $altname = !empty($options['itemname']) ? $options['itemname'] : get_string('pluginname', 'dataform');
-
-        $params = array();
-        $params['itemnumber'] = $itemnumber;
-        if ($existingitem) {
-            // Params from existing item.
-            $params['itemname'] = $itemornumber->itemname;
-            $params['gradetype'] = $itemornumber->gradetype;
-            $params['grademax'] = $itemornumber->grademax;
-            $params['scaleid'] = $itemornumber->scaleid;
-            $params['gradeguide'] = $itemornumber->gradeguide;
-            $params['gradecalc'] = $itemornumber->gradecalc;
-        } else {
-            $params['itemname'] = $altname;
-            $params['gradetype'] = GRADE_TYPE_NONE;
-            $params['grademax'] = 0;
-            $params['scaleid'] = 0;
-            $params['gradeguide'] = null;
-            $params['gradecalc'] = null;
-        }
-
-        // Make sure the name is unique.
-        $itemname = !empty($options['itemname']) ? $options['itemname'] : $params['itemname'];
-        $params['itemname'] = $this->get_name_for_item($itemornumber, $itemname);
-
-        // Make sure the idnumber is unique.
-        $idnumber = !empty($options['idnumber']) ? $options['idnumber'] : null;
-        $params['idnumber'] = $this->get_idnumber_for_item($itemornumber, $idnumber);
-
-        // Apply grade options.
-        if (!empty($options['gradetype'])) {
-            $params['gradetype'] = $options['gradetype'];
-        }
-        if (!empty($options['grademax'])) {
-            $params['grademax'] = $options['grademax'];
-        }
-        if (!empty($options['scaleid'])) {
-            $params['scaleid'] = $options['scaleid'];
-        }
-
-        return $params;
     }
 
     /**
@@ -843,6 +877,9 @@ class mod_dataform_grade_manager {
                 $params['gradetype'] = GRADE_TYPE_SCALE;
                 $params['scaleid'] = -$data->grade;
             }
+            if (isset($data->locked)) {
+                $params['locked'] = $data->locked;
+            }
         }
 
         return $params;
@@ -854,11 +891,11 @@ class mod_dataform_grade_manager {
      * without specifying names will result in the items names instancename, instancename1,
      * instancename2 and so on.
      *
-     * @param grade_item|int $itemornumber
-     * @param array $options
+     * @param int $itemnumber
+     * @param string $name
      * @return string
      */
-    protected function get_name_for_item($itemornumber, $name) {
+    protected function get_name_for_item($itemnumber, $name) {
         global $CFG;
 
         // With single grade, always take the instance name.
@@ -866,19 +903,8 @@ class mod_dataform_grade_manager {
             return $name;
         }
 
-        if ($existingitem = is_object($itemornumber)) {
-            $itemnumber = $itemornumber->itemnumber;
-        } else {
-            $itemnumber = $itemornumber;
-        }
-
-        // If same as existing, just return.
-        if ($existingitem and $itemornumber->itemname == $name) {
-            return $name;
-        }
-
-        // If no grade items, the name is unique enough to use.
-        if (!$gradeitems = $this->grade_items) {
+        // If no or one grade item, the name is unique enough to use.
+        if (!$gradeitems = $this->grade_items or count($gradeitems) == 1) {
             return $name;
         }
 
@@ -902,31 +928,18 @@ class mod_dataform_grade_manager {
     }
 
     /**
-     * Returns an idnumber for the item.
+     * Returns a unique idnumber for the item if specified.
      *
-     * @param grade_item|int $itemornumber
+     * @param grade_item $gitem
      * @param array $options.
      * @return string
      */
-    protected function get_idnumber_for_item($itemornumber, $options) {
-        $existingitem = is_object($itemornumber);
-        $itemnumber = $existingitem ? $itemornumber->itemnumber : $itemornumber;
-        $nooption = empty($options['idnumber']);
-
-        if ($nooption) {
-            if ($existingitem) {
-                return $itemornumber->idnumber;
-            } else {
-                $value = null;
-            }
-        } else {
-            $value = $options['idnumber'];
-
-            // If same as existing, just return.
-            if ($existingitem and $itemornumber->idnumber == $value) {
-                return $value;
-            }
+    protected function get_idnumber_for_item($gitem, array $options) {
+        if (empty($options['idnumber']) or $options['idnumber'] == $gitem->idnumber) {
+            return $gitem->idnumber;
         }
+
+        $value = $options['idnumber'];
 
         // If no grade items, the idnumber is unique enough to use.
         if (!$gradeitems = $this->grade_items) {
@@ -935,8 +948,8 @@ class mod_dataform_grade_manager {
 
         // Get all current idnumbers.
         $values = array();
-        foreach ($gradeitems as $ginumber => $gradeitem) {
-            if ($ginumber == $itemnumber) {
+        foreach ($gradeitems as $itemnumber => $gradeitem) {
+            if ($itemnumber == $gitem->itemnumber) {
                 continue;
             }
             $values[] = $gradeitem->idnumber;
@@ -973,29 +986,6 @@ class mod_dataform_grade_manager {
             $gitem->gradecalc = !empty($gdef[$itemnumber]['ca']) ? $gdef[$itemnumber]['ca'] : null;
         }
         return $gitem;
-    }
-
-    /**
-     *
-     */
-    protected function adjust_grade_item($itemnumber, $options) {
-        if (!$gradeitem = $this->fetch_item_by_number($itemnumber)) {
-            return null;
-        }
-
-        $update = false;
-        if (isset($options['categoryid'])) {
-            if ($options['categoryid'] != $gradeitem->categoryid) {
-                $gradeitem->categoryid = $options['categoryid'];
-                $update = true;
-            }
-        }
-
-        if ($update) {
-            $gradeitem->update();
-        }
-
-        return $gradeitem;
     }
 
     /**
