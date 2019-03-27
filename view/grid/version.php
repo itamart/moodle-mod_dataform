@@ -22,5 +22,5 @@
  */
 
 $plugin->component = 'dataformview_grid';
-$plugin->version = 2017051502;
-$plugin->requires = 2017051500;
+$plugin->version = 2018051705;
+$plugin->requires = 2018051700;
